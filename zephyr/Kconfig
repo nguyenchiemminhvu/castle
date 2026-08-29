@@ -1,0 +1,6 @@
+config CASTLE
+	bool "Castle (C++ header-only utility library)"
+	depends on CPP
+	help
+	  This option enables the 'Castle' header-only library by adding
+	  its include directory to the Zephyr build.
