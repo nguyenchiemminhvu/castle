@@ -1,11 +1,12 @@
-#pragma once
+#ifndef CASTLE_DESIGN_PATTERNS_OBSERVER_H
+#define CASTLE_DESIGN_PATTERNS_OBSERVER_H
 
-#include "castle/types/traits.h"
+#include "castle/core/compiler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
+#include "castle/container/array.h"
 
-#include <array>
-#include <cstddef>
-
-using namespace castle::types;
+#include <stddef.h>
 
 namespace castle
 {
@@ -19,33 +20,34 @@ template <typename T>
 class observer<T>
 {
 public:
-    virtual ~observer() = default;
-    virtual void notify(const T& data) = 0;
+    virtual ~observer() CASTLE_DEFAULT;
+    virtual void notify(CASTLE_CONST T& data) = 0;
 };
 
 template <>
 class observer<void>
 {
 public:
-    virtual ~observer() = default;
+    virtual ~observer() CASTLE_DEFAULT;
     virtual void notify() = 0;
 };
 
 template <typename T, typename... Rest>
 class observer<T, Rest...> : public observer<T>, public observer<Rest...>
 {
-    static_assert(has_unique_types_v<T, Rest...>, "Observer types must be unique.");
+    static_assert(meta::has_unique_types<T, Rest...>::value,
+                  "Observer types must be unique.");
 
 public:
     using observer<T>::notify;
     using observer<Rest...>::notify;
 };
 
-template <typename TOberver, std::size_t N>
+template <typename TOberver, size_type N>
 class observable
 {
 public:
-    bool add_observer(TOberver* observer)
+    bool add_observer(TOberver* observer) CASTLE_NOEXCEPT
     {
         if (observer == nullptr)
         {
@@ -57,8 +59,8 @@ public:
             return false; // Maximum number of observers reached
         }
 
-        std::size_t first_empty_slot = N;
-        for (std::size_t i = 0; i < N; ++i)
+        size_type first_empty_slot = N;
+        for (size_type i = 0; i < N; ++i)
         {
             if (observers_[i] == nullptr)
             {
@@ -78,7 +80,7 @@ public:
         return true;
     }
 
-    bool remove_observer(TOberver* observer)
+    bool remove_observer(TOberver* observer) CASTLE_NOEXCEPT
     {
         if (observer == nullptr)
         {
@@ -98,9 +100,9 @@ public:
     }
 
     template <typename TObserverType>
-    void notify_observers(const TObserverType& data)
+    void notify_observers(CASTLE_CONST TObserverType& data) CASTLE_NOEXCEPT
     {
-        for (const auto& observer : observers_)
+        for (CASTLE_CONST auto& observer : observers_)
         {
             if (observer != nullptr)
             {
@@ -109,9 +111,9 @@ public:
         }
     }
 
-    void notify_observers()
+    void notify_observers() CASTLE_NOEXCEPT
     {
-        for (const auto& observer : observers_)
+        for (CASTLE_CONST auto& observer : observers_)
         {
             if (observer != nullptr)
             {
@@ -121,9 +123,11 @@ public:
     }
 
 private:
-    std::array<TOberver*, N> observers_{};
-    std::size_t observer_count_ = 0;
+    container::array<TOberver*, N> observers_{};
+    size_type observer_count_ = 0U;
 };
 
 } // namespace design_patterns
 } // namespace castle
+
+#endif // CASTLE_DESIGN_PATTERNS_OBSERVER_H

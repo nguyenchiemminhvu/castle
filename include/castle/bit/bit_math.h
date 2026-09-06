@@ -1,11 +1,12 @@
-#pragma once
+#ifndef CASTLE_BIT_BIT_MATH_H
+#define CASTLE_BIT_BIT_MATH_H
 
-#include "castle/types/traits.h"
+#include "castle/core/compiler.h"
+#include "castle/core/types.h"
+#include "castle/core/traits.h"
 
-#include <cstdint>
-#include <climits>
-
-using namespace castle::types;
+#include <stdint.h>
+#include <limits.h>
 
 namespace castle
 {
@@ -18,38 +19,32 @@ namespace bit
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, bool>
-is_even(T v) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, bool>
+is_even(T v) CASTLE_NOEXCEPT
 {
     return (v & 1) == 0;
 }
 
-template <std::size_t N>
+template <size_type N>
 struct is_even_const
 {
-    static constexpr bool value = ((N & 1) == 0);
+    static CASTLE_CONSTEXPR bool value = ((N & 1) == 0);
 };
 
-template <std::size_t N>
-inline static constexpr bool is_even_v = is_even_const<N>::value;
-
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, bool>
-is_odd(T v) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, bool>
+is_odd(T v) CASTLE_NOEXCEPT
 {
     return (v & 1) != 0;
 }
 
-template <std::size_t N>
+template <size_type N>
 struct is_odd_const
 {
-    static constexpr bool value = ((N & 1) != 0);
+    static CASTLE_CONSTEXPR bool value = ((N & 1) != 0);
 };
-
-template <std::size_t N>
-inline static constexpr bool is_odd_v = is_odd_const<N>::value;
 
 // ──────────────────────────────────────────────────────────────
 // is_power_of_two — returns true if the value is an exact
@@ -58,26 +53,23 @@ inline static constexpr bool is_odd_v = is_odd_const<N>::value;
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, bool>
-is_power_of_two(T v) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, bool>
+is_power_of_two(T v) CASTLE_NOEXCEPT
 {
     if (v < 0)
         return false; // Negative numbers are not powers of two
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(v);
     return uval != 0 && (uval & (uval - 1)) == 0;
 }
 
-template <std::size_t N>
+template <size_type N>
 struct is_power_of_two_const
 {
-    static constexpr bool value = (N != 0 && (N & (N - 1)) == 0);
+    static CASTLE_CONSTEXPR bool value = (N != 0 && (N & (N - 1)) == 0);
 };
-
-template <std::size_t N>
-inline static constexpr bool is_power_of_two_v = is_power_of_two_const<N>::value;
 
 // ──────────────────────────────────────────────────────────────
 // next_power_of_two — returns the smallest power of two that
@@ -86,44 +78,49 @@ inline static constexpr bool is_power_of_two_v = is_power_of_two_const<N>::value
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-next_power_of_two(T v) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+next_power_of_two(T v) CASTLE_NOEXCEPT
 {
     if (v == 0)
+    {
         return 1;
+    }
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(v);
 
     --uval; // handle edge case where v is already a power of two
-    for (std::size_t i = 1; i < sizeof(T) * CHAR_BIT; i *= 2)
+    for (size_type i = 1; i < sizeof(T) * CHAR_BIT; i *= 2)
+    {
         uval |= uval >> i;
+    }
 
     return static_cast<T>(uval + 1);
 }
 
-template <std::size_t N>
-constexpr std::size_t next_power_of_two() noexcept
+template <size_type N>
+CASTLE_CONSTEXPR size_type next_power_of_two() CASTLE_NOEXCEPT
 {
     if (N == 0)
+    {
         return 1;
+    }
 
-    std::size_t v = N - 1;
-    for (std::size_t i = 1; i < sizeof(std::size_t) * CHAR_BIT; i *= 2)
+    size_type v = N - 1;
+    for (size_type i = 1; i < sizeof(size_type) * CHAR_BIT; i *= 2)
+    {
         v |= v >> i;
+    }
 
     return v + 1;
 }
 
-template <std::size_t N>
+template <size_type N>
 struct next_power_of_two_const
 {
-    static constexpr std::size_t value = next_power_of_two<N>();
+    static CASTLE_CONSTEXPR size_type value = next_power_of_two<N>();
 };
-
-template <std::size_t N>
-inline static constexpr std::size_t next_power_of_two_v = next_power_of_two_const<N>::value;
 
 // ──────────────────────────────────────────────────────────────
 // previous_power_of_two — returns the largest power of two
@@ -132,43 +129,48 @@ inline static constexpr std::size_t next_power_of_two_v = next_power_of_two_cons
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-previous_power_of_two(T v) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+previous_power_of_two(T v) CASTLE_NOEXCEPT
 {
     if (v == 0)
+    {
         return 0;
+    }
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(v);
 
-    for (std::size_t i = 1; i < sizeof(T) * CHAR_BIT; i *= 2)
+    for (size_type i = 1; i < sizeof(T) * CHAR_BIT; i *= 2)
+    {
         uval |= uval >> i;
+    }
 
     return static_cast<T>(uval - (uval >> 1));
 }
 
-template <std::size_t N>
-constexpr std::size_t previous_power_of_two() noexcept
+template <size_type N>
+CASTLE_CONSTEXPR size_type previous_power_of_two() CASTLE_NOEXCEPT
 {
     if (N == 0)
+    {
         return 0;
+    }
 
-    std::size_t v = N;
-    for (std::size_t i = 1; i < sizeof(std::size_t) * CHAR_BIT; i *= 2)
+    size_type v = N;
+    for (size_type i = 1; i < sizeof(size_type) * CHAR_BIT; i *= 2)
+    {
         v |= v >> i;
+    }
 
     return v - (v >> 1);
 }
 
-template <std::size_t N>
+template <size_type N>
 struct previous_power_of_two_const
 {
-    static constexpr std::size_t value = previous_power_of_two<N>();
+    static CASTLE_CONSTEXPR size_type value = previous_power_of_two<N>();
 };
-
-template <std::size_t N>
-inline static constexpr std::size_t previous_power_of_two_v = previous_power_of_two_const<N>::value;
 
 // ──────────────────────────────────────────────────────────────
 // align_up / align_down — round an address or size to the
@@ -178,23 +180,23 @@ inline static constexpr std::size_t previous_power_of_two_v = previous_power_of_
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-align_up(T value, T alignment) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+align_up(T value, T alignment) CASTLE_NOEXCEPT
 {
     // alignment must be a power of two; caller's responsibility.
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
     UnsignedT mask = static_cast<UnsignedT>(alignment) - UnsignedT{1U};
     return static_cast<T>((uval + mask) & ~mask);
 }
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-align_down(T value, T alignment) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+align_down(T value, T alignment) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
     UnsignedT mask = static_cast<UnsignedT>(alignment) - UnsignedT{1U};
     return static_cast<T>(uval & ~mask);
@@ -206,11 +208,11 @@ align_down(T value, T alignment) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, bool>
-is_aligned(T value, T alignment) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, bool>
+is_aligned(T value, T alignment) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT mask = static_cast<UnsignedT>(alignment) - UnsignedT{1U};
     return (static_cast<UnsignedT>(value) & mask) == UnsignedT{0U};
 }
@@ -221,21 +223,20 @@ is_aligned(T value, T alignment) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, int>
-sign(T v) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, int>
+sign(T v) CASTLE_NOEXCEPT
 {
     return (v > 0) - (v < 0);
 }
 
-template <std::size_t N>
-constexpr int sign() noexcept
+template <size_type N>
+CASTLE_CONSTEXPR int sign() CASTLE_NOEXCEPT
 {
     return (N > 0) - (N < 0);
 }
 
-template <std::size_t N>
-inline static constexpr int sign_v = sign<N>();
-
 } // namespace bit
 } // namespace castle
+
+#endif // CASTLE_BIT_BIT_MATH_H

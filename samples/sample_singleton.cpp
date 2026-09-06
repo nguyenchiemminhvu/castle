@@ -1,50 +1,26 @@
+#include "sample_support.h"
+
 #include "castle/design_patterns/singleton.h"
 
-#include <iostream>
-#include <unordered_map>
-#include <string>
+// Scenario: providing one explicitly controlled device-service instance without heap allocation.
+#include <stdint.h>
 
-using namespace castle::design_patterns;
-
-class config_manager
+struct TelemetryHub
 {
-public:
-    config_manager() = default;
-    ~config_manager() = default;
-
-    void set_config(const std::string& key, const std::string& value)
-    {
-        m_config[key] = value;
-    }
-
-    std::string get_config(const std::string& key) const
-    {
-        auto it = m_config.find(key);
-        if (it != m_config.end())
-        {
-            return it->second;
-        }
-        return "";
-    }
-
-private:
-    std::unordered_map<std::string, std::string> m_config;
+    explicit TelemetryHub(uint32_t initial) : sequence(initial) {}
+    ~TelemetryHub() noexcept = default;
+    uint32_t sequence;
 };
 
-using config_manager_singleton = singleton<config_manager>;
+using telemetry_hub = castle::design_patterns::singleton<TelemetryHub>;
 
 int main()
 {
-    if (!config_manager_singleton::is_valid())
-    {
-        config_manager_singleton::create();
-    }
-
-    config_manager_singleton::instance().set_config("app_name", "MyApp");
-    std::string app_name = config_manager_singleton::instance().get_config("app_name");
-    std::cout << "App Name: " << app_name << std::endl;
-
-    config_manager_singleton::destroy();
-
+    CASTLE_SAMPLE_CHECK(!telemetry_hub::is_valid());
+    telemetry_hub::create(1U);
+    telemetry_hub::instance().sequence += 1U;
+    CASTLE_SAMPLE_CHECK(telemetry_hub::instance().sequence == 2U);
+    telemetry_hub::destroy();
+    CASTLE_SAMPLE_CHECK(!telemetry_hub::is_valid());
     return 0;
 }

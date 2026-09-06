@@ -1,19 +1,17 @@
-#pragma once
+#ifndef CASTLE_EVENTS_TICK_TIMER_H
+#define CASTLE_EVENTS_TICK_TIMER_H
+
+#include "castle/core/compiler.h"
+#include "castle/core/error_handler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
+#include "castle/core/type_ranges.h"
+#include "castle/error/status.h"
 
 #include "castle/callbacks/function.h"
 #include "castle/callbacks/callback_registry.h"
-#include "castle/events/event_subscription.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <limits>
-#include <type_traits>
-#include <utility>
-
-using castle::callbacks::i_function;
-using castle::callbacks::callback_registry;
-using castle::callbacks::callback_subscription_error;
-using castle::callbacks::callback_subscription;
+#include <stdint.h>
 
 namespace castle
 {
@@ -23,7 +21,7 @@ namespace events
 // -----------------------------------------------------------------------------
 // Repeat mode for tick_timer.
 // -----------------------------------------------------------------------------
-enum class tick_timer_mode : std::uint8_t
+enum class tick_timer_mode : uint8_t
 {
     one_shot = 0,   // fire once, then stop
     periodic,       // fire forever until stop()
@@ -32,7 +30,7 @@ enum class tick_timer_mode : std::uint8_t
 
 // -----------------------------------------------------------------------------
 // tick_timer - fixed-capacity, heap-free, tick-driven software timer that
-// BORROWS its callbacks via non-owning i_function<>* pointers.
+// BORROWS its callbacks via non-owning callbacks::i_function<>* pointers.
 //
 // Model:
 //   - Callback signature is void() by design. A timeout event carries no
@@ -60,30 +58,30 @@ enum class tick_timer_mode : std::uint8_t
 //   sub.unsubscribe();
 //   t.stop();
 // -----------------------------------------------------------------------------
-template <std::size_t MaxCallback>
+template <size_type MaxCallback>
 class tick_timer
 {
     static_assert(MaxCallback > 0U,
                   "tick_timer requires MaxCallback >= 1");
 
 public:
-    using tick_type = std::uint32_t;
-    using error = event_subscription_error;
+    using tick_type = uint32_t;
+    using error = castle::status;
     using mode = tick_timer_mode;
-    using callback_type = i_function<void()>;                        // void()
-    using subscription = callback_subscription;
-    using registry_type = callback_registry<MaxCallback, void()>;
+    using callback_type = callbacks::i_function<void()>;                        // void()
+    using subscription = callbacks::callback_subscription;
+    using registry_type = callbacks::callback_registry<MaxCallback, void()>;
 
-    tick_timer() = default;
-    ~tick_timer() = default;
+    tick_timer() CASTLE_DEFAULT;
+    ~tick_timer() CASTLE_DEFAULT;
 
     // Non-copyable, non-movable. Registry identity (its i_unsubscribable*
     // address) is embedded in outstanding subscription handles.
-    tick_timer(const tick_timer&) = delete;
-    tick_timer& operator=(const tick_timer&) = delete;
+    tick_timer(CASTLE_CONST tick_timer&) CASTLE_DELETE;
+    tick_timer& operator=(CASTLE_CONST tick_timer&) CASTLE_DELETE;
 
-    tick_timer(tick_timer&&) = delete;
-    tick_timer& operator=(tick_timer&&) = delete;
+    tick_timer(tick_timer&&) CASTLE_DELETE;
+    tick_timer& operator=(tick_timer&&) CASTLE_DELETE;
 
     // -------------------------------------------------------------------------
     // Configure the timer period in ticks. Safe to call while running: takes
@@ -100,7 +98,7 @@ public:
     }
 
     // -------------------------------------------------------------------------
-    // Register a non-owning callback pointer. The pointed-to i_function<>
+    // Register a non-owning callback pointer. The pointed-to callbacks::i_function<>
     // instance must outlive the subscription (or the timer, whichever ends
     // first). Concrete callback variants (function, function_f, function_m,
     // function_ct, function_ct_m, function_ct_im) are defined in function.h.
@@ -110,13 +108,13 @@ public:
     // -------------------------------------------------------------------------
     subscription register_callback(callback_type* callback, error* out_error = nullptr) noexcept
     {
-        callback_subscription_error inner_error = callback_subscription_error::ok;
+        status inner_error = status::ok;
 
         subscription sub = registry_.subscribe(callback, &inner_error);
 
         if (out_error != nullptr)
         {
-            *out_error = convert_error(inner_error);
+            *out_error = inner_error;
         }
 
         return sub;
@@ -249,6 +247,9 @@ public:
                     break;
                 }
                 case mode::periodic:
+                {
+                    CASTLE_FALL_THROUGH;
+                }
                 default:
                 {
                     // Keep running; loop consumes any remaining accumulated ticks.
@@ -261,24 +262,24 @@ public:
     // -------------------------------------------------------------------------
     // Introspection / queries.
     // -------------------------------------------------------------------------
-    bool is_running() const noexcept
+    bool is_running() CASTLE_CONST noexcept
     {
         return running_;
     }
 
-    tick_type period() const noexcept
+    tick_type period() CASTLE_CONST noexcept
     {
         return period_;
     }
 
-    tick_type elapsed() const noexcept
+    tick_type elapsed() CASTLE_CONST noexcept
     {
         return counter_;
     }
 
     // Remaining ticks until the next timeout. Returns 0 when the timer is
     // stopped or not configured (no meaningful remaining time).
-    tick_type remaining() const noexcept
+    tick_type remaining() CASTLE_CONST noexcept
     {
         if (!running_ || period_ == 0)
         {
@@ -289,33 +290,33 @@ public:
                 : static_cast<tick_type>(period_ - counter_);
     }
 
-    mode current_mode() const noexcept
+    mode current_mode() CASTLE_CONST noexcept
     {
         return mode_;
     }
 
     // Number of remaining fires for an n_repeat timer. Undefined semantics
     // for other modes -> returns 0.
-    tick_type repeats_remaining() const noexcept
+    tick_type repeats_remaining() CASTLE_CONST noexcept
     {
         return (mode_ == mode::n_repeat)
                 ? repeat_remaining_
                 : 0;
     }
 
-    std::size_t callback_count() const noexcept
+    size_type callback_count() CASTLE_CONST noexcept
     {
         return registry_.size();
     }
 
-    static constexpr std::size_t callback_capacity() noexcept
+    static constexpr size_type callback_capacity() noexcept
     {
         return MaxCallback;
     }
 
     static constexpr tick_type max_period() noexcept
     {
-        return std::numeric_limits<tick_type>::max();
+        return castle::numeric_limits<tick_type>::max();
     }
 
     // -------------------------------------------------------------------------
@@ -339,36 +340,9 @@ public:
         return registry_;
     }
 
-    const registry_type& registry() const noexcept
+    CASTLE_CONST registry_type& registry() CASTLE_CONST noexcept
     {
         return registry_;
-    }
-
-private:
-    // Map callback_subscription_error to event_subscription_error.
-    static constexpr error convert_error(callback_subscription_error error_code) noexcept
-    {
-        switch (error_code)
-        {
-            case callback_subscription_error::ok:
-            {
-                return error::ok;
-            }
-            case callback_subscription_error::full:
-            {
-                return error::full;
-            }
-            case callback_subscription_error::invalid_callback:
-            {
-                return error::invalid_callback;
-            }
-            case callback_subscription_error::invalid_subscription:
-            {
-                return error::invalid_subscription;
-            }
-        }
-
-        return error::invalid_subscription;
     }
 
 private:
@@ -387,3 +361,5 @@ private:
 
 } // namespace events
 } // namespace castle
+
+#endif // CASTLE_EVENTS_TICK_TIMER_H

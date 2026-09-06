@@ -1,91 +1,44 @@
+/**
+ * Castle 2.0 sample: <castle/callbacks/callback_registry.h>
+ *
+ * Scenario: a fixed-capacity telemetry fan-out. The registry stores only
+ * non-owning callback pointers, so application lifetime remains explicit.
+ */
+#include "sample_support.h"
 #include "castle/callbacks/callback_registry.h"
+#include "castle/callbacks/function.h"
 
-#include <iostream>
+#include <stdint.h>
 
-using namespace castle::callbacks;
-
-//=====================================================
-// Free function
-//=====================================================
-void free_function(int value)
+namespace
 {
-    std::cout << "free_function : " << value << std::endl;
+uint32_t g_delivered = 0U;
+
+void on_telemetry(uint32_t value) noexcept
+{
+    g_delivered += value;
 }
-
-//=====================================================
-// Functor
-//=====================================================
-struct Functor
-{
-    void operator()(int value)
-    {
-        std::cout << "Functor       : " << value << std::endl;
-    }
-};
-
-//=====================================================
-// Handler class
-//=====================================================
-class Handler
-{
-public:
-    void member_function(int value)
-    {
-        std::cout << "member_function : " << value << std::endl;
-    }
-
-    void member_function_const(int value) const
-    {
-        std::cout << "member_function_const : " << value << std::endl;
-    }
-};
-
-//=====================================================
-// Global object cho function_ct_im
-//=====================================================
-Handler g_handler;
+} // namespace
 
 int main()
 {
-    std::cout << "==============================" << std::endl;
-    std::cout << "callback_registry" << std::endl;
-    std::cout << "==============================" << std::endl;
+    using callback_type = castle::callbacks::function<void(uint32_t)>;
+    using registry_type = castle::callbacks::callback_registry<4U, void(uint32_t)>;
 
-    using callback_signature_t = void(int);
-    callback_registry<4, callback_signature_t> registry;
-    registry(0); // nothing happens, no callbacks registered
+    callback_type callback{on_telemetry};
+    registry_type registry;
+    registry_type::error error = castle::status::ok;
 
-    function<void(int)> cb_func(&free_function);
-    registry.subscribe(&cb_func)
-    ? std::cout << "Subscribed free_function" << std::endl
-    : std::cout << "Failed to subscribe free_function" << std::endl;
+    castle::callbacks::callback_subscription subscription = registry.subscribe(&callback, &error);
 
-    Functor functor;
-    function_f<Functor, void(int)> cb_functor(functor);
-    registry.subscribe(&cb_functor)
-    ? std::cout << "Subscribed Functor" << std::endl
-    : std::cout << "Failed to subscribe Functor" << std::endl;
+    CASTLE_SAMPLE_CHECK(error == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(subscription.valid());
+    CASTLE_SAMPLE_CHECK(registry.size() == 1U);
 
-    function_m<Handler, void(int)> cb_member(g_handler, &Handler::member_function);
-    registry.subscribe(&cb_member)
-    ? std::cout << "Subscribed member_function" << std::endl
-    : std::cout << "Failed to subscribe member_function" << std::endl;
+    registry.invoke(3U);
+    CASTLE_SAMPLE_CHECK(g_delivered == 3U);
 
-    function_ct_im<g_handler, &Handler::member_function_const> cb_member_const;
-    registry.subscribe(&cb_member_const)
-    ? std::cout << "Subscribed member_function_const" << std::endl
-    : std::cout << "Failed to subscribe member_function_const" << std::endl;
-
-    function_ct_f<Functor, void(int)> cb_ct_functor;
-    registry.subscribe(&cb_ct_functor)
-    ? std::cout << "Subscribed cb_ct_functor" << std::endl
-    : std::cout << "Failed to subscribe cb_ct_functor" << std::endl;
-
-    registry(1); // invoke all registered callbacks with argument 1
-
-    registry.clear(); // clear all registered callbacks
-
-    registry(2); // nothing happens, all callbacks cleared
-
+    CASTLE_SAMPLE_CHECK(subscription.unsubscribe() == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(registry.empty());
     return 0;
 }
