@@ -1,11 +1,12 @@
-#pragma once
+#ifndef CASTLE_BIT_BIT_UTILS_H
+#define CASTLE_BIT_BIT_UTILS_H
 
-#include "castle/types/traits.h"
+#include "castle/core/compiler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
 
-#include <cstdint>
-#include <climits>
-
-using namespace castle::types;
+#include <stdint.h>
+#include <limits.h>
 
 namespace castle
 {
@@ -20,11 +21,11 @@ namespace bit
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-extract_lowest_set_bit(T value) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+extract_lowest_set_bit(T value) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     return static_cast<T>(uval & -uval);
@@ -38,16 +39,16 @@ extract_lowest_set_bit(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-extract_highest_set_bit(T value) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+extract_highest_set_bit(T value) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     if (uval == 0) return 0;
 
-    for (std::size_t i = 1; i < sizeof(T) * CHAR_BIT; i *= 2)
+    for (size_type i = 1; i < sizeof(T) * CHAR_BIT; i *= 2)
         uval |= uval >> i;
 
     return static_cast<T>(uval - (uval >> 1));
@@ -63,11 +64,11 @@ extract_highest_set_bit(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-extract_field(T value, std::uint32_t start_bit, std::uint32_t width) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+extract_field(T value, uint32_t start_bit, uint32_t width) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     if (width == 0 || start_bit >= sizeof(T) * CHAR_BIT)
@@ -80,18 +81,18 @@ extract_field(T value, std::uint32_t start_bit, std::uint32_t width) noexcept
     return static_cast<T>((uval >> start_bit) & mask);
 }
 
-template <std::size_t start_bit, std::size_t width, typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-extract_field(T value) noexcept
+template <size_type start_bit, size_type width, typename T>
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+extract_field(T value) CASTLE_NOEXCEPT
 {
     static_assert(start_bit + width <= sizeof(T) * CHAR_BIT,
                   "extract_field: start_bit + width exceeds bit width of T");
     static_assert(width > 0, "extract_field: width must be > 0");
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
-    constexpr UnsignedT mask = (UnsignedT{1U} << width) - UnsignedT{1U};
+    CASTLE_CONSTEXPR UnsignedT mask = (UnsignedT{1U} << width) - UnsignedT{1U};
     return static_cast<T>((uval >> start_bit) & mask);
 }
 
@@ -105,11 +106,11 @@ extract_field(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-insert_field(T dest, T field_val, std::uint32_t start_bit, std::uint32_t width) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+insert_field(T dest, T field_val, uint32_t start_bit, uint32_t width) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT udest = static_cast<UnsignedT>(dest);
     UnsignedT ufield = static_cast<UnsignedT>(field_val);
 
@@ -128,19 +129,19 @@ insert_field(T dest, T field_val, std::uint32_t start_bit, std::uint32_t width) 
     return static_cast<T>(udest);
 }
 
-template <std::size_t start_bit, std::size_t width, typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-insert_field(T dest, T field_val) noexcept
+template <size_type start_bit, size_type width, typename T>
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+insert_field(T dest, T field_val) CASTLE_NOEXCEPT
 {
     static_assert(start_bit + width <= sizeof(T) * CHAR_BIT,
                   "insert_field: start_bit + width exceeds bit width of T");
     static_assert(width > 0, "insert_field: width must be > 0");
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT udest = static_cast<UnsignedT>(dest);
     UnsignedT ufield = static_cast<UnsignedT>(field_val);
-    constexpr UnsignedT mask = (UnsignedT{1U} << width) - UnsignedT{1U};
+    CASTLE_CONSTEXPR UnsignedT mask = (UnsignedT{1U} << width) - UnsignedT{1U};
 
     ufield &= mask;
     udest &= ~(mask << start_bit);
@@ -150,3 +151,5 @@ insert_field(T dest, T field_val) noexcept
 
 } // namespace bit
 } // namespace castle
+
+#endif // CASTLE_BIT_BIT_UTILS_H

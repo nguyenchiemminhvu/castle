@@ -1,8 +1,11 @@
-#pragma once
+#ifndef CASTLE_CALLBACKS_FUNCTION_H
+#define CASTLE_CALLBACKS_FUNCTION_H
 
-#include <tuple>
-#include <type_traits>
-#include <utility>
+#include "castle/core/compiler.h"
+#include "castle/core/traits.h"
+#include "castle/utility/forward.h"
+#include "castle/utility/move.h"
+#include "castle/utility/tuple.h"
 
 namespace castle
 {
@@ -44,11 +47,11 @@ class i_function<R(Args...)>
 {
 public:
     using return_type = R;
-    using param_types = std::tuple<Args...>;
+    using param_types = castle::tuple<Args...>;
     using signature   = R(Args...);
 
-    virtual ~i_function() = default;
-    virtual R operator()(Args... args) = 0;
+    virtual ~i_function() CASTLE_DEFAULT;
+    virtual R operator()(Args... args) CASTLE_NOEXCEPT = 0;
 };
 
 // -----------------------------------------------------------------------------
@@ -68,20 +71,20 @@ class function<R(Args...)> : public i_function<R(Args...)>
 {
 public:
     using return_type = R;
-    using param_types = std::tuple<Args...>;
+    using param_types = castle::tuple<Args...>;
     using signature   = R(Args...);
 
     function(R (*func)(Args...)) : func_(func) {}
 
-    R operator()(Args... args) override
+    R operator()(Args... args) CASTLE_NOEXCEPT override
     {
-        if constexpr (std::is_void_v<R>)
+        CASTLE_IF_CONSTEXPR (castle::is_void<R>::value)
         {
-            (*func_)(std::forward<Args>(args)...);
+            (*func_)(CASTLE_FORWARD<Args>(args)...);
         }
         else
         {
-            return (*func_)(std::forward<Args>(args)...);
+            return (*func_)(CASTLE_FORWARD<Args>(args)...);
         }
     }
 
@@ -115,24 +118,25 @@ class function_f<Callable, R(Args...)> : public i_function<R(Args...)>
 public:
     using callable_type = Callable;
     using return_type   = R;
-    using param_types   = std::tuple<Args...>;
+    using param_types   = castle::tuple<Args...>;
     using signature     = R(Args...);
 
     // Perfect-forward construction so both lvalue functors and rvalue
     // lambda closures can be stored efficiently.
-    template <typename C, typename = std::enable_if_t<!std::is_same_v<std::decay_t<C>, function_f>>>
+    template <typename C,
+              typename = meta::enable_if_t<!castle::is_same<meta::decay_t<C>, function_f>::value>>
     explicit function_f(C&& c)
-        : callable_(std::forward<C>(c)) {}
+        : callable_(CASTLE_FORWARD<C>(c)) {}
 
-    R operator()(Args... args) override
+    R operator()(Args... args) CASTLE_NOEXCEPT override
     {
-        if constexpr (std::is_void_v<R>)
+        CASTLE_IF_CONSTEXPR (castle::is_void<R>::value)
         {
-            callable_(std::forward<Args>(args)...);
+            callable_(CASTLE_FORWARD<Args>(args)...);
         }
         else
         {
-            return callable_(std::forward<Args>(args)...);
+            return callable_(CASTLE_FORWARD<Args>(args)...);
         }
     }
 
@@ -145,7 +149,7 @@ private:
 template <typename Signature, typename Callable>
 auto make_function_f(Callable&& c)
 {
-    return function_f<std::decay_t<Callable>, Signature>(std::forward<Callable>(c));
+    return function_f<meta::decay_t<Callable>, Signature>(CASTLE_FORWARD<Callable>(c));
 }
 
 // -----------------------------------------------------------------------------
@@ -167,20 +171,20 @@ class function_fr<Callable, R(Args...)> : public i_function<R(Args...)>
 public:
     using callable_type = Callable;
     using return_type   = R;
-    using param_types   = std::tuple<Args...>;
+    using param_types   = castle::tuple<Args...>;
     using signature     = R(Args...);
 
     explicit function_fr(Callable& c) : callable_(&c) {}
 
-    R operator()(Args... args) override
+    R operator()(Args... args) CASTLE_NOEXCEPT override
     {
-        if constexpr (std::is_void_v<R>)
+        CASTLE_IF_CONSTEXPR (castle::is_void<R>::value)
         {
-            (*callable_)(std::forward<Args>(args)...);
+            (*callable_)(CASTLE_FORWARD<Args>(args)...);
         }
         else
         {
-            return (*callable_)(std::forward<Args>(args)...);
+            return (*callable_)(CASTLE_FORWARD<Args>(args)...);
         }
     }
 
@@ -214,21 +218,21 @@ class function_m<ObjType, R(Args...)> : public i_function<R(Args...)>
 public:
     using obj_type    = ObjType;
     using return_type = R;
-    using param_types = std::tuple<Args...>;
+    using param_types = castle::tuple<Args...>;
     using signature   = R(Args...);
 
     function_m(obj_type& obj, R (obj_type::*func)(Args...))
         : obj_(&obj), func_(func) {}
 
-    R operator()(Args... args) override
+    R operator()(Args... args) CASTLE_NOEXCEPT override
     {
-        if constexpr (std::is_void_v<R>)
+        CASTLE_IF_CONSTEXPR (castle::is_void<R>::value)
         {
-            (obj_->*func_)(std::forward<Args>(args)...);
+            (obj_->*func_)(CASTLE_FORWARD<Args>(args)...);
         }
         else
         {
-            return (obj_->*func_)(std::forward<Args>(args)...);
+            return (obj_->*func_)(CASTLE_FORWARD<Args>(args)...);
         }
     }
 
@@ -254,18 +258,18 @@ class function_ct<Func> : public i_function<R(Args...)>
 {
 public:
     using return_type = R;
-    using param_types = std::tuple<Args...>;
+    using param_types = castle::tuple<Args...>;
     using signature   = R(Args...);
 
-    R operator()(Args... args) override
+    R operator()(Args... args) CASTLE_NOEXCEPT override
     {
-        if constexpr (std::is_void_v<R>)
+        CASTLE_IF_CONSTEXPR (castle::is_void<R>::value)
         {
-            (*Func)(std::forward<Args>(args)...);
+            (*Func)(CASTLE_FORWARD<Args>(args)...);
         }
         else
         {
-            return (*Func)(std::forward<Args>(args)...);
+            return (*Func)(CASTLE_FORWARD<Args>(args)...);
         }
     }
 };
@@ -286,24 +290,24 @@ class function_ct_f;
 template <typename Callable, typename R, typename... Args>
 class function_ct_f<Callable, R(Args...)> : public i_function<R(Args...)>
 {
-    static_assert(std::is_default_constructible_v<Callable>,
+    static_assert(castle::is_default_constructible<Callable>::value,
                   "function_ct_f requires a default-constructible callable "
                   "(stateless functor or captureless lambda wrapped in a type).");
 public:
     using callable_type = Callable;
     using return_type   = R;
-    using param_types   = std::tuple<Args...>;
+    using param_types   = castle::tuple<Args...>;
     using signature     = R(Args...);
 
-    R operator()(Args... args) override
+    R operator()(Args... args) CASTLE_NOEXCEPT override
     {
-        if constexpr (std::is_void_v<R>)
+        CASTLE_IF_CONSTEXPR (castle::is_void<R>::value)
         {
-            Callable{}(std::forward<Args>(args)...);
+            Callable{}(CASTLE_FORWARD<Args>(args)...);
         }
         else
         {
-            return Callable{}(std::forward<Args>(args)...);
+            return Callable{}(CASTLE_FORWARD<Args>(args)...);
         }
     }
 };
@@ -328,20 +332,20 @@ class function_ct_m<mem_func_> : public i_function<R(Args...)>
 public:
     using obj_type    = ObjType;
     using return_type = R;
-    using param_types = std::tuple<Args...>;
+    using param_types = castle::tuple<Args...>;
     using signature   = R(Args...);
 
     explicit function_ct_m(obj_type& obj) : obj_(&obj) {}
 
-    R operator()(Args... args) override
+    R operator()(Args... args) CASTLE_NOEXCEPT override
     {
-        if constexpr (std::is_void_v<R>)
+        CASTLE_IF_CONSTEXPR (castle::is_void<R>::value)
         {
-            (obj_->*mem_func_)(std::forward<Args>(args)...);
+            (obj_->*mem_func_)(CASTLE_FORWARD<Args>(args)...);
         }
         else
         {
-            return (obj_->*mem_func_)(std::forward<Args>(args)...);
+            return (obj_->*mem_func_)(CASTLE_FORWARD<Args>(args)...);
         }
     }
 
@@ -349,31 +353,31 @@ private:
     obj_type* obj_;
 };
 
-template <typename ObjType, typename R, typename... Args, R (ObjType::*mem_func_)(Args...) const>
+template <typename ObjType, typename R, typename... Args, R (ObjType::*mem_func_)(Args...) CASTLE_CONST>
 class function_ct_m<mem_func_> : public i_function<R(Args...)>
 {
 public:
     using obj_type    = ObjType;
     using return_type = R;
-    using param_types = std::tuple<Args...>;
+    using param_types = castle::tuple<Args...>;
     using signature   = R(Args...);
 
-    explicit function_ct_m(const obj_type& obj) : obj_(&obj) {}
+    explicit function_ct_m(CASTLE_CONST obj_type& obj) : obj_(&obj) {}
 
-    R operator()(Args... args) override
+    R operator()(Args... args) CASTLE_NOEXCEPT override
     {
-        if constexpr (std::is_void_v<R>)
+        CASTLE_IF_CONSTEXPR (castle::is_void<R>::value)
         {
-            (obj_->*mem_func_)(std::forward<Args>(args)...);
+            (obj_->*mem_func_)(CASTLE_FORWARD<Args>(args)...);
         }
         else
         {
-            return (obj_->*mem_func_)(std::forward<Args>(args)...);
+            return (obj_->*mem_func_)(CASTLE_FORWARD<Args>(args)...);
         }
     }
 
 private:
-    const obj_type* obj_;
+    CASTLE_CONST obj_type* obj_;
 };
 
 // -----------------------------------------------------------------------------
@@ -396,44 +400,46 @@ class function_ct_im<Instance, mem_func_> : public i_function<R(Args...)>
 public:
     using obj_type    = ObjType;
     using return_type = R;
-    using param_types = std::tuple<Args...>;
+    using param_types = castle::tuple<Args...>;
     using signature   = R(Args...);
 
-    R operator()(Args... args) override
+    R operator()(Args... args) CASTLE_NOEXCEPT override
     {
-        if constexpr (std::is_void_v<R>)
+        CASTLE_IF_CONSTEXPR (castle::is_void<R>::value)
         {
-            (Instance.*mem_func_)(std::forward<Args>(args)...);
+            (Instance.*mem_func_)(CASTLE_FORWARD<Args>(args)...);
         }
         else
         {
-            return (Instance.*mem_func_)(std::forward<Args>(args)...);
+            return (Instance.*mem_func_)(CASTLE_FORWARD<Args>(args)...);
         }
     }
 };
 
 template <typename ObjType, ObjType& Instance,
-          typename R, typename... Args, R (ObjType::*mem_func_)(Args...) const>
+          typename R, typename... Args, R (ObjType::*mem_func_)(Args...) CASTLE_CONST>
 class function_ct_im<Instance, mem_func_> : public i_function<R(Args...)>
 {
 public:
     using obj_type    = ObjType;
     using return_type = R;
-    using param_types = std::tuple<Args...>;
+    using param_types = castle::tuple<Args...>;
     using signature   = R(Args...);
 
-    R operator()(Args... args) override
+    R operator()(Args... args) CASTLE_NOEXCEPT override
     {
-        if constexpr (std::is_void_v<R>)
+        CASTLE_IF_CONSTEXPR (castle::is_void<R>::value)
         {
-            (Instance.*mem_func_)(std::forward<Args>(args)...);
+            (Instance.*mem_func_)(CASTLE_FORWARD<Args>(args)...);
         }
         else
         {
-            return (Instance.*mem_func_)(std::forward<Args>(args)...);
+            return (Instance.*mem_func_)(CASTLE_FORWARD<Args>(args)...);
         }
     }
 };
 
 } // namespace callbacks
 } // namespace castle
+
+#endif // CASTLE_CALLBACKS_FUNCTION_H

@@ -1,62 +1,36 @@
-#pragma once
+#ifndef CASTLE_MATH_GCD_H
+#define CASTLE_MATH_GCD_H
 
-#include "castle/types/traits.h"
+#include "castle/core/compiler.h"
+#include "castle/core/traits.h"
+#include "castle/math/abs.h"
 
-#include <cstdint>
-
-using namespace castle::types;
+#include <stdint.h>
 
 namespace castle
 {
 namespace math
 {
 
-/// Compile-time GCD via template recursion
 template <intmax_t A, intmax_t B>
-struct gcd_v : gcd_v<B, A % B> {};
-
-template <intmax_t A>
-struct gcd_v<A, 0>
+struct gcd
 {
-    static constexpr intmax_t value = (A < 0) ? -A : A;
+    static CASTLE_CONSTEXPR intmax_t value = gcd<B, A % B>::value;
 };
 
-/// Runtime GCD for any integral type
-template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-gcd(T a, T b) noexcept
+template <intmax_t A>
+struct gcd<A, 0>
 {
-    // Handle signs for signed types
-    if constexpr (std::is_signed<T>::value)
-    {
-        if (a < 0) a = -a;
-        if (b < 0) b = -b;
-    }
+    static CASTLE_CONSTEXPR intmax_t value = A;
+};
 
-    while (b != T{0})
-    {
-        T r = a % b;
-        a = b;
-        b = r;
-    }
-    return a;
-}
+template <intmax_t A, intmax_t B>
+CASTLE_CONSTEXPR intmax_t gcd<A, B>::value;
 
-/// Variadic GCD: compute GCD of multiple values
-template <typename T, typename... Args>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-gcd(T a, T b, Args... args) noexcept
-{
-    T g = gcd(a, b);
-    if (g == T{1})
-    {
-        return T{1};
-    }
-    return gcd(g, args...);
-}
+template <intmax_t A>
+CASTLE_CONSTEXPR intmax_t gcd<A, 0>::value;
 
 } // namespace math
 } // namespace castle
 
+#endif // CASTLE_MATH_GCD_H

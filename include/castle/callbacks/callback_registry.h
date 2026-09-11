@@ -1,12 +1,20 @@
-#pragma once
+#ifndef CASTLE_CALLBACKS_CALLBACK_REGISTRY_H
+#define CASTLE_CALLBACKS_CALLBACK_REGISTRY_H
+
+#include "castle/core/compiler.h"
+#include "castle/core/error_handler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
+#include "castle/error/status.h"
+#include "castle/utility/move.h"
+#include "castle/utility/forward.h"
 
 #include "castle/callbacks/function.h"
 #include "castle/callbacks/callback_subscription.h"
 
-#include <array>
-#include <cstddef>
-#include <cstdint>
-#include <utility>
+#include "castle/container/array.h"
+
+#include <stdint.h>
 
 namespace castle
 {
@@ -38,18 +46,18 @@ namespace callbacks
 //   sub.unsubscribe();                    // self-unsubscribe
 // -----------------------------------------------------------------------------
 template <
-    std::size_t max_callback,
+    size_type max_callback,
     typename signature>
 class callback_registry;
 
 template <
-    std::size_t max_callback,
+    size_type max_callback,
     typename return_type,
     typename... Args>
-class callback_registry<max_callback, return_type(Args...)> final
+class callback_registry<max_callback, return_type(Args...)> CASTLE_FINAL
     : public i_unsubscribable
 {
-    static_assert(std::is_void_v<return_type>,
+    static_assert(castle::is_void<return_type>::value,
                   "callback_registry requires void callback return type");
 
 public:
@@ -57,18 +65,18 @@ public:
     // base pointer is i_function<void(Args...)>.
     using callback_type = i_function<return_type(Args...)>;
     using subscription = callback_subscription;
-    using error = callback_subscription_error;
+    using error = castle::status;
 
-    callback_registry() = default;
-    ~callback_registry() override = default;
+    callback_registry() CASTLE_DEFAULT;
+    ~callback_registry() override CASTLE_DEFAULT;
 
     // Non-copyable, non-movable. Registry identity is tied to slot storage
     // AND to the back-pointer embedded in outstanding subscriptions.
-    callback_registry(const callback_registry&) = delete;
-    callback_registry& operator=(const callback_registry&) = delete;
+    callback_registry(CASTLE_CONST callback_registry&) CASTLE_DELETE;
+    callback_registry& operator=(CASTLE_CONST callback_registry&) CASTLE_DELETE;
 
-    callback_registry(callback_registry&&) = delete;
-    callback_registry& operator=(callback_registry&&) = delete;
+    callback_registry(callback_registry&&) CASTLE_DELETE;
+    callback_registry& operator=(callback_registry&&) CASTLE_DELETE;
 
     // -------------------------------------------------------------------------
     // Subscribe a non-owning pointer to an i_function<Args...> instance.
@@ -78,7 +86,7 @@ public:
     // Returns a subscription handle. On failure the returned handle is
     // !valid() and out_error (if provided) is set.
     // -------------------------------------------------------------------------
-    subscription subscribe(callback_type* callback, error* out_error = nullptr) noexcept
+    subscription subscribe(callback_type* callback, error* out_error = nullptr) CASTLE_NOEXCEPT
     {
         if (callback == nullptr)
         {
@@ -89,7 +97,7 @@ public:
             return subscription{};
         }
 
-        for (std::size_t i = 0; i < max_callback; ++i)
+        for (size_type i = 0; i < max_callback; ++i)
         {
             slot& current_slot = slots_[i];
 
@@ -122,7 +130,7 @@ public:
     // Type-erased unsubscribe entry point used by callback_subscription.
     // Not intended for direct client use — prefer subscription::unsubscribe().
     // -------------------------------------------------------------------------
-    error unsubscribe_slot(std::size_t index, std::uint32_t generation) noexcept override
+    error unsubscribe_slot(size_type index, uint32_t generation) CASTLE_NOEXCEPT override
     {
         if (index >= max_callback)
         {
@@ -156,13 +164,13 @@ public:
     // -------------------------------------------------------------------------
     void invoke(Args... args)
     {
-        for (std::size_t i = 0; i < max_callback; ++i)
+        for (size_type i = 0; i < max_callback; ++i)
         {
             callback_type* callback = slots_[i].callback;
 
             if (callback != nullptr)
             {
-                (*callback)(std::forward<Args>(args)...);
+                (*callback)(CASTLE_FORWARD<Args>(args)...);
             }
         }
     }
@@ -174,7 +182,7 @@ public:
     // -------------------------------------------------------------------------
     void operator()(Args... args)
     {
-        this->invoke(std::forward<Args>(args)...);
+        this->invoke(CASTLE_FORWARD<Args>(args)...);
     }
 
     // -------------------------------------------------------------------------
@@ -182,9 +190,9 @@ public:
     // outstanding subscription handles become stale. Callback objects
     // themselves are untouched (caller owns their lifetime).
     // -------------------------------------------------------------------------
-    void clear() noexcept
+    void clear() CASTLE_NOEXCEPT
     {
-        for (std::size_t i = 0; i < max_callback; ++i)
+        for (size_type i = 0; i < max_callback; ++i)
         {
             slot& current_slot = slots_[i];
 
@@ -198,17 +206,17 @@ public:
         active_count_ = 0;
     }
 
-    constexpr std::size_t size() const noexcept
+    CASTLE_CONSTEXPR size_type size() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return active_count_;
     }
 
-    constexpr bool empty() const noexcept
+    CASTLE_CONSTEXPR bool empty() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return active_count_ == 0;
     }
 
-    static constexpr std::size_t capacity() noexcept
+    static CASTLE_CONSTEXPR size_type capacity() CASTLE_NOEXCEPT
     {
         return max_callback;
     }
@@ -220,12 +228,14 @@ private:
     struct slot
     {
         callback_type* callback = nullptr;
-        std::uint32_t generation = 0;
+        uint32_t generation = 0;
     };
 
-    std::array<slot, max_callback> slots_{};
-    std::size_t active_count_ = 0;
+    container::array<slot, max_callback> slots_{};
+    size_type active_count_ = 0;
 };
 
 } // namespace callbacks
 } // namespace castle
+
+#endif // CASTLE_CALLBACKS_CALLBACK_REGISTRY_H

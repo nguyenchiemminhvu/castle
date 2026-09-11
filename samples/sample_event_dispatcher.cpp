@@ -1,55 +1,44 @@
+/**
+ * Castle 2.0 sample: <castle/events/event_dispatcher.h>
+ *
+ * Scenario: route a sensor-ready interrupt event to task-level consumers using
+ * compile-time event tags and fixed callback capacity.
+ */
+#include "sample_support.h"
 #include "castle/events/event_config.h"
 #include "castle/events/event_dispatcher.h"
+#include "castle/callbacks/function.h"
 
-#include <iostream>
+#include <stdint.h>
 
-using namespace castle::callbacks;
-using namespace castle::events;
+struct SensorReadyEvent;
+using sensor_ready_config = castle::events::event_config<
+    SensorReadyEvent,
+    4U,
+    void(uint16_t)>;
 
-struct timer_expired_tag {};
-struct button_pressed_tag {};
-
-using dispatcher_t = event_dispatcher<
-    event_config<timer_expired_tag, 2, void(std::uint32_t)>,
-    event_config<button_pressed_tag, 2, void(std::uint32_t, std::uint32_t)>
->;
-using timer_expired_signature = void(std::uint32_t);
-using button_pressed_signature = void(std::uint32_t, std::uint32_t);
-
-dispatcher_t g_dispatcher;
-
-void on_timer(std::uint32_t timer_id)
+namespace
 {
-    std::cout << "Timer expired: " << timer_id << std::endl;
-}
+uint16_t g_observed = 0U;
 
-void on_button(std::uint32_t button_id, std::uint32_t timestamp)
+void on_sensor_ready(uint16_t sample_count) noexcept
 {
-    std::cout << "Button pressed: " << button_id << " at " << timestamp << std::endl;
+    g_observed = sample_count;
 }
+} // namespace
 
 int main()
 {
-    function<timer_expired_signature> timer_cb(&on_timer);
-    function<button_pressed_signature> button_cb(&on_button);
+    using dispatcher_type = castle::events::event_dispatcher<sensor_ready_config>;
+    dispatcher_type dispatcher;
+    castle::callbacks::function<void(uint16_t)> callback{on_sensor_ready};
 
-    auto timer_sub = g_dispatcher.register_callback<timer_expired_tag>(&timer_cb);
-    timer_sub
-    ? std::cout << "Timer callback registered successfully." << std::endl
-    : std::cout << "Failed to register timer callback." << std::endl;
+    auto subscription = dispatcher.register_callback<SensorReadyEvent>(&callback);
+    CASTLE_SAMPLE_CHECK(subscription.valid());
 
-    auto button_sub = g_dispatcher.register_callback<button_pressed_tag>(&button_cb);
-    button_sub
-    ? std::cout << "Button callback registered successfully." << std::endl
-    : std::cout << "Failed to register button callback." << std::endl;
+    CASTLE_SAMPLE_CHECK(dispatcher.dispatch_event<SensorReadyEvent>(17U) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(g_observed == 17U);
 
-    g_dispatcher.dispatch_event<timer_expired_tag>(42u);
-    g_dispatcher.dispatch_event<button_pressed_tag>(1u, 1000u);
-
-    timer_sub.unsubscribe();
-    g_dispatcher.dispatch_event<timer_expired_tag>(43u); // No output, callback unsubscribed
-    button_sub.unsubscribe();
-    g_dispatcher.dispatch_event<button_pressed_tag>(2u, 2000u); // No output, callback unsubscribed
-
+    CASTLE_SAMPLE_CHECK(subscription.unsubscribe() == castle::status::ok);
     return 0;
 }

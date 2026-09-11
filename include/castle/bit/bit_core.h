@@ -1,11 +1,12 @@
-#pragma once
+#ifndef CASTLE_BIT_BIT_CORE_H
+#define CASTLE_BIT_BIT_CORE_H
 
-#include "castle/types/traits.h"
+#include "castle/core/compiler.h"
+#include "castle/core/types.h"
+#include "castle/core/traits.h"
 
-#include <cstdint>
-#include <climits>
-
-using namespace castle::types;
+#include <stdint.h>
+#include <limits.h>
 
 namespace castle
 {
@@ -19,27 +20,29 @@ namespace bit
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, bool>
-test(T value, std::uint32_t bit_index) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, bool>
+test(T value, uint32_t bit_index) CASTLE_NOEXCEPT
 {
     if (bit_index >= sizeof(T) * CHAR_BIT)
+    {
         return false;
+    }
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     return ((uval >> bit_index) & UnsignedT{1U}) != UnsignedT{0U};
 }
 
-template <std::size_t bit_index, typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, bool>
-test(T value) noexcept
+template <size_type bit_index, typename T>
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, bool>
+test(T value) CASTLE_NOEXCEPT
 {
     static_assert(bit_index < sizeof(T) * CHAR_BIT, "bit_index is out of range for the type T");
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     return ((uval >> bit_index) & UnsignedT{1U}) != UnsignedT{0U};
@@ -52,27 +55,29 @@ test(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-set(T value, std::uint32_t bit_index) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+set(T value, uint32_t bit_index) CASTLE_NOEXCEPT
 {
     if (bit_index >= sizeof(T) * CHAR_BIT)
+    {
         return value;
+    }
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     return static_cast<T>(uval | (UnsignedT{1U} << bit_index));
 }
 
-template <std::size_t bit_index, typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-set(T value) noexcept
+template <size_type bit_index, typename T>
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+set(T value) CASTLE_NOEXCEPT
 {
     static_assert(bit_index < sizeof(T) * CHAR_BIT, "bit_index is out of range for the type T");
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     return static_cast<T>(uval | (UnsignedT{1U} << bit_index));
@@ -85,27 +90,29 @@ set(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-clear(T value, std::uint32_t bit_index) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+clear(T value, uint32_t bit_index) CASTLE_NOEXCEPT
 {
     if (bit_index >= sizeof(T) * CHAR_BIT)
+    {
         return value;
+    }
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     return static_cast<T>(uval & static_cast<UnsignedT>(~(UnsignedT{1U} << bit_index)));
 }
 
-template <std::size_t bit_index, typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-clear(T value) noexcept
+template <size_type bit_index, typename T>
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+clear(T value) CASTLE_NOEXCEPT
 {
     static_assert(bit_index < sizeof(T) * CHAR_BIT, "bit_index is out of range for the type T");
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     return static_cast<T>(uval & static_cast<UnsignedT>(~(UnsignedT{1U} << bit_index)));
@@ -118,27 +125,29 @@ clear(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-toggle(T value, std::uint32_t bit_index) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+toggle(T value, uint32_t bit_index) CASTLE_NOEXCEPT
 {
     if (bit_index >= sizeof(T) * CHAR_BIT)
+    {
         return value;
+    }
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     return static_cast<T>(uval ^ (UnsignedT{1U} << bit_index));
 }
 
-template <std::size_t bit_index, typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-toggle(T value) noexcept
+template <size_type bit_index, typename T>
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+toggle(T value) CASTLE_NOEXCEPT
 {
     static_assert(bit_index < sizeof(T) * CHAR_BIT, "bit_index is out of range for the type T");
 
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     return static_cast<T>(uval ^ (UnsignedT{1U} << bit_index));
@@ -146,3 +155,5 @@ toggle(T value) noexcept
 
 } // namespace bit
 } // namespace castle
+
+#endif // CASTLE_BIT_BIT_CORE_H
