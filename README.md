@@ -1,6 +1,6 @@
 # CASTLE
 
-**Common Automotive Safety-critical Template Library for Embedded engineers**
+**Compliant Automotive Safety Template Library for Embedded**
 
 *Prototype version 2.0*
 

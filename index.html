@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CASTLE 2.0 — a lightweight, header-only C++17 template library for deterministic embedded software.">
+  <meta name="theme-color" content="#0c1117">
+  <title>CASTLE 2.0 — Embedded C++ without the hidden cost</title>
+  <style>
+    :root {
+      --bg: #f5f6f4;
+      --paper: #ffffff;
+      --ink: #14191f;
+      --muted: #5c6670;
+      --line: #dfe4e8;
+      --line-strong: #c9d1d7;
+      --dark: #0b1117;
+      --dark-2: #111922;
+      --accent: #4e806f;
+      --accent-2: #7fa894;
+      --accent-soft: #edf5f0;
+      --code: #0d131a;
+      --shadow: 0 18px 55px rgba(20, 31, 39, .08);
+      --radius: 18px;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    img, svg { max-width: 100%; }
+    ::selection { background: rgba(78, 128, 111, .18); }
+
+    .skip-link {
+      position: fixed;
+      left: 16px;
+      top: -60px;
+      z-index: 1000;
+      padding: 10px 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+    .skip-link:focus { top: 16px; }
+
+    .container { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(11, 17, 23, .92);
+      backdrop-filter: blur(16px);
+    }
+    .nav {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand { display: inline-flex; align-items: center; gap: 12px; color: #fff; font-weight: 800; letter-spacing: -.02em; }
+    .mark {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: grid; place-items: center;
+      background: linear-gradient(145deg, #dce8e1, #789e8b);
+      color: #0a1210;
+      font: 800 15px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+    }
+    .brand small { display: block; color: #98a3ad; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-links a { color: #aeb8c2; font-size: 14px; font-weight: 650; transition: color .2s ease; }
+    .nav-links a:hover { color: #fff; }
+    .nav-cta {
+      border: 1px solid #394550;
+      color: #fff !important;
+      padding: 8px 13px;
+      border-radius: 9px;
+      background: #151e27;
+    }
+    .nav-cta:hover { border-color: #62707c; background: #1a2530; }
+    .menu-btn { display: none; border: 1px solid #394550; background: #151e27; color: #fff; border-radius: 10px; padding: 9px 11px; cursor: pointer; }
+    .menu-btn svg { display: block; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      color: #f4f7f8;
+      background:
+        radial-gradient(circle at 80% 12%, rgba(127,168,148,.11), transparent 31%),
+        linear-gradient(180deg, #0b1117 0%, #101820 100%);
+      border-bottom: 1px solid #1b2832;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .24;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: linear-gradient(to bottom, black 0%, transparent 86%);
+    }
+    .hero-inner { position: relative; z-index: 1; padding: 78px 0 82px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 7px 11px;
+      border: 1px solid #33414c;
+      border-radius: 999px;
+      color: #b7c5cd;
+      background: rgba(255,255,255,.025);
+      font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    }
+    .eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 0 4px rgba(127,168,148,.11); }
+    .hero-grid { display: grid; grid-template-columns: 1.02fr .98fr; gap: 64px; align-items: center; margin-top: 30px; }
+    h1 {
+      margin: 0;
+      max-width: 720px;
+      font-size: clamp(44px, 6vw, 76px);
+      line-height: .98;
+      letter-spacing: -.055em;
+      font-weight: 800;
+    }
+    .hero-lede {
+      max-width: 650px;
+      margin: 24px 0 0;
+      color: #b3bec8;
+      font-size: clamp(17px, 2.2vw, 20px);
+      line-height: 1.65;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      padding: 12px 17px;
+      border-radius: 11px;
+      border: 1px solid transparent;
+      font-weight: 800;
+      font-size: 14px;
+      transition: transform .2s ease, background .2s ease, border-color .2s ease;
+    }
+    .button:hover { transform: translateY(-1px); }
+    .button-primary { color: #0b1511; background: #b6cfbf; }
+    .button-primary:hover { background: #c7ddcf; }
+    .button-secondary { color: #e8eef1; border-color: #35434e; background: #131c24; }
+    .button-secondary:hover { border-color: #61707b; }
+    .hero-note { margin-top: 14px; color: #7f8c96; font-size: 12px; }
+
+    .terminal {
+      border: 1px solid #293844;
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(8, 13, 18, .88);
+      box-shadow: 0 28px 70px rgba(0,0,0,.3);
+    }
+    .terminal-bar { display: flex; align-items: center; gap: 7px; height: 42px; padding: 0 13px; border-bottom: 1px solid #25323c; background: #0e161e; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #5b6770; }
+    .terminal-title { margin-left: auto; margin-right: 2px; color: #72808b; font: 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    pre { margin: 0; overflow: auto; }
+    .code {
+      padding: 24px 24px 26px;
+      font: 13px/1.7 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #d9e4e9;
+    }
+    .kw { color: #b6cfbf; }
+    .ty { color: #d9bd8c; }
+    .fn { color: #a4c7ef; }
+    .cm { color: #71808a; }
+    .num { color: #c5a4dc; }
+    .str { color: #a9c9aa; }
+
+    .strip { background: #fff; border-bottom: 1px solid var(--line); }
+    .strip-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .strip-item { padding: 18px 16px; border-right: 1px solid var(--line); text-align: center; }
+    .strip-item:last-child { border-right: 0; }
+    .strip-item strong { display: block; font-size: 14px; letter-spacing: .01em; }
+    .strip-item span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+
+    section { padding: 96px 0; scroll-margin-top: 72px; }
+    .section-head { max-width: 760px; margin-bottom: 42px; }
+    .kicker { margin-bottom: 11px; color: var(--accent); font-size: 12px; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
+    h2 { margin: 0; font-size: clamp(32px, 4vw, 48px); line-height: 1.04; letter-spacing: -.04em; }
+    .section-head p { margin: 15px 0 0; color: var(--muted); font-size: 17px; }
+
+    .principles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .principle {
+      position: relative;
+      min-height: 210px;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: 0 5px 18px rgba(21,29,35,.03);
+      overflow: hidden;
+    }
+    .principle::after { content: ""; position: absolute; right: -24px; bottom: -34px; width: 120px; height: 120px; border-radius: 50%; border: 1px solid #e7ecef; }
+    .iconbox { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; border: 1px solid #d9e6df; background: var(--accent-soft); color: var(--accent); }
+    .principle h3 { margin: 18px 0 6px; font-size: 18px; letter-spacing: -.02em; }
+    .principle p { margin: 0; color: var(--muted); font-size: 14px; max-width: 470px; }
+
+    .dark-section { color: #edf2f5; background: var(--dark); }
+    .dark-section .section-head p { color: #8f9ba6; }
+    .module-layout { display: grid; grid-template-columns: .75fr 1.25fr; gap: 18px; align-items: start; }
+    .module-intro { position: sticky; top: 95px; }
+    .module-intro-card { padding: 26px; border: 1px solid #24313b; border-radius: var(--radius); background: linear-gradient(180deg, #111922, #0d141b); }
+    .module-intro-card strong { display: block; font-size: 27px; line-height: 1.08; letter-spacing: -.03em; }
+    .module-intro-card p { margin: 12px 0 0; color: #8f9ba6; font-size: 14px; }
+    .module-stat { display: flex; gap: 12px; align-items: flex-start; padding-top: 22px; margin-top: 22px; border-top: 1px solid #24313b; }
+    .module-stat b { color: #dce6eb; font-size: 13px; }
+    .module-stat span { display: block; color: #7f8b95; font-size: 12px; }
+
+    .modules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+    .module {
+      padding: 18px;
+      min-height: 160px;
+      border: 1px solid #24313b;
+      border-radius: 15px;
+      background: #101820;
+      transition: border-color .2s ease, transform .2s ease, background .2s ease;
+    }
+    .module:hover { transform: translateY(-2px); border-color: #415361; background: #121c25; }
+    .module-path { display: inline-block; margin-bottom: 16px; padding: 4px 7px; border: 1px solid #2b3944; border-radius: 6px; color: #96a5af; background: #0d141b; font: 11px/1.2 ui-monospace, monospace; }
+    .module h3 { margin: 0; color: #e7edf0; font-size: 16px; letter-spacing: -.02em; }
+    .module p { margin: 6px 0 0; color: #83919c; font-size: 12.5px; line-height: 1.55; }
+    .module a { display: inline-flex; margin-top: 13px; color: #a9c8b8; font-size: 11px; font-weight: 800; }
+
+    .install-grid { display: grid; grid-template-columns: 1.08fr .92fr; gap: 18px; }
+    .install-card, .code-card { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; overflow: hidden; box-shadow: 0 8px 25px rgba(20,31,39,.035); }
+    .card-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+    .card-top strong { font-size: 13px; letter-spacing: .01em; }
+    .badge { padding: 5px 8px; border-radius: 999px; border: 1px solid #dbe5df; background: #f3f8f5; color: #4a6f60; font: 700 10px/1 ui-monospace, monospace; }
+    .light-code { padding: 22px; background: #fbfcfc; color: #25313a; font: 12.5px/1.75 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow: auto; }
+    .install-copy { padding: 22px 20px 24px; }
+    .step { display: grid; grid-template-columns: 32px 1fr; gap: 12px; align-items: start; }
+    .step + .step { margin-top: 22px; }
+    .step-no { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: var(--dark); color: #dce6eb; font: 800 11px/1 ui-monospace, monospace; }
+    .step h3 { margin: 1px 0 4px; font-size: 14px; }
+    .step p { margin: 0; color: var(--muted); font-size: 13px; }
+    .copy-wrap { position: relative; }
+    .copy-btn { position: absolute; top: 12px; right: 12px; border: 1px solid var(--line); background: #fff; color: #5e6972; border-radius: 8px; padding: 6px 8px; font-size: 11px; font-weight: 800; cursor: pointer; }
+    .copy-btn:hover { border-color: var(--line-strong); color: #20282e; }
+
+    .architecture { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .arch-card { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; overflow: hidden; }
+    .arch-visual { padding: 26px; background: linear-gradient(180deg, #fbfcfb, #f5f7f7); border-bottom: 1px solid var(--line); }
+    .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; align-items: center; }
+    .node { min-height: 96px; padding: 13px; display: flex; flex-direction: column; justify-content: center; border: 1px solid #d8dfe3; border-radius: 13px; background: #fff; text-align: center; }
+    .node strong { font-size: 12px; }
+    .node span { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .arrow { color: #9aa6ae; text-align: center; }
+    .arch-copy { padding: 22px; }
+    .arch-copy h3 { margin: 0; font-size: 18px; }
+    .arch-copy p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    .contract-list { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+    .contract-list li { display: flex; gap: 10px; align-items: flex-start; color: #34414b; font-size: 12.5px; }
+    .check { flex: 0 0 auto; width: 18px; height: 18px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-size: 11px; font-weight: 900; }
+
+    .fit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .fit { padding: 21px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+    .fit h3 { margin: 0 0 6px; font-size: 16px; }
+    .fit p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .roadmap { border: 1px solid var(--line); border-radius: 20px; background: #fff; overflow: hidden; }
+    .road-row { display: grid; grid-template-columns: 150px 1fr; gap: 22px; padding: 19px 22px; border-bottom: 1px solid var(--line); }
+    .road-row:last-child { border-bottom: 0; }
+    .road-phase { color: var(--accent); font: 800 11px/1.2 ui-monospace, monospace; text-transform: uppercase; letter-spacing: .08em; }
+    .road-row strong { font-size: 14px; }
+    .road-row p { margin: 4px 0 0; color: var(--muted); font-size: 12.5px; }
+
+    .cta {
+      color: #edf2f5;
+      background: linear-gradient(145deg, #111a22 0%, #0b1117 100%);
+      border: 1px solid #24323d;
+      border-radius: 22px;
+      padding: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      box-shadow: var(--shadow);
+    }
+    .cta h2 { max-width: 690px; font-size: clamp(30px, 4vw, 44px); }
+    .cta p { max-width: 690px; margin: 12px 0 0; color: #8e9ba6; font-size: 14px; }
+    .cta-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+
+    footer { padding: 30px 0 46px; color: #707c85; }
+    .footer-line { height: 1px; background: var(--line); margin-bottom: 24px; }
+    .footer-flex { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .footer-brand { color: #263139; font-weight: 800; font-size: 14px; }
+    .footer-meta { font-size: 12px; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; }
+    .footer-links a:hover { color: #233038; }
+
+    @media (max-width: 980px) {
+      .hero-grid, .module-layout, .install-grid, .architecture { grid-template-columns: 1fr; }
+      .hero-grid { gap: 40px; }
+      .module-intro { position: static; }
+      .modules { grid-template-columns: repeat(2, 1fr); }
+      .fit-grid { grid-template-columns: repeat(2, 1fr); }
+      .cta { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 760px) {
+      .container { width: min(var(--max), calc(100% - 28px)); }
+      .nav { height: 66px; }
+      .nav-links { position: absolute; left: 14px; right: 14px; top: 61px; display: none; flex-direction: column; align-items: stretch; padding: 10px; border: 1px solid #283640; border-radius: 13px; background: #0f171f; box-shadow: 0 15px 40px rgba(0,0,0,.3); }
+      .nav-links.open { display: flex; }
+      .nav-links a { padding: 9px 10px; }
+      .menu-btn { display: inline-grid; place-items: center; }
+      .hero-inner { padding: 62px 0 64px; }
+      .hero-grid { margin-top: 24px; }
+      .strip-grid { grid-template-columns: repeat(2, 1fr); }
+      .strip-item:nth-child(2) { border-right: 0; }
+      .strip-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      section { padding: 76px 0; }
+      .principles, .modules, .fit-grid { grid-template-columns: 1fr; }
+      .principle { min-height: auto; }
+      .flow { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); }
+      .road-row { grid-template-columns: 1fr; gap: 7px; }
+      .cta { padding: 30px; }
+      .footer-flex { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="CASTLE home">
+        <span class="mark">C</span>
+        <span>CASTLE<small>Compliant Automotive Safety Temlpate Library for Embedded</small></span>
+      </a>
+      <nav class="nav-links" id="nav-links" aria-label="Primary">
+        <a href="#principles">Principles</a>
+        <a href="#modules">Modules</a>
+        <a href="#start">Get started</a>
+        <a href="#roadmap">Roadmap</a>
+        <a class="nav-cta" href="https://github.com/nguyenchiemminhvu/castle/tree/main" target="_blank" rel="noreferrer">GitHub ↗</a>
+      </nav>
+      <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="container hero-inner">
+        <span class="eyebrow"><i></i> Prototype 2.0 · Version 2.0.0</span>
+        <div class="hero-grid">
+          <div>
+            <h1>Embedded C++ without the hidden cost.</h1>
+            <p class="hero-lede">CASTLE is a lightweight, header-only template library for firmware where memory, timing and failure behavior need to be visible parts of the design.</p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#start">Start with CASTLE</a>
+              <a class="button button-secondary" href="https://github.com/nguyenchiemminhvu/castle/tree/main/docs" target="_blank" rel="noreferrer">Read the docs ↗</a>
+            </div>
+            <div class="hero-note">C++17 and lower · no mandatory heap · no mandatory RTTI · no mandatory exceptions · no STL dependency in public headers</div>
+          </div>
+
+          <div class="terminal" aria-label="Example CASTLE C++ code">
+            <div class="terminal-bar">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="terminal-title">main.cpp</span>
+            </div>
+            <pre class="code"><code><span class="kw">#include</span> <span class="str">"castle/container/vector.h"</span>
+<span class="kw">#include</span> <span class="str">"castle/utility/optional.h"</span>
+
+<span class="kw">int</span> <span class="fn">main</span>()
+{
+    castle::container::vector&lt;<span class="ty">uint16_t</span>, <span class="num">16</span>&gt; samples;
+
+    <span class="kw">if</span> (samples.<span class="fn">push_back</span>(<span class="num">42U</span>) != castle::status::ok)
+    {
+        <span class="cm">// capacity failure is explicit</span>
+        <span class="kw">return</span> <span class="num">1</span>;
+    }
+
+    castle::optional&lt;<span class="ty">uint16_t</span>&gt; value = samples[<span class="num">0</span>];
+    <span class="kw">return</span> value.<span class="fn">has_value</span>() ? <span class="num">0</span> : <span class="num">2</span>;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="strip" aria-label="Project facts">
+      <div class="container strip-grid">
+        <div class="strip-item"><strong>Header-only</strong><span>drop in the include tree</span></div>
+        <div class="strip-item"><strong>Fixed capacity</strong><span>bounds are part of the type</span></div>
+        <div class="strip-item"><strong>C++17 / lower</strong><span>GCC · Clang · ARM families</span></div>
+        <div class="strip-item"><strong>MIT licensed</strong><span>open source · © 2026</span></div>
+      </div>
+    </div>
+
+    <section id="principles">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">Engineering principles</div>
+          <h2>Make the important costs explicit.</h2>
+          <p>CASTLE 2.0 favors simple, inspectable building blocks over runtime machinery that can make embedded behavior harder to bound or reason about.</p>
+        </div>
+        <div class="principles">
+          <article class="principle">
+            <div class="iconbox" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18"/><rect x="5" y="5" width="14" height="14" rx="3"/></svg></div>
+            <h3>No hidden heap</h3>
+            <p>Containers and storage helpers keep data in bounded objects. Capacity becomes a compile-time decision instead of an invisible runtime dependency.</p>
+          </article>
+          <article class="principle">
+            <div class="iconbox" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h10v4H7zM5 9h14v12H5z"/><path d="M9 13h6M9 17h4"/></svg></div>
+            <h3>Explicit failure</h3>
+            <p>Full and empty states are ordinary control flow. Status values and boolean results make failure visible without requiring exception-based APIs.</p>
+          </article>
+          <article class="principle">
+            <div class="iconbox" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 18 18 6M7.5 7.5h.01M16.5 16.5h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
+            <h3>Freestanding-friendly</h3>
+            <p>The public headers do not depend on the C++ STL. The library is built around compiler features and small low-level building blocks.</p>
+          </article>
+          <article class="principle">
+            <div class="iconbox" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 16V8h16v8"/><path d="M8 12h8M8 5v3M16 5v3"/></svg></div>
+            <h3>Compile-time first</h3>
+            <p>Type traits, fixed sizes, configuration and many utility operations can be expressed or evaluated at compile time, keeping firmware intent close to the type system.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="modules" class="dark-section">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">Module map</div>
+          <h2>Small parts. Composable by design.</h2>
+          <p>CASTLE 2.0 currently spans the low-level primitives, containers, algorithms and event-oriented utilities that form a practical embedded foundation.</p>
+        </div>
+        <div class="module-layout">
+          <aside class="module-intro">
+            <div class="module-intro-card">
+              <strong>15 module families</strong>
+              <p>Organized to mirror the public include tree, so documentation and source stay easy to navigate together.</p>
+              <div class="module-stat">
+                <div><b>Header-first</b><span>minimal integration surface</span></div>
+              </div>
+              <div class="module-stat">
+                <div><b>No STL dependency</b><span>public headers stay self-contained</span></div>
+              </div>
+            </div>
+          </aside>
+
+          <div class="modules">
+            <article class="module"><span class="module-path">atomic/</span><h3>Atomics</h3><p>Atomic values and memory ordering primitives.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/atomic" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">bit/</span><h3>Bit operations</h3><p>Low-level bit manipulation and bit math helpers.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/bit" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">callbacks/</span><h3>Callbacks</h3><p>Fixed-storage callbacks and callback policies.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/callbacks" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">chrono/</span><h3>Chrono</h3><p>Durations, time points, clocks and literals.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/chrono" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">container/</span><h3>Containers</h3><p>Array, vector, ring buffer, stack, strings and associative containers.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/container" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">core/</span><h3>Core</h3><p>Types, compiler abstraction, traits, configuration and assertions.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/core" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">design_patterns/</span><h3>Design patterns</h3><p>Small embedded-oriented observer, singleton and visitor helpers.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/design_patterns" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">error/</span><h3>Error</h3><p>Status and error values for explicit control flow.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/error" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">events/</span><h3>Events</h3><p>Dispatchers, signals/slots, IPC events and tick timers.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/events" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">iterator/</span><h3>Iterators</h3><p>Iterator tags, traits, bounded, circular and reverse iterators.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/iterator" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">math/</span><h3>Math</h3><p>Integer math, ratios, square root, mean, logarithms and more.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/math" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">memory/</span><h3>Memory</h3><p>Placement construction, destruction, storage, addresses and lifetimes.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/memory" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">mutex/</span><h3>Mutex</h3><p>Mutex and scoped locking helpers for synchronized firmware paths.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/mutex" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">utility/</span><h3>Utilities</h3><p>Move, forward, swap, optional, variant, pair, tuple, bitset and safe casts.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/utility" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+            <article class="module"><span class="module-path">algorithm/</span><h3>Algorithms</h3><p>Reusable algorithmic building blocks for the library ecosystem.</p><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/include/castle/algorithm" target="_blank" rel="noreferrer">Browse module ↗</a></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="start">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">Get started</div>
+          <h2>Drop it into a firmware tree.</h2>
+          <p>CASTLE is header-only. Use the include directory directly, or consume the repository as a CMake subdirectory through its interface target.</p>
+        </div>
+        <div class="install-grid">
+          <article class="install-card">
+            <div class="card-top"><strong>Option 01 · CMake</strong><span class="badge">INTERFACE target</span></div>
+            <div class="copy-wrap">
+              <button class="copy-btn" data-copy="cmake-code">Copy</button>
+              <pre class="light-code" id="cmake-code">add_subdirectory(third_party/castle)
+
+target_link_libraries(my_app
+    PRIVATE castle
+)</pre>
+            </div>
+            <div class="install-copy">
+              <div class="step">
+                <span class="step-no">1</span>
+                <div><h3>Add the repository</h3><p>Keep CASTLE anywhere under your firmware source tree or dependency directory.</p></div>
+              </div>
+              <div class="step">
+                <span class="step-no">2</span>
+                <div><h3>Link the interface target</h3><p>The project exposes the <code>castle</code> target and propagates its include directory and C++17 requirement.</p></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="code-card">
+            <div class="card-top"><strong>Option 02 · Headers only</strong><span class="badge">zero build step</span></div>
+            <div class="copy-wrap">
+              <button class="copy-btn" data-copy="include-code">Copy</button>
+              <pre class="light-code" id="include-code">#include "castle/container/array.h"
+#include "castle/container/vector.h"
+#include "castle/utility/optional.h"
+#include "castle/events/tick_timer.h"
+
+// Add include/ to your compiler include path.</pre>
+            </div>
+            <div class="install-copy">
+              <div class="step">
+                <span class="step-no">+</span>
+                <div><h3>Compile for your target</h3><p>A typical configuration may use <code>-std=c++17 -fno-exceptions -fno-rtti -nostdinc++</code> where supported by the toolchain.</p></div>
+              </div>
+              <div class="step" style="margin-top:22px">
+                <span class="step-no">↗</span>
+                <div><h3>Open the docs</h3><p>The documentation mirrors <code>include/castle</code>, one module guide at a time.</p></div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="design" style="padding-top: 18px;">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">Architecture</div>
+          <h2>A small runtime contract by default.</h2>
+          <p>The point is not to ban every runtime mechanism. It is to keep the core data structures statically shaped, explicit and inspectable.</p>
+        </div>
+        <div class="architecture">
+          <article class="arch-card">
+            <div class="arch-visual">
+              <div class="flow">
+                <div class="node"><strong>Firmware</strong><span>application logic</span></div>
+                <div class="arrow">→</div>
+                <div class="node"><strong>CASTLE</strong><span>templates + storage</span></div>
+                <div class="arrow">→</div>
+                <div class="node"><strong>Toolchain</strong><span>GCC / Clang / ARM</span></div>
+              </div>
+            </div>
+            <div class="arch-copy">
+              <h3>Static shape, explicit behavior</h3>
+              <p>Capacity, storage and configuration are visible at the API boundary. That makes it easier to budget memory and reason about normal failure modes.</p>
+              <ul class="contract-list">
+                <li><span class="check">✓</span><span>Fixed-capacity containers such as <code>vector&lt;T, N&gt;</code></span></li>
+                <li><span class="check">✓</span><span>Status values such as <code>ok</code>, <code>full</code> and <code>empty</code></span></li>
+                <li><span class="check">✓</span><span>No mandatory heap, exceptions or RTTI</span></li>
+              </ul>
+            </div>
+          </article>
+          <article class="arch-card">
+            <div class="arch-visual">
+              <pre class="light-code" style="padding:18px; background:#fff;">template&lt;typename T, size_t N&gt;
+class vector
+{
+public:
+    static constexpr size_type
+        static_capacity = N;
+
+    bool empty() const noexcept;
+    bool full() const noexcept;
+    size_type size() const noexcept;
+    size_type capacity() const noexcept;
+
+    status push_back(const T&amp; value);
+};</pre>
+            </div>
+            <div class="arch-copy">
+              <h3>Familiar C++ shape</h3>
+              <p>CASTLE uses recognizable C++ vocabulary—containers, optionals, variants, iterators, tuples and chrono-style types—adapted to embedded constraints.</p>
+              <ul class="contract-list">
+                <li><span class="check">✓</span><span>Useful drop-in patterns without pretending the target is a desktop runtime</span></li>
+                <li><span class="check">✓</span><span>Header layout mirrors the documentation layout</span></li>
+                <li><span class="check">✓</span><span>Core interfaces favor templates over classical virtual inheritance</span></li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-top: 46px;">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">Good fit</div>
+          <h2>Built for software that has a budget.</h2>
+        </div>
+        <div class="fit-grid">
+          <article class="fit"><h3>Firmware & device drivers</h3><p>Keep buffers, state and helper objects bounded and close to the hardware-facing code.</p></article>
+          <article class="fit"><h3>Control software</h3><p>Use predictable containers and explicit results in control loops and supervisory logic.</p></article>
+          <article class="fit"><h3>Protocol stacks</h3><p>Model packets, lookup structures and communication buffers without making allocation the default.</p></article>
+          <article class="fit"><h3>Sensor pipelines</h3><p>Use fixed-capacity queues and value wrappers where throughput and bounded storage matter.</p></article>
+          <article class="fit"><h3>Schedulers & events</h3><p>Compose callbacks, event dispatchers, signals and tick timers from the existing event family.</p></article>
+          <article class="fit"><h3>Safety-oriented codebases</h3><p>Make constraints visible in APIs and leave room for your project’s MISRA, AUTOSAR and process requirements.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">Roadmap</div>
+          <h2>Growing toward a broader embedded toolbox.</h2>
+          <p>These are the project’s stated next areas after the current prototype 2.0 building blocks.</p>
+        </div>
+        <div class="roadmap">
+          <div class="road-row"><div class="road-phase">Next</div><div><strong>Finite state machine framework</strong><p>Explicit state transitions and embedded-friendly configuration.</p></div></div>
+          <div class="road-row"><div class="road-phase">Next</div><div><strong>Protocol I/O + codecs</strong><p>Input/output support plus encoder and decoder algorithms.</p></div></div>
+          <div class="road-row"><div class="road-phase">Planned</div><div><strong>Checksums & CRC</strong><p>CRC-8/16/32, Fletcher, Adler and related utilities.</p></div></div>
+          <div class="road-row"><div class="road-phase">Planned</div><div><strong>Math & geometry</strong><p>Additional basic math and geometry calculations.</p></div></div>
+          <div class="road-row"><div class="road-phase">Planned</div><div><strong>Event configuration</strong><p>More expressive compile-time configuration for event topologies.</p></div></div>
+          <div class="road-row"><div class="road-phase">Planned</div><div><strong>Conformance notes</strong><p>AUTOSAR / MISRA C++ guidance per module as the library matures.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-top: 18px;">
+      <div class="container">
+        <div class="cta">
+          <div>
+            <div class="kicker" style="margin-bottom:8px; color:#91b2a1;">Open source · CASTLE 2.0</div>
+            <h2>Keep the runtime contract small. Let the type system do more of the work.</h2>
+            <p>Explore the source, module guides and tests on the prototype 2.0 branch.</p>
+          </div>
+          <div class="cta-actions">
+            <a class="button button-primary" href="https://github.com/nguyenchiemminhvu/castle/tree/main" target="_blank" rel="noreferrer">View repository ↗</a>
+            <a class="button button-secondary" href="https://github.com/nguyenchiemminhvu/castle/tree/main/docs" target="_blank" rel="noreferrer">Documentation ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-line"></div>
+      <div class="footer-flex">
+        <div>
+          <div class="footer-brand">CASTLE — Compliant Automotive Safety Template Library</div>
+          <div class="footer-meta">Prototype 2.0 · Version 2.0.0 · MIT License · © 2026 nguyenchiemminhvu</div>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/nguyenchiemminhvu/castle" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/nguyenchiemminhvu/castle/tree/main/docs" target="_blank" rel="noreferrer">Docs</a>
+          <a href="https://github.com/nguyenchiemminhvu/castle/tree/main/test" target="_blank" rel="noreferrer">Tests</a>
+          <a href="https://github.com/nguyenchiemminhvu/castle/blob/main/LICENSE" target="_blank" rel="noreferrer">License</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const menuBtn = document.getElementById('menu-btn');
+      const nav = document.getElementById('nav-links');
+      if (menuBtn && nav) {
+        menuBtn.addEventListener('click', function () {
+          const open = nav.classList.toggle('open');
+          menuBtn.setAttribute('aria-expanded', String(open));
+          menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        });
+        nav.querySelectorAll('a').forEach(function (link) {
+          link.addEventListener('click', function () {
+            nav.classList.remove('open');
+            menuBtn.setAttribute('aria-expanded', 'false');
+            menuBtn.setAttribute('aria-label', 'Open menu');
+          });
+        });
+      }
+
+      document.querySelectorAll('.copy-btn').forEach(function (button) {
+        button.addEventListener('click', async function () {
+          const target = document.getElementById(button.dataset.copy);
+          if (!target) return;
+          const text = target.innerText;
+          try {
+            await navigator.clipboard.writeText(text);
+            const old = button.textContent;
+            button.textContent = 'Copied';
+            setTimeout(function () { button.textContent = old; }, 1300);
+          } catch (_) {
+            button.textContent = 'Select & copy';
+            setTimeout(function () { button.textContent = 'Copy'; }, 1300);
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

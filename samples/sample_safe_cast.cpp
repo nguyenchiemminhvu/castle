@@ -1,7 +1,7 @@
 /**
  * Castle 2.0 sample: <castle/utility/safe_cast.h>
  *
- * Scenario: make primitive conversions explicit at a safety-critical protocol
+ * Scenario: make primitive conversions explicit at a Safety protocol
  * boundary. The example uses non-overflowing values so behavior is unambiguous.
  */
 #include "sample_support.h"
