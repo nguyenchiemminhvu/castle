@@ -64,6 +64,8 @@ target_compile_options(
     PRIVATE
         -Wall
         -Wextra
+        -fno-exceptions
+        -fno-rtti
 )
 
 if(CASTLE_ENABLE_COVERAGE)
