@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/design_patterns/singleton.h"
+#include "castle/design_patterns/singleton.hpp"
 
 namespace
 {

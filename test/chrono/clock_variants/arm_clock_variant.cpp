@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/chrono/clock_variants/arm_clock_variant.h"
+#include "castle/chrono/clock_variants/arm_clock_variant.hpp"
 
 TEST(ArmClockVariantTest, HooksAreCallable)
 {

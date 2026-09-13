@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/swap.h"
+#include "castle/utility/swap.hpp"
 
 namespace
 {

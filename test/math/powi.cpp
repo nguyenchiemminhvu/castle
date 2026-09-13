@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/powi.h"
+#include "castle/math/powi.hpp"
 
 namespace
 {

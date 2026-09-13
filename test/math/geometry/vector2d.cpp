@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/geometry/vector2d.h"
+#include "castle/math/geometry/vector2d.hpp"
 
 namespace
 {

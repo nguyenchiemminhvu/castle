@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/chrono/chrono.h"
+#include "castle/chrono/chrono.hpp"
 
 // Scenario: umbrella-header smoke test for the complete Castle chrono facility.
 int main()

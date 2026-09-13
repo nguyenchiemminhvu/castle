@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/invert.h"
+#include "castle/math/invert.hpp"
 
 #include <stdint.h>
 

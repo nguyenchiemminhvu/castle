@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/geometry/algorithms.h"
+#include "castle/math/geometry/algorithms.hpp"
 
 namespace
 {

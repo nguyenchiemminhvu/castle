@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/events/signal_ipc_event.h"
+#include "castle/events/signal_ipc_event.hpp"
 #include <signal.h>
 
 namespace

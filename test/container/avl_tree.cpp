@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/avl_tree.h"
+#include "castle/container/avl_tree.hpp"
 #include <vector>
 #include <initializer_list>
 

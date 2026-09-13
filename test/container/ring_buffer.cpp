@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/ring_buffer.h"
+#include "castle/container/ring_buffer.hpp"
 
 namespace
 {

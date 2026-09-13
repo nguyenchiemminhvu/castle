@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/mutex/mutex.h"
+#include "castle/mutex/mutex.hpp"
 
 // Scenario: protecting a short critical section in a no-OS cooperative application.
 int main()

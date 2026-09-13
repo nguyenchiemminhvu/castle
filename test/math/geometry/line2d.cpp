@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/geometry/line2d.h"
+#include "castle/math/geometry/line2d.hpp"
 
 namespace
 {

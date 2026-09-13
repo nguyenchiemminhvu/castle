@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/bit/bit_reverse.h"
+#include "castle/bit/bit_reverse.hpp"
 
 #include <cstdint>
 

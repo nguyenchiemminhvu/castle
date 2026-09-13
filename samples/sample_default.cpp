@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/core/compiler_variants/default.h"
+#include "castle/core/compiler_variants/default.hpp"
 
 // Scenario: cross-toolchain inclusion test for a compiler-specific variant.
 int main()

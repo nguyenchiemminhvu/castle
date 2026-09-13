@@ -3,8 +3,8 @@
  *
  * Scenario: a bounded command queue where nodes stay in fixed internal storage.
  */
-#include "sample_support.h"
-#include "castle/container/forward_list.h"
+#include "sample_support.hpp"
+#include "castle/container/forward_list.hpp"
 
 #include <stdint.h>
 

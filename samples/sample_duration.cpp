@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/chrono/duration.h"
+#include "castle/chrono/duration.hpp"
 
 // Scenario: representing fixed scheduler and telemetry periods with integer duration arithmetic.
 #include <stdint.h>

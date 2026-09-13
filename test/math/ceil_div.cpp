@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/ceil_div.h"
+#include "castle/math/ceil_div.hpp"
 
 #include <cstdint>
 

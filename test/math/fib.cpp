@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/fib.h"
+#include "castle/math/fib.hpp"
 
 namespace
 {

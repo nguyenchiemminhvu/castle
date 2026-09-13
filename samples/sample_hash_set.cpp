@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/hash_set.h"
+#include "castle/container/hash_set.hpp"
 
 // Scenario: tracking a bounded set of enabled peripheral channels.
 int main()

@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/integral_sequence.h"
+#include "castle/utility/integral_sequence.hpp"
 
 // Scenario: compile-time indexing for generic register-field tables.
 using seq = castle::sequence::make_index_sequence<4U>::type;

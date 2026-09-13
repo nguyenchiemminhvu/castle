@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/floor_div.h"
+#include "castle/math/floor_div.hpp"
 
 #include <cstdint>
 

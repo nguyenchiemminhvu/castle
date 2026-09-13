@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/string_view.h"
+#include "castle/container/string_view.hpp"
 
 namespace
 {

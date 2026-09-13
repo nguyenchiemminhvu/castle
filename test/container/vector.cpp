@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/vector.h"
+#include "castle/container/vector.hpp"
 #include <type_traits>
 namespace
 {

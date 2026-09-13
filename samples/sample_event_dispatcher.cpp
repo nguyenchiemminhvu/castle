@@ -4,10 +4,10 @@
  * Scenario: route a sensor-ready interrupt event to task-level consumers using
  * compile-time event tags and fixed callback capacity.
  */
-#include "sample_support.h"
-#include "castle/events/event_config.h"
-#include "castle/events/event_dispatcher.h"
-#include "castle/callbacks/function.h"
+#include "sample_support.hpp"
+#include "castle/events/event_config.hpp"
+#include "castle/events/event_dispatcher.hpp"
+#include "castle/callbacks/function.hpp"
 
 #include <stdint.h>
 

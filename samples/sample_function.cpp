@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/callbacks/function.h"
+#include "castle/callbacks/function.hpp"
 
 // Scenario: registering a deterministic scheduler callback with no streams or operating-system services.
 #include <stdint.h>

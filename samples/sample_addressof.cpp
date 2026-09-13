@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/memory/addressof.h"
+#include "castle/memory/addressof.hpp"
 
 // Scenario: taking the true address of a low-level object without overloaded operator& interference.
 int main()

@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/geometry/point2d.h"
+#include "castle/math/geometry/point2d.hpp"
 
 namespace
 {

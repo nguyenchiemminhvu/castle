@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/atomic/atomic.h"
+#include "castle/atomic/atomic.hpp"
 
 // Scenario: an ISR/task handshake and a DMA cursor use atomic load/store, RMW and CAS operations.
 #include <stdint.h>

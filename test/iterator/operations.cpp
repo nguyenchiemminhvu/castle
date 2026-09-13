@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/iterator/operations.h"
+#include "castle/iterator/operations.hpp"
 
 #include <type_traits>
 

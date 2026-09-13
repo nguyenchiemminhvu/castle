@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/core/error_handler.h"
+#include "castle/core/error_handler.hpp"
 
 // Scenario: board-specific fail-stop policy integration.
 int main()

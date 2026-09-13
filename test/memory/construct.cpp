@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/memory/construct.h"
+#include "castle/memory/construct.hpp"
 
 namespace
 {

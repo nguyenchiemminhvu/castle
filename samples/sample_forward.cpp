@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/forward.h"
+#include "castle/utility/forward.hpp"
 
 // Scenario: preserving value category in a generic embedded factory.
 #include <stdint.h>

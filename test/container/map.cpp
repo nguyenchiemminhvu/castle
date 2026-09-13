@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/map.h"
+#include "castle/container/map.hpp"
 
 namespace
 {

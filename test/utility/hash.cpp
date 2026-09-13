@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/hash.h"
-#include "castle/container/string_view.h"
+#include "castle/utility/hash.hpp"
+#include "castle/container/string_view.hpp"
 
 #include <stdint.h>
 

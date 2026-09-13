@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "castle/memory/lifetime.h"
-#include "castle/memory/new.h"
+#include "castle/memory/lifetime.hpp"
+#include "castle/memory/new.hpp"
 
 namespace
 {

@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/design_patterns/visitor.h"
+#include "castle/design_patterns/visitor.hpp"
 
 // Scenario: compile-time smoke test for a visitor-based command/event hierarchy.
 int main()

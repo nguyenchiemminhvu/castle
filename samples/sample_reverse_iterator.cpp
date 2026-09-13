@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/iterator/reverse_iterator.h"
+#include "castle/iterator/reverse_iterator.hpp"
 
 // Scenario: walking a fixed log buffer newest-entry first.
 int main()

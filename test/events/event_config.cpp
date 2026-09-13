@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/events/event_config.h"
+#include "castle/events/event_config.hpp"
 
 namespace
 {

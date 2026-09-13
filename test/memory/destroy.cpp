@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "castle/memory/destroy.h"
-#include "castle/memory/new.h"
+#include "castle/memory/destroy.hpp"
+#include "castle/memory/new.hpp"
 
 namespace
 {

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/clamp.h"
+#include "castle/math/clamp.hpp"
 
 namespace
 {

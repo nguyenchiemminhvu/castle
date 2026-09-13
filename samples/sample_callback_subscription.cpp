@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/callbacks/callback_subscription.h"
+#include "castle/callbacks/callback_subscription.hpp"
 
 // Scenario: holding a deterministic callback-registration token in an embedded component.
 #include <stdint.h>

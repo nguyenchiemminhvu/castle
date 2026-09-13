@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/ratio.h"
+#include "castle/math/ratio.hpp"
 
 // Scenario: using ratio in a deterministic control/telemetry calculation.
 int main()

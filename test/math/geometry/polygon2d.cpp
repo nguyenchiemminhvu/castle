@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/geometry/polygon2d.h"
+#include "castle/math/geometry/polygon2d.hpp"
 
 namespace
 {

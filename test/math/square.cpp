@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/square.h"
+#include "castle/math/square.hpp"
 
 namespace
 {

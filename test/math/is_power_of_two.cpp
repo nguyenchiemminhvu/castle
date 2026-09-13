@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/is_power_of_two.h"
+#include "castle/math/is_power_of_two.hpp"
 
 #include <cstdint>
 

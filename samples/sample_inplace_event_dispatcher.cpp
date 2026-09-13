@@ -4,9 +4,9 @@
  * Scenario: a stateful callback is kept in deterministic inline storage while
  * the event key and payload remain statically described by event_config.
  */
-#include "sample_support.h"
-#include "castle/events/event_config.h"
-#include "castle/events/inplace_event_dispatcher.h"
+#include "sample_support.hpp"
+#include "castle/events/event_config.hpp"
+#include "castle/events/inplace_event_dispatcher.hpp"
 
 #include <stdint.h>
 

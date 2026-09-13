@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/mean.h"
+#include "castle/math/mean.hpp"
 
 #include <stdint.h>
 #include <vector>

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/forward_list.h"
+#include "castle/container/forward_list.hpp"
 
 namespace
 {

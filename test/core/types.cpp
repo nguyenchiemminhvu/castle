@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <type_traits>
 
-#include "castle/core/types.h"
+#include "castle/core/types.hpp"
 
 namespace
 {

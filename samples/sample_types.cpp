@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/core/types.h"
+#include "castle/core/types.hpp"
 
 // Scenario: using Castle’s target-stable size/difference typedefs in embedded APIs.
 int main()

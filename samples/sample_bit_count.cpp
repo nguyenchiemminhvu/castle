@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/bit/bit_count.h"
+#include "castle/bit/bit_count.hpp"
 
 // Scenario: validating a packed sensor/status word before transmitting it.
 #include <stdint.h>

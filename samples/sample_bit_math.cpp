@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/bit/bit_math.h"
+#include "castle/bit/bit_math.hpp"
 
 // Scenario: checking DMA ring sizes, divisibility and power-of-two hardware-buffer constraints.
 #include <stdint.h>

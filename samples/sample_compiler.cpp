@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/core/compiler.h"
+#include "castle/core/compiler.hpp"
 
 // Scenario: verifying that the Castle compiler abstraction can be included by a board build.
 int main()

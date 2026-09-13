@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/events/sigslot.h"
+#include "castle/events/sigslot.hpp"
 
 namespace
 {

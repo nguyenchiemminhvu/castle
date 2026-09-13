@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/geometry/intersections.h"
+#include "castle/math/geometry/intersections.hpp"
 
 namespace
 {

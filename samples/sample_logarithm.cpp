@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/logarithm.h"
+#include "castle/math/logarithm.hpp"
 
 // Scenario: using logarithm in a deterministic control/telemetry calculation.
 int main()

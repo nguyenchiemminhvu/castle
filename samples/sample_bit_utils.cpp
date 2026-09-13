@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/bit/bit_utils.h"
+#include "castle/bit/bit_utils.hpp"
 
 // Scenario: decoding the bit fields of a sampled peripheral status register.
 #include <stdint.h>

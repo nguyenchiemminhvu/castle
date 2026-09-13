@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/memory/alignment.h"
+#include "castle/memory/alignment.hpp"
 
 #include <cstdint>
 

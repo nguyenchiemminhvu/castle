@@ -1,7 +1,7 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/bitset.h"
-#include "castle/utility/bitset.h"
+#include "castle/container/bitset.hpp"
+#include "castle/utility/bitset.hpp"
 
 // Scenario: exercising both fixed bitset implementations for register maps and protocol masks.
 #include <stdint.h>

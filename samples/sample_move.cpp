@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/move.h"
+#include "castle/utility/move.hpp"
 
 // Scenario: moving a small message object without pulling in <utility>.
 struct Packet

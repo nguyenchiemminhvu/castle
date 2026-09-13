@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/compare.h"
+#include "castle/utility/compare.hpp"
 
 // Scenario: ordering command IDs and calibration keys with a single canonical comparator.
 int main()

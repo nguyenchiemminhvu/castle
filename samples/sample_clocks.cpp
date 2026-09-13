@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/chrono/clocks.h"
+#include "castle/chrono/clocks.hpp"
 
 // Scenario: obtaining a monotonic scheduler timestamp from the Castle clock abstraction.
 int main()

@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/memory/lifetime.h"
+#include "castle/memory/lifetime.hpp"
 
 // Scenario: compile smoke test for explicit lifetime utilities.
 int main()

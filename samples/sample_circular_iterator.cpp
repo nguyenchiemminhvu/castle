@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/iterator/circular_iterator.h"
+#include "castle/iterator/circular_iterator.hpp"
 
 // Scenario: walking a fixed command table cyclically without modulo arithmetic at each call site.
 int main()

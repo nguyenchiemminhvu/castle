@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/callbacks/callback_policy.h"
+#include "castle/callbacks/callback_policy.hpp"
 
 // Scenario: compilation smoke test for callback registration policy configuration.
 int main()

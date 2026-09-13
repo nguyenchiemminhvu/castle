@@ -4,9 +4,9 @@
  * Scenario: produce stable keys for fixed-capacity hash tables used by a
  * command/telemetry registry. No dynamic storage is involved.
  */
-#include "sample_support.h"
-#include "castle/utility/hash.h"
-#include "castle/container/string_view.h"
+#include "sample_support.hpp"
+#include "castle/utility/hash.hpp"
+#include "castle/container/string_view.hpp"
 
 #include <stdint.h>
 

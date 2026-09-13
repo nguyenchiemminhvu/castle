@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/memory/object.h"
+#include "castle/memory/object.hpp"
 
 // Scenario: recovering a typed object view from a register-aligned address.
 #include <stdint.h>

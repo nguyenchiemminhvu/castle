@@ -4,10 +4,10 @@
  * Scenario: explicitly end an object's lifetime in a caller-owned static buffer.
  * The raw storage is never allocated from the heap and is reused deterministically.
  */
-#include "sample_support.h"
-#include "castle/memory/destroy.h"
-#include "castle/memory/static_storage.h"
-#include "castle/memory/construct.h"
+#include "sample_support.hpp"
+#include "castle/memory/destroy.hpp"
+#include "castle/memory/static_storage.hpp"
+#include "castle/memory/construct.hpp"
 
 #include <stdint.h>
 

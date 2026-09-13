@@ -6,8 +6,8 @@
  * dedicated samples in this directory. Keeping this translation unit standalone
  * verifies that the umbrella remains independently includable.
  */
-#include "sample_support.h"
-#include "castle/iterator/iterator.h"
+#include "sample_support.hpp"
+#include "castle/iterator/iterator.hpp"
 
 int main()
 {

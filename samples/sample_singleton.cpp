@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/design_patterns/singleton.h"
+#include "castle/design_patterns/singleton.hpp"
 
 // Scenario: providing one explicitly controlled device-service instance without heap allocation.
 #include <stdint.h>

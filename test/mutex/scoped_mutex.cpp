@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/mutex/scoped_mutex.h"
+#include "castle/mutex/scoped_mutex.hpp"
 
 namespace
 {

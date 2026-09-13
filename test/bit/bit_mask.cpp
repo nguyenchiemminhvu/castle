@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/bit/bit_mask.h"
+#include "castle/bit/bit_mask.hpp"
 
 #include <cstdint>
 

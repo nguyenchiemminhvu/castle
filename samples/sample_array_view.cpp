@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/array_view.h"
+#include "castle/container/array_view.hpp"
 
 // Scenario: passing a non-owning view of a DMA/ADC buffer to a processing routine.
 int main()

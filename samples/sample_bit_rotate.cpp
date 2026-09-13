@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/bit/bit_rotate.h"
+#include "castle/bit/bit_rotate.hpp"
 
 // Scenario: implementing a compact CRC/hash-like mixing stage without lookup tables.
 #include <stdint.h>

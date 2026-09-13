@@ -4,8 +4,8 @@
  * Scenario: a small ISR/task callback fan-out where stateful lambdas are stored
  * in caller-owned fixed inline buffers. No heap allocation is required.
  */
-#include "sample_support.h"
-#include "castle/callbacks/inplace_callback_registry.h"
+#include "sample_support.hpp"
+#include "castle/callbacks/inplace_callback_registry.hpp"
 
 #include <stdint.h>
 

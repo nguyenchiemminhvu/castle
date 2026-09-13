@@ -4,8 +4,8 @@
  * Scenario: make primitive conversions explicit at a Safety protocol
  * boundary. The example uses non-overflowing values so behavior is unambiguous.
  */
-#include "sample_support.h"
-#include "castle/utility/safe_cast.h"
+#include "sample_support.hpp"
+#include "castle/utility/safe_cast.hpp"
 
 #include <stdint.h>
 

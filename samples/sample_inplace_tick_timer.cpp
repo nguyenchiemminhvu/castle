@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/events/inplace_tick_timer.h"
+#include "castle/events/inplace_tick_timer.hpp"
 
 // Scenario: deterministic tick-driven timeout handling.
 int main()

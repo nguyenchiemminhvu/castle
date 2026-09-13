@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/chrono/literals.h"
+#include "castle/chrono/literals.hpp"
 
 namespace
 {

@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/memory/new.h"
+#include "castle/memory/new.hpp"
 
 // Scenario: compile smoke test for placement construction support.
 int main()

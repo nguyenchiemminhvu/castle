@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/hash_map.h"
+#include "castle/container/hash_map.hpp"
 
 // Scenario: fixed-capacity lookup of sensor IDs to scaled sensor values.
 int main()

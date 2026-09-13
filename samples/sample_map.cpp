@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/map.h"
+#include "castle/container/map.hpp"
 
 // Scenario: ordered deterministic calibration mapping with bounded AVL storage.
 int main()

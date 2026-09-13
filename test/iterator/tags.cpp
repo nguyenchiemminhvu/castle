@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/iterator/tags.h"
+#include "castle/iterator/tags.hpp"
 
 #include <type_traits>
 

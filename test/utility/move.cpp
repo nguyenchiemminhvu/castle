@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/move.h"
-#include "castle/core/traits.h"
+#include "castle/utility/move.hpp"
+#include "castle/core/traits.hpp"
 
 namespace
 {

@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/swap.h"
+#include "castle/utility/swap.hpp"
 
 // Scenario: swapping fixed objects using Castle’s noexcept-aware utility.
 int main()

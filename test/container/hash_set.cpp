@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/hash_set.h"
+#include "castle/container/hash_set.hpp"
 
 namespace
 {

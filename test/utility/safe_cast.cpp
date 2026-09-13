@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/safe_cast.h"
+#include "castle/utility/safe_cast.hpp"
 
 #include <stdint.h>
 

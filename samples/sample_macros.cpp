@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/macros.h"
+#include "castle/utility/macros.hpp"
 
 // Scenario: compile-time utility macro integration test.
 int main()

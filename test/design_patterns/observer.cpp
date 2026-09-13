@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/design_patterns/observer.h"
+#include "castle/design_patterns/observer.hpp"
 
 namespace
 {

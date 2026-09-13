@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/events/inplace_event_dispatcher.h"
+#include "castle/events/inplace_event_dispatcher.hpp"
 
 namespace
 {

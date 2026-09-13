@@ -1,7 +1,7 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/memory/construct.h"
-#include "castle/memory/alignment.h"
+#include "castle/memory/construct.hpp"
+#include "castle/memory/alignment.hpp"
 
 // Scenario: constructing a peripheral-state object inside preallocated storage.
 #include <stdint.h>

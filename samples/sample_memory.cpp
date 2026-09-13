@@ -1,7 +1,7 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/memory/object.h"
-#include "castle/memory/alignment.h"
+#include "castle/memory/object.hpp"
+#include "castle/memory/alignment.hpp"
 
 // Scenario: accessing typed objects in manually controlled embedded storage.
 #include <stdint.h>

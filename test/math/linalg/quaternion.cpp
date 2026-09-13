@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/linalg/quaternion.h"
+#include "castle/math/linalg/quaternion.hpp"
 
 TEST(Quaternion, IdentityConstructionAndLength)
 {

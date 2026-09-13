@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/bit/bit_core.h"
+#include "castle/bit/bit_core.hpp"
 
 // Scenario: manipulating MCU control-register bits with bounds-safe bit primitives.
 #include <stdint.h>

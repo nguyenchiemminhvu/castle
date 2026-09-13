@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/memory/soo_buffer.h"
+#include "castle/memory/soo_buffer.hpp"
 
 #include <utility>
 

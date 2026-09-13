@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/avl_tree.h"
+#include "castle/container/avl_tree.hpp"
 
 // Scenario: bounded key/value lookup for calibration parameters with deterministic node storage.
 #include <stdint.h>

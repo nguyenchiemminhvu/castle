@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/compare.h"
+#include "castle/utility/compare.hpp"
 
 namespace
 {

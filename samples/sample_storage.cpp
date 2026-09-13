@@ -4,9 +4,9 @@
  * Scenario: reserve aligned, uninitialised bytes for an object that will be
  * constructed and destroyed explicitly by the application.
  */
-#include "sample_support.h"
-#include "castle/memory/alignment.h"
-#include "castle/memory/storage.h"
+#include "sample_support.hpp"
+#include "castle/memory/alignment.hpp"
+#include "castle/memory/storage.hpp"
 
 #include <stdint.h>
 

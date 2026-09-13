@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/forward.h"
-#include "castle/core/traits.h"
+#include "castle/utility/forward.hpp"
+#include "castle/core/traits.hpp"
 
 namespace
 {

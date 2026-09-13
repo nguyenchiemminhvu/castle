@@ -2,7 +2,7 @@
 
 #include <cfloat>
 
-#include "castle/core/traits.h"
+#include "castle/core/traits.hpp"
 
 namespace
 {

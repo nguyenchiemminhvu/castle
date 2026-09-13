@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/abs.h"
+#include "castle/math/abs.hpp"
 
 // Scenario: using abs in a deterministic control/telemetry calculation.
 int main()

@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/angle.h"
+#include "castle/math/angle.hpp"
 
 namespace
 {

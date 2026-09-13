@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/integral_sequence.h"
-#include "castle/core/traits.h"
+#include "castle/utility/integral_sequence.hpp"
+#include "castle/core/traits.hpp"
 
 namespace
 {

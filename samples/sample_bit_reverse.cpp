@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/bit/bit_reverse.h"
+#include "castle/bit/bit_reverse.hpp"
 
 // Scenario: bit-order conversion for a wire protocol whose serial bit order differs from CPU order.
 #include <stdint.h>
