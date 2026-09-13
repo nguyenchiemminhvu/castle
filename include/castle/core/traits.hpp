@@ -315,7 +315,6 @@ struct is_union
 // C-variadic, cv-, ref-, and CASTLE_NOEXCEPT-qualified variants.
 template <typename T> struct is_function : false_type {};
 template <typename R, typename... Args> struct is_function<R(Args...)>                : true_type {};
-template <typename R, typename... Args> struct is_function<R(Args......)>             : true_type {};
 template <typename R, typename... Args> struct is_function<R(Args...) CASTLE_CONST>          : true_type {};
 template <typename R, typename... Args> struct is_function<R(Args...) CASTLE_VOLATILE>       : true_type {};
 template <typename R, typename... Args> struct is_function<R(Args...) CASTLE_CONST CASTLE_VOLATILE> : true_type {};
