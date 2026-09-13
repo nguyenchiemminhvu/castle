@@ -1,6 +1,8 @@
 #ifndef CASTLE_CORE_COMPILER_VARIANTS_GCC_H
 #define CASTLE_CORE_COMPILER_VARIANTS_GCC_H
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
 #define CASTLE_COMPILER_GCC  1
 
 #define CASTLE_INLINE        inline __attribute__((always_inline))
@@ -15,5 +17,7 @@
 
 #define CASTLE_PACKED_ATTR   __attribute__((packed))
 #define CASTLE_RESTRICT      __restrict__
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 #endif // CASTLE_CORE_COMPILER_VARIANTS_GCC_H

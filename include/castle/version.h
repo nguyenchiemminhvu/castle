@@ -13,6 +13,8 @@
  *   PATCH - backward-compatible bug fixes
  */
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
 #define CASTLE_VERSION_MAJOR 2
 #define CASTLE_VERSION_MINOR 0
 #define CASTLE_VERSION_PATCH 0
@@ -40,6 +42,8 @@
  */
 #define CASTLE_VERSION_AT_LEAST(major, minor, patch) \
     (CASTLE_VERSION >= CASTLE_VERSION_ENCODE(major, minor, patch))
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 namespace castle
 {

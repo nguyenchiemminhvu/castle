@@ -13,6 +13,8 @@
     #include "compiler_variants/default.h"
 #endif
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
 // Standard C++ attributes (compiler independent)
 
 #define CASTLE_UNUSED            [[maybe_unused]]
@@ -36,5 +38,7 @@
 #define CASTLE_VIRTUAL           virtual
 #define CASTLE_MOVE              castle::move
 #define CASTLE_FORWARD           castle::forward
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 #endif // CASTLE_CORE_COMPILER_H
