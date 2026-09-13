@@ -69,7 +69,7 @@ public:
     }
 
     // Evaluates and yields the resulting accumulated mean value
-    CASTLE_CONSTEXPR double get_mean() const CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR double get_mean() CASTLE_CONST CASTLE_NOEXCEPT
     {
         if (recalculate_)
         {
@@ -88,13 +88,13 @@ public:
     }
 
     // Implicit cast transformation evaluator shortcut mapping to get_mean()
-    CASTLE_CONSTEXPR operator double() const CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR operator double() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return get_mean();
     }
 
     // Total tracked records added
-    [[nodiscard]] CASTLE_CONSTEXPR size_type count() const CASTLE_NOEXCEPT
+    [[nodiscard]] CASTLE_CONSTEXPR size_type count() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return static_cast<size_type>(counter_);
     }

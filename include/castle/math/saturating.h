@@ -22,7 +22,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_integral<T>::value && meta::is_unsigned<T>::value, T>::type
 saturating_add(T a, T b) CASTLE_NOEXCEPT
 {
-    const T maximum = castle::numeric_limits<T>::max();
+    CASTLE_CONST T maximum = castle::numeric_limits<T>::max();
     return (b > static_cast<T>(maximum - a)) ? maximum : static_cast<T>(a + b);
 }
 
@@ -39,8 +39,8 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_integral<T>::value && meta::is_signed<T>::value, T>::type
 saturating_add(T a, T b) CASTLE_NOEXCEPT
 {
-    const T maximum = castle::numeric_limits<T>::max();
-    const T minimum = castle::numeric_limits<T>::min();
+    CASTLE_CONST T maximum = castle::numeric_limits<T>::max();
+    CASTLE_CONST T minimum = castle::numeric_limits<T>::min();
 
     if (b > T{0} && a > static_cast<T>(maximum - b))
     {
@@ -58,8 +58,8 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_integral<T>::value && meta::is_signed<T>::value, T>::type
 saturating_sub(T a, T b) CASTLE_NOEXCEPT
 {
-    const T maximum = castle::numeric_limits<T>::max();
-    const T minimum = castle::numeric_limits<T>::min();
+    CASTLE_CONST T maximum = castle::numeric_limits<T>::max();
+    CASTLE_CONST T minimum = castle::numeric_limits<T>::min();
 
     if (b > T{0} && a < static_cast<T>(minimum + b))
     {

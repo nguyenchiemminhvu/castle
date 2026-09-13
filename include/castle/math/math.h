@@ -32,6 +32,7 @@
 #include "castle/math/sqrt_real.h"
 #include "castle/math/square.h"
 #include "castle/math/geometry.h"
+#include "castle/math/linalg.h"
 
 #include <math.h>
 

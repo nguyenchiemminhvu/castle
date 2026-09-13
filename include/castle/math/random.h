@@ -70,8 +70,8 @@ public:
     CASTLE_NODISCARD result_type next() CASTLE_NOEXCEPT
     {
         // xoshiro128** 1.1 reference output transformation.
-        const result_type result = rotate_left(state_[1] * 5U, 7U) * 9U;
-        const result_type t = state_[1] << 9U;
+        CASTLE_CONST result_type result = rotate_left(state_[1] * 5U, 7U) * 9U;
+        CASTLE_CONST result_type t = state_[1] << 9U;
 
         state_[2] ^= state_[0];
         state_[3] ^= state_[1];
@@ -99,14 +99,14 @@ public:
 
         // Lemire's multiply-high reduction. Only the rejection threshold uses
         // division; the normal accepted path uses a 32x32 -> 64 multiplication.
-        const result_type threshold = static_cast<result_type>(-bound) % bound;
+        CASTLE_CONST result_type threshold = static_cast<result_type>(-bound) % bound;
 
         for (;;)
         {
-            const result_type value = next();
-            const uint64_t product = static_cast<uint64_t>(value) *
+            CASTLE_CONST result_type value = next();
+            CASTLE_CONST uint64_t product = static_cast<uint64_t>(value) *
                                      static_cast<uint64_t>(bound);
-            const result_type low = static_cast<result_type>(product);
+            CASTLE_CONST result_type low = static_cast<result_type>(product);
 
             if (low >= threshold)
             {
@@ -124,7 +124,7 @@ public:
             CASTLE_ERROR_GENERIC("castle::random::range: low > high")
         );
 
-        const uint64_t span = static_cast<uint64_t>(high) -
+        CASTLE_CONST uint64_t span = static_cast<uint64_t>(high) -
                               static_cast<uint64_t>(low) + 1ULL;
         if (span == static_cast<uint64_t>(max()) + 1ULL)
         {

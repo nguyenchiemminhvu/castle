@@ -27,7 +27,7 @@ positive_mod(T value, T modulus) CASTLE_NOEXCEPT
     CASTLE_ASSERT(modulus > T{0},
                   CASTLE_ERROR_GENERIC("castle::math::positive_mod: modulus must be positive"));
 
-    const T result = static_cast<T>(value % modulus);
+    CASTLE_CONST T result = static_cast<T>(value % modulus);
     return (result < T{0}) ? static_cast<T>(result + modulus) : result;
 }
 
@@ -49,9 +49,9 @@ wrap(T value, T low, T high) CASTLE_NOEXCEPT
             int64_t,
             T>::type>::type;
 
-    const calc_type shifted = static_cast<calc_type>(value) - static_cast<calc_type>(low);
-    const calc_type period = static_cast<calc_type>(high) - static_cast<calc_type>(low);
-    const calc_type wrapped = static_cast<calc_type>(positive_mod(shifted, period));
+    CASTLE_CONST calc_type shifted = static_cast<calc_type>(value) - static_cast<calc_type>(low);
+    CASTLE_CONST calc_type period = static_cast<calc_type>(high) - static_cast<calc_type>(low);
+    CASTLE_CONST calc_type wrapped = static_cast<calc_type>(positive_mod(shifted, period));
     return static_cast<T>(static_cast<calc_type>(low) + wrapped);
 }
 

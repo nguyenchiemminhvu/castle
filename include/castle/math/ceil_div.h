@@ -29,8 +29,8 @@ ceil_div(T numerator, T denominator) CASTLE_NOEXCEPT
     CASTLE_ASSERT(denominator > T{0},
                   CASTLE_ERROR_GENERIC("castle::math::ceil_div: denominator must be positive"));
 
-    const T quotient = numerator / denominator;
-    const T remainder = numerator % denominator;
+    CASTLE_CONST T quotient = numerator / denominator;
+    CASTLE_CONST T remainder = numerator % denominator;
 
     return (remainder != T{0} && numerator > T{0})
                ? static_cast<T>(quotient + T{1})
