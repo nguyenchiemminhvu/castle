@@ -24,7 +24,7 @@ public:
 
     map() CASTLE_NOEXCEPT : tree_() {}
     explicit map(CASTLE_CONST Compare& compare) CASTLE_NOEXCEPT : tree_(compare) {}
-    ~map() CASTLE_NOEXCEPT = default;
+    ~map() CASTLE_NOEXCEPT CASTLE_DEFAULT;
 
     map(CASTLE_CONST map&) CASTLE_DELETE;
     map& operator=(CASTLE_CONST map&) CASTLE_DELETE;

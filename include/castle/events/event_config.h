@@ -71,9 +71,9 @@ struct event_config
     using event_tag = EventTag;
     using signature = Signature;
 
-    static constexpr size_type max_callback = MaxCallback;
-    static constexpr size_type callback_storage_size = CallbackStorageSize;
-    static constexpr size_type callback_storage_alignment = CallbackStorageAlignment;
+    static CASTLE_CONSTEXPR size_type max_callback = MaxCallback;
+    static CASTLE_CONSTEXPR size_type callback_storage_size = CallbackStorageSize;
+    static CASTLE_CONSTEXPR size_type callback_storage_alignment = CallbackStorageAlignment;
 };
 
 } // namespace events

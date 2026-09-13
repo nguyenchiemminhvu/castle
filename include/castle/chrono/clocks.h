@@ -72,7 +72,7 @@ public:
     using period = duration::period;
     using time_point = chrono::time_point<system_clock, duration>;
 
-    static constexpr bool is_steady = false;
+    static CASTLE_CONSTEXPR bool is_steady = false;
 
     static time_point now() CASTLE_NOEXCEPT
     {
@@ -91,7 +91,7 @@ public:
 #endif
     }
 
-    static ::time_t to_time_t(const time_point& value) CASTLE_NOEXCEPT
+    static ::time_t to_time_t(CASTLE_CONST time_point& value) CASTLE_NOEXCEPT
     {
         using time_t_duration = chrono::duration<int64_t, castle::math::ratio<1, 1> >;
         return static_cast<::time_t>(
@@ -121,7 +121,7 @@ public:
     using period = duration::period;
     using time_point = chrono::time_point<steady_clock, duration>;
 
-    static constexpr bool is_steady = true;
+    static CASTLE_CONSTEXPR bool is_steady = true;
 
     static time_point now() CASTLE_NOEXCEPT
     {

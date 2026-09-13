@@ -29,20 +29,20 @@ private:
     static no_type test(...);
 
 public:
-    static constexpr bool value = sizeof(test(static_cast<ActualCategory*>(0))) == sizeof(yes_type);
+    static CASTLE_CONSTEXPR bool value = sizeof(test(static_cast<ActualCategory*>(0))) == sizeof(yes_type);
 };
 
 template <typename Iterator, typename RequiredCategory>
 struct iterator_meets_category
 {
     using category = typename iterator_traits<Iterator>::iterator_category;
-    static constexpr bool value = iterator_category_is_compatible<category, RequiredCategory>::value;
+    static CASTLE_CONSTEXPR bool value = iterator_category_is_compatible<category, RequiredCategory>::value;
 };
 
 struct less
 {
     template <typename T, typename U>
-    CASTLE_CONSTEXPR bool operator()(CASTLE_CONST T& lhs, CASTLE_CONST U& rhs) const
+    CASTLE_CONSTEXPR bool operator()(CASTLE_CONST T& lhs, CASTLE_CONST U& rhs) CASTLE_CONST
     CASTLE_NOEXCEPT(noexcept(lhs < rhs))
     {
         return lhs < rhs;
@@ -747,7 +747,7 @@ void sort(TRandomAccessIterator first,
     static_assert(detail::iterator_meets_category<TRandomAccessIterator, random_access_iterator_tag>::value,
                   "castle::algorithm: iterator must satisfy RandomAccessIterator requirements");
 
-    const difference_type count_value = last - first;
+    CASTLE_CONST difference_type count_value = last - first;
     if (count_value <= 1)
     {
         return;
@@ -790,7 +790,7 @@ TForwardIterator lower_bound(TForwardIterator first,
 
     while (length > 0)
     {
-        const difference_type half = length / 2;
+        CASTLE_CONST difference_type half = length / 2;
         TForwardIterator middle = first;
         castle::advance(middle, half);
 
@@ -831,7 +831,7 @@ TForwardIterator upper_bound(TForwardIterator first,
 
     while (length > 0)
     {
-        const difference_type half = length / 2;
+        CASTLE_CONST difference_type half = length / 2;
         TForwardIterator middle = first;
         castle::advance(middle, half);
 
@@ -885,31 +885,31 @@ bool binary_search(TForwardIterator first,
 // ============================================================================
 
 template <typename T, typename TCompare>
-CASTLE_CONSTEXPR T const& min(T const& lhs,
-                             T const& rhs,
+CASTLE_CONSTEXPR T CASTLE_CONST& min(T CASTLE_CONST& lhs,
+                             T CASTLE_CONST& rhs,
                              TCompare compare) CASTLE_NOEXCEPT
 {
     return compare(rhs, lhs) ? rhs : lhs;
 }
 
 template <typename T>
-CASTLE_CONSTEXPR T const& min(T const& lhs,
-                             T const& rhs) CASTLE_NOEXCEPT
+CASTLE_CONSTEXPR T CASTLE_CONST& min(T CASTLE_CONST& lhs,
+                             T CASTLE_CONST& rhs) CASTLE_NOEXCEPT
 {
     return lhs < rhs ? lhs : rhs;
 }
 
 template <typename T, typename TCompare>
-CASTLE_CONSTEXPR T const& max(T const& lhs,
-                             T const& rhs,
+CASTLE_CONSTEXPR T CASTLE_CONST& max(T CASTLE_CONST& lhs,
+                             T CASTLE_CONST& rhs,
                              TCompare compare) CASTLE_NOEXCEPT
 {
     return compare(lhs, rhs) ? rhs : lhs;
 }
 
 template <typename T>
-CASTLE_CONSTEXPR T const& max(T const& lhs,
-                             T const& rhs) CASTLE_NOEXCEPT
+CASTLE_CONSTEXPR T CASTLE_CONST& max(T CASTLE_CONST& lhs,
+                             T CASTLE_CONST& rhs) CASTLE_NOEXCEPT
 {
     return lhs < rhs ? rhs : lhs;
 }

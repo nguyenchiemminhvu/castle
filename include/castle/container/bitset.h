@@ -47,7 +47,7 @@ public:
             return (*this = static_cast<bool>(other));
         }
 
-        operator bool() const CASTLE_NOEXCEPT
+        operator bool() CASTLE_CONST CASTLE_NOEXCEPT
         {
             return (*word_ & mask_) != 0U;
         }
@@ -76,14 +76,14 @@ public:
         sanitize_top_word();
     }
 
-    size_type size() const CASTLE_NOEXCEPT { return N; }
+    size_type size() CASTLE_CONST CASTLE_NOEXCEPT { return N; }
 
     reference operator[](size_type position) CASTLE_NOEXCEPT
     {
         return reference(words_[position / word_bits], mask(position));
     }
 
-    bool operator[](size_type position) const CASTLE_NOEXCEPT
+    bool operator[](size_type position) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return test(position);
     }
@@ -144,7 +144,7 @@ public:
         sanitize_top_word();
     }
 
-    bool test(size_type position) const CASTLE_NOEXCEPT
+    bool test(size_type position) CASTLE_CONST CASTLE_NOEXCEPT
     {
         if (position >= N)
         {
@@ -153,7 +153,7 @@ public:
         return (words_[position / word_bits] & mask(position)) != 0U;
     }
 
-    size_type count() const CASTLE_NOEXCEPT
+    size_type count() CASTLE_CONST CASTLE_NOEXCEPT
     {
         size_type result = 0U;
         for (size_type i = 0U; i < word_count; ++i)
@@ -163,7 +163,7 @@ public:
         return result;
     }
 
-    bool any() const CASTLE_NOEXCEPT
+    bool any() CASTLE_CONST CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i < word_count; ++i)
         {
@@ -175,12 +175,12 @@ public:
         return false;
     }
 
-    bool none() const CASTLE_NOEXCEPT
+    bool none() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return !any();
     }
 
-    bool all() const CASTLE_NOEXCEPT
+    bool all() CASTLE_CONST CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i + 1U < word_count; ++i)
         {
@@ -192,12 +192,12 @@ public:
         return (words_[word_count - 1U] & top_mask()) == top_mask();
     }
 
-    uint32_t to_uint32() const CASTLE_NOEXCEPT
+    uint32_t to_uint32() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return words_[0U];
     }
 
-    uint64_t to_uint64() const CASTLE_NOEXCEPT
+    uint64_t to_uint64() CASTLE_CONST CASTLE_NOEXCEPT
     {
         uint64_t value = static_cast<uint64_t>(words_[0U]);
         if (word_count > 1U)
@@ -207,7 +207,7 @@ public:
         return value;
     }
 
-    status to_string(char* dst, size_type capacity) const CASTLE_NOEXCEPT
+    status to_string(char* dst, size_type capacity) CASTLE_CONST CASTLE_NOEXCEPT
     {
         if ((dst == nullptr) || (capacity < (N + 1U)))
         {
@@ -215,7 +215,7 @@ public:
         }
         for (size_type i = 0U; i < N; ++i)
         {
-            const size_type bit = N - 1U - i;
+            CASTLE_CONST size_type bit = N - 1U - i;
             dst[i] = test(bit) ? '1' : '0';
         }
         dst[N] = '\0';
@@ -251,7 +251,7 @@ public:
         return *this;
     }
 
-    bitset operator~() const CASTLE_NOEXCEPT
+    bitset operator~() CASTLE_CONST CASTLE_NOEXCEPT
     {
         bitset result(*this);
         result.flip();
@@ -276,7 +276,7 @@ private:
         value = value - ((value >> 1U) & 0x55555555U);
         value = (value & 0x33333333U) + ((value >> 2U) & 0x33333333U);
         value = (value + (value >> 4U)) & 0x0F0F0F0FU;
-        const uint32_t packed = value * 0x01010101U;
+        CASTLE_CONST uint32_t packed = value * 0x01010101U;
         return static_cast<size_type>(packed >> 24U);
     }
 

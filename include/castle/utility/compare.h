@@ -11,7 +11,7 @@ namespace castle
 template <typename T>
 struct less
 {
-    CASTLE_CONSTEXPR bool operator()(CASTLE_CONST T& lhs, CASTLE_CONST T& rhs) const CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR bool operator()(CASTLE_CONST T& lhs, CASTLE_CONST T& rhs) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return lhs < rhs;
     }
@@ -20,7 +20,7 @@ struct less
 template <typename T>
 struct greater
 {
-    CASTLE_CONSTEXPR bool operator()(CASTLE_CONST T& lhs, CASTLE_CONST T& rhs) const CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR bool operator()(CASTLE_CONST T& lhs, CASTLE_CONST T& rhs) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return lhs > rhs;
     }
@@ -29,7 +29,7 @@ struct greater
 template <typename T>
 struct equal_to
 {
-    CASTLE_CONSTEXPR bool operator()(CASTLE_CONST T& lhs, CASTLE_CONST T& rhs) const CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR bool operator()(CASTLE_CONST T& lhs, CASTLE_CONST T& rhs) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return lhs == rhs;
     }
@@ -44,7 +44,7 @@ struct equal_to
 //
 // TLess must provide:
 //
-//     bool operator()(const T&, const T&) const;
+//     bool operator()(CASTLE_CONST T&, CASTLE_CONST T&) CASTLE_CONST;
 //
 // Only the less-than operation is required. Equality and the other relational
 // operations are derived from it, which is particularly useful for embedded
@@ -54,7 +54,7 @@ template <typename T, typename TLess = less<T>>
 struct compare
 {
     static_assert(meta::is_invocable_r<bool, TLess, CASTLE_CONST T&, CASTLE_CONST T&>::value,
-                  "TLess must be callable with (const T&, const T&) and return bool");
+                  "TLess must be callable with (CASTLE_CONST T&, CASTLE_CONST T&) and return bool");
 
     enum cmp_result
     {

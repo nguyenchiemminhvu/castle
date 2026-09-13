@@ -316,12 +316,12 @@ public:
         return registry_.size();
     }
 
-    static constexpr size_type callback_capacity() noexcept
+    static CASTLE_CONSTEXPR size_type callback_capacity() noexcept
     {
         return MaxCallback;
     }
 
-    static constexpr tick_type max_period() noexcept
+    static CASTLE_CONSTEXPR tick_type max_period() noexcept
     {
         return castle::numeric_limits<tick_type>::max();
     }

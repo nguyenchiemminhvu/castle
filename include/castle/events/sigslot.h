@@ -485,7 +485,7 @@ public:
         return active_count_ == 0U;
     }
 
-    static constexpr size_type capacity() noexcept
+    static CASTLE_CONSTEXPR size_type capacity() noexcept
     {
         return MaxSlot;
     }

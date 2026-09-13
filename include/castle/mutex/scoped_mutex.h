@@ -45,8 +45,8 @@ public:
         mutex_.unlock();
     }
 
-    scoped_mutex(const scoped_mutex&) CASTLE_DELETE;
-    scoped_mutex& operator=(const scoped_mutex&) CASTLE_DELETE;
+    scoped_mutex(CASTLE_CONST scoped_mutex&) CASTLE_DELETE;
+    scoped_mutex& operator=(CASTLE_CONST scoped_mutex&) CASTLE_DELETE;
 
     scoped_mutex(scoped_mutex&&) CASTLE_DELETE;
     scoped_mutex& operator=(scoped_mutex&&) CASTLE_DELETE;

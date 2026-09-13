@@ -154,8 +154,8 @@ private:
         size_type StorageAlignment>
     struct config_traits<signal_ipc_config<Signal, MaxCallback, StorageSize, StorageAlignment>>
     {
-        static constexpr signal signum = Signal;
-        static constexpr size_type max_callback = MaxCallback;
+        static CASTLE_CONSTEXPR signal signum = Signal;
+        static CASTLE_CONSTEXPR size_type max_callback = MaxCallback;
 
         static_assert(MaxCallback > 0,
                       "signal_ipc_event: signal_ipc_config::MaxCallback must be > 0");
@@ -221,7 +221,7 @@ public:
     using subscription = callbacks::callback_subscription;
     using callback_type = callbacks::i_function<void()>;
 
-    static constexpr size_type signal_count = sizeof...(SignalConfigs);
+    static CASTLE_CONSTEXPR size_type signal_count = sizeof...(SignalConfigs);
 
     // The class is a pure static namespace — no instances, ever. Enforcing
     // this at the type level is clearer than a "singleton runtime check".
@@ -235,13 +235,13 @@ public:
     // -------------------------------------------------------------------------
     // Compile-time capacity queries.
     // -------------------------------------------------------------------------
-    static constexpr size_type signal_capacity() noexcept
+    static CASTLE_CONSTEXPR size_type signal_capacity() noexcept
     {
         return signal_count;
     }
 
     template <signal Signum>
-    static constexpr size_type callback_capacity() noexcept
+    static CASTLE_CONSTEXPR size_type callback_capacity() noexcept
     {
         return config_traits<config_for<Signum>>::max_callback;
     }
@@ -343,7 +343,7 @@ public:
     template <signal Signum>
     static subscription register_callback(callback_type* callback, error* out_error = nullptr) noexcept
     {
-        constexpr size_type idx = index_of<Signum>();
+        CASTLE_CONSTEXPR size_type idx = index_of<Signum>();
         status inner_error = status::ok;
 
         subscription sub = castle::get<idx>(registries_).subscribe(callback, &inner_error);
@@ -412,13 +412,13 @@ private:
     // index_of<Signum>() is used.
     // -------------------------------------------------------------------------
     template <signal Target, size_type I, typename First, typename... Rest>
-    static constexpr size_type index_of_scan() noexcept
+    static CASTLE_CONSTEXPR size_type index_of_scan() noexcept
     {
-        if constexpr (config_traits<First>::signum == Target)
+        if CASTLE_CONSTEXPR (config_traits<First>::signum == Target)
         {
             return I;
         }
-        else if constexpr (sizeof...(Rest) > 0)
+        else if CASTLE_CONSTEXPR (sizeof...(Rest) > 0)
         {
             return index_of_scan<Target, I + 1, Rest...>();
         }
@@ -431,7 +431,7 @@ private:
     }
 
     template <signal Signum>
-    static constexpr size_type index_of() noexcept
+    static CASTLE_CONSTEXPR size_type index_of() noexcept
     {
         return index_of_scan<Signum, 0, SignalConfigs...>();
     }
@@ -468,7 +468,7 @@ private:
     template <size_type Index>
     static void invoke_impl(size_type target_index) noexcept
     {
-        if constexpr (Index < signal_count)
+        if CASTLE_CONSTEXPR (Index < signal_count)
         {
             if (Index == target_index)
             {
@@ -556,17 +556,17 @@ private:
     // consumed by <csignal> (sigaction, SIG_DFL, ...) and by the async-
     // signal handler's runtime lookup. Populated by projecting each
     // signal_ipc_config's signum through to_signum().
-    static constexpr int signal_list_[signal_count] = {
+    static CASTLE_CONSTEXPR int signal_list_[signal_count] = {
         to_signum(config_traits<SignalConfigs>::signum)...
     };
 };
 
-// Out-of-class definition for the constexpr signal_list_ array — required
+// Out-of-class definition for the CASTLE_CONSTEXPR signal_list_ array — required
 // pre-C++17 for ODR-use; harmless in C++17 where the in-class initializer
 // is already implicitly inline. Kept explicit for maximum toolchain
 // portability on older embedded compilers.
 template <typename... SignalConfigs>
-constexpr int signal_ipc_event<SignalConfigs...>::signal_list_[];
+CASTLE_CONSTEXPR int signal_ipc_event<SignalConfigs...>::signal_list_[];
 
 } // namespace events
 } // namespace castle
