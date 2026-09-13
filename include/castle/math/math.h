@@ -16,6 +16,22 @@
 #include "castle/math/invert.h"
 #include "castle/math/logarithm.h"
 #include "castle/math/random.h"
+#include "castle/math/angle.h"
+#include "castle/math/ceil_div.h"
+#include "castle/math/floor_div.h"
+#include "castle/math/hypot.h"
+#include "castle/math/is_power_of_two.h"
+#include "castle/math/isqrt.h"
+#include "castle/math/lerp.h"
+#include "castle/math/minmax.h"
+#include "castle/math/mod.h"
+#include "castle/math/near_equal.h"
+#include "castle/math/powi.h"
+#include "castle/math/saturating.h"
+#include "castle/math/sign.h"
+#include "castle/math/sqrt_real.h"
+#include "castle/math/square.h"
+#include "castle/math/geometry.h"
 
 #include <math.h>
 
