@@ -27,7 +27,7 @@ struct logarithm
     static_assert(Base > 1, "Base must be greater than 1");
     static_assert(Value > 0, "Value must be greater than 0");
 
-    static constexpr size_type value =
+    static CASTLE_CONSTEXPR size_type value =
         (Value >= Base)
         ? (1U + logarithm<Value / Base, Base>::value)
         : 0U;
@@ -41,7 +41,7 @@ struct logarithm<1U, Base>
 {
     static_assert(Base > 1, "Base must be greater than 1");
 
-    static constexpr size_type value = 0U;
+    static CASTLE_CONSTEXPR size_type value = 0U;
 };
 
 // ===========================================================================
@@ -52,7 +52,7 @@ struct logarithm<0U, Base>
 {
     static_assert(Base > 1, "Base must be greater than 1");
 
-    static constexpr size_type value = 0U;
+    static CASTLE_CONSTEXPR size_type value = 0U;
 };
 
 // ===========================================================================
@@ -63,7 +63,7 @@ struct log2
 {
     static_assert(Value > 0, "Value must be greater than 0");
 
-    static constexpr size_type value = logarithm<Value, 2U>::value;
+    static CASTLE_CONSTEXPR size_type value = logarithm<Value, 2U>::value;
 };
 
 // ===========================================================================
@@ -74,7 +74,7 @@ struct log10
 {
     static_assert(Value > 0, "Value must be greater than 0");
 
-    static constexpr size_type value = logarithm<Value, 10U>::value;
+    static CASTLE_CONSTEXPR size_type value = logarithm<Value, 10U>::value;
 };
 
 } // namespace math

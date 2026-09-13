@@ -31,18 +31,18 @@ public:
 
     CASTLE_CONSTEXPR point2d(T x, T y) CASTLE_NOEXCEPT : x_(x), y_(y) {}
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR T x() const CASTLE_NOEXCEPT { return x_; }
-    CASTLE_NODISCARD CASTLE_CONSTEXPR T y() const CASTLE_NOEXCEPT { return y_; }
+    CASTLE_NODISCARD CASTLE_CONSTEXPR T x() CASTLE_CONST CASTLE_NOEXCEPT { return x_; }
+    CASTLE_NODISCARD CASTLE_CONSTEXPR T y() CASTLE_CONST CASTLE_NOEXCEPT { return y_; }
 
     CASTLE_CONSTEXPR void set_x(T value) CASTLE_NOEXCEPT { x_ = value; }
     CASTLE_CONSTEXPR void set_y(T value) CASTLE_NOEXCEPT { y_ = value; }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR bool operator==(const point2d& other) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR bool operator==(CASTLE_CONST point2d& other) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return x_ == other.x_ && y_ == other.y_;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR bool operator!=(const point2d& other) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR bool operator!=(CASTLE_CONST point2d& other) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return !(*this == other);
     }

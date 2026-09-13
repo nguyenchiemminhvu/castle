@@ -28,22 +28,22 @@ namespace math
 // ============================================================================
 template <typename T>
 CASTLE_NODISCARD CASTLE_CONSTEXPR T squared_distance(
-    const point2d<T>& first,
-    const point2d<T>& second) CASTLE_NOEXCEPT
+    CASTLE_CONST point2d<T>& first,
+    CASTLE_CONST point2d<T>& second) CASTLE_NOEXCEPT
 {
-    const T dx = static_cast<T>(first.x() - second.x());
-    const T dy = static_cast<T>(first.y() - second.y());
+    CASTLE_CONST T dx = static_cast<T>(first.x() - second.x());
+    CASTLE_CONST T dy = static_cast<T>(first.y() - second.y());
     return static_cast<T>(dx * dx + dy * dy);
 }
 
 template <typename T>
 CASTLE_NODISCARD CASTLE_CONSTEXPR T squared_distance(
-    const point3d<T>& first,
-    const point3d<T>& second) CASTLE_NOEXCEPT
+    CASTLE_CONST point3d<T>& first,
+    CASTLE_CONST point3d<T>& second) CASTLE_NOEXCEPT
 {
-    const T dx = static_cast<T>(first.x() - second.x());
-    const T dy = static_cast<T>(first.y() - second.y());
-    const T dz = static_cast<T>(first.z() - second.z());
+    CASTLE_CONST T dx = static_cast<T>(first.x() - second.x());
+    CASTLE_CONST T dy = static_cast<T>(first.y() - second.y());
+    CASTLE_CONST T dz = static_cast<T>(first.z() - second.z());
     return static_cast<T>(dx * dx + dy * dy + dz * dz);
 }
 
@@ -56,7 +56,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR T squared_distance(
 template <typename T>
 CASTLE_NODISCARD CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_floating_point<T>::value, T>::type
-distance(const point2d<T>& first, const point2d<T>& second) CASTLE_NOEXCEPT
+distance(CASTLE_CONST point2d<T>& first, CASTLE_CONST point2d<T>& second) CASTLE_NOEXCEPT
 {
     return hypot(static_cast<T>(first.x() - second.x()),
                  static_cast<T>(first.y() - second.y()));
@@ -65,7 +65,7 @@ distance(const point2d<T>& first, const point2d<T>& second) CASTLE_NOEXCEPT
 template <typename T>
 CASTLE_NODISCARD CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_floating_point<T>::value, T>::type
-distance(const point3d<T>& first, const point3d<T>& second) CASTLE_NOEXCEPT
+distance(CASTLE_CONST point3d<T>& first, CASTLE_CONST point3d<T>& second) CASTLE_NOEXCEPT
 {
     return hypot(static_cast<T>(first.x() - second.x()),
                  static_cast<T>(first.y() - second.y()),
@@ -80,8 +80,8 @@ distance(const point3d<T>& first, const point3d<T>& second) CASTLE_NOEXCEPT
 // ============================================================================
 template <typename T>
 CASTLE_NODISCARD point2d<T> nearest_point(
-    const point2d<T>& point,
-    const line2d<T>& line) CASTLE_NOEXCEPT
+    CASTLE_CONST point2d<T>& point,
+    CASTLE_CONST line2d<T>& line) CASTLE_NOEXCEPT
 {
     static_assert(meta::is_floating_point<T>::value,
                   "nearest_point on a line requires a floating-point type");
@@ -90,9 +90,9 @@ CASTLE_NODISCARD point2d<T> nearest_point(
         return line.origin();
     }
 
-    const vector2d<T> delta = point - line.origin();
-    const T direction_squared = line.direction().squared_length();
-    const T parameter = static_cast<T>(delta.dot(line.direction()) / direction_squared);
+    CASTLE_CONST vector2d<T> delta = point - line.origin();
+    CASTLE_CONST T direction_squared = line.direction().squared_length();
+    CASTLE_CONST T parameter = static_cast<T>(delta.dot(line.direction()) / direction_squared);
     return line.point_at(parameter);
 }
 
@@ -101,8 +101,8 @@ CASTLE_NODISCARD point2d<T> nearest_point(
 // ============================================================================
 template <typename T>
 CASTLE_NODISCARD point3d<T> nearest_point(
-    const point3d<T>& point,
-    const line3d<T>& line) CASTLE_NOEXCEPT
+    CASTLE_CONST point3d<T>& point,
+    CASTLE_CONST line3d<T>& line) CASTLE_NOEXCEPT
 {
     static_assert(meta::is_floating_point<T>::value,
                   "nearest_point on a line requires a floating-point type");
@@ -111,9 +111,9 @@ CASTLE_NODISCARD point3d<T> nearest_point(
         return line.origin();
     }
 
-    const vector3d<T> delta = point - line.origin();
-    const T direction_squared = line.direction().squared_length();
-    const T parameter = static_cast<T>(delta.dot(line.direction()) / direction_squared);
+    CASTLE_CONST vector3d<T> delta = point - line.origin();
+    CASTLE_CONST T direction_squared = line.direction().squared_length();
+    CASTLE_CONST T parameter = static_cast<T>(delta.dot(line.direction()) / direction_squared);
     return line.point_at(parameter);
 }
 
@@ -124,20 +124,20 @@ CASTLE_NODISCARD point3d<T> nearest_point(
 // ============================================================================
 template <typename T>
 CASTLE_NODISCARD point2d<T> nearest_point_on_segment(
-    const point2d<T>& point,
-    const point2d<T>& first,
-    const point2d<T>& second) CASTLE_NOEXCEPT
+    CASTLE_CONST point2d<T>& point,
+    CASTLE_CONST point2d<T>& first,
+    CASTLE_CONST point2d<T>& second) CASTLE_NOEXCEPT
 {
     static_assert(meta::is_floating_point<T>::value,
                   "nearest_point_on_segment requires a floating-point type");
-    const vector2d<T> direction = second - first;
-    const T direction_squared = direction.squared_length();
+    CASTLE_CONST vector2d<T> direction = second - first;
+    CASTLE_CONST T direction_squared = direction.squared_length();
     if (direction_squared == T{})
     {
         return first;
     }
 
-    const vector2d<T> delta = point - first;
+    CASTLE_CONST vector2d<T> delta = point - first;
     T parameter = static_cast<T>(delta.dot(direction) / direction_squared);
     if (parameter < T{})
     {
@@ -155,20 +155,20 @@ CASTLE_NODISCARD point2d<T> nearest_point_on_segment(
 // ============================================================================
 template <typename T>
 CASTLE_NODISCARD point3d<T> nearest_point_on_segment(
-    const point3d<T>& point,
-    const point3d<T>& first,
-    const point3d<T>& second) CASTLE_NOEXCEPT
+    CASTLE_CONST point3d<T>& point,
+    CASTLE_CONST point3d<T>& first,
+    CASTLE_CONST point3d<T>& second) CASTLE_NOEXCEPT
 {
     static_assert(meta::is_floating_point<T>::value,
                   "nearest_point_on_segment requires a floating-point type");
-    const vector3d<T> direction = second - first;
-    const T direction_squared = direction.squared_length();
+    CASTLE_CONST vector3d<T> direction = second - first;
+    CASTLE_CONST T direction_squared = direction.squared_length();
     if (direction_squared == T{})
     {
         return first;
     }
 
-    const vector3d<T> delta = point - first;
+    CASTLE_CONST vector3d<T> delta = point - first;
     T parameter = static_cast<T>(delta.dot(direction) / direction_squared);
     if (parameter < T{})
     {
@@ -217,8 +217,8 @@ struct nearest_point_result3d
 // ============================================================================
 template <typename T, size_type N>
 CASTLE_NODISCARD nearest_point_result2d<T> nearest_point(
-    const container::array<point2d<T>, N>& points,
-    const point2d<T>& target) CASTLE_NOEXCEPT
+    CASTLE_CONST container::array<point2d<T>, N>& points,
+    CASTLE_CONST point2d<T>& target) CASTLE_NOEXCEPT
 {
     nearest_point_result2d<T> result;
     if (N == 0U)
@@ -233,7 +233,7 @@ CASTLE_NODISCARD nearest_point_result2d<T> nearest_point(
 
     for (size_type i = 1U; i < N; ++i)
     {
-        const T candidate_distance = squared_distance(points[i], target);
+        CASTLE_CONST T candidate_distance = squared_distance(points[i], target);
         if (candidate_distance < result.distance_squared)
         {
             result.index = i;
@@ -246,8 +246,8 @@ CASTLE_NODISCARD nearest_point_result2d<T> nearest_point(
 
 template <typename T, size_type N>
 CASTLE_NODISCARD nearest_point_result3d<T> nearest_point(
-    const container::array<point3d<T>, N>& points,
-    const point3d<T>& target) CASTLE_NOEXCEPT
+    CASTLE_CONST container::array<point3d<T>, N>& points,
+    CASTLE_CONST point3d<T>& target) CASTLE_NOEXCEPT
 {
     nearest_point_result3d<T> result;
     if (N == 0U)
@@ -262,7 +262,7 @@ CASTLE_NODISCARD nearest_point_result3d<T> nearest_point(
 
     for (size_type i = 1U; i < N; ++i)
     {
-        const T candidate_distance = squared_distance(points[i], target);
+        CASTLE_CONST T candidate_distance = squared_distance(points[i], target);
         if (candidate_distance < result.distance_squared)
         {
             result.index = i;
@@ -278,30 +278,30 @@ CASTLE_NODISCARD nearest_point_result3d<T> nearest_point(
 // ============================================================================
 template <typename T>
 CASTLE_NODISCARD CASTLE_CONSTEXPR bool point_on_segment(
-    const point2d<T>& point,
-    const point2d<T>& first,
-    const point2d<T>& second,
+    CASTLE_CONST point2d<T>& point,
+    CASTLE_CONST point2d<T>& first,
+    CASTLE_CONST point2d<T>& second,
     T epsilon = T{}) CASTLE_NOEXCEPT
 {
-    const detail::geometry_calc_type<T> dx = static_cast<detail::geometry_calc_type<T>>(second.x() - first.x());
-    const detail::geometry_calc_type<T> dy = static_cast<detail::geometry_calc_type<T>>(second.y() - first.y());
-    const detail::geometry_calc_type<T> px = static_cast<detail::geometry_calc_type<T>>(point.x() - first.x());
-    const detail::geometry_calc_type<T> py = static_cast<detail::geometry_calc_type<T>>(point.y() - first.y());
-    const detail::geometry_calc_type<T> cross_value = px * dy - py * dx;
+    CASTLE_CONST detail::geometry_calc_type<T> dx = static_cast<detail::geometry_calc_type<T>>(second.x() - first.x());
+    CASTLE_CONST detail::geometry_calc_type<T> dy = static_cast<detail::geometry_calc_type<T>>(second.y() - first.y());
+    CASTLE_CONST detail::geometry_calc_type<T> px = static_cast<detail::geometry_calc_type<T>>(point.x() - first.x());
+    CASTLE_CONST detail::geometry_calc_type<T> py = static_cast<detail::geometry_calc_type<T>>(point.y() - first.y());
+    CASTLE_CONST detail::geometry_calc_type<T> cross_value = px * dy - py * dx;
     if (cross_value < -static_cast<detail::geometry_calc_type<T>>(epsilon) ||
         cross_value > static_cast<detail::geometry_calc_type<T>>(epsilon))
     {
         return false;
     }
 
-    const detail::geometry_calc_type<T> length_squared = dx * dx + dy * dy;
+    CASTLE_CONST detail::geometry_calc_type<T> length_squared = dx * dx + dy * dy;
     if (length_squared == static_cast<detail::geometry_calc_type<T>>(0))
     {
         return (px * px + py * py) <=
                static_cast<detail::geometry_calc_type<T>>(epsilon * epsilon);
     }
 
-    const detail::geometry_calc_type<T> dot_value = px * dx + py * dy;
+    CASTLE_CONST detail::geometry_calc_type<T> dot_value = px * dx + py * dy;
     return dot_value >= -static_cast<detail::geometry_calc_type<T>>(epsilon) &&
            dot_value <= length_squared + static_cast<detail::geometry_calc_type<T>>(epsilon);
 }
@@ -315,8 +315,8 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR bool point_on_segment(
 // ============================================================================
 template <typename T>
 CASTLE_NODISCARD CASTLE_CONSTEXPR bool point_in_polygon(
-    const point2d<T>& point,
-    const point2d<T>* vertices,
+    CASTLE_CONST point2d<T>& point,
+    CASTLE_CONST point2d<T>* vertices,
     size_type count,
     T epsilon = T{}) CASTLE_NOEXCEPT
 {
@@ -333,25 +333,25 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR bool point_in_polygon(
 
     for (size_type current = 0U; current < count; ++current)
     {
-        const point2d<T>& a = vertices[previous];
-        const point2d<T>& b = vertices[current];
+        CASTLE_CONST point2d<T>& a = vertices[previous];
+        CASTLE_CONST point2d<T>& b = vertices[current];
 
         if (point_on_segment(point, a, b, epsilon))
         {
             return true;
         }
 
-        const bool crosses_scanline = ((a.y() > point.y()) != (b.y() > point.y()));
+        CASTLE_CONST bool crosses_scanline = ((a.y() > point.y()) != (b.y() > point.y()));
         if (crosses_scanline)
         {
             using calc_type = detail::geometry_calc_type<T>;
-            const calc_type lhs =
+            CASTLE_CONST calc_type lhs =
                 static_cast<calc_type>(point.x() - a.x()) *
                 static_cast<calc_type>(b.y() - a.y());
-            const calc_type rhs =
+            CASTLE_CONST calc_type rhs =
                 static_cast<calc_type>(point.y() - a.y()) *
                 static_cast<calc_type>(b.x() - a.x());
-            const bool hit = (b.y() > a.y()) ? (lhs < rhs) : (lhs > rhs);
+            CASTLE_CONST bool hit = (b.y() > a.y()) ? (lhs < rhs) : (lhs > rhs);
             if (hit)
             {
                 inside = !inside;
@@ -366,8 +366,8 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR bool point_in_polygon(
 
 template <typename T, size_type Capacity>
 CASTLE_NODISCARD CASTLE_CONSTEXPR bool point_in_polygon(
-    const point2d<T>& point,
-    const polygon2d<T, Capacity>& polygon,
+    CASTLE_CONST point2d<T>& point,
+    CASTLE_CONST polygon2d<T, Capacity>& polygon,
     T epsilon = T{}) CASTLE_NOEXCEPT
 {
     return point_in_polygon(point, polygon.data(), polygon.size(), epsilon);
@@ -384,22 +384,22 @@ namespace detail
 {
 
 template <typename T>
-CASTLE_CONSTEXPR bool point_less(const point2d<T>& first, const point2d<T>& second) CASTLE_NOEXCEPT
+CASTLE_CONSTEXPR bool point_less(CASTLE_CONST point2d<T>& first, CASTLE_CONST point2d<T>& second) CASTLE_NOEXCEPT
 {
     return (first.x() < second.x()) ||
            ((first.x() == second.x()) && (first.y() < second.y()));
 }
 
 template <typename T>
-CASTLE_CONSTEXPR geometry_calc_type<T> orientation(const point2d<T>& a,
-                                                   const point2d<T>& b,
-                                                   const point2d<T>& c) CASTLE_NOEXCEPT
+CASTLE_CONSTEXPR geometry_calc_type<T> orientation(CASTLE_CONST point2d<T>& a,
+                                                   CASTLE_CONST point2d<T>& b,
+                                                   CASTLE_CONST point2d<T>& c) CASTLE_NOEXCEPT
 {
     using calc_type = geometry_calc_type<T>;
-    const calc_type ab_x = static_cast<calc_type>(b.x()) - static_cast<calc_type>(a.x());
-    const calc_type ab_y = static_cast<calc_type>(b.y()) - static_cast<calc_type>(a.y());
-    const calc_type ac_x = static_cast<calc_type>(c.x()) - static_cast<calc_type>(a.x());
-    const calc_type ac_y = static_cast<calc_type>(c.y()) - static_cast<calc_type>(a.y());
+    CASTLE_CONST calc_type ab_x = static_cast<calc_type>(b.x()) - static_cast<calc_type>(a.x());
+    CASTLE_CONST calc_type ab_y = static_cast<calc_type>(b.y()) - static_cast<calc_type>(a.y());
+    CASTLE_CONST calc_type ac_x = static_cast<calc_type>(c.x()) - static_cast<calc_type>(a.x());
+    CASTLE_CONST calc_type ac_y = static_cast<calc_type>(c.y()) - static_cast<calc_type>(a.y());
     return static_cast<calc_type>(ab_x * ac_y - ab_y * ac_x);
 }
 
@@ -421,7 +421,7 @@ CASTLE_CONSTEXPR void heap_sift_down(container::array<point2d<T>, N>& values,
             return;
         }
 
-        const point2d<T> temporary = values[root];
+        CASTLE_CONST point2d<T> temporary = values[root];
         values[root] = values[child];
         values[child] = temporary;
         root = child;
@@ -444,7 +444,7 @@ CASTLE_CONSTEXPR void heap_sort(container::array<point2d<T>, N>& values,
 
     for (size_type end = count - 1U; end > 0U; --end)
     {
-        const point2d<T> temporary = values[0U];
+        CASTLE_CONST point2d<T> temporary = values[0U];
         values[0U] = values[end];
         values[end] = temporary;
         heap_sift_down(values, 0U, end);
@@ -452,7 +452,7 @@ CASTLE_CONSTEXPR void heap_sort(container::array<point2d<T>, N>& values,
 }
 
 template <typename T, size_type N>
-CASTLE_CONSTEXPR void copy_unique(const container::array<point2d<T>, N>& sorted,
+CASTLE_CONSTEXPR void copy_unique(CASTLE_CONST container::array<point2d<T>, N>& sorted,
                                   size_type count,
                                   container::array<point2d<T>, N>& unique,
                                   size_type& unique_count) CASTLE_NOEXCEPT
@@ -472,7 +472,7 @@ CASTLE_CONSTEXPR void copy_unique(const container::array<point2d<T>, N>& sorted,
 
 template <typename T, size_type N>
 CASTLE_NODISCARD CASTLE_CONSTEXPR status convex_hull(
-    const container::array<point2d<T>, N>& input,
+    CASTLE_CONST container::array<point2d<T>, N>& input,
     polygon2d<T, N>& output) CASTLE_NOEXCEPT
 {
     static_assert(meta::is_signed<T>::value || meta::is_floating_point<T>::value,
@@ -514,10 +514,10 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR status convex_hull(
         ++hull_count;
     }
 
-    const size_type lower_count = hull_count;
+    CASTLE_CONST size_type lower_count = hull_count;
     for (size_type i = unique_count - 1U; i > 0U; --i)
     {
-        const point2d<T>& point = unique[i - 1U];
+        CASTLE_CONST point2d<T>& point = unique[i - 1U];
         while (hull_count >= lower_count + 1U &&
                detail::orientation(
                    hull[hull_count - 2U], hull[hull_count - 1U], point) <= T{})

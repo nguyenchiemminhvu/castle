@@ -36,7 +36,7 @@ isqrt(T value) CASTLE_NOEXCEPT
 
     while (low <= high)
     {
-        const T middle = static_cast<T>(low + (high - low) / static_cast<T>(2));
+        CASTLE_CONST T middle = static_cast<T>(low + (high - low) / static_cast<T>(2));
         if (middle <= value / middle)
         {
             low = static_cast<T>(middle + static_cast<T>(1));

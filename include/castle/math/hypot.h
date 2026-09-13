@@ -23,17 +23,17 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_floating_point<T>::value, T>::type
 hypot(T x, T y) CASTLE_NOEXCEPT
 {
-    const T ax = abs(x);
-    const T ay = abs(y);
-    const T scale = (ax > ay) ? ax : ay;
+    CASTLE_CONST T ax = abs(x);
+    CASTLE_CONST T ay = abs(y);
+    CASTLE_CONST T scale = (ax > ay) ? ax : ay;
 
     if (scale == static_cast<T>(0))
     {
         return static_cast<T>(0);
     }
 
-    const T sx = x / scale;
-    const T sy = y / scale;
+    CASTLE_CONST T sx = x / scale;
+    CASTLE_CONST T sy = y / scale;
     return scale * sqrt_real(sx * sx + sy * sy);
 }
 
@@ -42,19 +42,19 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_floating_point<T>::value, T>::type
 hypot(T x, T y, T z) CASTLE_NOEXCEPT
 {
-    const T ax = abs(x);
-    const T ay = abs(y);
-    const T az = abs(z);
-    const T scale = max(ax, max(ay, az));
+    CASTLE_CONST T ax = abs(x);
+    CASTLE_CONST T ay = abs(y);
+    CASTLE_CONST T az = abs(z);
+    CASTLE_CONST T scale = max(ax, max(ay, az));
 
     if (scale == static_cast<T>(0))
     {
         return static_cast<T>(0);
     }
 
-    const T sx = x / scale;
-    const T sy = y / scale;
-    const T sz = z / scale;
+    CASTLE_CONST T sx = x / scale;
+    CASTLE_CONST T sy = y / scale;
+    CASTLE_CONST T sz = z / scale;
     return scale * sqrt_real(sx * sx + sy * sy + sz * sz);
 }
 

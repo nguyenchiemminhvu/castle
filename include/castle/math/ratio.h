@@ -20,14 +20,14 @@ struct ratio
                   "ratio denominator cannot be zero");
 
 private:
-    static constexpr intmax_t abs_num = (Numerator < 0) ? -Numerator : Numerator;
-    static constexpr intmax_t abs_den = (Denominator < 0) ? -Denominator : Denominator;
-    static constexpr intmax_t divisor = gcd<abs_num, abs_den>::value;
-    static constexpr intmax_t sign = (Denominator < 0) ? -1LL : 1LL;
+    static CASTLE_CONSTEXPR intmax_t abs_num = (Numerator < 0) ? -Numerator : Numerator;
+    static CASTLE_CONSTEXPR intmax_t abs_den = (Denominator < 0) ? -Denominator : Denominator;
+    static CASTLE_CONSTEXPR intmax_t divisor = gcd<abs_num, abs_den>::value;
+    static CASTLE_CONSTEXPR intmax_t sign = (Denominator < 0) ? -1LL : 1LL;
 
 public:
-    static constexpr intmax_t num = sign * (Numerator / divisor);
-    static constexpr intmax_t den = abs_den / divisor;
+    static CASTLE_CONSTEXPR intmax_t num = sign * (Numerator / divisor);
+    static CASTLE_CONSTEXPR intmax_t den = abs_den / divisor;
 
     using type = ratio<num, den>;
 };
@@ -81,7 +81,7 @@ using ratio_divide_t = typename ratio_divide<TRatio1, TRatio2>::type;
 template <typename TRatio1, typename TRatio2>
 struct ratio_equal
 {
-    static constexpr bool value =
+    static CASTLE_CONSTEXPR bool value =
         (TRatio1::num == TRatio2::num) &&
         (TRatio1::den == TRatio2::den);
 };
@@ -89,13 +89,13 @@ struct ratio_equal
 template <typename TRatio1, typename TRatio2>
 struct ratio_not_equal
 {
-    static constexpr bool value = !ratio_equal<TRatio1, TRatio2>::value;
+    static CASTLE_CONSTEXPR bool value = !ratio_equal<TRatio1, TRatio2>::value;
 };
 
 template <typename TRatio1, typename TRatio2>
 struct ratio_less
 {
-    static constexpr bool value =
+    static CASTLE_CONSTEXPR bool value =
         (TRatio1::num * TRatio2::den) <
         (TRatio2::num * TRatio1::den);
 };
@@ -103,19 +103,19 @@ struct ratio_less
 template <typename TRatio1, typename TRatio2>
 struct ratio_less_equal
 {
-    static constexpr bool value = !ratio_less<TRatio2, TRatio1>::value;
+    static CASTLE_CONSTEXPR bool value = !ratio_less<TRatio2, TRatio1>::value;
 };
 
 template <typename TRatio1, typename TRatio2>
 struct ratio_greater
 {
-    static constexpr bool value = ratio_less<TRatio2, TRatio1>::value;
+    static CASTLE_CONSTEXPR bool value = ratio_less<TRatio2, TRatio1>::value;
 };
 
 template <typename TRatio1, typename TRatio2>
 struct ratio_greater_equal
 {
-    static constexpr bool value = !ratio_less<TRatio1, TRatio2>::value;
+    static CASTLE_CONSTEXPR bool value = !ratio_less<TRatio1, TRatio2>::value;
 };
 
 } // namespace math
