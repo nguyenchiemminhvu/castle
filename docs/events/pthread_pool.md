@@ -2,7 +2,7 @@
 
 ## Overview
 
-`castle::threading::pthread_pool` is a fixed-capacity thread pool implemented on top of POSIX threads.
+`castle::events::pthread_pool` is a fixed-capacity thread pool implemented on top of POSIX threads.
 
 The implementation follows the CASTLE design goals for embedded systems:
 
@@ -20,7 +20,7 @@ The pool is available only when `CASTLE_USING_PTHREAD` is enabled.
 ## Header
 
 ```cpp
-#include "castle/threading/pthread_pool.hpp"
+#include "castle/events/pthread_pool.hpp"
 ```
 
 ## Namespace
@@ -28,7 +28,7 @@ The pool is available only when `CASTLE_USING_PTHREAD` is enabled.
 ```cpp
 namespace castle
 {
-namespace threading
+namespace events
 {
 class pthread_pool;
 }
@@ -130,7 +130,7 @@ Submission does not wait for a free queue slot. This is important for determinis
 ### Example
 
 ```cpp
-castle::threading::pthread_pool<2U, 8U> pool;
+castle::events::pthread_pool<2U, 8U> pool;
 
 int value = 0;
 
@@ -206,12 +206,12 @@ Example:
 
 ```cpp
 static_assert(
-castle::threading::pthread_pool<4U, 16U>::thread_count() == 4U,
+castle::events::pthread_pool<4U, 16U>::thread_count() == 4U,
 "Unexpected worker count"
 );
 
 static_assert(
-castle::threading::pthread_pool<4U, 16U>::task_capacity() == 16U,
+castle::events::pthread_pool<4U, 16U>::task_capacity() == 16U,
 "Unexpected task capacity"
 );
 ```
@@ -254,7 +254,7 @@ The constructor is `noexcept`; platform-level failures during initialization res
 For a pool declared as:
 
 ```cpp
-castle::threading::pthread_pool<4U, 32U> pool;
+castle::events::pthread_pool<4U, 32U> pool;
 ```
 
 the CASTLE-owned storage requirements are fixed at compile time.
@@ -293,13 +293,13 @@ Applications that need these behaviors should build the additional policy outsid
 ## Example
 
 ```cpp
-#include "castle/threading/pthread_pool.hpp"
+#include "castle/events/pthread_pool.hpp"
 
 void process_sensor_sample();
 
 int main()
 {
-castle::threading::pthread_pool<2U, 8U> pool;
+castle::events::pthread_pool<2U, 8U> pool;
 
 pool.submit([]() {
 process_sensor_sample();

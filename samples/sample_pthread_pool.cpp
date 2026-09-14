@@ -1,6 +1,6 @@
 #include "sample_support.hpp"
 
-#include "castle/threading/pthread_pool.hpp"
+#include "castle/events/pthread_pool.hpp"
 
 #include <assert.h>
 
@@ -8,7 +8,7 @@ static volatile int completed = 0;
 
 int main()
 {
-    castle::threading::pthread_pool<4, 8> pool; // 4 threads, 8 tasks
+    castle::events::pthread_pool<4, 8> pool; // 4 threads, 8 tasks
 
     assert(pool.running() == true);
     assert(pool.thread_count() == 4);
