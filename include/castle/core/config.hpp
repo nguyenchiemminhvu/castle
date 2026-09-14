@@ -47,6 +47,46 @@
 #define CASTLE_PLATFORM_32BIT (sizeof(void*) == 4)
 #define CASTLE_PLATFORM_64BIT (sizeof(void*) == 8)
 
+// -----------------------------------------------------------------------------
+// new operator support
+// -----------------------------------------------------------------------------
+
+#if !defined(CASTLE_USING_STD_NEW)
+    #if defined(__has_include)
+        #if __has_include(<new>)
+            #define CASTLE_USING_STD_NEW 1
+        #else
+            #define CASTLE_USING_STD_NEW 0
+        #endif
+    #else
+        #if defined(__STDC_HOSTED__) && (__STDC_HOSTED__ == 1)
+            #define CASTLE_USING_STD_NEW 1
+        #else
+            #define CASTLE_USING_STD_NEW 0
+        #endif
+    #endif
+#endif // !defined(CASTLE_USING_STD_NEW)
+
+// -----------------------------------------------------------------------------
+// POSIX threading support
+// -----------------------------------------------------------------------------
+
+#if !defined(CASTLE_USING_PTHREAD)
+    #if defined(__has_include)
+        #if __has_include(<pthread.h>)
+            #include <unistd.h>
+            // _POSIX_THREADS is defined in <unistd.h> if POSIX threads are supported
+            #if defined(_POSIX_THREADS) && (_POSIX_THREADS > 0)
+                #define CASTLE_USING_PTHREAD 1
+            #else
+                #define CASTLE_USING_PTHREAD 0
+            #endif
+        #else
+            #define CASTLE_USING_PTHREAD 0
+        #endif
+    #endif
+#endif // !defined(CASTLE_USING_PTHREAD)
+
 namespace castle
 {
 

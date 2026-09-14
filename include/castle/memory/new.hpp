@@ -2,24 +2,9 @@
 #define CASTLE_MEMORY_NEW_HPP
 
 #include "castle/core/compiler.hpp"
+#include "castle/core/config.hpp"
 
 #include <stddef.h>
-
-#if !defined(CASTLE_USING_STD_NEW)
-    #if defined(__has_include)
-        #if __has_include(<new>)
-            #define CASTLE_USING_STD_NEW 1
-        #else
-            #define CASTLE_USING_STD_NEW 0
-        #endif
-    #else
-        #if defined(__STDC_HOSTED__) && (__STDC_HOSTED__ == 1)
-            #define CASTLE_USING_STD_NEW 1
-        #else
-            #define CASTLE_USING_STD_NEW 0
-        #endif
-    #endif
-#endif // !defined(CASTLE_USING_STD_NEW)
 
 #if CASTLE_USING_STD_NEW
     #include <new>
