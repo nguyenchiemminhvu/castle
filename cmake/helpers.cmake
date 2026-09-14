@@ -35,6 +35,10 @@ function(castle_disable_features target feature)
     if(${feature} STREQUAL "use_stl")
         target_compile_options(${target} PRIVATE -nostdinc++ -fno-builtin -DCASTLE_USING_STD_NEW=0)
     endif()
+
+    if(${feature} STREQUAL "use_pthread")
+        target_compile_options(${target} PRIVATE -DCASTLE_USING_PTHREAD=0)
+    endif()
 endfunction()
 
 
@@ -94,4 +98,5 @@ function(castle_add_executable target)
     castle_disable_features(${target} "exceptions")
     castle_disable_features(${target} "rtti")
     castle_disable_features(${target} "use_stl")
+    # castle_disable_features(${target} "use_pthread")
 endfunction()
