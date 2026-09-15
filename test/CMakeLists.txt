@@ -50,14 +50,11 @@ add_executable(
     ${CASTLE_TEST_SOURCES}
 )
 
-find_package(Threads REQUIRED)
-
 target_link_libraries(
     castle_tests
     PRIVATE
         castle
         GTest::gtest
-        Threads::Threads
 )
 
 castle_set_cxx_standard(castle_tests 17)
@@ -69,24 +66,7 @@ target_compile_options(
         -Wextra
         -fno-exceptions
         -fno-rtti
-)
-
-set(CASTLE_PTHREAD_WRAP_OPTIONS
-    -Wl,--wrap=pthread_mutex_init
-    -Wl,--wrap=pthread_mutex_destroy
-    -Wl,--wrap=pthread_mutex_lock
-    -Wl,--wrap=pthread_mutex_unlock
-    -Wl,--wrap=pthread_cond_init
-    -Wl,--wrap=pthread_cond_destroy
-    -Wl,--wrap=pthread_cond_wait
-    -Wl,--wrap=pthread_cond_signal
-    -Wl,--wrap=pthread_cond_broadcast
-    -Wl,--wrap=pthread_create
-    -Wl,--wrap=pthread_join
-)
-
-target_link_options(castle_tests PRIVATE
-    ${CASTLE_PTHREAD_WRAP_OPTIONS}
+        -DCASTLE_USING_PTHREAD=0
 )
 
 if(CASTLE_ENABLE_COVERAGE)
