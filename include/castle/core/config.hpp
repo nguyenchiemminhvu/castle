@@ -6,6 +6,15 @@
 #include "castle/core/types.hpp"
 
 // -----------------------------------------------------------------------------
+// CPP standard version
+// -----------------------------------------------------------------------------
+
+#define CASTLE_CPP_11 (__cplusplus >= 201103L)
+#define CASTLE_CPP_14 (__cplusplus >= 201402L)
+#define CASTLE_CPP_17 (__cplusplus >= 201703L)
+#define CASTLE_CPP_20 (__cplusplus >= 202002L)
+
+// -----------------------------------------------------------------------------
 // Endianness constants
 // -----------------------------------------------------------------------------
 #define CASTLE_ENDIAN_LITTLE 0

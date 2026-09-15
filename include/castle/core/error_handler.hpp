@@ -151,7 +151,7 @@ private:
 
 #else // Default: rely on C assert() in debug, no-op in release.
 
-    #if !defined(NOT_DEBUG)
+    #if !defined(NDEBUG)
         #define CASTLE_ASSERT(cond, err)                    assert((cond))
         #define CASTLE_ASSERT_OR_RETURN(cond, err)          \
             do { if (CASTLE_UNLIKELY(!(cond))) { assert(false); return; } } while (false)
