@@ -1,23 +1,18 @@
-#pragma once
+#ifndef CASTLE_CALLBACKS_CALLBACK_SUBSCRIPTION_H
+#define CASTLE_CALLBACKS_CALLBACK_SUBSCRIPTION_H
 
-#include <cstddef>
-#include <cstdint>
+#include "castle/core/compiler.h"
+#include "castle/core/error_handler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
+#include "castle/error/status.h"
+
+#include <stdint.h>
 
 namespace castle
 {
 namespace callbacks
 {
-
-// -----------------------------------------------------------------------------
-// Error codes returned by callback_registry operations.
-// -----------------------------------------------------------------------------
-enum class callback_subscription_error : std::uint8_t
-{
-    ok = 0,
-    full,
-    invalid_callback,
-    invalid_subscription
-};
 
 // -----------------------------------------------------------------------------
 // Type-erased unsubscribe interface.
@@ -28,13 +23,13 @@ enum class callback_subscription_error : std::uint8_t
 class i_unsubscribable
 {
 public:
-    virtual ~i_unsubscribable() = default;
+    virtual ~i_unsubscribable() CASTLE_DEFAULT;
 
     // Remove the slot identified by (index, generation). Implementations must
     // treat mismatched generation / inactive slot as invalid_subscription.
-    virtual callback_subscription_error unsubscribe_slot(
-        std::size_t index,
-        std::uint32_t generation) noexcept = 0;
+    virtual status unsubscribe_slot(
+        size_type index,
+        uint32_t generation) CASTLE_NOEXCEPT = 0;
 };
 
 // -----------------------------------------------------------------------------
@@ -50,12 +45,12 @@ public:
 class callback_subscription
 {
 public:
-    constexpr callback_subscription() noexcept = default;
+    constexpr callback_subscription() CASTLE_NOEXCEPT CASTLE_DEFAULT;
 
     constexpr callback_subscription(
         i_unsubscribable* owner,
-        std::size_t index,
-        std::uint32_t generation) noexcept
+        size_type index,
+        uint32_t generation) CASTLE_NOEXCEPT
         : owner_(owner),
           index_(index),
           generation_(generation),
@@ -63,35 +58,35 @@ public:
     {
     }
 
-    constexpr bool valid() const noexcept
+    constexpr bool valid() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return valid_ && owner_ != nullptr;
     }
 
-    explicit operator bool() const noexcept
+    explicit operator bool() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return valid();
     }
 
-    constexpr std::size_t index() const noexcept
+    constexpr size_type index() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return index_;
     }
 
-    constexpr std::uint32_t generation() const noexcept
+    constexpr uint32_t generation() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return generation_;
     }
 
-    // Non-const because a successful unsubscribe invalidates *this in place.
-    callback_subscription_error unsubscribe() noexcept
+    // Non-CASTLE_CONST because a successful unsubscribe invalidates *this in place.
+    status unsubscribe() CASTLE_NOEXCEPT
     {
         if (!valid())
         {
-            return callback_subscription_error::invalid_subscription;
+            return status::invalid_subscription;
         }
 
-        const callback_subscription_error result =
+        CASTLE_CONST status result =
             owner_->unsubscribe_slot(index_, generation_);
 
         // Regardless of success/failure, this handle no longer refers to a
@@ -101,7 +96,7 @@ public:
         return result;
     }
 
-    void reset() noexcept
+    void reset() CASTLE_NOEXCEPT
     {
         owner_ = nullptr;
         index_ = 0;
@@ -111,10 +106,12 @@ public:
 
 private:
     i_unsubscribable* owner_ = nullptr;
-    std::size_t index_ = 0;
-    std::uint32_t generation_ = 0;
+    size_type index_ = 0;
+    uint32_t generation_ = 0;
     bool valid_ = false;
 };
 
 } // namespace callbacks
 } // namespace castle
+
+#endif // CASTLE_CALLBACKS_CALLBACK_SUBSCRIPTION_H

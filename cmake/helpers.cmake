@@ -18,6 +18,7 @@ function(castle_enable_warnings target)
             -Wall
             -Wextra
             -Wpedantic
+            -Werror
     )
 endfunction()
 
@@ -25,13 +26,14 @@ endfunction()
 function(castle_disable_features target feature)
     if(${feature} STREQUAL "exceptions")
         target_compile_options(${target} PRIVATE -fno-exceptions)
+    endif()
 
-    elseif(${feature} STREQUAL "rtti")
+    if(${feature} STREQUAL "rtti")
         target_compile_options(${target} PRIVATE -fno-rtti)
+    endif()
 
-    elseif(${feature} STREQUAL "all")
-        castle_disable_features(${target} "exceptions")
-        castle_disable_features(${target} "rtti")
+    if(${feature} STREQUAL "use_stl")
+        target_compile_options(${target} PRIVATE -nostdinc++ -fno-builtin)
     endif()
 endfunction()
 
@@ -91,4 +93,5 @@ function(castle_add_executable target)
     castle_enable_warnings(${target})
     castle_disable_features(${target} "exceptions")
     castle_disable_features(${target} "rtti")
+    castle_disable_features(${target} "use_stl")
 endfunction()

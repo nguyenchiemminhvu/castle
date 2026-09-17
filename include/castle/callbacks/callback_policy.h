@@ -1,14 +1,19 @@
-#pragma once
+#ifndef CASTLE_CALLBACKS_CALLBACK_POLICY_H
+#define CASTLE_CALLBACKS_CALLBACK_POLICY_H
 
-#include <atomic>
-#include <chrono>
-#include <cstddef>
-#include <optional>
-#include <type_traits>
-#include <utility>
+#include "castle/core/compiler.h"
+#include "castle/core/error_handler.h"
+#include "castle/core/types.h"
+#include "castle/core/traits.h"
+#include "castle/atomic/atomic.h"
+#include "castle/utility/forward.h"
+#include "castle/utility/optional.h"
+#include "castle/chrono/chrono.h"
+
+#include <stddef.h>
 
 // =============================================================================
-// castle::callback_policy
+// castle::callbacks::callback_policy
 // -----------------------------------------------------------------------------
 // A collection of small, header-only "control-flow" policies that decide *when*
 // a bound callback should actually run. Designed for embedded / resource
@@ -63,7 +68,7 @@
 //                        for every_n. The value is a template argument, so
 //                        the compiler can strength-reduce operations on it.
 //   * make_policy_st_with_clock<Clock> - variant of make_policy_st that lets the caller
-//                        override the default std::chrono::steady_clock.
+//                        override the default castle::chrono::steady_clock.
 // =============================================================================
 
 namespace castle
@@ -87,9 +92,9 @@ class single_thread
 public:
     using callback_type = Callback;
 
-    template <typename C, typename = std::enable_if_t<!std::is_same<std::decay_t<C>, single_thread>::value>>
-    explicit single_thread(C&& cb) noexcept(std::is_nothrow_constructible<Callback, C&&>::value)
-        : cb_(std::forward<C>(cb))
+    template <typename C, typename = meta::enable_if_t<!meta::is_same<meta::decay_t<C>, single_thread>::value>>
+    explicit single_thread(C&& cb) noexcept(meta::is_nothrow_constructible<Callback, C&&>::value)
+        : cb_(CASTLE_FORWARD<C>(cb))
     {
     }
 
@@ -102,18 +107,18 @@ public:
             return;
         }
         fired_ = true;  // set before invoke so recursive execute() is a no-op
-        cb_(std::forward<Args>(args)...);
+        cb_(CASTLE_FORWARD<Args>(args)...);
         return;
     }
 
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        execute(std::forward<Args>(args)...);
+        execute(CASTLE_FORWARD<Args>(args)...);
     }
 
     void reset() noexcept { fired_ = false; }
-    bool has_fired() const noexcept { return fired_; }
+    bool has_fired() CASTLE_CONST noexcept { return fired_; }
 
 private:
     Callback cb_;
@@ -128,9 +133,9 @@ class concurrent
 public:
     using callback_type = Callback;
 
-    template <typename C, typename = std::enable_if_t<!std::is_same<std::decay_t<C>, concurrent>::value>>
-    explicit concurrent(C&& cb) noexcept(std::is_nothrow_constructible<Callback, C&&>::value)
-        : cb_(std::forward<C>(cb))
+    template <typename C, typename = meta::enable_if_t<!meta::is_same<meta::decay_t<C>, concurrent>::value>>
+    explicit concurrent(C&& cb) noexcept(meta::is_nothrow_constructible<Callback, C&&>::value)
+        : cb_(CASTLE_FORWARD<C>(cb))
     {
     }
 
@@ -138,32 +143,32 @@ public:
     void execute(Args&&... args)
     {
         bool expected = false;
-        if (!fired_.compare_exchange_strong(expected, true, std::memory_order_acq_rel, std::memory_order_acquire))
+        if (!fired_.compare_exchange_strong(expected, true, castle::memory_order_acq_rel, castle::memory_order_acquire))
         {
             return;
         }
-        cb_(std::forward<Args>(args)...);
+        cb_(CASTLE_FORWARD<Args>(args)...);
     }
 
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        execute(std::forward<Args>(args)...);
+        execute(CASTLE_FORWARD<Args>(args)...);
     }
 
     void reset() noexcept
     {
-        fired_.store(false, std::memory_order_release);
+        fired_.store(false, castle::memory_order_release);
     }
 
-    bool has_fired() const noexcept
+    bool has_fired() CASTLE_CONST noexcept
     {
-        return fired_.load(std::memory_order_acquire);
+        return fired_.load(castle::memory_order_acquire);
     }
 
 private:
-    Callback          cb_;
-    std::atomic<bool> fired_{false};
+    Callback             cb_;
+    castle::atomic<bool> fired_{false};
 };
 
 
@@ -175,15 +180,15 @@ private:
 //   auto init = callback_policy::once::make_policy_st([]{ boot(); });
 //   auto flag = callback_policy::once::make_policy_concurrent([]{ log_once(); });
 template <typename C>
-single_thread<typename std::decay<C>::type> make_policy_st(C&& cb)
+single_thread<typename meta::decay<C>::type> make_policy_st(C&& cb)
 {
-    return single_thread<typename std::decay<C>::type>(std::forward<C>(cb));
+    return single_thread<typename meta::decay<C>::type>(CASTLE_FORWARD<C>(cb));
 }
 
 template <typename C>
-concurrent<typename std::decay<C>::type> make_policy_concurrent(C&& cb)
+concurrent<typename meta::decay<C>::type> make_policy_concurrent(C&& cb)
 {
-    return concurrent<typename std::decay<C>::type>(std::forward<C>(cb));
+    return concurrent<typename meta::decay<C>::type>(CASTLE_FORWARD<C>(cb));
 }
 
 } // namespace once
@@ -211,7 +216,7 @@ namespace armed_window
 // State latch used by the concurrent variant. Encoded in a single atomic so
 // the "check + fire" transition is a lock-free CAS. The single_thread variant
 // tracks the same states in a plain enum.
-enum class state : std::uint8_t
+enum class state : uint8_t
 {
     armed    = 0, // window open, callback has not fired yet
     fired    = 1, // callback fired inside the window, disarmed
@@ -222,7 +227,7 @@ enum class state : std::uint8_t
 // Non-thread-safe variant. Cheapest option; use when execute() is only ever
 // pumped from a single thread (typical for a main loop / cooperative
 // scheduler).
-template <typename Callback, typename Clock = std::chrono::steady_clock>
+template <typename Callback, typename Clock = castle::chrono::steady_clock>
 class single_thread
 {
 public:
@@ -232,10 +237,10 @@ public:
     using time_point    = typename Clock::time_point;
 
     template <typename Rep, typename Period, typename C,
-              typename = std::enable_if_t<!std::is_same<std::decay_t<C>, single_thread>::value>>
-    single_thread(std::chrono::duration<Rep, Period> window, C&& cb)
-        : cb_(std::forward<C>(cb))
-        , duration_(std::chrono::duration_cast<duration>(window))
+              typename = meta::enable_if_t<!meta::is_same<meta::decay_t<C>, single_thread>::value>>
+    single_thread(castle::chrono::duration<Rep, Period> window, C&& cb)
+        : cb_(CASTLE_FORWARD<C>(cb))
+        , duration_(castle::chrono::duration_cast<duration>(window))
         , deadline_(Clock::now() + duration_)
         , state_(state::armed)
     {
@@ -264,13 +269,13 @@ public:
         }
 
         state_ = state::fired; // set before invoke so recursive execute() is a no-op
-        cb_(std::forward<Args>(args)...);
+        cb_(CASTLE_FORWARD<Args>(args)...);
     }
 
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        execute(std::forward<Args>(args)...);
+        execute(CASTLE_FORWARD<Args>(args)...);
     }
 
     // Open a fresh window of the SAME duration starting from now. Also clears
@@ -283,9 +288,9 @@ public:
 
     // Open a fresh window of a NEW duration starting from now.
     template <typename Rep, typename Period>
-    void rearm(std::chrono::duration<Rep, Period> window) noexcept
+    void rearm(castle::chrono::duration<Rep, Period> window) noexcept
     {
-        duration_ = std::chrono::duration_cast<duration>(window);
+        duration_ = castle::chrono::duration_cast<duration>(window);
         deadline_ = Clock::now() + duration_;
         state_    = state::armed;
     }
@@ -300,12 +305,12 @@ public:
         }
     }
 
-    bool armed()    const noexcept { return state_ == state::armed; }
-    bool fired()    const noexcept { return state_ == state::fired; }
-    bool expired()  const noexcept { return state_ == state::expired; }
+    bool armed()    CASTLE_CONST noexcept { return state_ == state::armed; }
+    bool fired()    CASTLE_CONST noexcept { return state_ == state::fired; }
+    bool expired()  CASTLE_CONST noexcept { return state_ == state::expired; }
 
-    duration   window()   const noexcept { return duration_; }
-    time_point deadline() const noexcept { return deadline_; }
+    duration   window()   CASTLE_CONST noexcept { return duration_; }
+    time_point deadline() CASTLE_CONST noexcept { return deadline_; }
 
 private:
     Callback   cb_;
@@ -318,7 +323,7 @@ private:
 // Concurrent variant: the "armed -> fired / expired" transition is a single
 // atomic CAS. At most one caller ever runs the callback,
 // even under simultaneous execute() calls from N threads.
-template <typename Callback, typename Clock = std::chrono::steady_clock>
+template <typename Callback, typename Clock = castle::chrono::steady_clock>
 class concurrent
 {
 public:
@@ -328,10 +333,10 @@ public:
     using time_point    = typename Clock::time_point;
 
     template <typename Rep, typename Period, typename C,
-              typename = std::enable_if_t<!std::is_same<std::decay_t<C>, concurrent>::value>>
-    concurrent(std::chrono::duration<Rep, Period> window, C&& cb)
-        : cb_(std::forward<C>(cb))
-        , duration_(std::chrono::duration_cast<duration>(window))
+              typename = meta::enable_if_t<!meta::is_same<meta::decay_t<C>, concurrent>::value>>
+    concurrent(castle::chrono::duration<Rep, Period> window, C&& cb)
+        : cb_(CASTLE_FORWARD<C>(cb))
+        , duration_(castle::chrono::duration_cast<duration>(window))
         , deadline_(Clock::now() + duration_)
         , state_(state::armed)
     {
@@ -340,7 +345,7 @@ public:
     template <typename... Args>
     void execute(Args&&... args)
     {
-        state expected = state_.load(std::memory_order_acquire);
+        state expected = state_.load(castle::memory_order_acquire);
         if (expected != state::armed)
         {
             return;
@@ -351,27 +356,27 @@ public:
             // Best-effort latch to expired. If another thread already won the
             // race (fired or expired), we simply observe that and return.
             state_.compare_exchange_strong(expected, state::expired,
-                                           std::memory_order_acq_rel,
-                                           std::memory_order_acquire);
+                                           castle::memory_order_acq_rel,
+                                           castle::memory_order_acquire);
             return;
         }
 
         // Try to claim the single fire slot atomically. Only the winning
         // thread actually invokes the callback.
         if (!state_.compare_exchange_strong(expected, state::fired,
-                                            std::memory_order_acq_rel,
-                                            std::memory_order_acquire))
+                                            castle::memory_order_acq_rel,
+                                            castle::memory_order_acquire))
         {
             return;
         }
 
-        cb_(std::forward<Args>(args)...);
+        cb_(CASTLE_FORWARD<Args>(args)...);
     }
 
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        execute(std::forward<Args>(args)...);
+        execute(CASTLE_FORWARD<Args>(args)...);
     }
 
     // NOTE: reset()/rearm()/expire() are intended for coordination points
@@ -380,41 +385,41 @@ public:
     void reset() noexcept
     {
         deadline_ = Clock::now() + duration_;
-        state_.store(state::armed, std::memory_order_release);
+        state_.store(state::armed, castle::memory_order_release);
     }
 
     template <typename Rep, typename Period>
-    void rearm(std::chrono::duration<Rep, Period> window) noexcept
+    void rearm(castle::chrono::duration<Rep, Period> window) noexcept
     {
-        duration_ = std::chrono::duration_cast<duration>(window);
+        duration_ = castle::chrono::duration_cast<duration>(window);
         deadline_ = Clock::now() + duration_;
-        state_.store(state::armed, std::memory_order_release);
+        state_.store(state::armed, castle::memory_order_release);
     }
 
     void expire() noexcept
     {
         state expected = state::armed;
         state_.compare_exchange_strong(expected, state::expired,
-                                       std::memory_order_acq_rel,
-                                       std::memory_order_acquire);
+                                       castle::memory_order_acq_rel,
+                                       castle::memory_order_acquire);
     }
 
-    bool armed()   const noexcept { return state_.load(std::memory_order_acquire) == state::armed; }
-    bool fired()   const noexcept { return state_.load(std::memory_order_acquire) == state::fired; }
-    bool expired() const noexcept { return state_.load(std::memory_order_acquire) == state::expired; }
+    bool armed()   CASTLE_CONST noexcept { return state_.load(castle::memory_order_acquire) == state::armed; }
+    bool fired()   CASTLE_CONST noexcept { return state_.load(castle::memory_order_acquire) == state::fired; }
+    bool expired() CASTLE_CONST noexcept { return state_.load(castle::memory_order_acquire) == state::expired; }
 
-    duration   window()   const noexcept { return duration_; }
-    time_point deadline() const noexcept { return deadline_; }
+    duration   window()   CASTLE_CONST noexcept { return duration_; }
+    time_point deadline() CASTLE_CONST noexcept { return deadline_; }
 
 private:
-    Callback            cb_;
-    duration            duration_;
-    time_point          deadline_;
-    std::atomic<state>  state_;
+    Callback               cb_;
+    duration               duration_;
+    time_point             deadline_;
+    castle::atomic<state>  state_;
 };
 
 
-// Factory using the default clock (std::chrono::steady_clock)
+// Factory using the default clock (castle::chrono::steady_clock)
 // ("st" = single_thread variant).
 //
 //   using namespace std::chrono_literals;
@@ -428,18 +433,18 @@ private:
 //   // 200ms later, if execute() had never succeeded:
 //   ack.execute();   // returns false, permanently latched to "expired"
 template <typename Rep, typename Period, typename C>
-single_thread<typename std::decay<C>::type>
-make_policy_st(std::chrono::duration<Rep, Period> window, C&& cb)
+single_thread<typename meta::decay<C>::type>
+make_policy_st(castle::chrono::duration<Rep, Period> window, C&& cb)
 {
-    return single_thread<typename std::decay<C>::type>(window, std::forward<C>(cb));
+    return single_thread<typename meta::decay<C>::type>(window, CASTLE_FORWARD<C>(cb));
 }
 
 // Same as make_policy_st but with a user-supplied clock type.
 template <typename Clock, typename Rep, typename Period, typename C>
-single_thread<typename std::decay<C>::type, Clock>
-make_policy_st_with_clock(std::chrono::duration<Rep, Period> window, C&& cb)
+single_thread<typename meta::decay<C>::type, Clock>
+make_policy_st_with_clock(castle::chrono::duration<Rep, Period> window, C&& cb)
 {
-    return single_thread<typename std::decay<C>::type, Clock>(window, std::forward<C>(cb));
+    return single_thread<typename meta::decay<C>::type, Clock>(window, CASTLE_FORWARD<C>(cb));
 }
 
 // Factory for the atomic-based concurrent variant.
@@ -447,17 +452,17 @@ make_policy_st_with_clock(std::chrono::duration<Rep, Period> window, C&& cb)
 //   auto ack = callback_policy::armed_window::make_policy_concurrent(
 //                  50ms, []{ send_ack(); });
 template <typename Rep, typename Period, typename C>
-concurrent<typename std::decay<C>::type>
-make_policy_concurrent(std::chrono::duration<Rep, Period> window, C&& cb)
+concurrent<typename meta::decay<C>::type>
+make_policy_concurrent(castle::chrono::duration<Rep, Period> window, C&& cb)
 {
-    return concurrent<typename std::decay<C>::type>(window, std::forward<C>(cb));
+    return concurrent<typename meta::decay<C>::type>(window, CASTLE_FORWARD<C>(cb));
 }
 
 template <typename Clock, typename Rep, typename Period, typename C>
-concurrent<typename std::decay<C>::type, Clock>
-make_policy_concurrent_with_clock(std::chrono::duration<Rep, Period> window, C&& cb)
+concurrent<typename meta::decay<C>::type, Clock>
+make_policy_concurrent_with_clock(castle::chrono::duration<Rep, Period> window, C&& cb)
 {
-    return concurrent<typename std::decay<C>::type, Clock>(window, std::forward<C>(cb));
+    return concurrent<typename meta::decay<C>::type, Clock>(window, CASTLE_FORWARD<C>(cb));
 }
 
 } // namespace armed_window
@@ -475,9 +480,9 @@ class single_thread
 public:
     using callback_type = Callback;
 
-    template <typename C, typename = std::enable_if_t<!std::is_same<std::decay_t<C>, single_thread>::value>>
-    single_thread(std::size_t n, C&& cb)
-        : cb_(std::forward<C>(cb))
+    template <typename C, typename = meta::enable_if_t<!meta::is_same<meta::decay_t<C>, single_thread>::value>>
+    single_thread(size_type n, C&& cb)
+        : cb_(CASTLE_FORWARD<C>(cb))
         , n_(n == 0U ? 1U : n)
     {
     }
@@ -490,22 +495,22 @@ public:
             return;
         }
         counter_ = 0U;
-        cb_(std::forward<Args>(args)...);
+        cb_(CASTLE_FORWARD<Args>(args)...);
     }
 
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        execute(std::forward<Args>(args)...);
+        execute(CASTLE_FORWARD<Args>(args)...);
     }
 
     void reset() noexcept { counter_ = 0U; }
-    std::size_t interval() const noexcept { return n_; }
+    size_type interval() CASTLE_CONST noexcept { return n_; }
 
 private:
-    Callback     cb_;
-    std::size_t  n_;
-    std::size_t  counter_ = 0U;
+    Callback   cb_;
+    size_type  n_;
+    size_type  counter_ = 0U;
 };
 
 
@@ -515,9 +520,9 @@ class concurrent
 public:
     using callback_type = Callback;
 
-    template <typename C, typename = std::enable_if_t<!std::is_same<std::decay_t<C>, concurrent>::value>>
-    concurrent(std::size_t n, C&& cb)
-        : cb_(std::forward<C>(cb))
+    template <typename C, typename = meta::enable_if_t<!meta::is_same<meta::decay_t<C>, concurrent>::value>>
+    concurrent(size_type n, C&& cb)
+        : cb_(CASTLE_FORWARD<C>(cb))
         , n_(n == 0U ? 1U : n)
     {
     }
@@ -525,27 +530,27 @@ public:
     template <typename... Args>
     void execute(Args&&... args)
     {
-        const std::size_t prev = counter_.fetch_add(1U, std::memory_order_relaxed);
+        CASTLE_CONST size_type prev = counter_.fetch_add(1U, castle::memory_order_relaxed);
         if (((prev + 1U) % n_) != 0U)
         {
             return;
         }
-        cb_(std::forward<Args>(args)...);
+        cb_(CASTLE_FORWARD<Args>(args)...);
     }
 
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        execute(std::forward<Args>(args)...);
+        execute(CASTLE_FORWARD<Args>(args)...);
     }
 
-    void reset() noexcept { counter_.store(0U, std::memory_order_relaxed); }
-    std::size_t interval() const noexcept { return n_; }
+    void reset() noexcept { counter_.store(0U, castle::memory_order_relaxed); }
+    size_type interval() CASTLE_CONST noexcept { return n_; }
 
 private:
-    Callback                 cb_;
-    std::size_t              n_;
-    std::atomic<std::size_t> counter_{0U};
+    Callback                  cb_;
+    size_type                 n_;
+    castle::atomic<size_type> counter_{0U};
 };
 
 
@@ -556,15 +561,15 @@ private:
 //
 //   auto hb = callback_policy::every_n::make_policy_st(100, []{ toggle_led(); });
 template <typename C>
-single_thread<typename std::decay<C>::type> make_policy_st(std::size_t n, C&& cb)
+single_thread<typename meta::decay<C>::type> make_policy_st(size_type n, C&& cb)
 {
-    return single_thread<typename std::decay<C>::type>(n, std::forward<C>(cb));
+    return single_thread<typename meta::decay<C>::type>(n, CASTLE_FORWARD<C>(cb));
 }
 
 template <typename C>
-concurrent<typename std::decay<C>::type> make_policy_concurrent(std::size_t n, C&& cb)
+concurrent<typename meta::decay<C>::type> make_policy_concurrent(size_type n, C&& cb)
 {
-    return concurrent<typename std::decay<C>::type>(n, std::forward<C>(cb));
+    return concurrent<typename meta::decay<C>::type>(n, CASTLE_FORWARD<C>(cb));
 }
 
 // Factory with a compile-time constant N ("ct" = compile-time). Prefer this
@@ -572,11 +577,11 @@ concurrent<typename std::decay<C>::type> make_policy_concurrent(std::size_t n, C
 // immediate for power-of-two values.
 //
 //   auto stats = callback_policy::every_n::make_policy_ct<64>([]{ dump_stats(); });
-template <std::size_t N, typename C>
-single_thread<typename std::decay<C>::type> make_policy_ct(C&& cb)
+template <size_type N, typename C>
+single_thread<typename meta::decay<C>::type> make_policy_ct(C&& cb)
 {
     static_assert(N > 0, "every_n::make_policy_ct requires N > 0");
-    return single_thread<typename std::decay<C>::type>(N, std::forward<C>(cb));
+    return single_thread<typename meta::decay<C>::type>(N, CASTLE_FORWARD<C>(cb));
 }
 
 } // namespace every_n
@@ -584,7 +589,7 @@ single_thread<typename std::decay<C>::type> make_policy_ct(C&& cb)
 
 // -----------------------------------------------------------------------------
 // on_change - fire the callback only when the observed value differs from
-// the previously stored one. State is stored in-place via std::optional.
+// the previously stored one. State is stored in-place via castle::optional.
 // -----------------------------------------------------------------------------
 namespace on_change
 {
@@ -592,24 +597,24 @@ namespace on_change
 template <typename T, typename Callback>
 class single_thread
 {
-    static_assert(!std::is_reference<T>::value,
+    static_assert(!meta::is_reference<T>::value,
                   "on_change::single_thread requires a value type for T");
 public:
     using value_type    = T;
     using callback_type = Callback;
 
     // Construct without an initial value; the first execute() always fires.
-    template <typename C, typename = std::enable_if_t<!std::is_same<std::decay_t<C>, single_thread>::value>>
+    template <typename C, typename = meta::enable_if_t<!meta::is_same<meta::decay_t<C>, single_thread>::value>>
     explicit single_thread(C&& cb)
-        : cb_(std::forward<C>(cb))
+        : cb_(CASTLE_FORWARD<C>(cb))
     {
     }
 
     // Construct with an initial value; execute(v) fires only if v != initial.
     template <typename V, typename C>
     single_thread(V&& initial, C&& cb)
-        : cb_(std::forward<C>(cb))
-        , last_(std::in_place, std::forward<V>(initial))
+        : cb_(CASTLE_FORWARD<C>(cb))
+        , last_(meta::in_place, CASTLE_FORWARD<V>(initial))
     {
     }
 
@@ -620,26 +625,26 @@ public:
         {
             return;
         }
-        last_.emplace(std::forward<U>(new_value));
+        last_.emplace(CASTLE_FORWARD<U>(new_value));
         cb_(*last_);
     }
 
     template <typename U>
     void operator()(U&& new_value)
     {
-        execute(std::forward<U>(new_value));
+        execute(CASTLE_FORWARD<U>(new_value));
     }
 
-    void reset() noexcept(std::is_nothrow_destructible<T>::value)
+    void reset() noexcept(meta::is_nothrow_destructible<T>::value)
     {
         last_.reset();
     }
 
-    bool has_value() const noexcept { return last_.has_value(); }
+    bool has_value() CASTLE_CONST noexcept { return last_.has_value(); }
 
 private:
-    Callback         cb_;
-    std::optional<T> last_;
+    Callback            cb_;
+    castle::optional<T> last_;
 };
 
 
@@ -648,13 +653,13 @@ private:
 //
 //   auto w = callback_policy::on_change::make_policy_st(23, [](int v){ ... });
 template <typename V, typename C>
-single_thread<typename std::decay<V>::type, typename std::decay<C>::type>
+single_thread<typename meta::decay<V>::type, typename meta::decay<C>::type>
 make_policy_st(V&& initial, C&& cb)
 {
-    return single_thread<typename std::decay<V>::type,
-                         typename std::decay<C>::type>(
-        std::forward<V>(initial),
-        std::forward<C>(cb)
+    return single_thread<typename meta::decay<V>::type,
+                         typename meta::decay<C>::type>(
+        CASTLE_FORWARD<V>(initial),
+        CASTLE_FORWARD<C>(cb)
     );
 }
 
@@ -662,9 +667,9 @@ make_policy_st(V&& initial, C&& cb)
 //
 //   auto w = callback_policy::on_change::make_policy_st<int>([](int v){ ... });
 template <typename T, typename C>
-single_thread<T, typename std::decay<C>::type> make_policy_st(C&& cb)
+single_thread<T, typename meta::decay<C>::type> make_policy_st(C&& cb)
 {
-    return single_thread<T, typename std::decay<C>::type>(std::forward<C>(cb));
+    return single_thread<T, typename meta::decay<C>::type>(CASTLE_FORWARD<C>(cb));
 }
 
 } // namespace on_change
@@ -678,7 +683,7 @@ single_thread<T, typename std::decay<C>::type> make_policy_st(C&& cb)
 namespace throttle
 {
 
-template <typename Callback, typename Clock = std::chrono::steady_clock>
+template <typename Callback, typename Clock = castle::chrono::steady_clock>
 class single_thread
 {
 public:
@@ -688,62 +693,62 @@ public:
     using time_point    = typename Clock::time_point;
 
     template <typename Rep, typename Period, typename C,
-              typename = std::enable_if_t<!std::is_same<std::decay_t<C>, single_thread>::value>>
-    single_thread(std::chrono::duration<Rep, Period> interval, C&& cb)
-        : cb_(std::forward<C>(cb))
-        , interval_(std::chrono::duration_cast<duration>(interval))
+              typename = meta::enable_if_t<!meta::is_same<meta::decay_t<C>, single_thread>::value>>
+    single_thread(castle::chrono::duration<Rep, Period> interval, C&& cb)
+        : cb_(CASTLE_FORWARD<C>(cb))
+        , interval_(castle::chrono::duration_cast<duration>(interval))
     {
     }
 
     template <typename... Args>
     void execute(Args&&... args)
     {
-        const time_point now = Clock::now();
+        CASTLE_CONST time_point now = Clock::now();
         if (last_.has_value() && (now - *last_) < interval_)
         {
             return;
         }
         last_ = now;
-        cb_(std::forward<Args>(args)...);
+        cb_(CASTLE_FORWARD<Args>(args)...);
     }
 
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        execute(std::forward<Args>(args)...);
+        execute(CASTLE_FORWARD<Args>(args)...);
     }
 
     // Force next execute() to fire regardless of the elapsed interval.
     void reset() noexcept { last_.reset(); }
 
-    duration interval() const noexcept { return interval_; }
+    duration interval() CASTLE_CONST noexcept { return interval_; }
 
 private:
-    Callback                  cb_;
-    duration                  interval_;
-    std::optional<time_point> last_;
+    Callback                     cb_;
+    duration                     interval_;
+    castle::optional<time_point> last_;
 };
 
 
-// Factory using the default clock (std::chrono::steady_clock)
+// Factory using the default clock (castle::chrono::steady_clock)
 // ("st" = single_thread variant).
 //
 //   using namespace std::chrono_literals;
 //   auto gate = callback_policy::throttle::make_policy_st(500ms,
-//                   [](const char* m){ log(m); });
+//                   [](CASTLE_CONST char* m){ log(m); });
 template <typename Rep, typename Period, typename C>
-single_thread<typename std::decay<C>::type>
-make_policy_st(std::chrono::duration<Rep, Period> interval, C&& cb)
+single_thread<typename meta::decay<C>::type>
+make_policy_st(castle::chrono::duration<Rep, Period> interval, C&& cb)
 {
-    return single_thread<typename std::decay<C>::type>(interval, std::forward<C>(cb));
+    return single_thread<typename meta::decay<C>::type>(interval, CASTLE_FORWARD<C>(cb));
 }
 
 // Same as make_policy_st but with a user-supplied clock type.
 template <typename Clock, typename Rep, typename Period, typename C>
-single_thread<typename std::decay<C>::type, Clock>
-make_policy_st_with_clock(std::chrono::duration<Rep, Period> interval, C&& cb)
+single_thread<typename meta::decay<C>::type, Clock>
+make_policy_st_with_clock(castle::chrono::duration<Rep, Period> interval, C&& cb)
 {
-    return single_thread<typename std::decay<C>::type, Clock>(interval, std::forward<C>(cb));
+    return single_thread<typename meta::decay<C>::type, Clock>(interval, CASTLE_FORWARD<C>(cb));
 }
 
 } // namespace throttle
@@ -757,7 +762,7 @@ make_policy_st_with_clock(std::chrono::duration<Rep, Period> interval, C&& cb)
 namespace periodic
 {
 
-template <typename Callback, typename Clock = std::chrono::steady_clock>
+template <typename Callback, typename Clock = castle::chrono::steady_clock>
 class single_thread
 {
 public:
@@ -767,10 +772,10 @@ public:
     using time_point    = typename Clock::time_point;
 
     template <typename Rep, typename Period, typename C,
-              typename = std::enable_if_t<!std::is_same<std::decay_t<C>, single_thread>::value>>
-    single_thread(std::chrono::duration<Rep, Period> period, C&& cb)
-        : cb_(std::forward<C>(cb))
-        , period_(std::chrono::duration_cast<duration>(period))
+              typename = meta::enable_if_t<!meta::is_same<meta::decay_t<C>, single_thread>::value>>
+    single_thread(castle::chrono::duration<Rep, Period> period, C&& cb)
+        : cb_(CASTLE_FORWARD<C>(cb))
+        , period_(castle::chrono::duration_cast<duration>(period))
         , next_deadline_(Clock::now() + period_)
     {
     }
@@ -780,10 +785,10 @@ public:
     template <typename... Args>
     void poll(Args&&... args)
     {
-        const time_point now = Clock::now();
+        CASTLE_CONST time_point now = Clock::now();
         while (now >= next_deadline_)
         {
-            cb_(std::forward<Args>(args)...);
+            cb_(CASTLE_FORWARD<Args>(args)...);
             next_deadline_ += period_;
         }
     }
@@ -791,14 +796,14 @@ public:
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        poll(std::forward<Args>(args)...);
+        poll(CASTLE_FORWARD<Args>(args)...);
     }
 
     // Snap the next deadline to now + period (discards accumulated lag).
     void reset() noexcept { next_deadline_ = Clock::now() + period_; }
 
-    duration   period() const noexcept        { return period_; }
-    time_point next_deadline() const noexcept { return next_deadline_; }
+    duration   period() CASTLE_CONST noexcept        { return period_; }
+    time_point next_deadline() CASTLE_CONST noexcept { return next_deadline_; }
 
 private:
     Callback   cb_;
@@ -807,24 +812,24 @@ private:
 };
 
 
-// Factory using the default clock (std::chrono::steady_clock)
+// Factory using the default clock (castle::chrono::steady_clock)
 // ("st" = single_thread variant).
 //
 //   using namespace std::chrono_literals;
 //   auto tick = callback_policy::periodic::make_policy_st(1s, []{ housekeeping(); });
 template <typename Rep, typename Period, typename C>
-single_thread<typename std::decay<C>::type>
-make_policy_st(std::chrono::duration<Rep, Period> period, C&& cb)
+single_thread<typename meta::decay<C>::type>
+make_policy_st(castle::chrono::duration<Rep, Period> period, C&& cb)
 {
-    return single_thread<typename std::decay<C>::type>(period, std::forward<C>(cb));
+    return single_thread<typename meta::decay<C>::type>(period, CASTLE_FORWARD<C>(cb));
 }
 
 // Same as make_policy_st but with a user-supplied clock type.
 template <typename Clock, typename Rep, typename Period, typename C>
-single_thread<typename std::decay<C>::type, Clock>
-make_policy_st_with_clock(std::chrono::duration<Rep, Period> period, C&& cb)
+single_thread<typename meta::decay<C>::type, Clock>
+make_policy_st_with_clock(castle::chrono::duration<Rep, Period> period, C&& cb)
 {
-    return single_thread<typename std::decay<C>::type, Clock>(period, std::forward<C>(cb));
+    return single_thread<typename meta::decay<C>::type, Clock>(period, CASTLE_FORWARD<C>(cb));
 }
 
 } // namespace periodic
@@ -832,3 +837,5 @@ make_policy_st_with_clock(std::chrono::duration<Rep, Period> period, C&& cb)
 } // namespace policy
 } // namespace callbacks
 } // namespace castle
+
+#endif // CASTLE_CALLBACKS_CALLBACK_POLICY_H

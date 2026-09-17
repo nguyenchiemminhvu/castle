@@ -1,13 +1,20 @@
-#pragma once
+#ifndef CASTLE_CALLBACKS_INPLACE_CALLBACK_REGISTRY_H
+#define CASTLE_CALLBACKS_INPLACE_CALLBACK_REGISTRY_H
+
+#include "castle/core/compiler.h"
+#include "castle/core/config.h"
+#include "castle/core/error_handler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
+#include "castle/error/status.h"
+#include "castle/utility/move.h"
+#include "castle/utility/forward.h"
+#include "castle/container/array.h"
 
 #include "castle/callbacks/inplace_function.h"
 #include "castle/callbacks/callback_subscription.h"
 
-#include <array>
-#include <cstddef>
-#include <cstdint>
-#include <type_traits>
-#include <utility>
+#include <stdint.h>
 
 namespace castle
 {
@@ -37,40 +44,40 @@ namespace callbacks
 //   sub.unsubscribe();
 // -----------------------------------------------------------------------------
 template <
-    std::size_t max_callback,
+    size_type max_callback,
     typename signature,
-    std::size_t callback_storage_size = 64,
-    std::size_t callback_storage_alignment = alignof(std::max_align_t)>
+    size_type callback_storage_size = castle::inplace_storage_reserved,
+    size_type callback_storage_alignment = castle::inplace_alignment_default>
 class inplace_callback_registry;
 
 template <
-    std::size_t max_callback,
+    size_type max_callback,
     typename return_type,
     typename... Args,
-    std::size_t callback_storage_size,
-    std::size_t callback_storage_alignment>
-class inplace_callback_registry<max_callback, return_type(Args...), callback_storage_size, callback_storage_alignment> final
+    size_type callback_storage_size,
+    size_type callback_storage_alignment>
+class inplace_callback_registry<max_callback, return_type(Args...), callback_storage_size, callback_storage_alignment> CASTLE_FINAL
     : public i_unsubscribable
 {
-    static_assert(std::is_void_v<return_type>,
+    static_assert(castle::is_void<return_type>::value,
                   "inplace_callback_registry requires void callback return type");
 
 public:
     using callback_type = inplace_function<return_type(Args...), callback_storage_size, callback_storage_alignment>;
 
     using subscription = callback_subscription;
-    using error = callback_subscription_error;
+    using error = castle::status;
 
-    inplace_callback_registry() = default;
-    ~inplace_callback_registry() override = default;
+    inplace_callback_registry() CASTLE_DEFAULT;
+    ~inplace_callback_registry() override CASTLE_DEFAULT;
 
     // Non-copyable, non-movable. Registry identity is tied to slot storage
     // AND to the back-pointer embedded in outstanding subscriptions.
-    inplace_callback_registry(const inplace_callback_registry&) = delete;
-    inplace_callback_registry& operator=(const inplace_callback_registry&) = delete;
+    inplace_callback_registry(CASTLE_CONST inplace_callback_registry&) CASTLE_DELETE;
+    inplace_callback_registry& operator=(CASTLE_CONST inplace_callback_registry&) CASTLE_DELETE;
 
-    inplace_callback_registry(inplace_callback_registry&&) = delete;
-    inplace_callback_registry& operator=(inplace_callback_registry&&) = delete;
+    inplace_callback_registry(inplace_callback_registry&&) CASTLE_DELETE;
+    inplace_callback_registry& operator=(inplace_callback_registry&&) CASTLE_DELETE;
 
     // -------------------------------------------------------------------------
     // Subscribe a ready-made inplace_function callback.
@@ -88,13 +95,13 @@ public:
             return subscription{};
         }
 
-        for (std::size_t i = 0; i < max_callback; ++i)
+        for (size_type i = 0; i < max_callback; ++i)
         {
             slot& current_slot = slots_[i];
 
             if (!current_slot.active)
             {
-                current_slot.callback = std::move(callback);
+                current_slot.callback = CASTLE_MOVE(callback);
                 current_slot.active = true;
                 ++active_count_;
 
@@ -124,19 +131,20 @@ public:
     // subscribe(callback_type&&) above.
     // -------------------------------------------------------------------------
     template <typename callback_t,
-              typename = std::enable_if_t<!std::is_same_v<std::decay_t<callback_t>, callback_type> &&
-                                          !std::is_same_v<std::decay_t<callback_t>, subscription>>>
+              typename = meta::enable_if_t<
+                !castle::is_same<meta::decay_t<callback_t>, callback_type>::value
+             && !castle::is_same<meta::decay_t<callback_t>, subscription>::value, void>>
     subscription subscribe(callback_t&& callback, error* out_error = nullptr)
     {
-        callback_type callback_wrapper{std::forward<callback_t>(callback)};
-        return subscribe(std::move(callback_wrapper), out_error);
+        callback_type callback_wrapper{CASTLE_FORWARD<callback_t>(callback)};
+        return subscribe(CASTLE_MOVE(callback_wrapper), out_error);
     }
 
     // -------------------------------------------------------------------------
     // Type-erased unsubscribe entry point used by callback_subscription.
     // Not intended for direct client use — prefer subscription::unsubscribe().
     // -------------------------------------------------------------------------
-    error unsubscribe_slot(std::size_t index, std::uint32_t generation) noexcept override
+    error unsubscribe_slot(size_type index, uint32_t generation) noexcept override
     {
         if (index >= max_callback)
         {
@@ -169,13 +177,13 @@ public:
     // -------------------------------------------------------------------------
     void invoke(Args... args)
     {
-        for (std::size_t i = 0; i < max_callback; ++i)
+        for (size_type i = 0; i < max_callback; ++i)
         {
             slot& current_slot = slots_[i];
 
             if (current_slot.active && current_slot.callback)
             {
-                current_slot.callback(std::forward<Args>(args)...);
+                current_slot.callback(CASTLE_FORWARD<Args>(args)...);
             }
         }
     }
@@ -187,7 +195,7 @@ public:
     // -------------------------------------------------------------------------
     void operator()(Args... args)
     {
-        this->invoke(std::forward<Args>(args)...);
+        this->invoke(CASTLE_FORWARD<Args>(args)...);
     }
 
     // -------------------------------------------------------------------------
@@ -196,7 +204,7 @@ public:
     // -------------------------------------------------------------------------
     void clear() noexcept
     {
-        for (std::size_t i = 0; i < max_callback; ++i)
+        for (size_type i = 0; i < max_callback; ++i)
         {
             slot& current_slot = slots_[i];
 
@@ -211,17 +219,17 @@ public:
         active_count_ = 0;
     }
 
-    constexpr std::size_t size() const noexcept
+    constexpr size_type size() CASTLE_CONST noexcept
     {
         return active_count_;
     }
 
-    constexpr bool empty() const noexcept
+    constexpr bool empty() CASTLE_CONST noexcept
     {
         return active_count_ == 0;
     }
 
-    static constexpr std::size_t capacity() noexcept
+    static constexpr size_type capacity() noexcept
     {
         return max_callback;
     }
@@ -233,13 +241,15 @@ private:
     struct slot
     {
         callback_type callback;
-        std::uint32_t generation = 0;
+        uint32_t generation = 0;
         bool active = false;
     };
 
-    std::array<slot, max_callback> slots_{};
-    std::size_t active_count_ = 0;
+    container::array<slot, max_callback> slots_{};
+    size_type active_count_ = 0;
 };
 
 } // namespace callbacks
 } // namespace castle
+
+#endif // CASTLE_CALLBACKS_INPLACE_CALLBACK_REGISTRY_H

@@ -1,20 +1,18 @@
-#include "castle/types/safe_cast.h"
+/**
+ * Castle 2.0 sample: <castle/utility/safe_cast.h>
+ *
+ * Scenario: make primitive conversions explicit at a safety-critical protocol
+ * boundary. The example uses non-overflowing values so behavior is unambiguous.
+ */
+#include "sample_support.h"
+#include "castle/utility/safe_cast.h"
 
-#include <iostream>
-
-using namespace castle::types;
+#include <stdint.h>
 
 int main()
 {
-    int32_t int_value = 123456;
-    float float_value = SAFE_CAST<int32_t, float>(int_value);
-    std::cout << "int_value: " << int_value << ", float_value: "<< float_value << std::endl;
-
-    bool bool_value = SAFE_CAST<int32_t, bool>(int_value);
-    std::cout << "int_value: " << int_value << ", bool_value: "<< bool_value << std::endl;
-
-    uint16_t uint16_value = SAFE_CAST<int32_t, uint16_t>(int_value);
-    std::cout << "int_value: " << int_value << ", uint16_value: "<< uint16_value << std::endl;
-
+    CASTLE_SAMPLE_CHECK(castle::safe_cast::bool_to_uint8(true) == 1U);
+    CASTLE_SAMPLE_CHECK(castle::safe_cast::int8_to_uint8(42) == 42U);
+    CASTLE_SAMPLE_CHECK(castle::safe_cast::int16_to_int32(12) == 12);
     return 0;
 }

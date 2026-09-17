@@ -1,21 +1,19 @@
-#pragma once
+#ifndef CASTLE_EVENTS_INPLACE_EVENT_DISPATCHER_H
+#define CASTLE_EVENTS_INPLACE_EVENT_DISPATCHER_H
+
+#include "castle/core/compiler.h"
+#include "castle/core/error_handler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
+#include "castle/error/status.h"
+#include "castle/utility/forward.h"
+#include "castle/utility/tuple.h"
 
 #include "castle/callbacks/inplace_function.h"
 #include "castle/callbacks/inplace_callback_registry.h"
 #include "castle/events/event_config.h"
-#include "castle/events/event_subscription.h"
 
-#include <bitset>
-#include <cstddef>
-#include <cstdint>
-#include <tuple>
-#include <type_traits>
-#include <utility>
-
-using castle::callbacks::inplace_function;
-using castle::callbacks::inplace_callback_registry;
-using castle::callbacks::callback_subscription_error;
-using castle::callbacks::callback_subscription;
+#include <stdint.h>
 
 namespace castle
 {
@@ -40,21 +38,20 @@ namespace events
 //     tag acts as a compile-time key — analogous to an integer key in a hash
 //     table, but resolved at compile time to a tuple index (O(1), no hashing,
 //     no virtual dispatch, no placement new for the event slots themselves).
-//   - Each event owns its own inplace_callback_registry<max_callback,
+//   - Each event owns its own callbacks::inplace_callback_registry<max_callback,
 //     signature, callback_storage_size, callback_storage_alignment>.
 //     The registry stores each subscribed callable BY VALUE in a fixed
 //     inline buffer, so no heap allocation happens even for stateful
 //     lambdas.
 //
 // Storage:
-//   - A std::tuple of per-tag inplace_callback_registry instances holds the
+//   - A castle::tuple of per-tag callbacks::inplace_callback_registry instances holds the
 //     whole subscriber state — sized independently per event, no runtime
 //     allocation.
-//   - A std::bitset<sizeof...(EventConfigs)> tracks per-event enable state.
 //
 // Subscriptions:
 //   - register_callback<Tag>(callable) returns an
-//     callback_subscription carrying a back-pointer to the correct
+//     callbacks::callback_subscription carrying a back-pointer to the correct
 //     registry, so callers can self-unsubscribe:
 //         sub.unsubscribe();
 //
@@ -92,21 +89,21 @@ private:
     // not a function type", and "Signature returns non-void" all fall
     // through to the primary false_type — a single, sharp diagnostic at the
     // dispatcher's front door rather than a deeper failure inside
-    // inplace_callback_registry's void-return static_assert.
+    // callbacks::inplace_callback_registry's void-return static_assert.
     // -------------------------------------------------------------------------
     template <typename T>
-    struct is_valid_event_config : std::false_type {};
+    struct is_valid_event_config : meta::false_type {};
 
     template <
         typename EventTag,
-        std::size_t MaxCallback,
+        size_type MaxCallback,
         typename... Args,
-        std::size_t StorageSize,
-        std::size_t StorageAlignment>
+        size_type StorageSize,
+        size_type StorageAlignment>
     struct is_valid_event_config<event_config<EventTag, MaxCallback, void(Args...), StorageSize, StorageAlignment>>
-        : std::true_type {};
+        : meta::true_type {};
 
-    static_assert(std::conjunction<is_valid_event_config<EventConfigs>...>::value,
+    static_assert(meta::conjunction<is_valid_event_config<EventConfigs>...>::value,
                   "inplace_event_dispatcher accepts only event_config<...> template arguments "
                   "whose Signature is void(Args...)");
 
@@ -119,18 +116,18 @@ private:
 
     template <
         typename EventTag,
-        std::size_t MaxCallback,
+        size_type MaxCallback,
         typename Signature,
-        std::size_t StorageSize,
-        std::size_t StorageAlignment>
+        size_type StorageSize,
+        size_type StorageAlignment>
     struct config_traits<event_config<EventTag, MaxCallback, Signature, StorageSize, StorageAlignment>>
     {
         using event_tag = EventTag;
         using signature = Signature;
 
-        static constexpr std::size_t max_callback = MaxCallback;
-        static constexpr std::size_t storage_size = StorageSize;
-        static constexpr std::size_t storage_alignment = StorageAlignment;
+        static CASTLE_CONSTEXPR size_type max_callback = MaxCallback;
+        static CASTLE_CONSTEXPR size_type storage_size = StorageSize;
+        static CASTLE_CONSTEXPR size_type storage_alignment = StorageAlignment;
 
         static_assert(MaxCallback > 0,
                       "inplace_event_dispatcher: event_config::MaxCallback must be > 0");
@@ -153,13 +150,13 @@ private:
 
     // Empty-pack base case (partial specialisation: Target still open).
     template <typename Target>
-    struct contains_tag<Target> : std::false_type {};
+    struct contains_tag<Target> : meta::false_type {};
 
     // Recursive case.
     template <typename Target, typename First, typename... Rest>
     struct contains_tag<Target, First, Rest...>
-        : std::integral_constant<bool,
-              std::is_same<typename config_traits<First>::event_tag, Target>::value
+        : meta::integral_constant<bool,
+              meta::is_same<typename config_traits<First>::event_tag, Target>::value
               || contains_tag<Target, Rest...>::value>
     {};
 
@@ -170,13 +167,13 @@ private:
     // terminator because the EventConfigs... pack is guaranteed non-empty by
     // the static_assert above.
     template <typename Head>
-    struct configs_are_unique<Head> : std::true_type {};
+    struct configs_are_unique<Head> : meta::true_type {};
 
     // Recursive case: Head unique against Tail, plus Tail unique amongst
     // itself.
     template <typename Head, typename Next, typename... Tail>
     struct configs_are_unique<Head, Next, Tail...>
-        : std::integral_constant<bool,
+        : meta::integral_constant<bool,
               !contains_tag<typename config_traits<Head>::event_tag, Next, Tail...>::value
               && configs_are_unique<Next, Tail...>::value>
     {};
@@ -185,62 +182,60 @@ private:
                   "inplace_event_dispatcher: the EventConfigs... pack must not contain duplicate event_tag types");
 
     // -------------------------------------------------------------------------
-    // Per-event registry type — one owning inplace_callback_registry sized
+    // Per-event registry type — one owning callbacks::inplace_callback_registry sized
     // by that config's max_callback / signature / storage_size /
     // storage_alignment.
     // -------------------------------------------------------------------------
     template <typename Config>
-    using registry_type_for = inplace_callback_registry<
+    using registry_type_for = callbacks::inplace_callback_registry<
         config_traits<Config>::max_callback,
         typename config_traits<Config>::signature,
         config_traits<Config>::storage_size,
         config_traits<Config>::storage_alignment>;
 
-    using registry_tuple = std::tuple<registry_type_for<EventConfigs>...>;
+    using registry_tuple = castle::tuple<registry_type_for<EventConfigs>...>;
 
 public:
-    using error = event_subscription_error;
-    using subscription = callback_subscription;
+    using error = castle::status;
+    using subscription = callbacks::callback_subscription;
 
     inplace_event_dispatcher()
     {
-        // All events start enabled. bitset default-initialises to 0.
-        enabled_.set();
     }
 
-    ~inplace_event_dispatcher() = default;
+    ~inplace_event_dispatcher() CASTLE_DEFAULT;
 
     // Non-copyable, non-movable. Dispatcher identity is tied to the addresses
     // of the registries embedded in its tuple — outstanding subscriptions
     // reference those addresses via i_unsubscribable*.
-    inplace_event_dispatcher(const inplace_event_dispatcher&) = delete;
-    inplace_event_dispatcher& operator=(const inplace_event_dispatcher&) = delete;
+    inplace_event_dispatcher(CASTLE_CONST inplace_event_dispatcher&) CASTLE_DELETE;
+    inplace_event_dispatcher& operator=(CASTLE_CONST inplace_event_dispatcher&) CASTLE_DELETE;
 
-    inplace_event_dispatcher(inplace_event_dispatcher&&) = delete;
-    inplace_event_dispatcher& operator=(inplace_event_dispatcher&&) = delete;
+    inplace_event_dispatcher(inplace_event_dispatcher&&) CASTLE_DELETE;
+    inplace_event_dispatcher& operator=(inplace_event_dispatcher&&) CASTLE_DELETE;
 
     // -------------------------------------------------------------------------
     // Compile-time capacity queries.
     // -------------------------------------------------------------------------
-    static constexpr std::size_t event_capacity() noexcept
+    static CASTLE_CONSTEXPR size_type event_capacity() CASTLE_NOEXCEPT
     {
         return sizeof...(EventConfigs);
     }
 
     template <typename Tag>
-    static constexpr std::size_t callback_capacity() noexcept
+    static CASTLE_CONSTEXPR size_type callback_capacity() CASTLE_NOEXCEPT
     {
         return config_traits<config_for<Tag>>::max_callback;
     }
 
     template <typename Tag>
-    static constexpr std::size_t callback_storage_size() noexcept
+    static CASTLE_CONSTEXPR size_type callback_storage_size() CASTLE_NOEXCEPT
     {
         return config_traits<config_for<Tag>>::storage_size;
     }
 
     template <typename Tag>
-    static constexpr std::size_t callback_storage_alignment() noexcept
+    static CASTLE_CONSTEXPR size_type callback_storage_alignment() CASTLE_NOEXCEPT
     {
         return config_traits<config_for<Tag>>::storage_alignment;
     }
@@ -248,9 +243,9 @@ public:
     // -------------------------------------------------------------------------
     // Register a callback for the event identified by Tag.
     //
-    // Accepts any callable convertible to the inplace_function signature
+    // Accepts any callable convertible to the callbacks::inplace_function signature
     // declared by event_config<Tag, N, Signature, ...>. The callback is
-    // stored by value inside the registry's inplace_function buffer, so
+    // stored by value inside the registry's callbacks::inplace_function buffer, so
     // stateful lambdas / captures are supported (subject to the per-tag
     // callback_storage_size / callback_storage_alignment).
     //
@@ -260,16 +255,15 @@ public:
     template <typename Tag, typename Callback>
     subscription register_callback(Callback&& callback, error* out_error = nullptr)
     {
-        callback_subscription_error inner_error =
-            callback_subscription_error::ok;
+        status inner_error = status::ok;
 
         subscription sub = registry<Tag>().subscribe(
-            std::forward<Callback>(callback),
+            CASTLE_FORWARD<Callback>(callback),
             &inner_error);
 
         if (out_error != nullptr)
         {
-            *out_error = convert_error(inner_error);
+            *out_error = inner_error;
         }
 
         return sub;
@@ -279,46 +273,16 @@ public:
     // Dispatch an event identified by Tag with the payload declared by
     // Signature in event_config<Tag, N, Signature, ...>.
     //
-    // Perfect-forwarded to inplace_callback_registry::invoke(Args...).
+    // Perfect-forwarded to callbacks::inplace_callback_registry::invoke(Args...).
     // Returns error::event_disabled if the event tag is currently disabled.
     // (An unknown Tag fails to compile — no runtime "not found".)
     // -------------------------------------------------------------------------
     template <typename Tag, typename... CallArgs>
     error dispatch_event(CallArgs&&... args)
     {
-        constexpr std::size_t idx = index_of<Tag>();
-
-        if (!enabled_.test(idx))
-        {
-            return error::event_disabled;
-        }
-
-        registry<Tag>().invoke(std::forward<CallArgs>(args)...);
+        registry<Tag>().invoke(CASTLE_FORWARD<CallArgs>(args)...);
 
         return error::ok;
-    }
-
-    // -------------------------------------------------------------------------
-    // Enable / disable / query an event tag. Disabled events accept
-    // subscribes but dispatch_event() returns event_disabled without
-    // invoking any callbacks.
-    // -------------------------------------------------------------------------
-    template <typename Tag>
-    void enable_event() noexcept
-    {
-        enabled_.set(index_of<Tag>());
-    }
-
-    template <typename Tag>
-    void disable_event() noexcept
-    {
-        enabled_.reset(index_of<Tag>());
-    }
-
-    template <typename Tag>
-    bool is_event_enabled() const noexcept
-    {
-        return enabled_.test(index_of<Tag>());
     }
 
     // -------------------------------------------------------------------------
@@ -327,7 +291,7 @@ public:
     // objects are destroyed (the registry owns them).
     // -------------------------------------------------------------------------
     template <typename Tag>
-    void clear_event() noexcept
+    void clear_event() CASTLE_NOEXCEPT
     {
         registry<Tag>().clear();
     }
@@ -335,13 +299,13 @@ public:
     // -------------------------------------------------------------------------
     // Clear all subscriptions across every event tag.
     // -------------------------------------------------------------------------
-    void clear() noexcept
+    void clear() CASTLE_NOEXCEPT
     {
-        clear_all_impl(std::index_sequence_for<EventConfigs...>{});
+        clear_all_impl(castle::sequence::index_sequence_for<EventConfigs...>{});
     }
 
     template <typename Tag>
-    std::size_t subscriber_count() const noexcept
+    size_type subscriber_count() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return registry<Tag>().size();
     }
@@ -350,101 +314,74 @@ private:
     // -------------------------------------------------------------------------
     // Compile-time tag -> tuple index inside the EventConfigs... pack.
     //
-    // Implemented as a constexpr function template with `if constexpr` so
+    // Implemented as a CASTLE_CONSTEXPR function template with `CASTLE_IF_CONSTEXPR` so
     // only the branch corresponding to the actual match state is
     // instantiated — no runaway recursion after the first hit, and the
     // "unknown tag" diagnostic surfaces exactly once, at the moment
     // index_of<Tag>() is used.
     // -------------------------------------------------------------------------
-    template <typename Target, std::size_t I, typename First, typename... Rest>
-    static constexpr std::size_t index_of_scan() noexcept
+    template <typename Target, size_type I, typename First, typename... Rest>
+    static CASTLE_CONSTEXPR size_type index_of_scan() CASTLE_NOEXCEPT
     {
-        if constexpr (std::is_same<typename config_traits<First>::event_tag, Target>::value)
+        CASTLE_IF_CONSTEXPR (meta::is_same<typename config_traits<First>::event_tag, Target>::value)
         {
             return I;
         }
-        else if constexpr (sizeof...(Rest) > 0)
+        else CASTLE_IF_CONSTEXPR (sizeof...(Rest) > 0)
         {
             return index_of_scan<Target, I + 1, Rest...>();
         }
         else
         {
-            static_assert(std::is_same<typename config_traits<First>::event_tag, Target>::value,
+            static_assert(meta::is_same<typename config_traits<First>::event_tag, Target>::value,
                           "inplace_event_dispatcher: Tag is not present in the EventConfigs pack");
             return 0;
         }
     }
 
     template <typename Tag>
-    static constexpr std::size_t index_of() noexcept
+    static CASTLE_CONSTEXPR size_type index_of() CASTLE_NOEXCEPT
     {
         return index_of_scan<Tag, 0, EventConfigs...>();
     }
 
     // event_config bound to a specific tag — resolves via the tuple.
     template <typename Tag>
-    using config_for = std::tuple_element_t<index_of<Tag>(), std::tuple<EventConfigs...>>;
+    using config_for = castle::tuple_element_t<index_of<Tag>(), castle::tuple<EventConfigs...>>;
 
-    // Direct access to the inplace_callback_registry for a specific tag.
+    // Direct access to the callbacks::inplace_callback_registry for a specific tag.
     template <typename Tag>
-    registry_type_for<config_for<Tag>>& registry() noexcept
+    registry_type_for<config_for<Tag>>& registry() CASTLE_NOEXCEPT
     {
-        return std::get<index_of<Tag>()>(registries_);
+        return castle::get<index_of<Tag>()>(registries_);
     }
 
     template <typename Tag>
-    const registry_type_for<config_for<Tag>>& registry() const noexcept
+    CASTLE_CONST registry_type_for<config_for<Tag>>& registry() CASTLE_CONST CASTLE_NOEXCEPT
     {
-        return std::get<index_of<Tag>()>(registries_);
+        return castle::get<index_of<Tag>()>(registries_);
     }
 
     // Sequence a clear() call across every tuple element without fold
     // expressions in the body (index_sequence-driven expansion is C++14
     // friendly).
-    template <std::size_t... Is>
-    void clear_all_impl(std::index_sequence<Is...>) noexcept
+    template <size_type... Is>
+    void clear_all_impl(castle::sequence::index_sequence<Is...>) CASTLE_NOEXCEPT
     {
         int dummy[] = {
-            (std::get<Is>(registries_).clear(), 0)...
+            (castle::get<Is>(registries_).clear(), 0)...
         };
         (void)dummy;
     }
 
-    // Map callback_subscription_error to event_subscription_error.
-    static constexpr error convert_error(
-        callback_subscription_error error_code) noexcept
-    {
-        switch (error_code)
-        {
-            case callback_subscription_error::ok:
-            {
-                return error::ok;
-            }
-            case callback_subscription_error::full:
-            {
-                return error::full;
-            }
-            case callback_subscription_error::invalid_callback:
-            {
-                return error::invalid_callback;
-            }
-            case callback_subscription_error::invalid_subscription:
-            {
-                return error::invalid_subscription;
-            }
-        }
-        return error::invalid_subscription;
-    }
-
 private:
     // Per-event callback registries. Each registry is sized independently by
-    // its event_config and OWNS its callbacks by value via inplace_function's
+    // its event_config and OWNS its callbacks by value via callbacks::inplace_function's
     // inline buffer — zero heap.
     registry_tuple registries_{};
-
-    // Per-event enable/disable flags, indexed by index_of<Tag>().
-    std::bitset<sizeof...(EventConfigs)> enabled_{};
 };
 
 } // namespace events
 } // namespace castle
+
+#endif // CASTLE_EVENTS_INPLACE_EVENT_DISPATCHER_H

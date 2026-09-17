@@ -1,6 +1,11 @@
-#pragma once
+#ifndef CASTLE_EVENTS_EVENT_CONFIG_H
+#define CASTLE_EVENTS_EVENT_CONFIG_H
 
-#include <cstddef>
+#include "castle/core/compiler.h"
+#include "castle/core/config.h"
+#include "castle/core/error_handler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
 
 namespace castle
 {
@@ -48,8 +53,8 @@ namespace events
 //   struct Shutdown       {};
 //
 //   using configs =
-//       event_config<TimerExpired,   8, void(std::uint32_t, std::uint32_t)>,
-//       event_config<VehicleStarted, 4, void(std::uint8_t)>,
+//       event_config<TimerExpired,   8, void(uint32_t, uint32_t)>,
+//       event_config<VehicleStarted, 4, void(uint8_t)>,
 //       event_config<Shutdown,       2, void(), 32>;
 //
 //   using dispatcher_t         = event_dispatcher<configs...>;
@@ -57,19 +62,21 @@ namespace events
 // -----------------------------------------------------------------------------
 template <
     typename EventTag,
-    std::size_t MaxCallback,
+    size_type MaxCallback,
     typename Signature,
-    std::size_t CallbackStorageSize = 64,
-    std::size_t CallbackStorageAlignment = alignof(std::max_align_t)>
+    size_type CallbackStorageSize = castle::inplace_storage_reserved,
+    size_type CallbackStorageAlignment = castle::inplace_alignment_default>
 struct event_config
 {
     using event_tag = EventTag;
     using signature = Signature;
 
-    static constexpr std::size_t max_callback = MaxCallback;
-    static constexpr std::size_t callback_storage_size = CallbackStorageSize;
-    static constexpr std::size_t callback_storage_alignment = CallbackStorageAlignment;
+    static constexpr size_type max_callback = MaxCallback;
+    static constexpr size_type callback_storage_size = CallbackStorageSize;
+    static constexpr size_type callback_storage_alignment = CallbackStorageAlignment;
 };
 
 } // namespace events
 } // namespace castle
+
+#endif // CASTLE_EVENTS_EVENT_CONFIG_H
