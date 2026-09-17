@@ -56,7 +56,7 @@ CASTLE_INLINE T signed_min_error() CASTLE_NOEXCEPT
 // 1. Signed integrals
 // ----------------------------------------------------------------------------
 template <typename T>
-CASTLE_NODISCARD CASTLE_INLINE
+CASTLE_NODISCARD CASTLE_INLINE CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_signed<T>::value && meta::is_integral<T>::value, T>::type
 abs(T value) CASTLE_NOEXCEPT
 {
@@ -69,7 +69,7 @@ abs(T value) CASTLE_NOEXCEPT
 // 2. Floating-point
 // ----------------------------------------------------------------------------
 template <typename T>
-CASTLE_NODISCARD CASTLE_INLINE
+CASTLE_NODISCARD CASTLE_INLINE CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_floating_point<T>::value, T>::type
 abs(T value) CASTLE_NOEXCEPT
 {
@@ -80,7 +80,7 @@ abs(T value) CASTLE_NOEXCEPT
 // 3. Unsigned integrals - identity
 // ----------------------------------------------------------------------------
 template <typename T>
-CASTLE_NODISCARD CASTLE_INLINE
+CASTLE_NODISCARD CASTLE_INLINE CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_unsigned<T>::value, T>::type
 abs(T value) CASTLE_NOEXCEPT
 {
@@ -91,7 +91,7 @@ abs(T value) CASTLE_NOEXCEPT
 // 4. Signed -> unsigned magnitude (safe for the entire signed range)
 // ----------------------------------------------------------------------------
 template <typename T>
-CASTLE_NODISCARD CASTLE_INLINE
+CASTLE_NODISCARD CASTLE_INLINE CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_signed<T>::value && meta::is_integral<T>::value,
                         typename meta::make_unsigned<T>::type>::type
 uabs(T value) CASTLE_NOEXCEPT
@@ -107,7 +107,7 @@ uabs(T value) CASTLE_NOEXCEPT
 }
 
 template <typename T>
-CASTLE_NODISCARD CASTLE_INLINE
+CASTLE_NODISCARD CASTLE_INLINE CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_unsigned<T>::value, T>::type
 uabs(T value) CASTLE_NOEXCEPT
 {
