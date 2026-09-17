@@ -40,6 +40,21 @@ sqrt_real(T value) CASTLE_NOEXCEPT
         return static_cast<T>(0);
     }
 
+    // GCC/Clang (including armclang) fold __builtin_sqrt into a single
+    // hardware sqrt instruction at runtime, and can still evaluate it at
+    // compile time inside a constexpr context, so this keeps both usages
+    // fast without giving up determinism (IEEE-754 sqrt is exactly rounded).
+#if defined(__GNUC__) || defined(__clang__)
+    if (meta::is_same<T, float>::value)
+    {
+        return static_cast<T>(__builtin_sqrtf(static_cast<float>(value)));
+    }
+    if (meta::is_same<T, double>::value)
+    {
+        return static_cast<T>(__builtin_sqrt(static_cast<double>(value)));
+    }
+#endif
+
     // Keep the Newton iteration close to unity. Every scaling step changes
     // the square-root magnitude by a factor of two.
     T scaled = value;

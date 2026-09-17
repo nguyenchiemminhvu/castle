@@ -4,6 +4,8 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 
+#include <string.h>
+
 namespace castle
 {
 namespace container
@@ -69,14 +71,34 @@ public:
 
     size_type find(CharT value, size_type offset = 0U) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        for (size_type i = offset; i < size_; ++i)
+        if (offset >= size_)
         {
-            if (data_[i] == value)
-            {
-                return i;
-            }
+            return npos;
         }
-        return npos;
+
+        // memchr is typically a vectorized libc routine; a byte-at-a-time
+        // loop cannot match it, so only fall back to the loop for
+        // multi-byte character types.
+        CASTLE_IF_CONSTEXPR (sizeof(CharT) == 1U)
+        {
+            CASTLE_CONST void* found = memchr(data_ + offset, 
+                                              static_cast<unsigned char>(value),
+                                              size_ - offset);
+            return (found == nullptr)
+                   ? npos
+                   : static_cast<size_type>(static_cast<const CharT*>(found) - data_);
+        }
+        else
+        {
+            for (size_type i = offset; i < size_; ++i)
+            {
+                if (data_[i] == value)
+                {
+                    return i;
+                }
+            }
+            return npos;
+        }
     }
 
     size_type find(basic_string_view value, size_type offset = 0U) CASTLE_CONST CASTLE_NOEXCEPT
@@ -89,19 +111,49 @@ public:
         {
             return npos;
         }
-        for (size_type i = offset; i <= size_ - value.size_; ++i)
+
+        CASTLE_CONST size_type last_start = size_ - value.size_;
+
+        // memchr-accelerated skip search: jump straight to the next
+        // occurrence of the needle's first character instead of testing
+        // every start position, then confirm the rest with memcmp.
+        CASTLE_IF_CONSTEXPR (sizeof(CharT) == 1U)
         {
-            size_type j = 0U;
-            while ((j < value.size_) && (data_[i + j] == value.data_[j]))
+            size_type i = offset;
+            while (i <= last_start)
             {
-                ++j;
+                CASTLE_CONST void* found = memchr(data_ + i,
+                                                  static_cast<unsigned char>(value.data_[0U]),
+                                                  last_start - i + 1U);
+                if (found == nullptr)
+                {
+                    return npos;
+                }
+                i = static_cast<size_type>(static_cast<const CharT*>(found) - data_);
+                if (memcmp(data_ + i, value.data_, value.size_) == 0)
+                {
+                    return i;
+                }
+                ++i;
             }
-            if (j == value.size_)
-            {
-                return i;
-            }
+            return npos;
         }
-        return npos;
+        else
+        {
+            for (size_type i = offset; i <= last_start; ++i)
+            {
+                size_type j = 0U;
+                while ((j < value.size_) && (data_[i + j] == value.data_[j]))
+                {
+                    ++j;
+                }
+                if (j == value.size_)
+                {
+                    return i;
+                }
+            }
+            return npos;
+        }
     }
 
     int compare(basic_string_view other) CASTLE_CONST CASTLE_NOEXCEPT
@@ -109,16 +161,11 @@ public:
         CASTLE_CONST size_type common = size_ < other.size_
                                         ? size_
                                         : other.size_;
-        for (size_type i = 0U; i < common; ++i)
+
+        int result = memcmp(data_, other.data_, common);
+        if (result != 0)
         {
-            if (data_[i] < other.data_[i])
-            {
-                return -1;
-            }
-            if (other.data_[i] < data_[i])
-            {
-                return 1;
-            }
+            return result;
         }
         if (size_ < other.size_)
         {
@@ -150,12 +197,22 @@ private:
         {
             return 0U;
         }
-        size_type count = 0U;
-        while (text[count] != CharT())
+
+        // strlen() is a heavily optimized (often vectorized) libc routine;
+        // a hand-written byte loop is strictly slower for narrow characters.
+        CASTLE_IF_CONSTEXPR (sizeof(CharT) == 1U)
         {
-            ++count;
+            return static_cast<size_type>(strlen(reinterpret_cast<CASTLE_CONST char*>(text)));
         }
-        return count;
+        else
+        {
+            size_type count = 0U;
+            while (text[count] != CharT())
+            {
+                ++count;
+            }
+            return count;
+        }
     }
 
     const_pointer data_;

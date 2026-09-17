@@ -73,6 +73,37 @@ private:
         return static_cast<word_type>(static_cast<word_type>(1U) << (position % word_bits));
     }
 
+    // GCC/Clang (including armclang) lower these to a single hardware
+    // popcount/CLZ-based instruction (or a small branch-free sequence on
+    // targets without one), instead of the CHAR_BIT * sizeof(word) worst
+    // case iterations of the portable Kernighan loop kept as a fallback.
+    static size_type popcount_word(word_type value) CASTLE_NOEXCEPT
+    {
+#if defined(__GNUC__) || defined(__clang__)
+        CASTLE_IF_CONSTEXPR (sizeof(word_type) <= sizeof(unsigned int))
+        {
+            return static_cast<size_type>(__builtin_popcount(static_cast<unsigned int>(value)));
+        }
+        else CASTLE_IF_CONSTEXPR (sizeof(word_type) <= sizeof(unsigned long))
+        {
+            return static_cast<size_type>(__builtin_popcountl(static_cast<unsigned long>(value)));
+        }
+        else
+        {
+            return static_cast<size_type>(__builtin_popcountll(static_cast<unsigned long long>(value)));
+        }
+#else
+        size_type result = 0U;
+        word_type remaining = value;
+        while (remaining != static_cast<word_type>(0))
+        {
+            remaining &= static_cast<word_type>(remaining - static_cast<word_type>(1U));
+            ++result;
+        }
+        return result;
+#endif
+    }
+
 public:
     // ========================================================================
     // reference
@@ -236,12 +267,7 @@ public:
 
         for (size_type i = 0U; i < word_count; ++i)
         {
-            word_type value = words_[i];
-            while (value != static_cast<word_type>(0))
-            {
-                value &= static_cast<word_type>(value - static_cast<word_type>(1U));
-                ++result;
-            }
+            result += popcount_word(words_[i]);
         }
 
         return result;
@@ -389,13 +415,12 @@ public:
     {
         static_assert(Bits <= sizeof(unsigned long) * CHAR_BIT,
                       "castle::bitset::to_ulong() target type is too small");
+        // Pack whole words directly instead of re-deriving word/bit indices
+        // via test() for every single bit.
         unsigned long result = 0UL;
-        for (size_type i = 0U; i < Bits; ++i)
+        for (size_type i = 0U; i < word_count; ++i)
         {
-            if (test(i))
-            {
-                result |= (static_cast<unsigned long>(1UL) << i);
-            }
+            result |= static_cast<unsigned long>(words_[i]) << (i * word_bits);
         }
         return result;
     }
@@ -404,13 +429,12 @@ public:
     {
         static_assert(Bits <= sizeof(unsigned long long) * CHAR_BIT,
                       "castle::bitset::to_ullong() target type is too small");
+        // Pack whole words directly instead of re-deriving word/bit indices
+        // via test() for every single bit.
         unsigned long long result = 0ULL;
-        for (size_type i = 0U; i < Bits; ++i)
+        for (size_type i = 0U; i < word_count; ++i)
         {
-            if (test(i))
-            {
-                result |= (static_cast<unsigned long long>(1ULL) << i);
-            }
+            result |= static_cast<unsigned long long>(words_[i]) << (i * word_bits);
         }
         return result;
     }

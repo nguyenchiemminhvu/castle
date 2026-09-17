@@ -146,8 +146,8 @@ public:
     }
 
     // Returns the newest element. Precondition: !empty().
-    reference top() CASTLE_NOEXCEPT { return data_[wrap(head_ + N - 1U)]; }
-    const_reference top() CASTLE_CONST CASTLE_NOEXCEPT { return data_[wrap(head_ + N - 1U)]; }
+    reference top() CASTLE_NOEXCEPT { return data_[retreat(head_)]; }
+    const_reference top() CASTLE_CONST CASTLE_NOEXCEPT { return data_[retreat(head_)]; }
 
     size_type push_bulk(CASTLE_CONST value_type* src, size_type max) CASTLE_NOEXCEPT
     {
@@ -192,14 +192,18 @@ private:
                    : (index % N);
     }
 
+    // advance()/retreat() only ever move by one slot from an already-valid
+    // index in [0, N), so a compare-and-reset is enough here: this avoids
+    // the integer division that wrap()'s generic modulo needs whenever N is
+    // not a power of two, which is far costlier than a well-predicted branch.
     static CASTLE_CONSTEXPR size_type advance(size_type index) CASTLE_NOEXCEPT
     {
-        return wrap(index + 1U);
+        return (index + 1U == N) ? 0U : (index + 1U);
     }
 
     static CASTLE_CONSTEXPR size_type retreat(size_type index) CASTLE_NOEXCEPT
     {
-        return wrap(index + N - 1U);
+        return (index == 0U) ? (N - 1U) : (index - 1U);
     }
 
     container::array<value_type, N> data_{};

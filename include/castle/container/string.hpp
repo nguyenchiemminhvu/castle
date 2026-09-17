@@ -292,9 +292,11 @@ private:
     size_type size_;
 };
 
-using string = basic_string<char, 128U>;
+template <size_type N>
+using string = basic_string<char, N>;
 
-using u8string = basic_string<char, 128U>;
+template <size_type N>
+using u8string = basic_string<char, N>;
 
 template <typename CharT, size_type N>
 bool operator==(CASTLE_CONST basic_string<CharT, N>& lhs, CASTLE_CONST basic_string<CharT, N>& rhs) CASTLE_NOEXCEPT
