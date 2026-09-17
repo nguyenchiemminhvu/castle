@@ -1,10 +1,13 @@
-#pragma once
+#ifndef CASTLE_DESIGN_PATTERNS_SINGLETON_H
+#define CASTLE_DESIGN_PATTERNS_SINGLETON_H
 
-#include <cassert>
-#include <cstddef>
-#include <new>
-#include <type_traits>
-#include <utility>
+#include "castle/core/compiler.h"
+#include "castle/core/error_handler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
+#include "castle/memory/alignment.h"
+#include "castle/utility/utility.h"
+#include "castle/memory/new.h"
 
 //==============================================================================
 // singleton.h
@@ -36,14 +39,6 @@ namespace castle
 namespace design_patterns
 {
 
-//------------------------------------------------------------------------------
-// Assertion hook. Redefine SINGLETON_ASSERT before including this header to
-// integrate with a project-specific fault handler.
-//------------------------------------------------------------------------------
-#ifndef SINGLETON_ASSERT
-    #define SINGLETON_ASSERT(cond, msg) assert((cond) && (msg))
-#endif
-
 template <typename T>
 class singleton
 {
@@ -58,8 +53,8 @@ public:
     template <typename... Args>
     static void create(Args&&... args)
     {
-        SINGLETON_ASSERT(!s_is_valid, "singleton_already_created");
-        ::new (static_cast<void*>(&s_storage)) T(std::forward<Args>(args)...);
+        CASTLE_ASSERT(!s_is_valid, "singleton_already_created");
+        ::new (static_cast<void*>(&s_storage)) T(CASTLE_FORWARD<Args>(args)...);
         s_is_valid = true;
     }
 
@@ -67,9 +62,9 @@ public:
     // Destroy the managed instance.
     // Precondition: is_valid() == true.
     //--------------------------------------------------------------------------
-    static void destroy() noexcept(std::is_nothrow_destructible<T>::value)
+    static void destroy() noexcept(meta::is_nothrow_destructible<T>::value)
     {
-        SINGLETON_ASSERT(s_is_valid, "singleton_not_created");
+        CASTLE_ASSERT(s_is_valid, "singleton_not_created");
         reinterpret_cast<T*>(&s_storage)->~T();
         s_is_valid = false;
     }
@@ -80,7 +75,7 @@ public:
     //--------------------------------------------------------------------------
     static T& instance() noexcept
     {
-        SINGLETON_ASSERT(s_is_valid, "singleton_not_created");
+        CASTLE_ASSERT(s_is_valid, "singleton_not_created");
         return *reinterpret_cast<T*>(&s_storage);
     }
 
@@ -94,14 +89,14 @@ public:
 
 private:
 
-    singleton() = delete;
-    ~singleton() = delete;
-    singleton(const singleton&) = delete;
-    singleton& operator=(const singleton&) = delete;
-    singleton(singleton&&) = delete;
-    singleton& operator=(singleton&&) = delete;
+    singleton() CASTLE_DELETE;
+    ~singleton() CASTLE_DELETE;
+    singleton(CASTLE_CONST singleton&) CASTLE_DELETE;
+    singleton& operator=(CASTLE_CONST singleton&) CASTLE_DELETE;
+    singleton(singleton&&) CASTLE_DELETE;
+    singleton& operator=(singleton&&) CASTLE_DELETE;
 
-    using storage_type = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
+    using storage_type = typename memory::aligned_storage<sizeof(T), alignof(T)>::type;
 
     static storage_type s_storage;
     static bool         s_is_valid;
@@ -120,3 +115,4 @@ bool singleton<T>::s_is_valid = false;
 } // namespace design_patterns
 } // namespace castle
 
+#endif // CASTLE_DESIGN_PATTERNS_SINGLETON_H

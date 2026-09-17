@@ -1,19 +1,18 @@
-#pragma once
+#ifndef CASTLE_EVENTS_INPLACE_TICK_TIMER_H
+#define CASTLE_EVENTS_INPLACE_TICK_TIMER_H
+
+#include "castle/core/compiler.h"
+#include "castle/core/config.h"
+#include "castle/core/error_handler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
+#include "castle/core/type_ranges.h"
+#include "castle/error/status.h"
 
 #include "castle/callbacks/inplace_function.h"
 #include "castle/callbacks/inplace_callback_registry.h"
-#include "castle/events/event_subscription.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <limits>
-#include <type_traits>
-#include <utility>
-
-using castle::callbacks::inplace_function;
-using castle::callbacks::inplace_callback_registry;
-using castle::callbacks::callback_subscription_error;
-using castle::callbacks::callback_subscription;
+#include <stdint.h>
 
 namespace castle
 {
@@ -23,7 +22,7 @@ namespace events
 // -----------------------------------------------------------------------------
 // Repeat mode for inplace_tick_timer.
 // -----------------------------------------------------------------------------
-enum class inplace_tick_timer_mode : std::uint8_t
+enum class inplace_tick_timer_mode : uint8_t
 {
     one_shot = 0,   // fire once, then stop
     periodic,       // fire forever until stop()
@@ -32,7 +31,7 @@ enum class inplace_tick_timer_mode : std::uint8_t
 
 // -----------------------------------------------------------------------------
 // inplace_tick_timer - fixed-capacity, heap-free, tick-driven software timer
-// that OWNS its callbacks by value (via inplace_callback_registry).
+// that OWNS its callbacks by value (via callbacks::inplace_callback_registry).
 //
 // Model:
 //   - Callback signature is void() by design: a timeout event carries no
@@ -43,8 +42,8 @@ enum class inplace_tick_timer_mode : std::uint8_t
 //
 // Template parameters:
 //   MaxCallback              - max concurrent subscribers.
-//   CallbackStorageSize      - inplace_function SBO size per callback.
-//   CallbackStorageAlignment - inplace_function SBO alignment per callback.
+//   CallbackStorageSize      - callbacks::inplace_function SBO size per callback.
+//   CallbackStorageAlignment - callbacks::inplace_function SBO alignment per callback.
 //
 // Usage:
 //   castle::events::inplace_tick_timer<4> t;
@@ -60,35 +59,35 @@ enum class inplace_tick_timer_mode : std::uint8_t
 //   t.stop();
 // -----------------------------------------------------------------------------
 template <
-    std::size_t MaxCallback,
-    std::size_t CallbackStorageSize = 32,
-    std::size_t CallbackStorageAlignment = alignof(std::max_align_t)>
+    size_type MaxCallback,
+    size_type CallbackStorageSize = castle::inplace_storage_reserved,
+    size_type CallbackStorageAlignment = castle::inplace_alignment_default>
 class inplace_tick_timer
 {
     static_assert(MaxCallback > 0,
                   "inplace_tick_timer requires MaxCallback >= 1");
 
 public:
-    using tick_type = std::uint32_t;
-    using error = event_subscription_error;
+    using tick_type = uint32_t;
+    using error = castle::status;
     using mode = inplace_tick_timer_mode;
-    using subscription = callback_subscription;
-    using registry_type = inplace_callback_registry<
+    using subscription = callbacks::callback_subscription;
+    using registry_type = callbacks::inplace_callback_registry<
         MaxCallback,
         void(),
         CallbackStorageSize,
         CallbackStorageAlignment>;
 
-    inplace_tick_timer() = default;
-    ~inplace_tick_timer() = default;
+    inplace_tick_timer() CASTLE_DEFAULT;
+    ~inplace_tick_timer() CASTLE_DEFAULT;
 
     // Non-copyable, non-movable. Registry embeds an unsubscribable identity
     // that outstanding subscriptions reference by address.
-    inplace_tick_timer(const inplace_tick_timer&) = delete;
-    inplace_tick_timer& operator=(const inplace_tick_timer&) = delete;
+    inplace_tick_timer(CASTLE_CONST inplace_tick_timer&) CASTLE_DELETE;
+    inplace_tick_timer& operator=(CASTLE_CONST inplace_tick_timer&) CASTLE_DELETE;
 
-    inplace_tick_timer(inplace_tick_timer&&) = delete;
-    inplace_tick_timer& operator=(inplace_tick_timer&&) = delete;
+    inplace_tick_timer(inplace_tick_timer&&) CASTLE_DELETE;
+    inplace_tick_timer& operator=(inplace_tick_timer&&) CASTLE_DELETE;
 
     // -------------------------------------------------------------------------
     // Configure the timer period in ticks. Safe to call while running: takes
@@ -105,23 +104,23 @@ public:
     }
 
     // -------------------------------------------------------------------------
-    // Register a timeout callback. Any callable convertible to inplace_function
+    // Register a timeout callback. Any callable convertible to callbacks::inplace_function
     // signature void() is accepted (function pointers, stateless lambdas,
     // stateful lambdas within the SBO budget, functor objects, etc.).
     //
-    // Returns an callback_subscription. On failure the handle is
+    // Returns an callbacks::callback_subscription. On failure the handle is
     // !valid() and out_error (if provided) is set.
     // -------------------------------------------------------------------------
     template <typename Callback>
     subscription register_callback(Callback&& callback, error* out_error = nullptr) noexcept
     {
-        callback_subscription_error inner_error = callback_subscription_error::ok;
+        status inner_error = status::ok;
 
-        subscription sub = registry_.subscribe(std::forward<Callback>(callback), &inner_error);
+        subscription sub = registry_.subscribe(CASTLE_FORWARD<Callback>(callback), &inner_error);
 
         if (out_error != nullptr)
         {
-            *out_error = convert_error(inner_error);
+            *out_error = inner_error;
         }
 
         return sub;
@@ -255,6 +254,9 @@ public:
                     break;
                 }
                 case mode::periodic:
+                {
+                    CASTLE_FALL_THROUGH;
+                }
                 default:
                 {
                     // Keep running; loop consumes any remaining accumulated ticks.
@@ -267,24 +269,24 @@ public:
     // -------------------------------------------------------------------------
     // Introspection / queries.
     // -------------------------------------------------------------------------
-    bool is_running() const noexcept
+    bool is_running() CASTLE_CONST noexcept
     {
         return running_;
     }
 
-    tick_type period() const noexcept
+    tick_type period() CASTLE_CONST noexcept
     {
         return period_;
     }
 
-    tick_type elapsed() const noexcept
+    tick_type elapsed() CASTLE_CONST noexcept
     {
         return counter_;
     }
 
     // Remaining ticks until the next timeout. Returns 0 when the timer is
     // stopped or not configured (no meaningful remaining time).
-    tick_type remaining() const noexcept
+    tick_type remaining() CASTLE_CONST noexcept
     {
         if (!running_ || period_ == 0)
         {
@@ -295,33 +297,33 @@ public:
                 : static_cast<tick_type>(period_ - counter_);
     }
 
-    mode current_mode() const noexcept
+    mode current_mode() CASTLE_CONST noexcept
     {
         return mode_;
     }
 
     // Number of remaining fires for an n_repeat timer. Undefined semantics
     // for other modes -> returns 0.
-    tick_type repeats_remaining() const noexcept
+    tick_type repeats_remaining() CASTLE_CONST noexcept
     {
         return (mode_ == mode::n_repeat)
                 ? repeat_remaining_
                 : 0;
     }
 
-    std::size_t callback_count() const noexcept
+    size_type callback_count() CASTLE_CONST noexcept
     {
         return registry_.size();
     }
 
-    static constexpr std::size_t callback_capacity() noexcept
+    static constexpr size_type callback_capacity() noexcept
     {
         return MaxCallback;
     }
 
     static constexpr tick_type max_period() noexcept
     {
-        return std::numeric_limits<tick_type>::max();
+        return castle::numeric_limits<tick_type>::max();
     }
 
     // -------------------------------------------------------------------------
@@ -343,36 +345,9 @@ public:
         return registry_;
     }
 
-    const registry_type& registry() const noexcept
+    CASTLE_CONST registry_type& registry() CASTLE_CONST noexcept
     {
         return registry_;
-    }
-
-private:
-    // Map callback_subscription_error to tick_timer_error.
-    static constexpr error convert_error(callback_subscription_error error_code) noexcept
-    {
-        switch (error_code)
-        {
-            case callback_subscription_error::ok:
-            {
-                return error::ok;
-            }
-            case callback_subscription_error::full:
-            {
-                return error::full;
-            }
-            case callback_subscription_error::invalid_callback:
-            {
-                return error::invalid_callback;
-            }
-            case callback_subscription_error::invalid_subscription:
-            {
-                return error::invalid_subscription;
-            }
-        }
-
-        return error::invalid_subscription;
     }
 
 private:
@@ -391,3 +366,5 @@ private:
 
 } // namespace events
 } // namespace castle
+
+#endif // CASTLE_EVENTS_INPLACE_TICK_TIMER_H

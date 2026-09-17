@@ -1,11 +1,12 @@
-#pragma once
+#ifndef CASTLE_BIT_BIT_ROTATE_H
+#define CASTLE_BIT_BIT_ROTATE_H
 
-#include "castle/types/traits.h"
+#include "castle/core/compiler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
 
-#include <cstdint>
-#include <climits>
-
-using namespace castle::types;
+#include <stdint.h>
+#include <limits.h>
 
 namespace castle
 {
@@ -19,13 +20,13 @@ namespace bit
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-rotate_left(T value, std::uint32_t shift) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+rotate_left(T value, uint32_t shift) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
-    constexpr std::uint32_t bit_count = sizeof(T) * CHAR_BIT;
+    CASTLE_CONSTEXPR uint32_t bit_count = sizeof(T) * CHAR_BIT;
 
     shift %= bit_count;
     if (shift == 0)
@@ -44,13 +45,13 @@ rotate_left(T value, std::uint32_t shift) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, T>
-rotate_right(T value, std::uint32_t shift) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, T>
+rotate_right(T value, uint32_t shift) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
-    constexpr std::uint32_t bit_count = sizeof(T) * CHAR_BIT;
+    CASTLE_CONSTEXPR uint32_t bit_count = sizeof(T) * CHAR_BIT;
 
     shift %= bit_count;
     if (shift == 0)
@@ -64,3 +65,5 @@ rotate_right(T value, std::uint32_t shift) noexcept
 
 } // namespace bit
 } // namespace castle
+
+#endif // CASTLE_BIT_BIT_ROTATE_H

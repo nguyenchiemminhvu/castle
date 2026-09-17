@@ -1,11 +1,12 @@
-#pragma once
+#ifndef CASTLE_BIT_BIT_COUNT_H
+#define CASTLE_BIT_BIT_COUNT_H
 
-#include "castle/types/traits.h"
+#include "castle/core/compiler.h"
+#include "castle/core/types.h"
+#include "castle/core/traits.h"
 
-#include <cstdint>
-#include <climits>
-
-using namespace castle::types;
+#include <stdint.h>
+#include <limits.h>
 
 namespace castle
 {
@@ -15,24 +16,24 @@ namespace bit
 // ──────────────────────────────────────────────────────────────
 // popcount — count the number of set bits (1s) in a value.
 // Uses the SWAR (SIMD Within A Register) algorithm.
-// Branch-free, constexpr, no lookup tables.
+// Branch-free, CASTLE_CONSTEXPR, no lookup tables.
 // ──────────────────────────────────────────────────────────────
 
-constexpr std::uint32_t popcount(std::uint64_t value) noexcept
+CASTLE_CONSTEXPR uint32_t popcount(uint64_t value) CASTLE_NOEXCEPT
 {
-    std::uint64_t x = value;
+    uint64_t x = value;
     x -= (x >> 1) & 0x5555555555555555ULL;
     x = (x & 0x3333333333333333ULL) + ((x >> 2) & 0x3333333333333333ULL);
     x = (x + (x >> 4)) & 0x0F0F0F0F0F0F0F0FULL;
-    return static_cast<std::uint32_t>((x * 0x0101010101010101ULL) >> 56);
+    return static_cast<uint32_t>((x * 0x0101010101010101ULL) >> 56);
 }
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, std::uint32_t>
-popcount(T value) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, uint32_t>
+popcount(T value) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     uint64_t uval64 = static_cast<UnsignedT>(value);
 
     return popcount(uval64);
@@ -45,17 +46,17 @@ popcount(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, std::uint32_t>
-count_ones(T value) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, uint32_t>
+count_ones(T value) CASTLE_NOEXCEPT
 {
     return popcount(value);
 }
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, std::uint32_t>
-count_zeros(T value) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, uint32_t>
+count_zeros(T value) CASTLE_NOEXCEPT
 {
     return sizeof(T) * CHAR_BIT - popcount(value);
 }
@@ -68,25 +69,27 @@ count_zeros(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, std::uint32_t>
-count_leading_zeros(T value) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, uint32_t>
+count_leading_zeros(T value) CASTLE_NOEXCEPT
 {
     // Make value unsigned to guarantee safe bitwise right-shifts
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     if (uval == 0)
+    {
         return sizeof(T) * CHAR_BIT;
+    }
 
-    std::uint32_t count = 0;
+    uint32_t count = 0;
 
     // Binary search by shifting the value RIGHT instead of left
-    for (std::size_t i = (sizeof(T) * CHAR_BIT >> 1); i > 0; i >>= 1)
+    for (size_type i = (sizeof(T) * CHAR_BIT >> 1); i > 0; i >>= 1)
     {
         if ((uval >> i) == 0)
         {
-            count += static_cast<std::uint32_t>(i);
+            count += static_cast<uint32_t>(i);
         }
         else
         {
@@ -103,23 +106,25 @@ count_leading_zeros(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, std::uint32_t>
-count_trailing_zeros(T value) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, uint32_t>
+count_trailing_zeros(T value) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     if (uval == 0)
+    {
         return sizeof(T) * CHAR_BIT;
+    }
 
-    std::uint32_t count = 0;
+    uint32_t count = 0;
 
-    for (std::size_t i = (sizeof(T) * CHAR_BIT >> 1); i > 0; i >>= 1)
+    for (size_type i = (sizeof(T) * CHAR_BIT >> 1); i > 0; i >>= 1)
     {
         if ((uval & ((UnsignedT{1U} << i) - UnsignedT{1U})) == 0)
         {
-            count += static_cast<std::uint32_t>(i);
+            count += static_cast<uint32_t>(i);
             uval >>= i;
         }
     }
@@ -134,15 +139,17 @@ count_trailing_zeros(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, std::uint32_t>
-bit_width(T value) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, uint32_t>
+bit_width(T value) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     if (uval == 0)
+    {
         return 0;
+    }
 
     return sizeof(T) * CHAR_BIT - count_leading_zeros(uval);
 }
@@ -152,15 +159,17 @@ bit_width(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, std::uint32_t>
-log2_floor(T value) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, uint32_t>
+log2_floor(T value) CASTLE_NOEXCEPT
 {
-    using UnsignedT = typename std::make_unsigned<T>::type;
+    using UnsignedT = typename meta::make_unsigned<T>::type;
     UnsignedT uval = static_cast<UnsignedT>(value);
 
     if (uval == 0)
+    {
         return 0; // defensive; mathematically undefined
+    }
 
     return bit_width(uval) - 1U;
 }
@@ -171,18 +180,20 @@ log2_floor(T value) noexcept
 // ──────────────────────────────────────────────────────────────
 
 template <typename T>
-constexpr
-typename std::enable_if_t<is_valid_integer_v<T>, std::uint32_t>
-parity(T value) noexcept
+CASTLE_CONSTEXPR
+typename meta::enable_if_t<meta::is_valid_integer<T>::value, uint32_t>
+parity(T value) CASTLE_NOEXCEPT
 {
     return popcount(value) & 1;
 }
 
-template <std::size_t N>
-constexpr std::uint32_t parity() noexcept
+template <size_type N>
+CASTLE_CONSTEXPR uint32_t parity() CASTLE_NOEXCEPT
 {
-    return popcount(static_cast<std::uint64_t>(N)) & 1;
+    return popcount(static_cast<uint64_t>(N)) & 1;
 }
 
 } // namespace bit
 } // namespace castle
+
+#endif // CASTLE_BIT_BIT_COUNT_H

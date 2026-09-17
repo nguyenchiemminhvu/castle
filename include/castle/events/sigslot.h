@@ -1,12 +1,19 @@
-#pragma once
+#ifndef CASTLE_EVENTS_INPLACE_SIGSLOT_H
+#define CASTLE_EVENTS_INPLACE_SIGSLOT_H
+
+#include "castle/core/compiler.h"
+#include "castle/core/config.h"
+#include "castle/core/error_handler.h"
+#include "castle/core/traits.h"
+#include "castle/core/types.h"
+#include "castle/utility/move.h"
+#include "castle/utility/forward.h"
+
+#include "castle/container/array.h"
 
 #include "castle/callbacks/inplace_function.h"
 
-#include <array>
-#include <cstddef>
-#include <cstdint>
-#include <type_traits>
-#include <utility>
+#include <stdint.h>
 
 namespace castle
 {
@@ -17,7 +24,7 @@ namespace sigslot
 // Error codes returned by signal operations.
 // -----------------------------------------------------------------------------
 
-enum class signal_error : std::uint8_t
+enum class signal_error : uint8_t
 {
     ok = 0,
     full,
@@ -54,10 +61,10 @@ enum class signal_error : std::uint8_t
 // -----------------------------------------------------------------------------
 
 template <
-    std::size_t MaxSlot,
+    size_type MaxSlot,
     typename Signature,
-    std::size_t StorageSize = 64,
-    std::size_t StorageAlignment = alignof(std::max_align_t)>
+    size_type StorageSize = castle::inplace_storage_reserved,
+    size_type StorageAlignment = castle::inplace_alignment_default>
 class signal;
 
 // -----------------------------------------------------------------------------
@@ -88,20 +95,20 @@ class signal;
 
 template <
     typename Signal,
-    std::size_t MaxSlot>
+    size_type MaxSlot>
 class signal_connection
 {
 public:
 
-    signal_connection() noexcept = default;
+    signal_connection() noexcept CASTLE_DEFAULT;
 
     ~signal_connection()
     {
         disconnect();
     }
 
-    signal_connection(const signal_connection&) = delete;
-    signal_connection& operator=(const signal_connection&) = delete;
+    signal_connection(CASTLE_CONST signal_connection&) CASTLE_DELETE;
+    signal_connection& operator=(CASTLE_CONST signal_connection&) CASTLE_DELETE;
 
     signal_connection(signal_connection&& other) noexcept
         : owner_(other.owner_)
@@ -162,7 +169,7 @@ public:
 
         Signal* owner = owner_;
 
-        const signal_error result =
+        CASTLE_CONST signal_error result =
             owner->disconnect_slot(
                 index_,
                 generation_,
@@ -181,12 +188,12 @@ public:
     // Query whether this connection still represents a live subscription.
     // -------------------------------------------------------------------------
 
-    bool connected() const noexcept
+    bool connected() CASTLE_CONST noexcept
     {
         return valid_ && owner_ != nullptr;
     }
 
-    explicit operator bool() const noexcept
+    explicit operator bool() CASTLE_CONST noexcept
     {
         return connected();
     }
@@ -197,7 +204,7 @@ private:
 
     friend Signal;
 
-    signal_connection(Signal* owner, std::size_t index, std::uint32_t generation) noexcept
+    signal_connection(Signal* owner, size_type index, uint32_t generation) noexcept
         : owner_(owner)
         , index_(index)
         , generation_(generation)
@@ -222,8 +229,8 @@ private:
     }
 
     Signal* owner_ = nullptr;
-    std::size_t index_ = 0U;
-    std::uint32_t generation_ = 0U;
+    size_type index_ = 0U;
+    uint32_t generation_ = 0U;
     bool valid_ = false;
 };
 
@@ -232,11 +239,11 @@ private:
 // -----------------------------------------------------------------------------
 
 template <
-    std::size_t MaxSlot,
+    size_type MaxSlot,
     typename ReturnType,
     typename... Args,
-    std::size_t StorageSize,
-    std::size_t StorageAlignment>
+    size_type StorageSize,
+    size_type StorageAlignment>
 class signal<
     MaxSlot,
     ReturnType(Args...),
@@ -252,29 +259,26 @@ class signal<
     static_assert(StorageAlignment > 0,
                   "signal requires StorageAlignment > 0");
 
-    static_assert(std::is_void_v<ReturnType>,
+    static_assert(meta::is_void<ReturnType>::value,
                   "signal currently supports void return type only");
 
 public:
 
     using callback_type = callbacks::inplace_function<ReturnType(Args...), StorageSize, StorageAlignment>;
-
     using connection_type = signal_connection<signal, MaxSlot>;
 
-public:
-
-    signal() = default;
+    signal() CASTLE_DEFAULT;
 
     ~signal()
     {
         invalidate_connections();
     }
 
-    signal(const signal&) = delete;
-    signal& operator=(const signal&) = delete;
+    signal(CASTLE_CONST signal&) CASTLE_DELETE;
+    signal& operator=(CASTLE_CONST signal&) CASTLE_DELETE;
 
-    signal(signal&&) = delete;
-    signal& operator=(signal&&) = delete;
+    signal(signal&&) CASTLE_DELETE;
+    signal& operator=(signal&&) CASTLE_DELETE;
 
     // -------------------------------------------------------------------------
     // Connect a ready-made inplace_function.
@@ -288,13 +292,13 @@ public:
             return connection_type{};
         }
 
-        for (std::size_t i = 0U; i < MaxSlot; ++i)
+        for (size_type i = 0U; i < MaxSlot; ++i)
         {
             slot& current_slot = slots_[i];
 
             if (!current_slot.active)
             {
-                current_slot.callback = std::move(callback);
+                current_slot.callback = CASTLE_MOVE(callback);
                 current_slot.active = true;
 
                 ++active_count_;
@@ -328,18 +332,18 @@ public:
 
     template <
         typename Callable,
-        typename std::enable_if_t<
-            !std::is_same_v<typename std::decay<Callable>::type, callback_type> &&
-            !std::is_same_v<typename std::decay<Callable>::type, connection_type>,
+        typename meta::enable_if_t<
+            !meta::is_same<typename meta::decay<Callable>::type, callback_type>::value &&
+            !meta::is_same<typename meta::decay<Callable>::type, connection_type>::value,
             int> = 0>
     connection_type connect(Callable&& callback, signal_error* out_error = nullptr)
     {
-        callback_type callback_wrapper{std::forward<Callable>(callback)};
-        return connect(std::move(callback_wrapper), out_error);
+        callback_type callback_wrapper{CASTLE_FORWARD<Callable>(callback)};
+        return connect(CASTLE_MOVE(callback_wrapper), out_error);
     }
 
     // -------------------------------------------------------------------------
-    // Connect a non-const member function.
+    // Connect a non-CASTLE_CONST member function.
     //
     // The object is NOT owned by the signal.
     //
@@ -355,10 +359,10 @@ public:
         ReturnType (Class::*method)(MethodArgs...),
         signal_error* out_error = nullptr)
     {
-        static_assert(std::is_same_v<typename std::decay<Object>::type, Class>,
+        static_assert(meta::is_same<typename meta::decay<Object>::type, Class>::value,
                       "Member function class does not match object type");
 
-        static_assert(std::is_same_v<void(Args...), void(MethodArgs...)>,
+        static_assert(meta::is_same<void(Args...), void(MethodArgs...)>::value,
                       "Member function signature does not match signal signature");
 
         Class* object_ptr = &object;
@@ -366,14 +370,14 @@ public:
         return connect(
             [object_ptr, method](Args... args)
             {
-                (object_ptr->*method)(std::forward<Args>(args)...);
+                (object_ptr->*method)(CASTLE_FORWARD<Args>(args)...);
             },
             out_error
         );
     }
 
     // -------------------------------------------------------------------------
-    // Connect a const member function.
+    // Connect a CASTLE_CONST member function.
     // -------------------------------------------------------------------------
 
     template <
@@ -381,22 +385,22 @@ public:
         typename Class,
         typename... MethodArgs>
     connection_type connect(
-        const Object& object,
-        ReturnType (Class::*method)(MethodArgs...) const,
+        CASTLE_CONST Object& object,
+        ReturnType (Class::*method)(MethodArgs...) CASTLE_CONST,
         signal_error* out_error = nullptr)
     {
-        static_assert(std::is_same_v<typename std::decay<Object>::type, Class>,
+        static_assert(meta::is_same<typename meta::decay<Object>::type, Class>::value,
                       "Member function class does not match object type");
 
-        static_assert(std::is_same_v<void(Args...), void(MethodArgs...)>,
+        static_assert(meta::is_same<void(Args...), void(MethodArgs...)>::value,
                       "Member function signature does not match signal signature");
 
-        const Class* object_ptr = &object;
+        CASTLE_CONST Class* object_ptr = &object;
 
         return connect(
             [object_ptr, method](Args... args)
             {
-                (object_ptr->*method)(std::forward<Args>(args)...);
+                (object_ptr->*method)(CASTLE_FORWARD<Args>(args)...);
             },
             out_error
         );
@@ -417,13 +421,13 @@ public:
 
     void emit(Args... args)
     {
-        for (std::size_t i = 0U; i < MaxSlot; ++i)
+        for (size_type i = 0U; i < MaxSlot; ++i)
         {
             slot& current_slot = slots_[i];
 
             if (current_slot.active && current_slot.callback)
             {
-                current_slot.callback(std::forward<Args>(args)...);
+                current_slot.callback(CASTLE_FORWARD<Args>(args)...);
             }
         }
     }
@@ -434,7 +438,7 @@ public:
 
     void operator()(Args... args)
     {
-        emit(std::forward<Args>(args)...);
+        emit(CASTLE_FORWARD<Args>(args)...);
     }
 
     // -------------------------------------------------------------------------
@@ -445,7 +449,7 @@ public:
 
     void disconnect_all() noexcept
     {
-        for (std::size_t i = 0U; i < MaxSlot; ++i)
+        for (size_type i = 0U; i < MaxSlot; ++i)
         {
             slot& current_slot = slots_[i];
 
@@ -471,17 +475,17 @@ public:
     // Number of currently connected slots.
     // -------------------------------------------------------------------------
 
-    std::size_t size() const noexcept
+    size_type size() CASTLE_CONST noexcept
     {
         return active_count_;
     }
 
-    bool empty() const noexcept
+    bool empty() CASTLE_CONST noexcept
     {
         return active_count_ == 0U;
     }
 
-    static constexpr std::size_t capacity() noexcept
+    static constexpr size_type capacity() noexcept
     {
         return MaxSlot;
     }
@@ -501,7 +505,7 @@ private:
     {
         callback_type callback;
         connection_type* connection_ = nullptr;
-        std::uint32_t generation = 0U;
+        uint32_t generation = 0U;
         bool active = false;
     };
 
@@ -536,8 +540,8 @@ private:
     // -------------------------------------------------------------------------
 
     signal_error disconnect_slot(
-        std::size_t index,
-        std::uint32_t generation,
+        size_type index,
+        uint32_t generation,
         connection_type* connection_ptr) noexcept
     {
         if (index >= MaxSlot)
@@ -579,8 +583,8 @@ private:
     // -------------------------------------------------------------------------
 
     void rebind_connection(
-        std::size_t index,
-        std::uint32_t generation,
+        size_type index,
+        uint32_t generation,
         connection_type* new_connection) noexcept
     {
         if (index >= MaxSlot)
@@ -612,7 +616,7 @@ private:
 
     void invalidate_connections() noexcept
     {
-        for (std::size_t i = 0U; i < MaxSlot; ++i)
+        for (size_type i = 0U; i < MaxSlot; ++i)
         {
             slot& current_slot = slots_[i];
 
@@ -624,9 +628,11 @@ private:
         }
     }
 
-    std::array<slot, MaxSlot> slots_{};
-    std::size_t active_count_ = 0U;
+    container::array<slot, MaxSlot> slots_{};
+    size_type active_count_ = 0U;
 };
 
 } // namespace sigslot
 } // namespace castle
+
+#endif // CASTLE_EVENTS_INPLACE_SIGSLOT_H

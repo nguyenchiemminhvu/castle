@@ -1,6 +1,8 @@
 #ifndef CASTLE_VERSION_H
 #define CASTLE_VERSION_H
 
+#include "castle/core/compiler.h"
+
 /**
  * @file    version.h
  * @brief   CASTLE library version information.
@@ -11,8 +13,8 @@
  *   PATCH - backward-compatible bug fixes
  */
 
-#define CASTLE_VERSION_MAJOR 0
-#define CASTLE_VERSION_MINOR 1
+#define CASTLE_VERSION_MAJOR 2
+#define CASTLE_VERSION_MINOR 0
 #define CASTLE_VERSION_PATCH 0
 
 /* Encoded as 0xMMmmpp (8 bits per field) for cheap numeric comparison. */
@@ -41,10 +43,10 @@
 
 namespace castle
 {
-    static constexpr int version_encoded = CASTLE_VERSION;
-    static constexpr int version_major = CASTLE_VERSION_MAJOR;
-    static constexpr int version_minor = CASTLE_VERSION_MINOR;
-    static constexpr int version_patch = CASTLE_VERSION_PATCH;
+    static CASTLE_CONSTEXPR int version_encoded = CASTLE_VERSION;
+    static CASTLE_CONSTEXPR int version_major = CASTLE_VERSION_MAJOR;
+    static CASTLE_CONSTEXPR int version_minor = CASTLE_VERSION_MINOR;
+    static CASTLE_CONSTEXPR int version_patch = CASTLE_VERSION_PATCH;
 }
 
 #endif /* CASTLE_VERSION_H */
