@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/tuple.h"
-#include "castle/core/traits.h"
+#include "castle/utility/tuple.hpp"
+#include "castle/core/traits.hpp"
 
 namespace
 {

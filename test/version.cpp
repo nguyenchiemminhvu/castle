@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/version.h"
+#include "castle/version.hpp"
 
 namespace
 {

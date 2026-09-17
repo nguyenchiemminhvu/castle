@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/core/compiler_variants/arm.h"
+#include "castle/core/compiler_variants/arm.hpp"
 
 namespace
 {

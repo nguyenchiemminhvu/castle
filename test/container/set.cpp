@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/set.h"
+#include "castle/container/set.hpp"
 
 namespace
 {

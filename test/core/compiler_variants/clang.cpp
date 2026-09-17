@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/core/compiler_variants/clang.h"
+#include "castle/core/compiler_variants/clang.hpp"
 
 namespace
 {

@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/geometry/circle3d.h"
+#include "castle/math/geometry/circle3d.hpp"
 
 namespace
 {

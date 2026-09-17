@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/vector.h"
+#include "castle/container/vector.hpp"
 
 // Scenario: growing a deterministic in-object vector of samples up to a compile-time bound.
 int main()

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/sqrt.h"
+#include "castle/math/sqrt.hpp"
 
 namespace
 {

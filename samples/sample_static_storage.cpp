@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/memory/static_storage.h"
+#include "castle/memory/static_storage.hpp"
 
 // Scenario: owning a fixed pool of uninitialised slots for deterministic object construction.
 #include <stdint.h>

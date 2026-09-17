@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/core/config.h"
+#include "castle/core/config.hpp"
 
 // Scenario: compile-time configuration smoke test for target feature switches.
 int main()

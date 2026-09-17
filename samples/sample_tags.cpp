@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/iterator/tags.h"
+#include "castle/iterator/tags.hpp"
 
 // Scenario: using iterator category tags for dispatch in generic embedded algorithms.
 int main()

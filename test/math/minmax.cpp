@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/minmax.h"
+#include "castle/math/minmax.hpp"
 
 namespace
 {

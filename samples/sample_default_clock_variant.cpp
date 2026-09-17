@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/chrono/clock_variants/default_clock_variant.h"
+#include "castle/chrono/clock_variants/default_clock_variant.hpp"
 
 // Scenario: ensuring the target-specific clock variant header remains independently includable.
 int main()

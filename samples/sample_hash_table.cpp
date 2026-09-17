@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/hash_table.h"
+#include "castle/container/hash_table.hpp"
 
 // Scenario: deterministic open-addressed key/value storage for a small command table.
 int main()

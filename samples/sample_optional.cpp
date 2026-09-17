@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/optional.h"
+#include "castle/utility/optional.hpp"
 
 // Scenario: representing an optional sensor reading without a sentinel value or allocation.
 #include <stdint.h>

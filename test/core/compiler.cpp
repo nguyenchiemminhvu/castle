@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-#include "castle/core/compiler.h"
+#include "castle/core/compiler.hpp"
 
 namespace
 {

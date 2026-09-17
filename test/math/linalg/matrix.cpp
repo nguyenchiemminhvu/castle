@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/linalg/matrix.h"
+#include "castle/math/linalg/matrix.hpp"
 
 TEST(Matrix, ConstructionAccessAndIteration)
 {

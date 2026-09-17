@@ -1,7 +1,7 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/move.h"
-#include "castle/callbacks/inplace_function.h"
+#include "castle/utility/move.hpp"
+#include "castle/callbacks/inplace_function.hpp"
 
 // Scenario: binding a small ISR-safe callable entirely inside inline storage.
 #include <stdint.h>

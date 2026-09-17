@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "castle/memory/static_storage.h"
-#include "castle/memory/new.h"
+#include "castle/memory/static_storage.hpp"
+#include "castle/memory/new.hpp"
 
 #include <cstdint>
 

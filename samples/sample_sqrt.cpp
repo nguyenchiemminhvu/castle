@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/sqrt.h"
+#include "castle/math/sqrt.hpp"
 
 // Scenario: compile-time integer square-root calculations used for
 // deterministic buffer sizing and lookup-table dimensions.

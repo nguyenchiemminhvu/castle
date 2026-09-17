@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/lcm.h"
+#include "castle/math/lcm.hpp"
 
 #include <stdint.h>
 

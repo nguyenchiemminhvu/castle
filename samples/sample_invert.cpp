@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/invert.h"
+#include "castle/math/invert.hpp"
 
 // Scenario: using invert in a deterministic control/telemetry calculation.
 int main()

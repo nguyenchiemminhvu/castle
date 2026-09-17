@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/version.h"
+#include "castle/version.hpp"
 
 // Scenario: compile smoke test for the library version declaration.
 int main()

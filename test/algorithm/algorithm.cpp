@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "castle/algorithm/algorithm.h"
-#include "castle/container/array.h"
-#include "castle/container/forward_list.h"
+#include "castle/algorithm/algorithm.hpp"
+#include "castle/container/array.hpp"
+#include "castle/container/forward_list.hpp"
 
 namespace
 {

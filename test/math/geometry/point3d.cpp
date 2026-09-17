@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/geometry/point3d.h"
+#include "castle/math/geometry/point3d.hpp"
 
 namespace
 {

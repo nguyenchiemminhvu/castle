@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/iterator/operations.h"
+#include "castle/iterator/operations.hpp"
 
 // Scenario: generic iterator traversal in fixed buffers without depending on the STL algorithms header.
 int main()

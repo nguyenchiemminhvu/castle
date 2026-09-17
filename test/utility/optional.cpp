@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/optional.h"
-#include "castle/core/traits.h"
+#include "castle/utility/optional.hpp"
+#include "castle/core/traits.hpp"
 
 namespace
 {

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/linalg/vector.h"
+#include "castle/math/linalg/vector.hpp"
 
 TEST(Vector, ConstructionAndElementAccess)
 {

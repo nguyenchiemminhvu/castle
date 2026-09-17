@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/string.h"
+#include "castle/container/string.hpp"
 
 // Scenario: building a bounded diagnostic/telemetry line with explicit capacity errors.
 int main()

@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/mod.h"
+#include "castle/math/mod.hpp"
 
 namespace
 {

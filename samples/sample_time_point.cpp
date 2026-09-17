@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/chrono/time_point.h"
+#include "castle/chrono/time_point.hpp"
 
 // Scenario: computing deterministic deadlines from a monotonic timestamp representation.
 #include <stdint.h>

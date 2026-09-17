@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/utility.h"
+#include "castle/utility/utility.hpp"
 
 // Scenario: umbrella-header smoke test covering Castle’s standard-library-like utility layer.
 int main()

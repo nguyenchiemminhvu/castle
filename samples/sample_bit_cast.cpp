@@ -4,8 +4,8 @@
  * Scenario: decoding a fixed-width wire/register representation without C-style
  * aliasing or union type-punning tricks.
  */
-#include "sample_support.h"
-#include "castle/utility/bit_cast.h"
+#include "sample_support.hpp"
+#include "castle/utility/bit_cast.hpp"
 
 #include <stdint.h>
 

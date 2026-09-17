@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/bitset.h"
+#include "castle/container/bitset.hpp"
 
 namespace
 {

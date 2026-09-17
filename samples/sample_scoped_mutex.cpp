@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/mutex/scoped_mutex.h"
+#include "castle/mutex/scoped_mutex.hpp"
 
 // Scenario: RAII locking of a very short critical section while preserving exception-free code.
 int main()

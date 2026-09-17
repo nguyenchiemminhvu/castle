@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/string_view.h"
+#include "castle/container/string_view.hpp"
 
 // Scenario: parsing an incoming command frame without copying it into another buffer.
 int main()

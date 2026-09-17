@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/mean.h"
+#include "castle/math/mean.hpp"
 
 // Scenario: using mean in a deterministic control/telemetry calculation.
 int main()

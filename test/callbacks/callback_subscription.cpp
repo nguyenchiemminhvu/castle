@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/callbacks/callback_subscription.h"
+#include "castle/callbacks/callback_subscription.hpp"
 
 namespace
 {

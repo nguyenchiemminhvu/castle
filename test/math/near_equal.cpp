@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/near_equal.h"
+#include "castle/math/near_equal.hpp"
 
 namespace
 {

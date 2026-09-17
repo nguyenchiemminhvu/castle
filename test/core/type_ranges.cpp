@@ -4,7 +4,7 @@
 #include <climits>
 #include <limits>
 
-#include "castle/core/type_ranges.h"
+#include "castle/core/type_ranges.hpp"
 
 namespace
 {

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/mutex/mutex.h"
+#include "castle/mutex/mutex.hpp"
 
 namespace
 {

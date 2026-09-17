@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/variant.h"
+#include "castle/utility/variant.hpp"
 
 // Scenario: implementing a finite-state message payload without dynamic allocation.
 #include <stdint.h>

@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/sqrt_real.h"
+#include "castle/math/sqrt_real.hpp"
 
 namespace
 {

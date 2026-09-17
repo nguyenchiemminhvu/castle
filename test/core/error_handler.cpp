@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-#include "castle/core/error_handler.h"
+#include "castle/core/error_handler.hpp"
 
 namespace
 {

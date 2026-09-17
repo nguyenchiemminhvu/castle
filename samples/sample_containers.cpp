@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/containers.h"
+#include "castle/container/containers.hpp"
 
 // Scenario: umbrella-header smoke test for the full fixed-capacity container set.
 int main()

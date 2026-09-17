@@ -4,8 +4,8 @@
  * Scenario: declare an event contract at compile time. The dispatcher samples
  * consume these same configuration types, keeping capacities deterministic.
  */
-#include "sample_support.h"
-#include "castle/events/event_config.h"
+#include "sample_support.hpp"
+#include "castle/events/event_config.hpp"
 
 #include <stdint.h>
 

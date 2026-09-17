@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/isqrt.h"
+#include "castle/math/isqrt.hpp"
 
 #include <cstdint>
 

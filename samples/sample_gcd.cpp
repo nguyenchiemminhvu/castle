@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/gcd.h"
+#include "castle/math/gcd.hpp"
 
 // Scenario: using gcd in a deterministic control/telemetry calculation.
 int main()

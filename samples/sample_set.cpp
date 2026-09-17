@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/set.h"
+#include "castle/container/set.hpp"
 
 // Scenario: maintaining a sorted set of active channel IDs without heap allocation.
 int main()

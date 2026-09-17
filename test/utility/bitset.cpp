@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/bitset.h"
+#include "castle/utility/bitset.hpp"
 
 #include <stdint.h>
 

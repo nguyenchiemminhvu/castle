@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/events/signal_ipc_config.h"
+#include "castle/events/signal_ipc_config.hpp"
 
 // Scenario: compile-time signal/IPC configuration smoke test.
 int main()

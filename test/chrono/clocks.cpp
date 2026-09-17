@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/chrono/clocks.h"
+#include "castle/chrono/clocks.hpp"
 
 TEST(ClocksTest, PropertiesNowAndTimeTConversion)
 {

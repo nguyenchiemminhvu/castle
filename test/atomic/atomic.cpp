@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/atomic/atomic.h"
+#include "castle/atomic/atomic.hpp"
 
 namespace
 {

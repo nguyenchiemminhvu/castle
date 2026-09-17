@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/saturating.h"
+#include "castle/math/saturating.hpp"
 
 #include <cstdint>
 

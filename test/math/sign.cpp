@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/sign.h"
+#include "castle/math/sign.hpp"
 
 #include <cstdint>
 

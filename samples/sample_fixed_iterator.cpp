@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/iterator/fixed_iterator.h"
+#include "castle/iterator/fixed_iterator.hpp"
 
 // Scenario: preventing accidental traversal beyond a validated fixed buffer range.
 int main()

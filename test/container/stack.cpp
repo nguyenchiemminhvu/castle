@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/stack.h"
+#include "castle/container/stack.hpp"
 namespace
 {
 TEST(StackTest, LIFOOverflowWrapAndBulk)

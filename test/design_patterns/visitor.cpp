@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/design_patterns/visitor.h"
+#include "castle/design_patterns/visitor.hpp"
 
 namespace
 {

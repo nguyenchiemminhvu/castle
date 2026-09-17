@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/linalg/trigonometry.h"
+#include "castle/math/linalg/trigonometry.hpp"
 
 TEST(Trigonometry, BasicFloatDoubleAndLongDoubleWrappers)
 {

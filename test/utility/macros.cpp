@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/utility/macros.h"
+#include "castle/utility/macros.hpp"
 
 #include <string.h>
 #include <wchar.h>

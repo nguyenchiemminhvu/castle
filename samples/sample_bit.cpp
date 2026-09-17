@@ -4,8 +4,8 @@
  * Scenario: an MCU status register is decoded and updated using the bit facade.
  * The same pattern is typical for GPIO, UART, DMA, and timer control registers.
  */
-#include "sample_support.h"
-#include "castle/bit/bit.h"
+#include "sample_support.hpp"
+#include "castle/bit/bit.hpp"
 
 #include <stdint.h>
 

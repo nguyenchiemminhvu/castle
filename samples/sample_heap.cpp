@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/heap.h"
+#include "castle/container/heap.hpp"
 
 // Scenario: bounded deadline queue where the next smallest timeout must be at the root.
 int main()

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/container/heap.h"
+#include "castle/container/heap.hpp"
 
 namespace
 {

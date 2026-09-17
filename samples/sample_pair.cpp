@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/pair.h"
+#include "castle/utility/pair.hpp"
 
 // Scenario: storing a compact key/value record used by deterministic lookup tables.
 int main()

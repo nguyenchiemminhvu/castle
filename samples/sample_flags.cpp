@@ -4,8 +4,8 @@
  * Scenario: represent a four-bit software feature mask while constraining all
  * writes to the declared mask width.
  */
-#include "sample_support.h"
-#include "castle/bit/flags.h"
+#include "sample_support.hpp"
+#include "castle/bit/flags.hpp"
 
 #include <stdint.h>
 

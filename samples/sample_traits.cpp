@@ -5,9 +5,9 @@
  * basename, so the required sample_<header_file_name>.cpp rule permits one file.
  * Both APIs are covered here.
  */
-#include "sample_support.h"
-#include "castle/core/traits.h"
-#include "castle/iterator/traits.h"
+#include "sample_support.hpp"
+#include "castle/core/traits.hpp"
+#include "castle/iterator/traits.hpp"
 
 #include <stdint.h>
 

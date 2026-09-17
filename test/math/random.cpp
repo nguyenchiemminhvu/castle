@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/random.h"
+#include "castle/math/random.hpp"
 
 #include <stdint.h>
 #include <set>

@@ -4,8 +4,8 @@
  * Scenario: deterministic pseudo-random backoff for retry scheduling. The PRNG
  * has explicit seed/state and does not depend on libc rand/srand or a heap.
  */
-#include "sample_support.h"
-#include "castle/math/random.h"
+#include "sample_support.hpp"
+#include "castle/math/random.hpp"
 
 #include <stdint.h>
 

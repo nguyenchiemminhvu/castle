@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/memory/soo_buffer.h"
+#include "castle/memory/soo_buffer.hpp"
 
 // Scenario: compile smoke test for small-object-optimization storage primitives.
 int main()

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/chrono/chrono.h"
+#include "castle/chrono/chrono.hpp"
 
 TEST(ChronoTest, UmbrellaCompilesAndAliases)
 {

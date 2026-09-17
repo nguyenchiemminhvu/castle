@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/memory/addressof.h"
+#include "castle/memory/addressof.hpp"
 
 namespace
 {

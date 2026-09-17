@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "castle/container/array_view.h"
-#include "castle/container/array.h"
+#include "castle/container/array_view.hpp"
+#include "castle/container/array.hpp"
 
 namespace 
 {

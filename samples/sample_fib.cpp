@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/fib.h"
+#include "castle/math/fib.hpp"
 
 // Scenario: using fib in a deterministic control/telemetry calculation.
 int main()

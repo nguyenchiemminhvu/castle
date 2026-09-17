@@ -1,7 +1,7 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/move.h"
-#include "castle/events/sigslot.h"
+#include "castle/utility/move.hpp"
+#include "castle/events/sigslot.hpp"
 
 // Scenario: fixed-capacity signal/slot notification from an ISR-safe producer to application logic.
 #include <stdint.h>

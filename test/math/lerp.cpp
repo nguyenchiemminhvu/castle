@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/lerp.h"
+#include "castle/math/lerp.hpp"
 
 namespace
 {

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/linalg/transform.h"
+#include "castle/math/linalg/transform.hpp"
 
 TEST(Transform, TwoDimensionalTranslationAndScaling)
 {

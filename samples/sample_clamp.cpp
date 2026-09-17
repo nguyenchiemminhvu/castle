@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/clamp.h"
+#include "castle/math/clamp.hpp"
 
 // Scenario: using clamp in a deterministic control/telemetry calculation.
 int main()

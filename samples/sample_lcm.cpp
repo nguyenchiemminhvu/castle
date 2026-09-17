@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/lcm.h"
+#include "castle/math/lcm.hpp"
 
 // Scenario: using lcm in a deterministic control/telemetry calculation.
 int main()

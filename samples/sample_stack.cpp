@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/stack.h"
+#include "castle/container/stack.hpp"
 
 // Scenario: bounded execution stack for a cooperative command interpreter.
 int main()

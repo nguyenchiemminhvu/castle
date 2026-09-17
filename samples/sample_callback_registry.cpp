@@ -4,9 +4,9 @@
  * Scenario: a fixed-capacity telemetry fan-out. The registry stores only
  * non-owning callback pointers, so application lifetime remains explicit.
  */
-#include "sample_support.h"
-#include "castle/callbacks/callback_registry.h"
-#include "castle/callbacks/function.h"
+#include "sample_support.hpp"
+#include "castle/callbacks/callback_registry.hpp"
+#include "castle/callbacks/function.hpp"
 
 #include <stdint.h>
 

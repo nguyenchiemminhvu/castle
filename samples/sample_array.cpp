@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/array.h"
+#include "castle/container/array.hpp"
 
 // Scenario: storing a fixed set of ADC channels without any dynamic allocation.
 int main()

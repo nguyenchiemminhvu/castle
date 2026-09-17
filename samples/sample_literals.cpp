@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/chrono/literals.h"
+#include "castle/chrono/literals.hpp"
 
 // Scenario: expressing timer constants in readable source without runtime conversion.
 int main()

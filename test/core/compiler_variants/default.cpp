@@ -3,7 +3,7 @@
 // Include the fallback variant directly. It is NOT the active variant on this
 // platform, but the header stands alone and its macros can be exercised in
 // isolation because gcc.h is never pulled in here.
-#include "castle/core/compiler_variants/default.h"
+#include "castle/core/compiler_variants/default.hpp"
 
 namespace
 {

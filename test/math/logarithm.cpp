@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/math/logarithm.h"
+#include "castle/math/logarithm.hpp"
 
 namespace
 {

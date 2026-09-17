@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "castle/math/hypot.h"
+#include "castle/math/hypot.hpp"
 
 namespace
 {

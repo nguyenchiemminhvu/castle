@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/bit/bit_mask.h"
+#include "castle/bit/bit_mask.hpp"
 
 // Scenario: building compile-time and runtime masks for GPIO and peripheral register fields.
 #include <stdint.h>

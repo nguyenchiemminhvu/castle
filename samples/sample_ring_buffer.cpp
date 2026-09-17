@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/container/ring_buffer.h"
+#include "castle/container/ring_buffer.hpp"
 
 // Scenario: retaining the most recent telemetry samples while bounding RAM exactly.
 int main()

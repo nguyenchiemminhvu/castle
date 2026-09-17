@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/math/math.h"
+#include "castle/math/math.hpp"
 
 // Scenario: using math in a deterministic control/telemetry calculation.
 int main()

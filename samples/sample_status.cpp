@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/error/status.h"
+#include "castle/error/status.hpp"
 
 // Scenario: checking non-throwing operation results used throughout Castle containers.
 int main()

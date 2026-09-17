@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/events/inplace_tick_timer.h"
+#include "castle/events/inplace_tick_timer.hpp"
 
 namespace
 {

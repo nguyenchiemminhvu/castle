@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "castle/core/config.h"
+#include "castle/core/config.hpp"
 
 namespace
 {

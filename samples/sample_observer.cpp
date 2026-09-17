@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/design_patterns/observer.h"
+#include "castle/design_patterns/observer.hpp"
 
 // Scenario: notifying a fixed set of observers when a sensor value changes.
 #include <stdint.h>

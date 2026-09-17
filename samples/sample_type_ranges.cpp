@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/core/type_ranges.h"
+#include "castle/core/type_ranges.hpp"
 
 // Scenario: range checks used to validate sensor scaling without including <limits>.
 int main()

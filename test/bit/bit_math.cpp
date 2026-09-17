@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/bit/bit_math.h"
+#include "castle/bit/bit_math.hpp"
 
 #include <cstdint>
 

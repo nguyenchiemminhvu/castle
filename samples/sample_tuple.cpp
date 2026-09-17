@@ -1,6 +1,6 @@
-#include "sample_support.h"
+#include "sample_support.hpp"
 
-#include "castle/utility/tuple.h"
+#include "castle/utility/tuple.hpp"
 
 // Scenario: packing heterogeneous telemetry metadata while preserving static type information.
 #include <stdint.h>

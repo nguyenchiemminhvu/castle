@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/chrono/duration.h"
+#include "castle/chrono/duration.hpp"
 
 namespace
 {
