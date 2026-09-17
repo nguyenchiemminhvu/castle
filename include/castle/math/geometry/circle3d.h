@@ -34,8 +34,8 @@ public:
     }
 
     CASTLE_CONSTEXPR circle3d(
-        const point3d<T>& center,
-        const vector3d<T>& normal,
+        CASTLE_CONST point3d<T>& center,
+        CASTLE_CONST vector3d<T>& normal,
         T radius) CASTLE_NOEXCEPT
         : center_(center), normal_(normal), radius_(radius)
     {
@@ -43,17 +43,17 @@ public:
         CASTLE_ASSERT(radius_ >= T{}, "circle radius must be non-negative");
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR const point3d<T>& center() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR CASTLE_CONST point3d<T>& center() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return center_;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR const vector3d<T>& normal() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR CASTLE_CONST vector3d<T>& normal() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return normal_;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR T radius() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR T radius() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return radius_;
     }
@@ -61,42 +61,42 @@ public:
     // ------------------------------------------------------------------------
     // Test membership in the filled circular disk.
     // ------------------------------------------------------------------------
-    CASTLE_NODISCARD bool contains(const point3d<T>& point, T epsilon = T{}) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD bool contains(CASTLE_CONST point3d<T>& point, T epsilon = T{}) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        const vector3d<T> delta = point - center_;
-        const T normal_length_sq = normal_.squared_length();
-        const T plane_value = normal_.dot(delta);
-        const T plane_limit = static_cast<T>(epsilon * epsilon * normal_length_sq);
+        CASTLE_CONST vector3d<T> delta = point - center_;
+        CASTLE_CONST T normal_length_sq = normal_.squared_length();
+        CASTLE_CONST T plane_value = normal_.dot(delta);
+        CASTLE_CONST T plane_limit = static_cast<T>(epsilon * epsilon * normal_length_sq);
         if (static_cast<T>(plane_value * plane_value) > plane_limit)
         {
             return false;
         }
 
-        const T axial = static_cast<T>(delta.squared_length() -
+        CASTLE_CONST T axial = static_cast<T>(delta.squared_length() -
                                        static_cast<T>((plane_value * plane_value) / normal_length_sq));
         if (axial < static_cast<T>(0))
         {
             return false;
         }
-        const T distance = sqrt_real(axial);
+        CASTLE_CONST T distance = sqrt_real(axial);
         return distance <= static_cast<T>(radius_ + epsilon);
     }
 
     // ------------------------------------------------------------------------
     // Test membership on the circle circumference.
     // ------------------------------------------------------------------------
-    CASTLE_NODISCARD bool on_circle(const point3d<T>& point, T epsilon = T{}) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD bool on_circle(CASTLE_CONST point3d<T>& point, T epsilon = T{}) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        const vector3d<T> delta = point - center_;
-        const T normal_length_sq = normal_.squared_length();
-        const T plane_value = normal_.dot(delta);
-        const T plane_limit = static_cast<T>(epsilon * epsilon * normal_length_sq);
+        CASTLE_CONST vector3d<T> delta = point - center_;
+        CASTLE_CONST T normal_length_sq = normal_.squared_length();
+        CASTLE_CONST T plane_value = normal_.dot(delta);
+        CASTLE_CONST T plane_limit = static_cast<T>(epsilon * epsilon * normal_length_sq);
         if (static_cast<T>(plane_value * plane_value) > plane_limit)
         {
             return false;
         }
 
-        const T axial = static_cast<T>(delta.squared_length() -
+        CASTLE_CONST T axial = static_cast<T>(delta.squared_length() -
                                        static_cast<T>((plane_value * plane_value) / normal_length_sq));
         if (axial < static_cast<T>(0))
         {
@@ -105,7 +105,7 @@ public:
         return abs(sqrt_real(axial) - radius_) <= static_cast<T>(epsilon);
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR plane3d<T> plane() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR plane3d<T> plane() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return plane3d<T>(center_, normal_);
     }

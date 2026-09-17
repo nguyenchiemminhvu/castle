@@ -39,7 +39,7 @@ CASTLE_CONSTEXPR T sqrt_floor(T value, T low, T high) CASTLE_NOEXCEPT
 
     while (low <= high)
     {
-        const T mid = low + (high - low) / T{2};
+        CASTLE_CONST T mid = low + (high - low) / T{2};
 
         // Avoid mid * mid overflow.
         if (mid == T{0} || mid <= value / mid)
