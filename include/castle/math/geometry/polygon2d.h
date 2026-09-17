@@ -35,22 +35,22 @@ public:
 
     CASTLE_CONSTEXPR polygon2d() CASTLE_NOEXCEPT : points_(), size_(0U) {}
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR size_type size() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR size_type size() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return size_;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR size_type capacity() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR size_type capacity() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return Capacity;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR bool empty() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR bool empty() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return size_ == 0U;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR bool full() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR bool full() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return size_ == Capacity;
     }
@@ -59,7 +59,7 @@ public:
     // Twice the signed area. Positive means counter-clockwise vertex order.
     // O(N) time, O(1) storage. Keeping twice-area avoids an unnecessary divide.
     // ------------------------------------------------------------------------
-    CASTLE_NODISCARD CASTLE_CONSTEXPR typename detail::geometry_calc_type<T> signed_area2() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR typename detail::geometry_calc_type<T> signed_area2() CASTLE_CONST CASTLE_NOEXCEPT
     {
         if (size_ < 3U)
         {
@@ -79,12 +79,12 @@ public:
         return area;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR bool clockwise() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR bool clockwise() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return signed_area2() < T{};
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR const value_type& operator[](size_type index) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR CASTLE_CONST value_type& operator[](size_type index) CASTLE_CONST CASTLE_NOEXCEPT
     {
         CASTLE_ASSERT(index < size_, "polygon index out of range");
         return points_[index];
@@ -101,7 +101,7 @@ public:
         return points_.begin();
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR const_iterator begin() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR const_iterator begin() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return points_.begin();
     }
@@ -111,7 +111,7 @@ public:
         return points_.begin() + size_;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR const_iterator end() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR const_iterator end() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return points_.begin() + size_;
     }
@@ -121,12 +121,12 @@ public:
         return points_.data();
     }
 
-    CASTLE_NODISCARD const value_type* data() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONST value_type* data() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return points_.data();
     }
 
-    CASTLE_CONSTEXPR status push_back(const value_type& value) CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR status push_back(CASTLE_CONST value_type& value) CASTLE_NOEXCEPT
     {
         if (size_ >= Capacity)
         {

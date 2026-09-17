@@ -31,28 +31,28 @@ public:
     {
     }
 
-    CASTLE_CONSTEXPR plane3d(const point3d<T>& point, const vector3d<T>& normal) CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR plane3d(CASTLE_CONST point3d<T>& point, CASTLE_CONST vector3d<T>& normal) CASTLE_NOEXCEPT
         : point_(point), normal_(normal)
     {
         CASTLE_ASSERT(!normal_.degenerate(), "plane normal must be non-zero");
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR const point3d<T>& point() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR CASTLE_CONST point3d<T>& point() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return point_;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR const vector3d<T>& normal() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR CASTLE_CONST vector3d<T>& normal() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return normal_;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR T signed_value(const point3d<T>& value) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR T signed_value(CASTLE_CONST point3d<T>& value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return normal_.dot(value - point_);
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR bool contains(const point3d<T>& value, T epsilon = T{}) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR bool contains(CASTLE_CONST point3d<T>& value, T epsilon = T{}) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return detail::near_zero(signed_value(value), epsilon);
     }

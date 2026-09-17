@@ -24,33 +24,33 @@ public:
 
     CASTLE_CONSTEXPR vector3d(T x, T y, T z) CASTLE_NOEXCEPT : x_(x), y_(y), z_(z) {}
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR T x() const CASTLE_NOEXCEPT { return x_; }
-    CASTLE_NODISCARD CASTLE_CONSTEXPR T y() const CASTLE_NOEXCEPT { return y_; }
-    CASTLE_NODISCARD CASTLE_CONSTEXPR T z() const CASTLE_NOEXCEPT { return z_; }
+    CASTLE_NODISCARD CASTLE_CONSTEXPR T x() CASTLE_CONST CASTLE_NOEXCEPT { return x_; }
+    CASTLE_NODISCARD CASTLE_CONSTEXPR T y() CASTLE_CONST CASTLE_NOEXCEPT { return y_; }
+    CASTLE_NODISCARD CASTLE_CONSTEXPR T z() CASTLE_CONST CASTLE_NOEXCEPT { return z_; }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR T squared_length() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR T squared_length() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return static_cast<T>(x_ * x_ + y_ * y_ + z_ * z_);
     }
 
     template <typename U = T>
     CASTLE_NODISCARD CASTLE_CONSTEXPR typename meta::enable_if<meta::is_floating_point<U>::value, U>::type
-    length() const CASTLE_NOEXCEPT
+    length() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return hypot(static_cast<U>(x_), static_cast<U>(y_), static_cast<U>(z_));
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR bool degenerate() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR bool degenerate() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return x_ == T{} && y_ == T{} && z_ == T{};
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR T dot(const vector3d& other) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR T dot(CASTLE_CONST vector3d& other) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return static_cast<T>(x_ * other.x_ + y_ * other.y_ + z_ * other.z_);
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d cross(const vector3d& other) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d cross(CASTLE_CONST vector3d& other) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return vector3d(
             static_cast<T>(y_ * other.z_ - z_ * other.y_),
@@ -60,9 +60,9 @@ public:
 
     template <typename U = T>
     CASTLE_NODISCARD typename meta::enable_if<meta::is_floating_point<U>::value, vector3d>::type
-    normalized() const CASTLE_NOEXCEPT
+    normalized() CASTLE_CONST CASTLE_NOEXCEPT
     {
-        const U len = length<U>();
+        CASTLE_CONST U len = length<U>();
         CASTLE_ASSERT(len > static_cast<U>(0), "cannot normalize a zero vector");
         return vector3d(
             static_cast<T>(x_ / len),
@@ -70,17 +70,17 @@ public:
             static_cast<T>(z_ / len));
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d operator+() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d operator+() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return *this;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d operator-() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d operator-() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return vector3d(static_cast<T>(-x_), static_cast<T>(-y_), static_cast<T>(-z_));
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d operator+(const vector3d& other) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d operator+(CASTLE_CONST vector3d& other) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return vector3d(
             static_cast<T>(x_ + other.x_),
@@ -88,7 +88,7 @@ public:
             static_cast<T>(z_ + other.z_));
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d operator-(const vector3d& other) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d operator-(CASTLE_CONST vector3d& other) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return vector3d(
             static_cast<T>(x_ - other.x_),
@@ -96,7 +96,7 @@ public:
             static_cast<T>(z_ - other.z_));
     }
 
-    CASTLE_CONSTEXPR vector3d& operator+=(const vector3d& other) CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR vector3d& operator+=(CASTLE_CONST vector3d& other) CASTLE_NOEXCEPT
     {
         x_ = static_cast<T>(x_ + other.x_);
         y_ = static_cast<T>(y_ + other.y_);
@@ -104,7 +104,7 @@ public:
         return *this;
     }
 
-    CASTLE_CONSTEXPR vector3d& operator-=(const vector3d& other) CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR vector3d& operator-=(CASTLE_CONST vector3d& other) CASTLE_NOEXCEPT
     {
         x_ = static_cast<T>(x_ - other.x_);
         y_ = static_cast<T>(y_ - other.y_);
@@ -112,7 +112,7 @@ public:
         return *this;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d operator*(T scalar) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d operator*(T scalar) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return vector3d(
             static_cast<T>(x_ * scalar),
@@ -120,7 +120,7 @@ public:
             static_cast<T>(z_ * scalar));
     }
 
-    CASTLE_NODISCARD vector3d operator/(T scalar) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD vector3d operator/(T scalar) CASTLE_CONST CASTLE_NOEXCEPT
     {
         CASTLE_ASSERT(scalar != static_cast<T>(0), "vector division by zero");
         return vector3d(
@@ -129,12 +129,12 @@ public:
             static_cast<T>(z_ / scalar));
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR bool operator==(const vector3d& other) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR bool operator==(CASTLE_CONST vector3d& other) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return x_ == other.x_ && y_ == other.y_ && z_ == other.z_;
     }
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR bool operator!=(const vector3d& other) const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR bool operator!=(CASTLE_CONST vector3d& other) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return !(*this == other);
     }
@@ -146,13 +146,13 @@ private:
 };
 
 template <typename T>
-CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d<T> operator*(T scalar, const vector3d<T>& value) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d<T> operator*(T scalar, CASTLE_CONST vector3d<T>& value) CASTLE_NOEXCEPT
 {
     return value * scalar;
 }
 
 template <typename T>
-CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d<T> operator-(const point3d<T>& a, const point3d<T>& b) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d<T> operator-(CASTLE_CONST point3d<T>& a, CASTLE_CONST point3d<T>& b) CASTLE_NOEXCEPT
 {
     return vector3d<T>(
         static_cast<T>(a.x() - b.x()),
@@ -161,7 +161,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d<T> operator-(const point3d<T>& a, con
 }
 
 template <typename T>
-CASTLE_NODISCARD CASTLE_CONSTEXPR point3d<T> operator+(const point3d<T>& point, const vector3d<T>& value) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_CONSTEXPR point3d<T> operator+(CASTLE_CONST point3d<T>& point, CASTLE_CONST vector3d<T>& value) CASTLE_NOEXCEPT
 {
     return point3d<T>(
         static_cast<T>(point.x() + value.x()),
@@ -170,7 +170,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR point3d<T> operator+(const point3d<T>& point, 
 }
 
 template <typename T>
-CASTLE_NODISCARD CASTLE_CONSTEXPR point3d<T> operator-(const point3d<T>& point, const vector3d<T>& value) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_CONSTEXPR point3d<T> operator-(CASTLE_CONST point3d<T>& point, CASTLE_CONST vector3d<T>& value) CASTLE_NOEXCEPT
 {
     return point3d<T>(
         static_cast<T>(point.x() - value.x()),
@@ -179,22 +179,22 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR point3d<T> operator-(const point3d<T>& point, 
 }
 
 template <typename T>
-CASTLE_NODISCARD CASTLE_CONSTEXPR T dot(const vector3d<T>& a, const vector3d<T>& b) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_CONSTEXPR T dot(CASTLE_CONST vector3d<T>& a, CASTLE_CONST vector3d<T>& b) CASTLE_NOEXCEPT
 {
     return a.dot(b);
 }
 
 template <typename T>
-CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d<T> cross(const vector3d<T>& a, const vector3d<T>& b) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_CONSTEXPR vector3d<T> cross(CASTLE_CONST vector3d<T>& a, CASTLE_CONST vector3d<T>& b) CASTLE_NOEXCEPT
 {
     return a.cross(b);
 }
 
 template <typename T>
 CASTLE_NODISCARD CASTLE_CONSTEXPR T scalar_triple_product(
-    const vector3d<T>& a,
-    const vector3d<T>& b,
-    const vector3d<T>& c) CASTLE_NOEXCEPT
+    CASTLE_CONST vector3d<T>& a,
+    CASTLE_CONST vector3d<T>& b,
+    CASTLE_CONST vector3d<T>& c) CASTLE_NOEXCEPT
 {
     return a.dot(b.cross(c));
 }

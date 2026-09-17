@@ -44,7 +44,7 @@ sqrt_real(T value) CASTLE_NOEXCEPT
     // the square-root magnitude by a factor of two.
     T scaled = value;
     T scale = static_cast<T>(1);
-    const unsigned scale_steps = (sizeof(T) <= sizeof(float)) ? 64U : 512U;
+    CASTLE_CONST unsigned scale_steps = (sizeof(T) <= sizeof(float)) ? 64U : 512U;
 
     for (unsigned i = 0U; i < scale_steps; ++i)
     {
@@ -65,11 +65,11 @@ sqrt_real(T value) CASTLE_NOEXCEPT
     }
 
     T guess = static_cast<T>(1);
-    const unsigned newton_steps = (sizeof(T) <= sizeof(float)) ? 24U : 32U;
+    CASTLE_CONST unsigned newton_steps = (sizeof(T) <= sizeof(float)) ? 24U : 32U;
 
     for (unsigned i = 0U; i < newton_steps; ++i)
     {
-        const T next = static_cast<T>(0.5) *
+        CASTLE_CONST T next = static_cast<T>(0.5) *
                        (guess + scaled / guess);
         if (next == guess)
         {
