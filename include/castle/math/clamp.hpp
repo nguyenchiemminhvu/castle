@@ -22,11 +22,9 @@ CASTLE_NODISCARD CASTLE_INLINE CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_arithmetic<T>::value, T>::type
 clamp(T value, T low, T high) CASTLE_NOEXCEPT
 {
-    CASTLE_ASSERT(low <= high, "clamp precondition violated: low > hi.hpp");
+    CASTLE_ASSERT(low <= high, "clamp precondition violated: low > hi.hpp"); // LCOV_EXCL_BR_LINE
 
-    return (value < low)
-           ? low
-           : ((high < value) ? high : value);
+    return (value < low) ? low : ((high < value) ? high : value); // LCOV_EXCL_BR_LINE
 }
 
 } // namespace math

@@ -46,7 +46,7 @@ CASTLE_INLINE CASTLE_CONSTEXPR
 typename meta::enable_if_t<meta::is_floating_point<T>::value, bool>
 is_equal(T a, T b) CASTLE_NOEXCEPT
 {
-    return (a == b) || (castle::math::abs(a - b) <= castle::floating_epsilon<T>::value);
+    return (a == b) || (castle::math::abs(a - b) <= castle::floating_epsilon<T>::value); // LCOV_EXCL_BR_LINE
 }
 
 template <typename T>

@@ -41,6 +41,7 @@ TEST(SafeCastTest, NarrowingClampsAtUpperBound)
     EXPECT_EQ(castle::safe_cast::int32_to_int8(200), INT8_MAX);
     EXPECT_EQ(castle::safe_cast::int32_to_int16(100000), INT16_MAX);
     EXPECT_EQ(castle::safe_cast::int32_to_uint8(300), static_cast<uint8_t>(UINT8_MAX));
+    EXPECT_EQ(castle::safe_cast::int32_to_uint8(1), 1U);
 }
 
 TEST(SafeCastTest, NarrowingClampsAtLowerBound)
@@ -58,8 +59,11 @@ TEST(SafeCastTest, NegativeToUnsignedClampsToZero)
 
 TEST(SafeCastTest, UnsignedToSignedClampsAtMax)
 {
+    EXPECT_EQ(castle::safe_cast::uint16_to_int8(1U), 1);
     EXPECT_EQ(castle::safe_cast::uint32_to_int32(0xFFFFFFFFU), INT32_MAX);
+    EXPECT_EQ(castle::safe_cast::uint32_to_int32(1U), 1);
     EXPECT_EQ(castle::safe_cast::uint64_to_int64(0xFFFFFFFFFFFFFFFFULL), INT64_MAX);
+    EXPECT_EQ(castle::safe_cast::uint64_to_int64(1ULL), 1);
     EXPECT_EQ(castle::safe_cast::uint16_to_int8(1000U), INT8_MAX);
 }
 
@@ -68,6 +72,7 @@ TEST(SafeCastTest, FloatToIntegralTruncatesAndClamps)
     EXPECT_EQ(castle::safe_cast::float_to_int32(3.7f), 3);
     EXPECT_EQ(castle::safe_cast::float_to_uint8(-1.0f), 0);
     EXPECT_EQ(castle::safe_cast::float_to_uint8(1000.0f), static_cast<uint8_t>(UINT8_MAX));
+    EXPECT_EQ(castle::safe_cast::float_to_uint8(1.0F), 1U);
 }
 
 TEST(SafeCastTest, DoubleToIntegralTruncatesAndClamps)
@@ -75,7 +80,11 @@ TEST(SafeCastTest, DoubleToIntegralTruncatesAndClamps)
     EXPECT_EQ(castle::safe_cast::double_to_int32(42.9), 42);
     EXPECT_EQ(castle::safe_cast::double_to_int8(500.0), INT8_MAX);
     EXPECT_EQ(castle::safe_cast::double_to_int8(-500.0), INT8_MIN);
+    EXPECT_EQ(castle::safe_cast::double_to_int8(INT8_MAX - 1U), static_cast<int8_t>(INT8_MAX - 1U));
+    EXPECT_EQ(castle::safe_cast::float_to_int8(INT8_MAX - 1U), static_cast<int8_t>(INT8_MAX - 1U));
     EXPECT_EQ(castle::safe_cast::double_to_uint16(-3.0), 0);
+    EXPECT_EQ(castle::safe_cast::double_to_uint16(999999999.0), static_cast<uint16_t>(UINT16_MAX));
+    EXPECT_EQ(castle::safe_cast::double_to_uint16(UINT16_MAX - 1U), static_cast<uint16_t>(UINT16_MAX - 1U));
 }
 
 TEST(SafeCastTest, IntegralToFloatingPoint)

@@ -27,6 +27,9 @@ TEST(SigslotTest, ConnectEmitDisconnectMoveAndFull)
     auto c2=s.connect([&](int v){b+=2*v;});
     Obj o;
     auto c3=s.connect(o,&Obj::add);
+    auto c4=s.connect([](int){});
+    auto c5=std::move(c4);
+    c5=std::move(c5);
     EXPECT_TRUE(c1.connected());
     EXPECT_TRUE(c2);
     s.emit(3);

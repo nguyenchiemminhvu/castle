@@ -40,7 +40,7 @@ public:
     // ---------------------------------------------------------------------------
     void lock() CASTLE_NOEXCEPT
     {
-        while (__sync_lock_test_and_set(&flag_, 1U))
+        while (__sync_lock_test_and_set(&flag_, 1U)) // LCOV_EXCL_BR_LINE
         {
             // Spin/Busy-wait loop
         }

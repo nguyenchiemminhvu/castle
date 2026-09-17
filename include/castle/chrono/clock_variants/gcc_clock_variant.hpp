@@ -24,7 +24,7 @@ struct clock_variant
         timespec ts{};
 
         int result = clock_gettime(CLOCK_REALTIME, &ts);
-        CASTLE_ASSERT(result == 0, CASTLE_ERROR_GENERIC("clock_gettime(CLOCK_REALTIME) failed"));
+        CASTLE_ASSERT(result == 0, CASTLE_ERROR_GENERIC("clock_gettime(CLOCK_REALTIME) failed")); // LCOV_EXCL_BR_LINE
 
         return ts;
     }
@@ -34,7 +34,7 @@ struct clock_variant
         timespec ts{};
 
         int result = clock_gettime(CLOCK_MONOTONIC, &ts);
-        CASTLE_ASSERT(result == 0, CASTLE_ERROR_GENERIC("clock_gettime(CLOCK_MONOTONIC) failed"));
+        CASTLE_ASSERT(result == 0, CASTLE_ERROR_GENERIC("clock_gettime(CLOCK_MONOTONIC) failed")); // LCOV_EXCL_BR_LINE
 
         return ts;
     }

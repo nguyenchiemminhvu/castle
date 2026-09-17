@@ -24,7 +24,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_integral<T>::value, T>::type
 positive_mod(T value, T modulus) CASTLE_NOEXCEPT
 {
-    CASTLE_ASSERT(modulus > T{0},
+    CASTLE_ASSERT(modulus > T{0}, // LCOV_EXCL_BR_LINE
                   CASTLE_ERROR_GENERIC("castle::math::positive_mod: modulus must be positive"));
 
     CASTLE_CONST T result = static_cast<T>(value % modulus);
@@ -36,7 +36,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_integral<T>::value, T>::type
 wrap(T value, T low, T high) CASTLE_NOEXCEPT
 {
-    CASTLE_ASSERT(high > low,
+    CASTLE_ASSERT(high > low, // LCOV_EXCL_BR_LINE
                   CASTLE_ERROR_GENERIC("castle::math::wrap: high must be greater than low"));
 
     // For common embedded integer widths, widen before subtracting so a

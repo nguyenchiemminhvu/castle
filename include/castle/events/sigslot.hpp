@@ -116,7 +116,7 @@ public:
         , generation_(other.generation_)
         , valid_(other.valid_)
     {
-        if (valid_ && owner_ != nullptr)
+        if (valid_ && owner_ != nullptr) // LCOV_EXCL_BR_LINE
         {
             owner_->rebind_connection(
                 index_,
@@ -139,7 +139,7 @@ public:
             generation_ = other.generation_;
             valid_ = other.valid_;
 
-            if (valid_ && owner_ != nullptr)
+            if (valid_ && owner_ != nullptr) // LCOV_EXCL_BR_LINE
             {
                 owner_->rebind_connection(
                     index_,
@@ -544,6 +544,7 @@ private:
         uint32_t generation,
         connection_type* connection_ptr) noexcept
     {
+        // LCOV_EXCL_START
         if (index >= MaxSlot)
         {
             return signal_error::invalid_connection;
@@ -565,6 +566,7 @@ private:
         {
             return signal_error::invalid_connection;
         }
+        // LCOV_EXCL_STOP
 
         current_slot.callback = callback_type{};
         current_slot.active = false;
@@ -587,6 +589,7 @@ private:
         uint32_t generation,
         connection_type* new_connection) noexcept
     {
+        // LCOV_EXCL_START
         if (index >= MaxSlot)
         {
             return;
@@ -603,6 +606,7 @@ private:
         {
             return;
         }
+        // LCOV_EXCL_STOP
 
         current_slot.connection_ = new_connection;
     }

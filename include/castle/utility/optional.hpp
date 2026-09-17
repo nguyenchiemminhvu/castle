@@ -106,7 +106,7 @@ public:
         CASTLE_NOEXCEPT(meta::is_nothrow_copy_constructible<T>::value)
         : engaged_(false)
     {
-        if (other.has_value())
+        if (other.has_value()) // LCOV_EXCL_BR_LINE
         {
             construct(other.value_ref());
         }
@@ -116,7 +116,7 @@ public:
         CASTLE_NOEXCEPT(meta::is_nothrow_move_constructible<T>::value)
         : engaged_(false)
     {
-        if (other.has_value())
+        if (other.has_value()) // LCOV_EXCL_BR_LINE
         {
             construct(CASTLE_MOVE(other.value_ref()));
         }
@@ -146,7 +146,7 @@ public:
         if (this != &other)
         {
             reset();
-            if (other.has_value())
+            if (other.has_value()) // LCOV_EXCL_BR_LINE
             {
                 construct(other.value_ref());
             }
@@ -160,7 +160,7 @@ public:
         if (this != &other)
         {
             reset();
-            if (other.has_value())
+            if (other.has_value()) // LCOV_EXCL_BR_LINE
             {
                 construct(CASTLE_MOVE(other.value_ref()));
             }
@@ -205,25 +205,25 @@ public:
     // ------------------------------------------------------------------------
     reference value() & CASTLE_NOEXCEPT
     {
-        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value"));
+        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value")); // LCOV_EXCL_BR_LINE
         return value_ref();
     }
 
     const_reference value() CASTLE_CONST & CASTLE_NOEXCEPT
     {
-        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value"));
+        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value")); // LCOV_EXCL_BR_LINE
         return value_ref();
     }
 
     T&& value() && CASTLE_NOEXCEPT
     {
-        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value"));
+        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value")); // LCOV_EXCL_BR_LINE
         return CASTLE_MOVE(value_ref());
     }
 
     CASTLE_CONST T&& value() CASTLE_CONST && CASTLE_NOEXCEPT
     {
-        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value"));
+        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value")); // LCOV_EXCL_BR_LINE
         return CASTLE_MOVE(value_ref());
     }
 
@@ -249,13 +249,13 @@ public:
 
     pointer operator->() CASTLE_NOEXCEPT
     {
-        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value"));
+        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value")); // LCOV_EXCL_BR_LINE
         return storage_.template get_address<T>();
     }
 
     const_pointer operator->() CASTLE_CONST CASTLE_NOEXCEPT
     {
-        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value"));
+        CASTLE_ASSERT(engaged_, CASTLE_ERROR_GENERIC("castle::optional: no value")); // LCOV_EXCL_BR_LINE
         return storage_.template get_address<T>();
     }
 

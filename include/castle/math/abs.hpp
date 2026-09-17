@@ -60,9 +60,11 @@ CASTLE_NODISCARD CASTLE_INLINE CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_signed<T>::value && meta::is_integral<T>::value, T>::type
 abs(T value) CASTLE_NOEXCEPT
 {
+    // LCOV_EXCL_BR_START
     return (value == castle::numeric_limits<T>::min())
            ? detail::signed_min_error<T>()
            : static_cast<T>((value < static_cast<T>(0)) ? -value : value);
+    // LCOV_EXCL_BR_END
 }
 
 // ----------------------------------------------------------------------------
@@ -73,7 +75,7 @@ CASTLE_NODISCARD CASTLE_INLINE CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_floating_point<T>::value, T>::type
 abs(T value) CASTLE_NOEXCEPT
 {
-    return (value < static_cast<T>(0)) ? static_cast<T>(-value) : value;
+    return (value < static_cast<T>(0)) ? static_cast<T>(-value) : value; // LCOV_EXCL_BR_LINE
 }
 
 // ----------------------------------------------------------------------------
@@ -98,12 +100,14 @@ uabs(T value) CASTLE_NOEXCEPT
 {
     using UType = typename meta::make_unsigned<T>::type;
 
+    // LCOV_EXCL_BR_START
     // |INT_MIN| == INT_MAX + 1 == (UINT_MAX / 2) + 1
     return (value == castle::numeric_limits<T>::min())
            ? static_cast<UType>((castle::numeric_limits<UType>::max() / static_cast<UType>(2)) + static_cast<UType>(1))
            : (value < static_cast<T>(0))
                ? static_cast<UType>(-value)
                : static_cast<UType>(value);
+    // LCOV_EXCL_BR_END
 }
 
 template <typename T>

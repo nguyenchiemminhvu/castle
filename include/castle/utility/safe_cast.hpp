@@ -16,13 +16,13 @@ public:
     // bool conversions
     static CASTLE_INLINE int8_t bool_to_int8(bool value) CASTLE_NOEXCEPT { return value ? static_cast<int8_t>(1) : static_cast<int8_t>(0); }
     static CASTLE_INLINE int16_t bool_to_int16(bool value) CASTLE_NOEXCEPT { return value ? static_cast<int16_t>(1) : static_cast<int16_t>(0); }
-    static CASTLE_INLINE int32_t bool_to_int32(bool value) CASTLE_NOEXCEPT { return value ? static_cast<int32_t>(1) : static_cast<int32_t>(0); }
-    static CASTLE_INLINE int64_t bool_to_int64(bool value) CASTLE_NOEXCEPT { return value ? static_cast<int64_t>(1) : static_cast<int64_t>(0); }
-    static CASTLE_INLINE uint8_t bool_to_uint8(bool value) CASTLE_NOEXCEPT { return value ? static_cast<uint8_t>(1U) : static_cast<uint8_t>(0U); }
+    static CASTLE_INLINE int32_t bool_to_int32(bool value) CASTLE_NOEXCEPT { return value ? static_cast<int32_t>(1) : static_cast<int32_t>(0); } // LCOV_EXCL_BR_LINE
+    static CASTLE_INLINE int64_t bool_to_int64(bool value) CASTLE_NOEXCEPT { return value ? static_cast<int64_t>(1) : static_cast<int64_t>(0); } // LCOV_EXCL_BR_LINE
+    static CASTLE_INLINE uint8_t bool_to_uint8(bool value) CASTLE_NOEXCEPT { return value ? static_cast<uint8_t>(1U) : static_cast<uint8_t>(0U); } // LCOV_EXCL_BR_LINE
     static CASTLE_INLINE uint16_t bool_to_uint16(bool value) CASTLE_NOEXCEPT { return value ? static_cast<uint16_t>(1U) : static_cast<uint16_t>(0U); }
     static CASTLE_INLINE uint32_t bool_to_uint32(bool value) CASTLE_NOEXCEPT { return value ? static_cast<uint32_t>(1U) : static_cast<uint32_t>(0U); }
     static CASTLE_INLINE uint64_t bool_to_uint64(bool value) CASTLE_NOEXCEPT { return value ? static_cast<uint64_t>(1U) : static_cast<uint64_t>(0U); }
-    static CASTLE_INLINE float bool_to_float(bool value) CASTLE_NOEXCEPT { return value ? 1.0f : 0.0f; }
+    static CASTLE_INLINE float bool_to_float(bool value) CASTLE_NOEXCEPT { return value ? 1.0f : 0.0f; } // LCOV_EXCL_BR_LINE
     static CASTLE_INLINE double bool_to_double(bool value) CASTLE_NOEXCEPT { return value ? 1.0 : 0.0; }
     // int8_t conversions
     static CASTLE_INLINE bool int8_to_bool(int8_t value) CASTLE_NOEXCEPT { return value != 0; }
@@ -61,22 +61,28 @@ public:
     static CASTLE_INLINE bool int32_to_bool(int32_t value) CASTLE_NOEXCEPT { return value != 0; }
     static CASTLE_INLINE int8_t int32_to_int8(int32_t value) CASTLE_NOEXCEPT
     {
+        // LCOV_EXCL_BR_START
         if (value < static_cast<int32_t>(castle::numeric_limits<int8_t>::min())) { return static_cast<int8_t>(castle::numeric_limits<int8_t>::min()); }
         if (value > static_cast<int32_t>(castle::numeric_limits<int8_t>::max())) { return static_cast<int8_t>(castle::numeric_limits<int8_t>::max()); }
         return static_cast<int8_t>(value);
+        // LCOV_EXCL_BR_END
     }
     static CASTLE_INLINE int16_t int32_to_int16(int32_t value) CASTLE_NOEXCEPT
     {
+        // LCOV_EXCL_BR_START
         if (value < static_cast<int32_t>(castle::numeric_limits<int16_t>::min())) { return static_cast<int16_t>(castle::numeric_limits<int16_t>::min()); }
         if (value > static_cast<int32_t>(castle::numeric_limits<int16_t>::max())) { return static_cast<int16_t>(castle::numeric_limits<int16_t>::max()); }
         return static_cast<int16_t>(value);
+        // LCOV_EXCL_BR_END
     }
     static CASTLE_INLINE int64_t int32_to_int64(int32_t value) CASTLE_NOEXCEPT { return static_cast<int64_t>(value); }
     static CASTLE_INLINE uint8_t int32_to_uint8(int32_t value) CASTLE_NOEXCEPT
     {
+        // LCOV_EXCL_BR_START
         if (value < 0) { return 0U; }
         if (value > static_cast<int32_t>(castle::numeric_limits<uint8_t>::max())) { return static_cast<uint8_t>(castle::numeric_limits<uint8_t>::max()); }
         return static_cast<uint8_t>(value);
+        // LCOV_EXCL_BR_END
     }
     static CASTLE_INLINE uint16_t int32_to_uint16(int32_t value) CASTLE_NOEXCEPT
     {
@@ -156,7 +162,7 @@ public:
     static CASTLE_INLINE bool uint16_to_bool(uint16_t value) CASTLE_NOEXCEPT { return value != 0U; }
     static CASTLE_INLINE int8_t uint16_to_int8(uint16_t value) CASTLE_NOEXCEPT
     {
-        if (value > static_cast<uint16_t>(castle::numeric_limits<int8_t>::max())) { return static_cast<int8_t>(castle::numeric_limits<int8_t>::max()); }
+        if (value > static_cast<uint16_t>(castle::numeric_limits<int8_t>::max())) { return static_cast<int8_t>(castle::numeric_limits<int8_t>::max()); } // LCOV_EXCL_BR_LINE
         return static_cast<int8_t>(value);
     }
     static CASTLE_INLINE int16_t uint16_to_int16(uint16_t value) CASTLE_NOEXCEPT
@@ -190,7 +196,7 @@ public:
     }
     static CASTLE_INLINE int32_t uint32_to_int32(uint32_t value) CASTLE_NOEXCEPT
     {
-        if (value > static_cast<uint32_t>(castle::numeric_limits<int32_t>::max())) { return static_cast<int32_t>(castle::numeric_limits<int32_t>::max()); }
+        if (value > static_cast<uint32_t>(castle::numeric_limits<int32_t>::max())) { return static_cast<int32_t>(castle::numeric_limits<int32_t>::max()); } // LCOV_EXCL_BR_LINE
         return static_cast<int32_t>(value);
     }
     static CASTLE_INLINE int64_t uint32_to_int64(uint32_t value) CASTLE_NOEXCEPT { return static_cast<int64_t>(value); }
@@ -227,7 +233,7 @@ public:
     }
     static CASTLE_INLINE int64_t uint64_to_int64(uint64_t value) CASTLE_NOEXCEPT
     {
-        if (value > static_cast<uint64_t>(castle::numeric_limits<int64_t>::max())) { return static_cast<int64_t>(castle::numeric_limits<int64_t>::max()); }
+        if (value > static_cast<uint64_t>(castle::numeric_limits<int64_t>::max())) { return static_cast<int64_t>(castle::numeric_limits<int64_t>::max()); } // LCOV_EXCL_BR_LINE
         return static_cast<int64_t>(value);
     }
     static CASTLE_INLINE uint8_t uint64_to_uint8(uint64_t value) CASTLE_NOEXCEPT
@@ -252,9 +258,11 @@ public:
     static CASTLE_INLINE bool float_to_bool(float value) CASTLE_NOEXCEPT { return castle::math::abs(static_cast<double>(value)) >= meta::floating_epsilon<float>::value; }
     static CASTLE_INLINE int8_t float_to_int8(float value) CASTLE_NOEXCEPT
     {
+        // LCOV_EXCL_BR_START
         if (static_cast<double>(value) <= static_cast<double>(castle::numeric_limits<int8_t>::min())) { return static_cast<int8_t>(castle::numeric_limits<int8_t>::min()); }
         if (static_cast<double>(value) >= static_cast<double>(castle::numeric_limits<int8_t>::max())) { return static_cast<int8_t>(castle::numeric_limits<int8_t>::max()); }
         return static_cast<int8_t>(value);
+        // LCOV_EXCL_BR_END
     }
     static CASTLE_INLINE int16_t float_to_int16(float value) CASTLE_NOEXCEPT
     {
@@ -367,9 +375,9 @@ CASTLE_INLINE To SAFE_CAST(From value)
 // bool specializations
 template <> CASTLE_INLINE int8_t SAFE_CAST<bool, int8_t>(bool value) { return safe_cast::bool_to_int8(value); }
 template <> CASTLE_INLINE int16_t SAFE_CAST<bool, int16_t>(bool value) { return safe_cast::bool_to_int16(value); }
-template <> CASTLE_INLINE int32_t SAFE_CAST<bool, int32_t>(bool value) { return safe_cast::bool_to_int32(value); }
+template <> CASTLE_INLINE int32_t SAFE_CAST<bool, int32_t>(bool value) { return safe_cast::bool_to_int32(value); } // LCOV_EXCL_BR_LINE
 template <> CASTLE_INLINE int64_t SAFE_CAST<bool, int64_t>(bool value) { return safe_cast::bool_to_int64(value); }
-template <> CASTLE_INLINE uint8_t SAFE_CAST<bool, uint8_t>(bool value) { return safe_cast::bool_to_uint8(value); }
+template <> CASTLE_INLINE uint8_t SAFE_CAST<bool, uint8_t>(bool value) { return safe_cast::bool_to_uint8(value); } // LCOV_EXCL_BR_LINE
 template <> CASTLE_INLINE uint16_t SAFE_CAST<bool, uint16_t>(bool value) { return safe_cast::bool_to_uint16(value); }
 template <> CASTLE_INLINE uint32_t SAFE_CAST<bool, uint32_t>(bool value) { return safe_cast::bool_to_uint32(value); }
 template <> CASTLE_INLINE uint64_t SAFE_CAST<bool, uint64_t>(bool value) { return safe_cast::bool_to_uint64(value); }

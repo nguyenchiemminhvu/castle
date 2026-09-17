@@ -56,6 +56,13 @@ TEST(SooBufferTest, MoveAssignmentPreservesValue)
     EXPECT_EQ(*b.get(), 321);
 }
 
+TEST(SooBufferTest, MoveAssignmentSameObject)
+{
+    castle::memory::soo_buffer<int> a{42};
+    a = std::move(a);
+    EXPECT_EQ(*a.get(), 42);
+}
+
 TEST(SooBufferTest, RunsDestructorOnScopeExit)
 {
     g_live = 0;

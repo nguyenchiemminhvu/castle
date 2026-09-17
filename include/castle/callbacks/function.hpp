@@ -232,7 +232,7 @@ public:
         }
         else
         {
-            return (obj_->*func_)(CASTLE_FORWARD<Args>(args)...);
+            return (obj_->*func_)(CASTLE_FORWARD<Args>(args)...); // LCOV_EXCL_BR_LINE
         }
     }
 

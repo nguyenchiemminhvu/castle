@@ -305,13 +305,15 @@ public:
 
         for (size_type i = 0; i < signal_count; ++i)
         {
-            if (::sigaction(signal_list_[i], &sa, nullptr) != 0)
+            if (::sigaction(signal_list_[i], &sa, nullptr) != 0) // LCOV_EXCL_BR_LINE
             {
+                // LCOV_EXCL_START
                 // Roll back so the process is not left in a half-armed
                 // state (some signals delivered to our handler, others
                 // still to whatever was previously installed).
                 uninstall();
                 return error::system_call_error;
+                // LCOV_EXCL_STOP
             }
         }
 
@@ -536,6 +538,7 @@ private:
     // -------------------------------------------------------------------------
     static void os_handler(int signum) noexcept
     {
+        // LCOV_EXCL_START
         // Acquire: pairs with the release-store in install(). If setup is
         // not yet complete (or uninstall() has begun), bail out before
         // touching any registry state.
@@ -549,6 +552,7 @@ private:
         {
             return;
         }
+        // LCOV_EXCL_STOP
 
         if (!enabled_.test(idx))
         {

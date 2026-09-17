@@ -4,8 +4,10 @@
 
 namespace
 {
-using E=castle::events::signal_ipc_event<castle::events::signal_ipc_config<
-    castle::events::signal::sigusr1,2>>;
+using E=castle::events::signal_ipc_event<
+    castle::events::signal_ipc_config<castle::events::signal::sigusr1,2>,
+    castle::events::signal_ipc_config<castle::events::signal::sigusr2,2>
+>;
 
 volatile sig_atomic_t hits=0;
 
@@ -19,11 +21,13 @@ TEST(SignalIpcEventTest, InstallEnableDisableDispatchAndClear)
     E::uninstall();
     E::clear();
     EXPECT_FALSE(E::is_installed());
-    EXPECT_EQ(E::signal_capacity(),1U);
+    EXPECT_EQ(E::signal_capacity(),2U);
     static_assert(E::callback_capacity<castle::events::signal::sigusr1>()==2U,"cap"); castle::callbacks::function<void()> cb(&hit);
     castle::status e=castle::status::unknown_error;
     auto sub=E::register_callback<castle::events::signal::sigusr1>(&cb,&e);
+    auto sub2=E::register_callback<castle::events::signal::sigusr2>(&cb);
     EXPECT_TRUE(sub.valid());
+    EXPECT_TRUE(sub2.valid());
     EXPECT_EQ(e,castle::status::ok);
     EXPECT_EQ(E::subscriber_count<castle::events::signal::sigusr1>(),1U);
     EXPECT_EQ(E::install(),castle::status::ok);

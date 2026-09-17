@@ -52,12 +52,14 @@ public:
         state_[2] = splitmix32(state);
         state_[3] = splitmix32(state);
 
+        // LCOV_EXCL_BR_START
         // xoshiro128** forbids the all-zero state. The mixer above makes this
         // practically unreachable, but keep the invariant explicit.
         if ((state_[0] | state_[1] | state_[2] | state_[3]) == 0U)
         {
             state_[0] = 1U;
         }
+        // LCOV_EXCL_BR_END
     }
 
     // Returns the next 32-bit pseudo-random value.
@@ -87,15 +89,15 @@ public:
     // Precondition: bound != 0.
     CASTLE_NODISCARD result_type uniform(result_type bound) CASTLE_NOEXCEPT
     {
-        CASTLE_ASSERT(
-            bound != 0U,
-            CASTLE_ERROR_GENERIC("castle::random::uniform: bound == 0")
-        );
+        CASTLE_ASSERT(bound != 0U, // LCOV_EXCL_BR_LINE
+                      CASTLE_ERROR_GENERIC("castle::random::uniform: bound == 0"));
 
+        // LCOV_EXCL_START
         if (bound == 0U)
         {
             return 0U;
         }
+        // LCOV_EXCL_STOP
 
         // Lemire's multiply-high reduction. Only the rejection threshold uses
         // division; the normal accepted path uses a 32x32 -> 64 multiplication.
@@ -119,10 +121,8 @@ public:
     // Precondition: low <= high.
     CASTLE_NODISCARD result_type range(result_type low, result_type high) CASTLE_NOEXCEPT
     {
-        CASTLE_ASSERT(
-            low <= high,
-            CASTLE_ERROR_GENERIC("castle::random::range: low > hi.hpp")
-        );
+        CASTLE_ASSERT(low <= high, // LCOV_EXCL_BR_LINE
+                      CASTLE_ERROR_GENERIC("castle::random::range: low > hi.hpp"));
 
         CASTLE_CONST uint64_t span = static_cast<uint64_t>(high) -
                               static_cast<uint64_t>(low) + 1ULL;

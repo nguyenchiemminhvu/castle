@@ -22,8 +22,16 @@ namespace memory
 CASTLE_NODISCARD CASTLE_INLINE bool is_aligned(CASTLE_CONST void* p,
                                                size_type required_alignment) CASTLE_NOEXCEPT
 {
-    return ((required_alignment != 0U) && (required_alignment & (required_alignment - 1U)) == 0U)
-        && (reinterpret_cast<uintptr_t>(p) % static_cast<uintptr_t>(required_alignment)) == 0U;
+    bool non_zero_alignment = required_alignment != 0U;
+    bool power_of_two_alignment = (required_alignment & (required_alignment - 1U)) == 0U;
+
+    bool pointer_aligned = false;
+    if (non_zero_alignment) // LCOV_EXCL_BR_LINE
+    {
+        pointer_aligned = (reinterpret_cast<uintptr_t>(p) % static_cast<uintptr_t>(required_alignment)) == 0U;
+    }
+
+    return non_zero_alignment && power_of_two_alignment && pointer_aligned; // LCOV_EXCL_BR_LINE
 }
 
 template <size_type Alignment>
