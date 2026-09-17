@@ -33,7 +33,7 @@ function(castle_disable_features target feature)
     endif()
 
     if(${feature} STREQUAL "use_stl")
-        target_compile_options(${target} PRIVATE -nostdinc++ -fno-builtin)
+        target_compile_options(${target} PRIVATE -nostdinc++ -fno-builtin -DCASTLE_USING_STD_NEW=0)
     endif()
 endfunction()
 

@@ -5,19 +5,21 @@
 
 #include <stddef.h>
 
-#if defined(__has_include)
-    #if __has_include(<new>)
-        #define CASTLE_USING_STD_NEW 1
+#if !defined(CASTLE_USING_STD_NEW)
+    #if defined(__has_include)
+        #if __has_include(<new>)
+            #define CASTLE_USING_STD_NEW 1
+        #else
+            #define CASTLE_USING_STD_NEW 0
+        #endif
     #else
-        #define CASTLE_USING_STD_NEW 0
+        #if defined(__STDC_HOSTED__) && (__STDC_HOSTED__ == 1)
+            #define CASTLE_USING_STD_NEW 1
+        #else
+            #define CASTLE_USING_STD_NEW 0
+        #endif
     #endif
-#else
-    #if defined(__STDC_HOSTED__) && (__STDC_HOSTED__ == 1)
-        #define CASTLE_USING_STD_NEW 1
-    #else
-        #define CASTLE_USING_STD_NEW 0
-    #endif
-#endif
+#endif // !defined(CASTLE_USING_STD_NEW)
 
 #if CASTLE_USING_STD_NEW
     #include <new>
