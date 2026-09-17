@@ -5,7 +5,6 @@
 #include "castle/container/vector.hpp"
 #include "castle/container/ring_buffer.hpp"
 #include "castle/container/stack.hpp"
-#include "castle/container/bitset.hpp"
 #include "castle/container/string.hpp"
 #include "castle/container/string_view.hpp"
 #include "castle/container/array_view.hpp"
