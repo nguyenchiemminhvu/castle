@@ -24,14 +24,17 @@ namespace threading
 // The pending queue contains task-slot indices instead of inplace_function
 // objects because castle::container::ring_buffer intentionally requires its
 // element type to be trivially copyable and trivially destructible.
-template <size_type ThreadCount, size_type PendingTaskCount>
+template <size_type ThreadCount
+        , size_type PendingTaskCount
+        , size_type StorageSize = castle::inplace_storage_reserved
+        , size_type StorageAlignment = castle::inplace_alignment_default>
 class pthread_pool
 {
     static_assert(ThreadCount > 0U, "pthread_pool thread count must be non-zero");
     static_assert(PendingTaskCount > 0U, "pthread_pool task count must be non-zero");
 
 public:
-    using task_type = castle::callbacks::inplace_function<void()>;
+    using task_type = castle::callbacks::inplace_function<void(), StorageSize, StorageAlignment>;
 
     pthread_pool() CASTLE_NOEXCEPT
         : created_thread_count_(0U)
@@ -130,9 +133,6 @@ public:
 
         pthread_mutex_unlock(&queue_mutex_);
 
-        CASTLE_ASSERT(signal_result == 0,
-                      CASTLE_ERROR_GENERIC("pthread_pool failed to signal worker thread"));
-
         return signal_result == 0;
     }
 
@@ -170,17 +170,11 @@ public:
         CASTLE_CONST int broadcast_result = pthread_cond_broadcast(&queue_condition_);
         pthread_mutex_unlock(&queue_mutex_);
 
-        CASTLE_ASSERT(broadcast_result == 0,
-                      CASTLE_ERROR_GENERIC("pthread_pool failed to wake worker threads"));
-
         bool join_ok = (broadcast_result == 0);
 
         for (size_type i = 0U; i < created_thread_count_; ++i)
         {
             CASTLE_CONST int join_result = pthread_join(threads_[i], nullptr);
-
-            CASTLE_ASSERT(join_result == 0,
-                          CASTLE_ERROR_GENERIC("pthread_pool failed to join worker thread"));
 
             join_ok = join_ok && (join_result == 0);
         }
