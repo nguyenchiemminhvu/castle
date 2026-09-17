@@ -15,7 +15,7 @@
 
 namespace castle
 {
-namespace threading
+namespace events
 {
 
 // Fixed-size pthread thread pool. Thread storage and task storage are owned by
@@ -326,6 +326,12 @@ private:
                 }
             }
 
+            if (stop_requested_)
+            {
+                pthread_mutex_unlock(&queue_mutex_);
+                return;
+            }
+
             if (pending_queue_.empty())
             {
                 pthread_mutex_unlock(&queue_mutex_);
@@ -361,7 +367,7 @@ private:
     bool condition_initialized_;
 };
 
-} // namespace threading
+} // namespace events
 } // namespace castle
 
 #else

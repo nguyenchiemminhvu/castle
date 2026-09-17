@@ -73,7 +73,7 @@
 
 #if !defined(CASTLE_USING_PTHREAD)
     #if defined(__has_include)
-        #if __has_include(<pthread.h>)
+        #if __has_include(<unistd.h>) && __has_include(<pthread.h>)
             #include <unistd.h>
             // _POSIX_THREADS is defined in <unistd.h> if POSIX threads are supported
             #if defined(_POSIX_THREADS) && (_POSIX_THREADS > 0)

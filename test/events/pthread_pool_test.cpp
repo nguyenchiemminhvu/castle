@@ -2,7 +2,7 @@
 #define CASTLE_USING_PTHREAD 1
 #endif // CASTLE_USING_PTHREAD
 
-#include "castle/threading/pthread_pool.hpp"
+#include "castle/events/pthread_pool.hpp"
 
 #include <gtest/gtest.h>
 #include <errno.h>
@@ -169,7 +169,7 @@ extern "C" int __wrap_pthread_join(pthread_t thread, void** value)
 namespace
 {
 
-using pool_type = castle::threading::pthread_pool<2U, 2U>;
+using pool_type = castle::events::pthread_pool<2U, 2U>;
 
 class PthreadPoolTest : public ::testing::Test
 {
