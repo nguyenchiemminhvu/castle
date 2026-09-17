@@ -13,7 +13,7 @@ namespace math
 // Integer exponentiation by squaring.
 //
 // The number of multiplications is O(log(exponent)), making this preferable to
-// repeated multiplication in tight embedded loops and useful in constexpr code.
+// repeated multiplication in tight embedded loops and useful in CASTLE_CONSTEXPR code.
 //
 // Real-life use cases:
 //   - Sensor scaling and calibration polynomials with integer powers.

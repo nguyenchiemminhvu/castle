@@ -32,22 +32,22 @@ public:
     {
     }
 
-    explicit CASTLE_CONSTEXPR time_point(const duration& value) CASTLE_NOEXCEPT
+    explicit CASTLE_CONSTEXPR time_point(CASTLE_CONST duration& value) CASTLE_NOEXCEPT
         : value_(value)
     {
     }
 
     template <typename Duration2>
     explicit CASTLE_CONSTEXPR time_point(
-        const time_point<Clock, Duration2>& other) CASTLE_NOEXCEPT
+        CASTLE_CONST time_point<Clock, Duration2>& other) CASTLE_NOEXCEPT
         : value_(duration_cast<duration>(other.time_since_epoch()))
     {
     }
 
-    time_point(const time_point&) CASTLE_DEFAULT;
-    time_point& operator=(const time_point&) CASTLE_DEFAULT;
+    time_point(CASTLE_CONST time_point&) CASTLE_DEFAULT;
+    time_point& operator=(CASTLE_CONST time_point&) CASTLE_DEFAULT;
 
-    CASTLE_NODISCARD CASTLE_CONSTEXPR duration time_since_epoch() const CASTLE_NOEXCEPT
+    CASTLE_NODISCARD CASTLE_CONSTEXPR duration time_since_epoch() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return value_;
     }
@@ -62,13 +62,13 @@ public:
         return time_point(duration::max());
     }
 
-    CASTLE_CONSTEXPR time_point& operator+=(const duration& delta) CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR time_point& operator+=(CASTLE_CONST duration& delta) CASTLE_NOEXCEPT
     {
         value_ += delta;
         return *this;
     }
 
-    CASTLE_CONSTEXPR time_point& operator-=(const duration& delta) CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR time_point& operator-=(CASTLE_CONST duration& delta) CASTLE_NOEXCEPT
     {
         value_ -= delta;
         return *this;
@@ -109,7 +109,7 @@ private:
 // ============================================================================
 template <typename ToDuration, typename Clock, typename Duration>
 CASTLE_NODISCARD CASTLE_CONSTEXPR time_point<Clock, ToDuration>
-time_point_cast(const time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
+time_point_cast(CASTLE_CONST time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
 {
     return time_point<Clock, ToDuration>(
         duration_cast<ToDuration>(value.time_since_epoch())
@@ -118,7 +118,7 @@ time_point_cast(const time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
 
 template <typename ToDuration, typename Clock, typename Duration>
 CASTLE_NODISCARD CASTLE_CONSTEXPR time_point<Clock, ToDuration>
-floor(const time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
+floor(CASTLE_CONST time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
 {
     return time_point<Clock, ToDuration>(
         chrono::floor<ToDuration>(value.time_since_epoch())
@@ -127,7 +127,7 @@ floor(const time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
 
 template <typename ToDuration, typename Clock, typename Duration>
 CASTLE_NODISCARD CASTLE_CONSTEXPR time_point<Clock, ToDuration>
-ceil(const time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
+ceil(CASTLE_CONST time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
 {
     return time_point<Clock, ToDuration>(
         chrono::ceil<ToDuration>(value.time_since_epoch())
@@ -136,7 +136,7 @@ ceil(const time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
 
 template <typename ToDuration, typename Clock, typename Duration>
 CASTLE_NODISCARD CASTLE_CONSTEXPR time_point<Clock, ToDuration>
-round(const time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
+round(CASTLE_CONST time_point<Clock, Duration>& value) CASTLE_NOEXCEPT
 {
     return time_point<Clock, ToDuration>(
         chrono::round<ToDuration>(value.time_since_epoch())
@@ -151,8 +151,8 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR time_point<
     Clock,
     castle::common_type_t<Duration1, duration<Rep2, Period2>>>
 operator+(
-    const time_point<Clock, Duration1>& value,
-    const duration<Rep2, Period2>& delta) CASTLE_NOEXCEPT
+    CASTLE_CONST time_point<Clock, Duration1>& value,
+    CASTLE_CONST duration<Rep2, Period2>& delta) CASTLE_NOEXCEPT
 {
     using delta_type = duration<Rep2, Period2>;
     using result_duration = castle::common_type_t<Duration1, delta_type>;
@@ -167,8 +167,8 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR time_point<
     Clock,
     castle::common_type_t<duration<Rep1, Period1>, Duration2>>
 operator+(
-    const duration<Rep1, Period1>& delta,
-    const time_point<Clock, Duration2>& value) CASTLE_NOEXCEPT
+    CASTLE_CONST duration<Rep1, Period1>& delta,
+    CASTLE_CONST time_point<Clock, Duration2>& value) CASTLE_NOEXCEPT
 {
     return value + delta;
 }
@@ -178,8 +178,8 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR time_point<
     Clock,
     castle::common_type_t<Duration1, duration<Rep2, Period2>>>
 operator-(
-    const time_point<Clock, Duration1>& value,
-    const duration<Rep2, Period2>& delta) CASTLE_NOEXCEPT
+    CASTLE_CONST time_point<Clock, Duration1>& value,
+    CASTLE_CONST duration<Rep2, Period2>& delta) CASTLE_NOEXCEPT
 {
     using delta_type = duration<Rep2, Period2>;
     using result_duration = castle::common_type_t<Duration1, delta_type>;
@@ -195,8 +195,8 @@ operator-(
 template <typename Clock, typename Duration1, typename Duration2>
 CASTLE_NODISCARD CASTLE_CONSTEXPR castle::common_type_t<Duration1, Duration2>
 operator-(
-    const time_point<Clock, Duration1>& lhs,
-    const time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
+    CASTLE_CONST time_point<Clock, Duration1>& lhs,
+    CASTLE_CONST time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
 {
     using result = castle::common_type_t<Duration1, Duration2>;
 
@@ -210,8 +210,8 @@ operator-(
 template <typename Clock, typename Duration1, typename Duration2>
 CASTLE_CONSTEXPR bool
 operator==(
-    const time_point<Clock, Duration1>& lhs,
-    const time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
+    CASTLE_CONST time_point<Clock, Duration1>& lhs,
+    CASTLE_CONST time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
 {
     using common_duration = castle::common_type_t<Duration1, Duration2>;
 
@@ -222,8 +222,8 @@ operator==(
 template <typename Clock, typename Duration1, typename Duration2>
 CASTLE_CONSTEXPR bool
 operator!=(
-    const time_point<Clock, Duration1>& lhs,
-    const time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
+    CASTLE_CONST time_point<Clock, Duration1>& lhs,
+    CASTLE_CONST time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
 {
     return !(lhs == rhs);
 }
@@ -231,8 +231,8 @@ operator!=(
 template <typename Clock, typename Duration1, typename Duration2>
 CASTLE_CONSTEXPR bool
 operator<(
-    const time_point<Clock, Duration1>& lhs,
-    const time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
+    CASTLE_CONST time_point<Clock, Duration1>& lhs,
+    CASTLE_CONST time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
 {
     using common_duration = castle::common_type_t<Duration1, Duration2>;
 
@@ -243,8 +243,8 @@ operator<(
 template <typename Clock, typename Duration1, typename Duration2>
 CASTLE_CONSTEXPR bool
 operator<=(
-    const time_point<Clock, Duration1>& lhs,
-    const time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
+    CASTLE_CONST time_point<Clock, Duration1>& lhs,
+    CASTLE_CONST time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
 {
     return !(rhs < lhs);
 }
@@ -252,8 +252,8 @@ operator<=(
 template <typename Clock, typename Duration1, typename Duration2>
 CASTLE_CONSTEXPR bool
 operator>(
-    const time_point<Clock, Duration1>& lhs,
-    const time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
+    CASTLE_CONST time_point<Clock, Duration1>& lhs,
+    CASTLE_CONST time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
 {
     return rhs < lhs;
 }
@@ -261,8 +261,8 @@ operator>(
 template <typename Clock, typename Duration1, typename Duration2>
 CASTLE_CONSTEXPR bool
 operator>=(
-    const time_point<Clock, Duration1>& lhs,
-    const time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
+    CASTLE_CONST time_point<Clock, Duration1>& lhs,
+    CASTLE_CONST time_point<Clock, Duration2>& rhs) CASTLE_NOEXCEPT
 {
     return !(lhs < rhs);
 }

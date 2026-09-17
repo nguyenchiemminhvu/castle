@@ -53,7 +53,7 @@ public:
 
     set() CASTLE_NOEXCEPT : tree_() {}
     explicit set(CASTLE_CONST Compare& compare) CASTLE_NOEXCEPT : tree_(compare) {}
-    ~set() CASTLE_NOEXCEPT = default;
+    ~set() CASTLE_NOEXCEPT CASTLE_DEFAULT;
 
     set(CASTLE_CONST set&) CASTLE_DELETE;
     set& operator=(CASTLE_CONST set&) CASTLE_DELETE;

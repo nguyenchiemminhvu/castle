@@ -219,17 +219,17 @@ public:
         active_count_ = 0;
     }
 
-    constexpr size_type size() CASTLE_CONST noexcept
+    CASTLE_CONSTEXPR size_type size() CASTLE_CONST noexcept
     {
         return active_count_;
     }
 
-    constexpr bool empty() CASTLE_CONST noexcept
+    CASTLE_CONSTEXPR bool empty() CASTLE_CONST noexcept
     {
         return active_count_ == 0;
     }
 
-    static constexpr size_type capacity() noexcept
+    static CASTLE_CONSTEXPR size_type capacity() noexcept
     {
         return max_callback;
     }

@@ -20,9 +20,9 @@ CASTLE_CONSTEXPR T* addressof(T& value) CASTLE_NOEXCEPT
 }
 
 template <typename T>
-CASTLE_CONSTEXPR T const* addressof(T const& value) CASTLE_NOEXCEPT
+CASTLE_CONSTEXPR T CASTLE_CONST* addressof(T CASTLE_CONST& value) CASTLE_NOEXCEPT
 {
-    return reinterpret_cast<T const*>(
+    return reinterpret_cast<T CASTLE_CONST*>(
         &const_cast<char&>(
             reinterpret_cast<CASTLE_CONST CASTLE_VOLATILE char&>(value)
         )

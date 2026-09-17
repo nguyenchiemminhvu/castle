@@ -40,7 +40,7 @@ struct hash_impl;
 template <typename T>
 struct hash_impl<T, true, false, false>
 {
-    size_type operator()(CASTLE_CONST T& value) const CASTLE_NOEXCEPT
+    size_type operator()(CASTLE_CONST T& value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return detail::hash_integral(value);
     }
@@ -49,7 +49,7 @@ struct hash_impl<T, true, false, false>
 template <typename T>
 struct hash_impl<T, false, true, false>
 {
-    size_type operator()(CASTLE_CONST T& value) const CASTLE_NOEXCEPT
+    size_type operator()(CASTLE_CONST T& value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return detail::hash_integral(value);
     }
@@ -58,7 +58,7 @@ struct hash_impl<T, false, true, false>
 template <typename T>
 struct hash_impl<T, false, false, true>
 {
-    size_type operator()(CASTLE_CONST T& value) const CASTLE_NOEXCEPT
+    size_type operator()(CASTLE_CONST T& value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return static_cast<size_type>(detail::hash_mix64(static_cast<uint64_t>(reinterpret_cast<uintptr_t>(value))));
     }
@@ -67,7 +67,7 @@ struct hash_impl<T, false, false, true>
 template <typename T>
 struct hash
 {
-    size_type operator()(CASTLE_CONST T& value) const CASTLE_NOEXCEPT
+    size_type operator()(CASTLE_CONST T& value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         static_assert(meta::is_integral<T>::value || meta::is_enum<T>::value || meta::is_pointer<T>::value,
                       "castle::hash<T>: provide a hash specialization for this type");
@@ -78,7 +78,7 @@ struct hash
 template <typename T>
 struct hash<CASTLE_CONST T>
 {
-    size_type operator()(CASTLE_CONST T& value) const CASTLE_NOEXCEPT
+    size_type operator()(CASTLE_CONST T& value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return hash<T>()(value);
     }
@@ -87,7 +87,7 @@ struct hash<CASTLE_CONST T>
 template <typename CharT>
 struct hash<container::basic_string_view<CharT>>
 {
-    size_type operator()(container::basic_string_view<CharT> value) const CASTLE_NOEXCEPT
+    size_type operator()(container::basic_string_view<CharT> value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         uint64_t state = 1469598103934665603ULL;
         for (size_type i = 0U; i < value.size(); ++i)

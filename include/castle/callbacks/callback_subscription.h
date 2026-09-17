@@ -45,9 +45,9 @@ public:
 class callback_subscription
 {
 public:
-    constexpr callback_subscription() CASTLE_NOEXCEPT CASTLE_DEFAULT;
+    CASTLE_CONSTEXPR callback_subscription() CASTLE_NOEXCEPT CASTLE_DEFAULT;
 
-    constexpr callback_subscription(
+    CASTLE_CONSTEXPR callback_subscription(
         i_unsubscribable* owner,
         size_type index,
         uint32_t generation) CASTLE_NOEXCEPT
@@ -58,7 +58,7 @@ public:
     {
     }
 
-    constexpr bool valid() CASTLE_CONST CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR bool valid() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return valid_ && owner_ != nullptr;
     }
@@ -68,12 +68,12 @@ public:
         return valid();
     }
 
-    constexpr size_type index() CASTLE_CONST CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR size_type index() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return index_;
     }
 
-    constexpr uint32_t generation() CASTLE_CONST CASTLE_NOEXCEPT
+    CASTLE_CONSTEXPR uint32_t generation() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return generation_;
     }
