@@ -1,97 +1,123 @@
 # CASTLE
 
-**Common Automotive Safety-critical Template Library for Embedded engineers**
+**Compliant Automotive Safety Template Library for Embedded**
 
-*Prototype version 1.0*
+*Prototype version 2.0*
 
-CASTLE is a lightweight, header-only C++17 template library built for safety-critical
+CASTLE is a lightweight, header-only CPP17-based template library built for safety-critical
 embedded systems where every byte of RAM, every millisecond of jitter, and every
-allocation counts. It is inspired by the [ETL (Embedded Template Library)](https://www.etlcpp.com/docs/)
+allocation counts.
+
+It is inspired by the [ETL (Embedded Template Library)](https://www.etlcpp.com/docs/)
 and is intended as a drop-in replacement for parts of the C++ standard library and
 common enterprise frameworks that are otherwise unsuitable for automotive ECUs,
 MCUs, and other resource-constrained targets.
 
-The core idea is simple: give embedded developers a set of small, composable,
-statically-sized building blocks — with no heap allocation, no exceptions,
-no RTTI, and no hidden costs.
+The main idea is simple: make common C++ jobs easier without bringing the
+runtime costs that are often unwanted on small targets.
+
+CASTLE 2.0 focuses on:
+
+- deterministic, fixed-capacity behavior where practical
+- no mandatory heap allocation
+- no mandatory RTTI
+- no mandatory exceptions
+- no virtual functions in the core data structures
+- no dependency on the C++ STL
+- C++17 and lower language levels
+- GCC, Clang, and ARM compiler families
+
+CASTLE is a good fit for firmware, device drivers, control software, protocol
+stacks, communication buffers, sensor pipelines, schedulers, and other code
+where memory and timing are important.
 
 ---
 
-## Why CASTLE?
+## Design principles
 
-Most of the C++ standard library (`std::function`, `std::string`,
-`std::vector`, `std::unordered_map`, most logging frameworks, ...) relies on
-dynamic memory allocation, exceptions, and virtual dispatch. That combination
-is often unacceptable in automotive and safety-critical environments where:
+### No hidden heap
 
-- Heap fragmentation must be avoided over long runtimes.
-- Worst-case execution time (WCET) must be provable.
-- Stack usage must be bounded and known at compile time.
-- Exceptions and RTTI are either disabled or forbidden by the coding standard
-  (MISRA C++, AUTOSAR C++14 guidelines, ISO 26262 constraints).
+`vector`, `array`, `ring_buffer`, `stack`, `optional`, `variant`, and the
+storage helpers keep their data in objects with known bounds.
 
-CASTLE addresses these constraints by providing **stack-allocated,
-fixed-capacity, `constexpr`/`noexcept`-friendly** alternatives whose behaviour
-is predictable, testable, and traceable.
+That means the application can choose the memory budget at compile time.
+
+### Explicit failure
+
+A fixed-size container can become full or empty. CASTLE reports these cases
+through return values such as `castle::status::ok`, `castle::status::full`, and
+`castle::status::empty`, or through `bool` for simple operations.
+
+There is no need to throw an exception for a normal capacity condition.
+
+### Friendly to freestanding-style firmware
+
+The public headers do not require the C++ STL. CASTLE uses compiler features
+and small low-level building blocks instead.
+
+### Compile-time first
+
+Many utilities can be evaluated at compile time.
+
+This is useful for register definitions, buffer sizes, time periods, and other firmware configuration.
 
 ---
 
-## Features
+## Module map
 
-- **Deterministic behaviour, tailored for embedded targets** — bounded
-  capacities, bounded stack usage, no exceptions.
-- **No heap allocation** — every container, callback, event queue, timer, and
-  log record lives on the stack or in static storage. Capacity is a
-  compile-time template parameter.
-- **Easy-to-set-up event mechanism** — a family of ready-to-use dispatchers
-  (`event_dispatcher`, `inplace_event_dispatcher`, `signal_event`,
-  `tick_timer`, `inplace_signal_event`, `inplace_tick_timer`, `sigslot`), wiring
-  publishers and subscribers takes only a few lines of code.
-- **Easy to integrate — header-only** — no build system required for
-  consumption; drop `include/` on your include path and `#include
-  <castle/...>`. A CMake `INTERFACE` target `castle` is also provided.
-- **High availability through compile-time configuration** — sizes,
-  capacities, signal maps, event topologies, and even bound member functions
-  can be encoded as template parameters (`function_ct`, `function_ct_m`,
-  `function_ct_im`, `signal_config<...>`), so misconfiguration becomes a
-  compile-time error rather than a runtime failure.
-- **Fewer virtual functions** — the library favours static polymorphism
-  (templates, CRTP, type erasure with a single small vtable, compile-time
-  binding of callbacks) over classical inheritance. Where a virtual interface
-  is unavoidable, it is minimal and its lifetime is explicit.
-- **Many small, focused utilities** — bit manipulation, safe
-  numeric casts, iterators, type traits, design pattern helpers, logger...
+- [`algorithm/`](docs/algorithm/algorithm.md) — Range algorithms and iterator-based utilities.
+- [`atomic/`](docs/atomic/atomic.md) — Atomic values and memory ordering.
+- [`bit/`](docs/bit/bit.md) — Bit operations, masks, rotations, and flags.
+- [`callbacks/`](docs/callbacks/delegate.md) — Fixed-storage delegates, functions, registries, and execution policies.
+- [`chrono/`](docs/chrono/chrono.md) — Durations, time points, clocks, and literals.
+- [`container/`](docs/container/containers.md) — Fixed-capacity sequences, associative containers, buffers, and strings.
+- [`core/`](docs/core/compiler.md) — Compiler abstraction, configuration, traits, type ranges, and error handling.
+- [`design_patterns/`](docs/design_patterns/observer.md) — Observer, singleton, and visitor helpers.
+- [`error/`](docs/error/status.md) — Common status/error values.
+- [`events/`](docs/events/delegate_dispatcher.md) — Event dispatch, signal/slot, IPC, timers, and thread-pool helpers.
+- [`filter/`](docs/filter/debounce_sampling.md) — Deterministic signal sampling helpers.
+- [`iterator/`](docs/iterator/iterator.md) — Iterator tags, traits, operations, and bounded iterators.
+- [`math/`](docs/math/geometry/geometry.md) — Integer math, geometry, linear algebra, ratios, roots, random helpers, and more.
+- [`memory/`](docs/memory/memory.md) — Alignment, storage, object lifetime, construction, and destruction helpers.
+- [`serialization/`](docs/serialization/ini.md) — Fixed-capacity INI, JSON, and XML support.
+- [`sync/`](docs/sync/mutex.md) — Mutexes, semaphores, shared locking, and wait policies.
+- [`utility/`](docs/utility/utility.md) — Bit cast, bitset, compare, hash, optional, pair, tuple, variant, and basic move/forward utilities.
+
+See the module guides in [`docs/`](docs/README.md).
 
 ---
 
 ## Requirements
 
 - **C++17** background and toolchain.
-- A conforming compiler: **GCC 7+**, **Clang 5+**, or **MSVC 19.14+**.
+- A conforming compiler: **GCC 7+**, **Clang 5+**.
 - **CMake 3.10+** if you want to build the samples/tests through the provided
   project files (optional — CASTLE itself is header-only).
-
-CASTLE does not use exceptions or RTTI, so it can be compiled with
-`-fno-exceptions -fno-rtti` (or the equivalent MSVC switches).
 
 ---
 
 ## Installation
 
-CASTLE is **header-only**. Any of the following is enough:
-
-### 1. Copy the headers
-
-Copy `include/castle/` into your project and add `include/` to your
-compiler's include path. Then:
+Castle is header-only. Add `include/` to the compiler include path and include the required `.hpp` file:
 
 ```cpp
-#include <castle/buffers/ring_buffer.h>
-#include <castle/events/tick_timer.h>
-#include <castle/logging/logging.h>
+#include "castle/core/error_handler.hpp"
+#include "castle/container/vector.hpp"
+#include "castle/utility/optional.hpp"
+
+castle::container::vector<int, 4U> values;
+CASTLE_ASSERT((values.push_back(42) == castle::status::ok), "Push failed");
+castle::optional<int> reading(42);
+CASTLE_ASSERT(reading.has_value(), "Has no value");
 ```
 
-### 2. CMake (`add_subdirectory`)
+A simple GCC/Clang build command is:
+
+```text
+c++ -std=c++17 -Iinclude -fno-exceptions -fno-rtti your_file.cpp
+```
+
+### CMake (`add_subdirectory`)
 
 ```cmake
 add_subdirectory(third_party/castle)
@@ -101,7 +127,7 @@ target_link_libraries(my_app PRIVATE castle)
 The `castle` target is an `INTERFACE` library that propagates the include
 directory and enforces `cxx_std_17`.
 
-### 3. CMake (`FetchContent`)
+### CMake (`FetchContent`)
 
 ```cmake
 include(FetchContent)
@@ -134,30 +160,6 @@ cmake -S . -B build \
       -DCASTLE_FETCH_GTEST=ON
 cmake --build build -j
 ```
-
-Every module has a matching runnable example under `samples/` (for example
-`sample_ring_buffer.cpp`, `sample_signal_event.cpp`, `sample_tick_timer.cpp`,
-`sample_logging.cpp`, `sample_safe_cast.cpp`, ...), and per-module
-documentation lives in `docs/`.
-
----
-
-## Roadmap
-
-Prototype 1.0 covers bit utilities, fixed-capacity buffers, callables,
-event/timer/signal dispatchers, signals and slots, logging, iterators,
-math, safe casts, and a few design-pattern helpers.
-
-Planned for upcoming releases:
-
-- More containers (fixed-capacity heaps) and their utility functions.
-- Finite state machine framework.
-- Input/Output support for protocols.
-- Encoder and decoder algorithms.
-- CRC and checksum utilities (CRC-8/16/32, Fletcher, Adler).
-- More basic math and geometry caculations.
-- More expressive compile-time configuration for the event system.
-- AUTOSAR / MISRA C++ conformance notes per module.
 
 ---
 
