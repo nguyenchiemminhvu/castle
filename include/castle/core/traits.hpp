@@ -629,7 +629,7 @@ struct is_convertible_impl : false_type {};
 template <typename From, typename To>
 struct is_convertible_impl<
     From, To,
-    void_t<decltype(static_cast<To(*)()>(nullptr),
+    void_t<decltype(static_cast<void>(static_cast<To(*)()>(nullptr)),
                     static_cast<void(*)(To)>(nullptr)(declval<From>()))>>
     : true_type {};
 

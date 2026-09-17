@@ -14,7 +14,7 @@ namespace memory
 // Calling a trivial destructor is unnecessary. This also lets the same
 // primitive work cleanly for scalar/trivial types such as uint32_t.
 template <typename T>
-void destroy_at(T* pointer) CASTLE_NOEXCEPT
+void destroy_at(CASTLE_UNUSED T* pointer) CASTLE_NOEXCEPT
 {
     static_assert(meta::is_destructible<T>::value,
                   "T must be destructible");
