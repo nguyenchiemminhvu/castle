@@ -28,16 +28,13 @@ TEST(MathUmbrella, AggregateApiExposed)
 // ---------------------------------------------------------------------------
 // is_equal - floating point equality within epsilon
 // ---------------------------------------------------------------------------
-TEST(MathIsEqual, ExactlyEqual)
+TEST(MathIsEqual, Equal)
 {
     EXPECT_TRUE(castle::math::is_equal(1.0, 1.0));
     EXPECT_TRUE(castle::math::is_equal(0.0, 0.0));
     EXPECT_TRUE(castle::math::is_equal(-2.5, -2.5));
     EXPECT_TRUE(castle::math::is_equal(3.5f, 3.5f));
-}
 
-TEST(MathIsEqual, WithinEpsilon)
-{
     // Differences far smaller than epsilon compare equal.
     EXPECT_TRUE(castle::math::is_equal(1.0, 1.0 + 1e-18));
     EXPECT_TRUE(castle::math::is_equal(1.0f, 1.0f + 1e-9f));

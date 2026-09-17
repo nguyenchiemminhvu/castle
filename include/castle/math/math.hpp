@@ -20,6 +20,7 @@
 #include "castle/math/ceil_div.hpp"
 #include "castle/math/floor_div.hpp"
 #include "castle/math/hypot.hpp"
+#include "castle/math/factorial.hpp"
 #include "castle/math/is_power_of_two.hpp"
 #include "castle/math/isqrt.hpp"
 #include "castle/math/lerp.hpp"
