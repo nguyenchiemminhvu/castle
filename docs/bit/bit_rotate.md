@@ -1,53 +1,32 @@
-# `castle/bit/bit_rotate.h` — Circular shifts
+# BitRotate
 
-**Header:** `castle/bit/bit_rotate.h`
-**Namespace:** `castle::bit`
-**Sample:** [`samples/sample_bit.cpp`](../../samples/sample_bit.cpp) — `demo_bit_rotate()`
+## Overview
+Circular bit-rotation helpers for integer values. Use this header when bits that leave one side of a value must re-enter on the other side instead of being discarded.
 
-## Purpose
+## Header
+`#include "castle/bit/bit_rotate.hpp"`
 
-`rotate_left` and `rotate_right` perform **circular** shifts (bits
-shifted off one end re-enter the other end). Rotations are the core
-mixing step of most non-cryptographic hashes (FNV-1a variants,
-MurmurHash, xxHash, SipHash) and of many block ciphers, and they also
-appear in some ring-buffer index arithmetic.
+## Dependencies
+- [compiler](../core/compiler.md)
+- [traits](../core/traits.md)
+- [types](../core/types.md)
 
-## Design notes
+## Public API
+| Signature | Description |
+|---|---|
+| `template <typename T> T rotate_left(T value, uint32_t shift)` | Rotates `value` left by `shift` bit positions within the full width of `T`. The shift count is reduced modulo the bit width. Complexity: O(1). |
+| `template <typename T> T rotate_right(T value, uint32_t shift)` | Rotates `value` right by `shift` bit positions within the full width of `T`. The shift count is reduced modulo the bit width. Complexity: O(1). |
 
-- `constexpr` + `noexcept`.
-- `shift` is reduced modulo the width of `T`, so any rotation amount is
-  well-defined; a zero-shift shortcut avoids the UB of shifting by the
-  full type width on some platforms.
-- Requires `castle::types::is_valid_integer_v<T>`.
-
-## API
-
-| Function                          | Returns |
-| --------------------------------- | ------- |
-| `rotate_left(T v, uint32_t s)`    | `T`     |
-| `rotate_right(T v, uint32_t s)`   | `T`     |
-
-## Example
-
+## Usage Example
 ```cpp
-#include <castle/bit/bit_rotate.h>
-using namespace castle::bit;
+#include "castle/bit/bit_rotate.hpp"
 
-static_assert(rotate_left<uint8_t>(0b1000'0001, 1) == 0b0000'0011);
-static_assert(rotate_right<uint8_t>(0b0000'0011, 1) == 0b1000'0001);
+const uint32_t left = castle::bit::rotate_left(0x12345678U, 8U);
+const uint32_t right = castle::bit::rotate_right(0x12345678U, 8U);
 ```
+See `samples/sample_bit_rotate.cpp` for a complete example.
 
-## Diagram
-
-```plantuml
-@startuml
-title rotate_left(byte, 1)
-rectangle "b7 b6 b5 b4 b3 b2 b1 b0" as A
-rectangle "b6 b5 b4 b3 b2 b1 b0 b7" as B
-A --> B : shift MSB->LSB
-@enduml
-```
-
-## See also
-
-- `bit_reverse.h` — for full bit reversal, not rotation.
+## Constraints & Notes
+- Accepts Castle valid integer types only.
+- A zero effective shift returns the original value so the implementation never shifts by the full bit width.
+- Rotation is independent of machine endianness because it operates on the value, not on its memory layout.

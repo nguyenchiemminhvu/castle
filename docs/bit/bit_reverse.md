@@ -1,53 +1,40 @@
-# `castle/bit/bit_reverse.h` — Bit / byte reversal
+# BitReverse
 
-**Header:** `castle/bit/bit_reverse.h`
-**Namespace:** `castle::bit`
-**Sample:** [`samples/sample_bit.cpp`](../../samples/sample_bit.cpp) — `demo_bit_reverse()`
+## Overview
+Helpers for reversing bit order or byte order in integer values. Use this header for bit-serial protocols, endianness conversion, and packed data transformations.
 
-## Purpose
+## Header
+`#include "castle/bit/bit_reverse.hpp"`
 
-Reverses the ordering of bits (or bytes) inside an integral value. Bit
-reversal is required by several CRC variants, FFT indexing, and
-serial-protocol adapters where the wire transmits LSB-first while the
-CPU sees MSB-first (or vice versa).
+## Dependencies
+- [compiler](../core/compiler.md)
+- [traits](../core/traits.md)
 
-## Design notes
+## Public API
+| Signature | Description |
+|---|---|
+| `uint8_t reverse_bits(uint8_t n)` | Reverses all 8 bit positions. Complexity: O(1). |
+| `uint16_t reverse_bits(uint16_t n)` | Reverses all 16 bit positions. Complexity: O(1). |
+| `uint32_t reverse_bits(uint32_t n)` | Reverses all 32 bit positions. Complexity: O(1). |
+| `uint64_t reverse_bits(uint64_t n)` | Reverses all 64 bit positions. Complexity: O(1). |
+| `template <typename T> T reverse_bits(T value)` | Generic integer overload that reverses the bit positions of the corresponding unsigned representation and casts back to `T`. Complexity: O(1). |
+| `uint8_t byte_swap(uint8_t v)` | Returns the byte unchanged. Complexity: O(1). |
+| `uint16_t byte_swap(uint16_t v)` | Reverses the two-byte order. Complexity: O(1). |
+| `uint32_t byte_swap(uint32_t v)` | Reverses the four-byte order. Complexity: O(1). |
+| `uint64_t byte_swap(uint64_t v)` | Reverses the eight-byte order. Complexity: O(1). |
+| `template <typename T> T byte_swap(T value)` | Generic integer overload that byte-swaps the corresponding unsigned representation and casts back to `T`. Complexity: O(1). |
+| `template <typename T> T reverse_bytes(T value)` | Alias for `byte_swap(value)`. Complexity: O(1). |
 
-- Explicit `constexpr` overloads for `uint8_t`, `uint16_t`, `uint32_t`,
-  `uint64_t`, implemented with the classic parallel-swap technique
-  (nibble-swap, then 2-bit, then 1-bit; equivalent for 16/32/64 sizes).
-- A generic dispatcher forwards other integral types via their unsigned
-  representation.
-- `reverse_bytes(v)` is a thin alias of `byte_swap(v)` from
-  `bit_endian.h`, kept here for API symmetry.
-
-## API
-
-| Function                    | Description                        |
-| --------------------------- | ---------------------------------- |
-| `reverse_bits(uint8_t v)`   | Bit-reverse an 8-bit value         |
-| `reverse_bits(uint16_t v)`  | Bit-reverse a 16-bit value         |
-| `reverse_bits(uint32_t v)`  | Bit-reverse a 32-bit value         |
-| `reverse_bits(uint64_t v)`  | Bit-reverse a 64-bit value         |
-| `reverse_bits<T>(T v)`      | Generic dispatcher (SFINAE)        |
-| `reverse_bytes<T>(T v)`     | Alias of `byte_swap(v)`            |
-
-## Example — CRC-16 with LSB-first input
-
+## Usage Example
 ```cpp
-#include <castle/bit/bit_reverse.h>
-using namespace castle::bit;
+#include "castle/bit/bit_reverse.hpp"
 
-uint16_t crc = 0xFFFF;
-for (uint8_t b : payload)
-{
-    uint8_t bit_rev = reverse_bits(b);   // wire is LSB-first
-    // …feed bit_rev into CRC lookup…
-}
+const uint8_t bits = castle::bit::reverse_bits(static_cast<uint8_t>(0xB0U));
+const uint32_t bytes = castle::bit::byte_swap(0x12345678U);
 ```
+See `samples/sample_bit_reverse.cpp` for a complete example.
 
-## See also
-
-- `bit_endian.h` — `byte_swap` for pure byte-order conversions.
-- `bit_count.h` — `popcount` is unaffected by bit ordering; useful as a
-  sanity check.
+## Constraints & Notes
+- Accepts Castle valid integer types for the generic overloads.
+- Bit reversal changes logical bit positions across the full width of the value; it is not an endianness operation.
+- Byte swapping reverses byte order only; it does not reverse bits inside each byte.

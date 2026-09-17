@@ -1,99 +1,41 @@
-# `castle/design_patterns/observer.h` — Observer / observable
+# Observer
 
-**Header:** `castle/design_patterns/observer.h`
-**Namespace:** `castle::design_patterns`
-**Sample:** [`samples/sample_observer.cpp`](../../samples/sample_observer.cpp)
+## Overview
+Fixed-capacity observer interfaces and an observable registry for embedded event fan-out. Use it when a subject must notify a bounded set of listeners without dynamic allocation.
 
-## Purpose
+## Header
+`#include "castle/design_patterns/observer.hpp"`
 
-Fixed-capacity, allocation-free implementation of the Observer pattern.
-Supports **multiple event types per observer** through variadic
-inheritance: a single observer class can react to `T1`, `T2`, `T3` …
-each via its own `notify(const T&)` overload.
+## Dependencies
+- [`../container/array.md`](../container/array.md)
+- `castle/core/types.hpp`
+- `castle/core/traits.hpp`
 
-## Design notes
+## Public API
+| API | Description |
+| --- | --- |
+| `observer<T>` | Abstract observer interface with `notify(T const&)`. |
+| `observer<void>` | Abstract observer interface for parameterless notifications. |
+| `observer<T, Rest...>` | Multiple-inheritance helper that exposes all `notify()` overloads for unique payload types. |
+| `observable<TObserver, N>` | Stores up to `N` observer pointers in fixed-capacity inline storage. |
+| `add_observer` | Registers a non-null observer pointer; rejects duplicates and overflow. |
+| `remove_observer` | Unregisters a previously added observer pointer. |
+| `notify_observers` | Invokes `notify(data)` or `notify()` on every registered observer. |
 
-- `observer<T>` — abstract base with `virtual void notify(const T&) = 0`.
-- `observer<void>` — specialisation for parameterless notifications
-  (`virtual void notify() = 0`).
-- `observer<T1, T2, ...>` — recursively inherits from `observer<T1>`
-  and `observer<Rest...>`, pulling all `notify` overloads into scope.
-  A `static_assert(has_unique_types_v<...>)` rejects duplicate types.
-- `observable<TObserver, N>` — fixed-capacity registry of `N`
-  `TObserver*` pointers. Provides `add_observer`, `remove_observer`,
-  and `notify_observers(data)` / `notify_observers()`.
-- **No dynamic allocation.** Slots are a `std::array<TObserver*, N>`.
-- Not thread-safe on its own.
-
-## API
-
-### `observer<Ts...>`
-| Signature                             | Kind         |
-| ------------------------------------- | ------------ |
-| `virtual void notify(const T&) = 0`   | Per non-void `T` |
-| `virtual void notify() = 0`           | For `observer<void>` |
-
-### `observable<TObserver, N>`
-| Method                                     | Returns  |
-| ------------------------------------------ | -------- |
-| `add_observer(TObserver*)`                 | `bool`   |
-| `remove_observer(TObserver*)`              | `bool`   |
-| `notify_observers(const TData&)`           | `void`   |
-| `notify_observers()`                       | `void`   |
-
-`add_observer` refuses `nullptr`, refuses duplicates, and refuses
-enrolment when the registry is full — all via return value `false`.
-
-## Diagram
-
-```plantuml
-@startuml
-title Observer wiring
-class "observer<TempSample>" as OT
-class "observer<DoorEvent>" as OD
-class "MyLogger" as ML
-class "observable<observer<TempSample>, 4>" as SubjT
-class "observable<observer<DoorEvent>, 4>" as SubjD
-
-OT <|-- ML
-OD <|-- ML
-SubjT o-- ML : add_observer(&ml)
-SubjD o-- ML : add_observer(&ml)
-@enduml
-```
-
-## Example
-
+## Usage Example
 ```cpp
-#include <castle/design_patterns/observer.h>
-using namespace castle::design_patterns;
+// See: samples/sample_observer.cpp
+#include "castle/design_patterns/observer.hpp"
 
-struct temp_sample { float celsius; };
-struct door_event  { bool  open;    };
-
-class hmi
-    : public observer<temp_sample>
-    , public observer<door_event>
+struct temperature_observer : castle::design_patterns::observer<uint16_t>
 {
-public:
-    void notify(const temp_sample& s) override { /* update UI */ }
-    void notify(const door_event&  e) override { /* animate  */ }
+    void notify(uint16_t const& value) override { last = value; }
+    uint16_t last = 0U;
 };
-
-observable<observer<temp_sample>, 4> temp_hub;
-observable<observer<door_event>,  4> door_hub;
-
-hmi ui;
-temp_hub.add_observer(&ui);
-door_hub.add_observer(&ui);
-
-temp_hub.notify_observers(temp_sample{23.4f});
-door_hub.notify_observers(door_event{true});
 ```
 
-## See also
-
-- `castle/callbacks/callback_registry.h` — a lower-level, function-based
-  publish/subscribe primitive.
-- `castle/design_patterns/visitor.h` — same "recursive variadic bases"
-  trick applied to double-dispatch.
+## Constraints & Notes
+- No heap allocation; `observable` stores observer pointers in `castle::container::array`.
+- Lifetime management is manual: observers must outlive their registrations.
+- Duplicate registrations are rejected.
+- Dispatch uses virtual functions, so this header does not avoid virtual dispatch even though it remains RTTI-free.

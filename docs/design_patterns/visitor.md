@@ -1,90 +1,33 @@
-# `castle/design_patterns/visitor.h` — Type-safe visitor / visitable
+# Visitor
 
-**Header:** `castle/design_patterns/visitor.h`
-**Namespace:** `castle::design_patterns`
-**Sample:** [`samples/sample_visitor.cpp`](../../samples/sample_visitor.cpp)
+## Overview
+Variadic visitor and visitable base helpers for classic visitor-style dispatch. Use it when concrete node types need a shared visitor interface with compile-time-checked overload sets.
 
-## Purpose
+## Header
+`#include "castle/design_patterns/visitor.hpp"`
 
-Compile-time-checked GoF Visitor. A single `visitor<Ts...>` inherits
-`visit(T)` overloads for every element type; every `visitable<Vs...>`
-inherits an `accept(V&)` overload for every visitor family. This
-enables statically-checked **double dispatch** without any hidden
-dynamic allocation.
+## Dependencies
+- `castle/core/traits.hpp`
 
-## Design notes
+## Public API
+| API | Description |
+| --- | --- |
+| `visitor<T1, Types...>` | Combines multiple `visit()` overload requirements through recursive inheritance. |
+| `visitor<T1>` | Base case declaring one pure-virtual `visit(T1)`. |
+| `visitable<T1, Types...>` | Combines multiple `accept()` overload requirements through recursive inheritance. |
+| `visitable<T1>` | Base case declaring one pure-virtual `accept(T1&)`. |
 
-- Recursive variadic inheritance — mirrors the trick used in
-  `observer<>`.
-- A `static_assert(has_unique_types_v<...>)` guards against accidental
-  duplicate element types.
-- Element types can be spelled as value, `T&`, or `const T&` — the
-  visitor overload matches the exact parameter form.
-- Only `visit(...)` and `accept(...)` are virtual. Everything else is
-  statically dispatched.
-
-## API
-
-### `visitor<Ts...>`
-| Member                             | Notes                       |
-| ---------------------------------- | --------------------------- |
-| `virtual void visit(T) = 0`        | one per element type        |
-
-### `visitable<Vs...>`
-| Member                             | Notes                       |
-| ---------------------------------- | --------------------------- |
-| `virtual void accept(V&) = 0`      | one per visitor family      |
-
-## Diagram
-
-```plantuml
-@startuml
-title Double dispatch
-interface ShapeVisitor {
-  + visit(Circle&)
-  + visit(Square&)
-}
-interface Shape {
-  + accept(ShapeVisitor&)
-}
-Shape <|.. Circle
-Shape <|.. Square
-Circle : accept(v) { v.visit(*this); }
-Square : accept(v) { v.visit(*this); }
-ShapeVisitor <|.. AreaCalc
-@enduml
-```
-
-## Example
-
+## Usage Example
 ```cpp
-#include <castle/design_patterns/visitor.h>
-using namespace castle::design_patterns;
+// See: samples/sample_visitor.cpp
+#include "castle/design_patterns/visitor.hpp"
 
-struct circle; struct square;
-
-using shape_visitor = visitor<circle&, square&>;
-
-struct shape : visitable<shape_visitor> {};
-
-struct circle : shape {
-    float r;
-    void accept(shape_visitor& v) override { v.visit(*this); }
-};
-struct square : shape {
-    float s;
-    void accept(shape_visitor& v) override { v.visit(*this); }
-};
-
-class area_calc : public shape_visitor {
-public:
-    float total = 0;
-    void visit(circle& c) override { total += 3.14159f * c.r * c.r; }
-    void visit(square& s) override { total += s.s * s.s; }
-};
+struct start_command;
+struct stop_command;
+using command_visitor = castle::design_patterns::visitor<start_command&, stop_command&>;
 ```
 
-## See also
-
-- `castle/design_patterns/observer.h` — same variadic-inheritance
-  technique.
+## Constraints & Notes
+- No heap allocation or RTTI.
+- This implementation uses pure virtual functions for `visit()` and `accept()`, so dispatch is runtime polymorphic rather than CRTP/static dispatch.
+- Parameter packs require unique types; duplicates are rejected with `static_assert`.

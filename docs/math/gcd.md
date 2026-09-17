@@ -1,47 +1,31 @@
-# `castle/math/gcd.h` — Greatest common divisor
+# Greatest Common Divisor
 
-**Header:** `castle/math/gcd.h`
-**Namespace:** `castle::math`
-**Sample:** [`samples/sample_math_gcd.cpp`](../../samples/sample_math_gcd.cpp)
+## Overview
+Compile-time Euclidean greatest-common-divisor support for `intmax_t` template arguments. It exists mainly for ratio reduction and period calculations elsewhere in Castle.
 
-## Purpose
+## Header
+`#include "castle/math/gcd.hpp"`
 
-`constexpr` Euclidean-algorithm GCD, available in three shapes:
+## Dependencies
+- [`castle/core/compiler.hpp`](../core/compiler.md)
+- [`castle/core/traits.hpp`](../core/traits.md)
+- [`castle/math/abs.hpp`](abs.md)
 
-- `gcd_v<A, B>::value` — pure compile-time constant.
-- `gcd(a, b)` — runtime for any `is_valid_integer_v<T>`.
-- `gcd(a, b, c, ...)` — variadic runtime overload with an
-  early-out on `gcd == 1`.
+## Public API
+| Signature | Description |
+| --- | --- |
+| `template <intmax_t A, intmax_t B> struct gcd` | Compile-time Euclidean algorithm. `gcd<A, B>::value` stores the terminating divisor as `intmax_t`. Instantiation depth is proportional to the length of the remainder chain. |
 
-## Design notes
-
-- Handles negative signed inputs by taking the absolute value first.
-- Loop-based iteration (not recursion) for the runtime overload, so it
-  never blows the stack even on 8-bit MCUs.
-- Variadic overload short-circuits as soon as an intermediate GCD
-  reaches `1`, keeping worst-case time proportional to a single
-  reduction chain.
-
-## API
-
-| Overload                          | Kind         |
-| --------------------------------- | ------------ |
-| `gcd_v<A, B>::value`              | Compile time |
-| `gcd(T a, T b)`                   | Runtime      |
-| `gcd(T a, T b, Args... rest)`     | Variadic     |
-
-## Example
-
+## Usage Example
 ```cpp
-#include <castle/math/gcd.h>
-using namespace castle::math;
+#include "castle/math/gcd.hpp"
 
-static_assert(gcd_v<24, 36>::value == 12);
-
-int g  = gcd(24, 36);          // 12
-int g2 = gcd(24, 36, 48, 60);  // 12
+constexpr intmax_t divisor = castle::math::gcd<84, 30>::value;
 ```
 
-## See also
+See [`samples/sample_gcd.cpp`](../../samples/sample_gcd.cpp).
 
-- `castle/math/lcm.h` — reuses `gcd` internally.
+## Constraints & Notes
+- `gcd<A, 0>::value` is `A`, so `gcd<0, 0>::value` is `0`.
+- This header does not normalize the sign of its template arguments; negative operands can therefore produce a negative result.
+- For canonical positive GCD results, instantiate it with non-negative values.

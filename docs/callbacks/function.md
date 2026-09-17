@@ -1,103 +1,48 @@
-# `castle/callbacks/function.h` — Non-owning callable wrappers
+# Function
 
-**Header:** `castle/callbacks/function.h`
-**Namespace:** `castle::callbacks`
-**Samples:** [`sample_function.cpp`](../../samples/sample_function.cpp), [`sample_callback_registry.cpp`](../../samples/sample_callback_registry.cpp)
+## Overview
+`function.hpp` provides an owning, small-buffer callable wrapper similar in role to `std::function`, but with fixed inline storage and no heap allocation. Use it when a component needs one erased callable with deterministic storage.
 
-## Purpose
+## Header
+`#include "castle/callbacks/function.hpp"`
 
-A family of small callable adapters built around a common virtual
-interface `i_function<R(Args...)>`. Each variant binds a different kind
-of target (free function, functor, member function, compile-time
-addresses) and is intended to be **held by pointer** through
-`i_function<R(Args...)>*` — for example by `callback_registry`,
-`event_dispatcher`, `tick_timer` and `signal_event`.
+## Dependencies
+- [`../core/compiler.md`](../core/compiler.md)
+- [`../core/config.md`](../core/config.md)
+- [`../core/error_handler.md`](../core/error_handler.md)
+- [`../core/traits.md`](../core/traits.md)
+- [`../core/types.md`](../core/types.md)
+- [`../utility/move.md`](../utility/move.md)
+- [`../utility/forward.md`](../utility/forward.md)
+- [`../memory/new.md`](../memory/new.md)
 
-Every variant is heap-free and non-throwing on the hot path; the object
-lifetime is owned by the caller (usually a local or a member of a
-class), never by the registry.
+## Public API
+| API | Description |
+| --- | --- |
+| `function<R(Args...), StorageSize, StorageAlignment>` | Owns one callable in an inline byte buffer. |
+| `function(callable)` | Stores a callable object by value if it fits in the configured storage. |
+| `function(callback_ptr_t)` / `operator=(callback_ptr_t)` | Stores a raw function pointer; `nullptr` produces/keeps an empty wrapper. |
+| Copy/move constructor and assignment | Copy or move the stored callable through internal function pointers. |
+| `operator bool()` | Returns whether a callable target is present. |
+| `operator()(args...)` | Invokes the stored callable; empty invocation triggers `CASTLE_ASSERT`. |
 
-## Design notes
-
-- **Common base:** `i_function<R(Args...)>` is a signature-aware
-  abstract with `operator()(Args...) -> R`. Mis-spelt instantiations
-  such as `i_function<int, float>` fail to compile with an
-  "incomplete type" diagnostic.
-- **Runtime-bound variants** (target address stored as a member; costs
-  one indirection per call):
-  - `function<R(Args...)>` — free / static function pointer.
-  - `function_f<Callable, R(Args...)>` — owns a functor / lambda **by
-    value**. `make_function_f<Signature>(callable)` deduces `Callable`.
-  - `function_fr<Callable, R(Args...)>` — holds a functor **by
-    reference**. `make_function_fr<Signature>(callable)` factory.
-  - `function_m<ObjType, R(Args...)>` — bound member function; stores
-    the object reference plus the member pointer.
-- **Compile-time-bound variants** (target address is a *template
-  parameter*; the compiler often inlines the call, zero per-instance
-  storage for the pointer):
-  - `function_ct<&free_fn>` — signature deduced.
-  - `function_ct_f<Callable, R(Args...)>` — default-constructible
-    functor whose type carries the target.
-  - `function_ct_m<&Handler::on_tick>` — member function; instance
-    still bound at runtime (constructor argument).
-  - `function_ct_im<g_handler, &Handler::on_tick>` — both instance
-    **and** member are compile-time bound; the object is empty.
-- `void` and non-`void` return types both work; `callback_registry`
-  separately enforces `R == void` on the pointers it stores.
-
-## Diagram — class family
-
-```plantuml
-@startuml
-interface "i_function<R(Args...)>" as I {
-  + operator()(Args...) : R
-}
-class "function<Sig>" as F1
-class "function_f<Callable,Sig>" as F2
-class "function_fr<Callable,Sig>" as F3
-class "function_m<Obj,Sig>" as F4
-class "function_ct<&fn>" as F5
-class "function_ct_f<Callable,Sig>" as F6
-class "function_ct_m<&Obj::mem>" as F7
-class "function_ct_im<inst,&Obj::mem>" as F8
-I <|-- F1
-I <|-- F2
-I <|-- F3
-I <|-- F4
-I <|-- F5
-I <|-- F6
-I <|-- F7
-I <|-- F8
-@enduml
-```
-
-## Example
+## Usage Example
+See `samples/sample_function.cpp`.
 
 ```cpp
-#include <castle/callbacks/function.h>
-using namespace castle::callbacks;
-
-void on_tick_free();
-
-struct Handler {
-    void on_tick(int v);
+int total = 0;
+castle::callbacks::function<void(int), 32U> callback{
+    [&total](int value) noexcept
+    {
+        total += value;
+    }
 };
-Handler h;
-
-// runtime-bound
-function<void()>                       cb1(&on_tick_free);
-function_m<Handler, void(int)>         cb2(h, &Handler::on_tick);
-auto                                   cb3 = make_function_f<void(int)>(
-                                             [](int v){ /* ... */ });
-
-// compile-time bound
-function_ct<&on_tick_free>             cb4;                 // zero pointer stored
-function_ct_m<&Handler::on_tick>       cb5(h);
+callback(5);
 ```
 
-## See also
-
-- `castle/callbacks/callback_registry.h` — non-owning fixed-capacity
-  registry of `i_function<void(Args...)>*`.
-- `castle/callbacks/inplace_function.h` — self-owning, SBO variant
-  used when the registry needs to store the callable itself.
+## Constraints & Notes
+- No heap allocation.
+- `StorageSize` and `StorageAlignment` are compile-time limits; oversized or over-aligned callables fail to compile.
+- Copy/move support depends on the stored callable's constructors.
+- Empty wrappers are allowed and test false with `operator bool()`.
+- No internal synchronization; concurrent access requires external coordination.

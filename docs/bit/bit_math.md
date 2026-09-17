@@ -1,59 +1,48 @@
-# `castle/bit/bit_math.h` — Bit-based arithmetic helpers
+# BitMath
 
-**Header:** `castle/bit/bit_math.h`
-**Namespace:** `castle::bit`
-**Sample:** [`samples/sample_bit.cpp`](../../samples/sample_bit.cpp) — `demo_bit_math()`
+## Overview
+Integer math helpers expressed as bit operations. Use this header for parity tests, power-of-two rounding, alignment calculations, and sign queries that need to stay deterministic and constexpr-friendly.
 
-## Purpose
+## Header
+`#include "castle/bit/bit_math.hpp"`
 
-Small numeric predicates and rounding routines that fall out naturally
-from bit patterns and appear again and again in embedded code:
-parity, powers of two, alignment, sign.
+## Dependencies
+- [compiler](../core/compiler.md)
+- [types](../core/types.md)
+- [traits](../core/traits.md)
 
-## Design notes
+## Public API
+| Signature | Description |
+|---|---|
+| `template <typename T> bool is_even(T v)` | Returns whether the least-significant bit is clear. Complexity: O(1). |
+| `template <size_type N> struct is_even_const` | Compile-time evenness test via `is_even_const<N>::value`. Complexity: O(1). |
+| `template <typename T> bool is_odd(T v)` | Returns whether the least-significant bit is set. Complexity: O(1). |
+| `template <size_type N> struct is_odd_const` | Compile-time oddness test via `is_odd_const<N>::value`. Complexity: O(1). |
+| `template <typename T> bool is_power_of_two(T v)` | Returns whether `v` is a positive exact power of two. Signed negative inputs return `false`. Complexity: O(1). |
+| `template <size_type N> struct is_power_of_two_const` | Compile-time power-of-two test via `is_power_of_two_const<N>::value`. Complexity: O(1). |
+| `template <typename T> T next_power_of_two(T v)` | Returns the smallest power of two greater than or equal to `v`; `0` maps to `1`. Complexity: O(log bit-width). |
+| `template <size_type N> size_type next_power_of_two()` | Compile-time `castle::size_type` form of `next_power_of_two`. Complexity: O(log bit-width). |
+| `template <size_type N> struct next_power_of_two_const` | Compile-time wrapper exposing `next_power_of_two_const<N>::value`. Complexity: O(log bit-width). |
+| `template <typename T> T previous_power_of_two(T v)` | Returns the largest power of two less than or equal to `v`; `0` maps to `0`. Complexity: O(log bit-width). |
+| `template <size_type N> size_type previous_power_of_two()` | Compile-time `castle::size_type` form of `previous_power_of_two`. Complexity: O(log bit-width). |
+| `template <size_type N> struct previous_power_of_two_const` | Compile-time wrapper exposing `previous_power_of_two_const<N>::value`. Complexity: O(log bit-width). |
+| `template <typename T> T align_up(T value, T alignment)` | Rounds `value` up to the next multiple of `alignment`. Caller is expected to pass a non-zero power-of-two alignment. Complexity: O(1). |
+| `template <typename T> T align_down(T value, T alignment)` | Rounds `value` down to the previous multiple of `alignment`. Caller is expected to pass a non-zero power-of-two alignment. Complexity: O(1). |
+| `template <typename T> bool is_aligned(T value, T alignment)` | Returns whether `value` is already aligned to `alignment`. Caller is expected to pass a non-zero power-of-two alignment. Complexity: O(1). |
+| `template <typename T> int sign(T v)` | Returns `-1`, `0`, or `1` for negative, zero, or positive runtime values. Complexity: O(1). |
+| `template <size_type N> int sign()` | Compile-time sign helper for `castle::size_type` values; returns `0` for `0` and `1` otherwise. Complexity: O(1). |
 
-- Branch-free where possible (`is_even`, `is_odd`, `sign`).
-- Every helper is `constexpr` and comes in both **runtime** and
-  **compile-time** (`_v<N>`) forms — you can use them in `static_assert`,
-  in enum sizing, and in `if constexpr` selectors.
-- `align_up` / `align_down` / `is_aligned` **assume the alignment is a
-  power of two**; enforcing that is the caller's responsibility (this is
-  the common contract in linker scripts and DMA descriptor setup).
-
-## API
-
-| Function                            | Returns  | Notes                                    |
-| ----------------------------------- | -------- | ---------------------------------------- |
-| `is_even(v)` / `is_even_v<N>`       | `bool`   | LSB test                                 |
-| `is_odd(v)` / `is_odd_v<N>`         | `bool`   | LSB test                                 |
-| `is_power_of_two(v)` / `_v<N>`      | `bool`   | `false` for `0` and negative             |
-| `next_power_of_two(v)` / `<N>()`    | `T`      | `1` for input `0`                        |
-| `previous_power_of_two(v)` / `<N>()`| `T`      | `0` for input `0`                        |
-| `align_up(v, align)`                | `T`      | `align` must be a power of two           |
-| `align_down(v, align)`              | `T`      | `align` must be a power of two           |
-| `is_aligned(v, align)`              | `bool`   | `align` must be a power of two           |
-| `sign(v)` / `sign_v<N>`             | `int`    | `-1`, `0`, or `+1`, branch-free          |
-
-All functions require `castle::types::is_valid_integer_v<T>`.
-
-## Example — sizing a DMA descriptor ring
-
+## Usage Example
 ```cpp
-#include <castle/bit/bit_math.h>
-using namespace castle::bit;
+#include "castle/bit/bit_math.hpp"
 
-// User asked for 200 descriptors; round up so hardware pointer math
-// can be done with a single mask instead of a modulo.
-constexpr std::size_t requested = 200;
-constexpr std::size_t ring_size = next_power_of_two_v<requested>; // 256
-static_assert(is_power_of_two_v<ring_size>);
-
-std::uintptr_t base = reinterpret_cast<std::uintptr_t>(&ring[0]);
-std::uintptr_t aligned = align_up(base, static_cast<std::uintptr_t>(64));
+const uint32_t capacity = castle::bit::next_power_of_two(300U);
+const uint32_t base = castle::bit::align_down(37U, 8U);
+const bool ready = castle::bit::is_power_of_two(capacity);
 ```
+See `samples/sample_bit_math.cpp` for a complete example.
 
-## See also
-
-- `bit_count.h` — `log2_floor` / `bit_width` complement this module.
-- `bit_utils.h` — extracting the lowest set bit is another idiomatic
-  power-of-two operation.
+## Constraints & Notes
+- Accepts Castle valid integer types only.
+- `next_power_of_two` and `previous_power_of_two` are intended for non-negative values; overflow follows the implementation's unsigned arithmetic path.
+- Alignment helpers do not validate the alignment argument.

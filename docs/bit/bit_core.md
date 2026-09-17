@@ -1,57 +1,40 @@
-# `castle/bit/bit_core.h` — Single-bit read / write
+# BitCore
 
-**Header:** `castle/bit/bit_core.h`
-**Namespace:** `castle::bit`
-**Sample:** [`samples/sample_bit.cpp`](../../samples/sample_bit.cpp) — `demo_bit_core()`
+## Overview
+Helpers for testing and changing individual bits in integer values. Use this header for register shadows, packed protocol fields, and similar low-level code that needs explicit single-bit operations.
 
-## Purpose
+## Header
+`#include "castle/bit/bit_core.hpp"`
 
-Fundamental **per-bit** primitives: query, set, clear, and toggle a
-single bit inside an integral value. These four operations are the
-building blocks used everywhere else in `castle::bit`.
+## Dependencies
+- [compiler](../core/compiler.md)
+- [types](../core/types.md)
+- [traits](../core/traits.md)
 
-## Design notes
+## Public API
+| Signature | Description |
+|---|---|
+| `template <typename T> bool test(T value, uint32_t bit_index)` | Returns whether the zero-based bit at `bit_index` is set. Out-of-range runtime indexes return `false`. Complexity: O(1). |
+| `template <size_type bit_index, typename T> bool test(T value)` | Compile-time-index variant of `test`. Rejects invalid indexes with `static_assert`. Complexity: O(1). |
+| `template <typename T> T set(T value, uint32_t bit_index)` | Returns `value` with the selected bit set. Out-of-range runtime indexes leave the value unchanged. Complexity: O(1). |
+| `template <size_type bit_index, typename T> T set(T value)` | Compile-time-index variant of `set`. Complexity: O(1). |
+| `template <typename T> T clear(T value, uint32_t bit_index)` | Returns `value` with the selected bit cleared. Out-of-range runtime indexes leave the value unchanged. Complexity: O(1). |
+| `template <size_type bit_index, typename T> T clear(T value)` | Compile-time-index variant of `clear`. Complexity: O(1). |
+| `template <typename T> T toggle(T value, uint32_t bit_index)` | Returns `value` with the selected bit inverted. Out-of-range runtime indexes leave the value unchanged. Complexity: O(1). |
+| `template <size_type bit_index, typename T> T toggle(T value)` | Compile-time-index variant of `toggle`. Complexity: O(1). |
 
-- `constexpr` + `noexcept`, branch-free on the fast path.
-- Two overload flavours per operation:
-  - **Runtime index:** `f(value, bit_index)`. Out-of-range indices
-    return the input unchanged (`set`, `clear`, `toggle`) or `false`
-    (`test`) — no UB, no exceptions.
-  - **Compile-time index:** `f<bit_index>(value)`. A `static_assert`
-    enforces `bit_index < sizeof(T) * CHAR_BIT`.
-- Internally values are cast to their unsigned counterpart to make
-  shift semantics well-defined for signed inputs.
-
-## API
-
-| Function                                    | Returns | Notes                        |
-| ------------------------------------------- | ------- | ---------------------------- |
-| `test(T v, uint32_t bit_index)`             | `bool`  | `false` if index OOR         |
-| `test<bit_index>(T v)`                      | `bool`  | Compile-time checked         |
-| `set(T v, uint32_t bit_index)`              | `T`     | Returns `v` if index OOR     |
-| `set<bit_index>(T v)`                       | `T`     | Compile-time checked         |
-| `clear(T v, uint32_t bit_index)`            | `T`     | Returns `v` if index OOR     |
-| `clear<bit_index>(T v)`                     | `T`     | Compile-time checked         |
-| `toggle(T v, uint32_t bit_index)`           | `T`     | Returns `v` if index OOR     |
-| `toggle<bit_index>(T v)`                    | `T`     | Compile-time checked         |
-
-All functions require `castle::types::is_valid_integer_v<T>`.
-
-## Example
-
+## Usage Example
 ```cpp
-#include <castle/bit/bit_core.h>
-using namespace castle::bit;
+#include "castle/bit/bit_core.hpp"
 
-uint32_t reg = 0b0000'1111;
-
-bool b3   = test<3>(reg);       // true
-reg       = set<5>(reg);        // 0b0010'1111
-reg       = clear(reg, 0U);     // 0b0010'1110
-reg       = toggle<4>(reg);     // 0b0011'1110
+uint32_t control = 0U;
+control = castle::bit::set(control, 5U);
+const bool enabled = castle::bit::test<5U>(control);
+control = castle::bit::clear(control, 5U);
 ```
+See `samples/sample_bit_core.cpp` for a complete example.
 
-## See also
-
-- `bit_mask.h` — build masks for multi-bit ranges.
-- `bit_utils.h` — read / write **contiguous** bit fields at once.
+## Constraints & Notes
+- Accepts Castle valid integer types only.
+- Bit indexes are zero-based and operate on the full width of `T`.
+- Generic operations cast through the corresponding unsigned type before shifting, avoiding signed right-shift semantics.

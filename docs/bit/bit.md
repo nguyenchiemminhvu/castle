@@ -1,73 +1,38 @@
-# `castle/bit/bit.h` — Umbrella header
+# Bit
 
-**Header:** `castle/bit/bit.h`
-**Namespace:** `castle::bit`
-**Sample:** [`samples/sample_bit.cpp`](../../samples/sample_bit.cpp)
+## Overview
+Umbrella header that pulls in every Castle bit-manipulation component. Use it when one translation unit needs several bit helpers and a single include is more convenient than selecting individual headers.
 
-## Purpose
+## Header
+`#include "castle/bit/bit.hpp"`
 
-Single-include convenience header. Pulls in every submodule under
-`castle/bit/` so callers can just write:
+## Dependencies
+- [bit_core](bit_core.md)
+- [bit_count](bit_count.md)
+- [bit_mask](bit_mask.md)
+- [bit_math](bit_math.md)
+- [bit_reverse](bit_reverse.md)
+- [bit_rotate](bit_rotate.md)
+- [bit_utils](bit_utils.md)
+- [flags](flags.md)
 
+## Public API
+| Signature | Description |
+|---|---|
+| `#include "castle/bit/bit.hpp"` | Includes the complete public API from the eight bit component headers listed above. No additional declarations are introduced by this umbrella header. |
+
+## Usage Example
 ```cpp
-#include <castle/bit/bit.h>
-using namespace castle::bit;
+#include "castle/bit/bit.hpp"
+
+uint8_t value = 0;
+value = castle::bit::set(value, 3U);
+const uint8_t rotated = castle::bit::rotate_left(value, 1U);
+castle::bit::flags<uint8_t, 0x0FU> status(rotated);
 ```
+See `samples/sample_bit.cpp` for a complete example.
 
-and gain access to bit test/set/clear/toggle, popcount, endian swap,
-masks, math helpers, reverse and rotate operations, plus low-level
-field extraction / insertion utilities.
-
-## What it includes
-
-| Sub-header                | Category                                    |
-| ------------------------- | ------------------------------------------- |
-| `bit_core.h`              | `test`, `set`, `clear`, `toggle`            |
-| `bit_count.h`             | `popcount`, `count_leading_zeros`, `parity` |
-| `bit_endian.h`            | `byte_swap`                                 |
-| `bit_mask.h`              | `single_bit_mask`, `low/high/range_mask`    |
-| `bit_math.h`              | `is_power_of_two`, `align_up/down`, `sign`  |
-| `bit_reverse.h`           | `reverse_bits`, `reverse_bytes`             |
-| `bit_rotate.h`            | `rotate_left`, `rotate_right`               |
-| `bit_utils.h`             | `extract_field`, `insert_field`             |
-
-## Design notes
-
-- All helpers are `constexpr` and `noexcept`; suitable for use in
-  compile-time computations and safety-critical hot paths.
-- Every function is SFINAE-constrained to `castle::types::is_valid_integer_v<T>`
-  so misuse (floats, enums, pointers) fails at compile time.
-- Both **runtime** overloads (index passed as function argument) and
-  **compile-time** overloads (index passed as a template parameter with
-  `static_assert` range checks) are provided.
-
-## Diagram — module composition
-
-```plantuml
-@startuml
-skinparam packageStyle rectangle
-package "castle::bit" {
-  [bit_core]
-  [bit_count]
-  [bit_endian]
-  [bit_mask]
-  [bit_math]
-  [bit_reverse]
-  [bit_rotate]
-  [bit_utils]
-}
-[bit] --> [bit_core]
-[bit] --> [bit_count]
-[bit] --> [bit_endian]
-[bit] --> [bit_mask]
-[bit] --> [bit_math]
-[bit] --> [bit_reverse]
-[bit] --> [bit_rotate]
-[bit] --> [bit_utils]
-@enduml
-```
-
-## See also
-
-- Per-header documents inside this folder.
-- `castle/types/traits.h` — the `is_valid_integer_v` predicate.
+## Constraints & Notes
+- Header-only and allocation-free.
+- Behavior comes entirely from the included component headers.
+- Prefer the narrower component header when include surface matters more than convenience.

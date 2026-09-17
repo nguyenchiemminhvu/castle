@@ -1,38 +1,31 @@
-# `castle/math/lcm.h` — Least common multiple
+# Least Common Multiple
 
-**Header:** `castle/math/lcm.h`
-**Namespace:** `castle::math`
-**Sample:** [`samples/sample_math_lcm.cpp`](../../samples/sample_math_lcm.cpp)
+## Overview
+Compile-time least-common-multiple support for positive `intmax_t` template arguments. It exists mainly for ratio denominators and chrono period calculations that need a shared multiple at compile time.
 
-## Purpose
+## Header
+`#include "castle/math/lcm.hpp"`
 
-`constexpr` LCM built on top of `gcd`, in both compile-time and runtime
-flavours.
+## Dependencies
+- [`castle/core/compiler.hpp`](../core/compiler.md)
+- [`castle/core/traits.hpp`](../core/traits.md)
+- [`castle/math/gcd.hpp`](gcd.md)
 
-## Design notes
+## Public API
+| Signature | Description |
+| --- | --- |
+| `template <intmax_t A, intmax_t B> struct lcm` | Compile-time least-common-multiple metafunction. `lcm<A, B>::value` stores `(A / gcd<A, B>::value) * B` as `intmax_t`. |
 
-- Uses the identity `lcm(a, b) = |a / gcd(a, b) * b|` — dividing first
-  avoids overflow that the naive `a * b / gcd` would trigger.
-- `lcm(0, x)` and `lcm(x, 0)` are defined as `0`.
-- Signed inputs are folded to their absolute value.
-
-## API
-
-| Overload                          | Kind         |
-| --------------------------------- | ------------ |
-| `lcm_v<A, B>::value`              | Compile time |
-| `lcm(T a, T b)`                   | Runtime      |
-
-## Example
-
+## Usage Example
 ```cpp
-#include <castle/math/lcm.h>
-using namespace castle::math;
+#include "castle/math/lcm.hpp"
 
-static_assert(lcm_v<4, 6>::value == 12);
-auto x = lcm(4, 6);   // 12
+constexpr intmax_t common = castle::math::lcm<12, 15>::value;
 ```
 
-## See also
+See [`samples/sample_lcm.cpp`](../../samples/sample_lcm.cpp).
 
-- `castle/math/gcd.h` — factored dependency.
+## Constraints & Notes
+- `A` and `B` must both be strictly positive; zero or negative values fail the `static_assert`s in the template.
+- Dividing before multiplying reduces intermediate growth but does not eliminate overflow risk for large results.
+- No runtime overload is provided in this header.

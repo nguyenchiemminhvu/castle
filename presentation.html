@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1117">
+<title>CASTLE 2.0 — Prototype 2.0</title>
+<style>
+:root{
+  --bg:#f5f6f4;--paper:#fff;--ink:#14191f;--muted:#64707a;--line:#dfe4e8;--dark:#0b1117;--dark2:#111922;
+  --accent:#4e806f;--accent2:#7fa894;--accentSoft:#edf5f0;--code:#0d131a;--code2:#121c25;--amber:#d4aa6a;
+  --shadow:0 24px 70px rgba(20,31,39,.16);--radius:22px;--scale:1;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:radial-gradient(circle at 12% 12%,#e6f0ea 0,transparent 34%),radial-gradient(circle at 88% 16%,#eaf1ef 0,transparent 32%),var(--bg);overflow:hidden}
+body.presentation{background:#0b1117}
+a{color:inherit}
+.deck{position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
+.frame{position:relative;width:1200px;height:720px;background:var(--paper);border:1px solid #cfd6da;border-radius:24px;box-shadow:var(--shadow);overflow:hidden;transform:scale(var(--scale));transform-origin:center}
+.progress{position:absolute;top:0;left:0;height:5px;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:20;transition:width .25s ease}
+.slide{position:absolute;inset:0;padding:36px 40px 28px;display:grid;grid-template-rows:auto 1fr auto;gap:16px;opacity:0;transform:translateX(28px) scale(.985);transition:opacity .3s ease,transform .3s ease;pointer-events:none}
+.slide.active{opacity:1;transform:none;z-index:2;pointer-events:auto}
+.slide-title{margin:0;font-size:42px;line-height:1.05;letter-spacing:-.035em;font-weight:820}
+.slide-subtitle{margin:8px 0 0;color:var(--muted);font-size:18px;line-height:1.45}
+.kicker{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--accent);font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.content{min-height:0;display:grid;gap:14px;font-size:17px;line-height:1.52;overflow:hidden}
+.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stack{display:grid;gap:12px;min-height:0;min-width:0}.card{border:1px solid var(--line);border-radius:14px;padding:15px 17px;background:#f8faf9}
+.card h3{margin:0 0 6px;color:var(--accent);font-size:15px}.card p{margin:0;color:var(--muted);font-size:14px}
+.callout{border:1px solid #c7dbd0;background:var(--accentSoft);border-radius:14px;padding:15px 17px}.callout h3{margin:0 0 7px;font-size:15px;color:#396b59}.callout p{margin:0;font-size:15px}.warn{border-color:#ead9b9;background:#fbf7ef;border-radius:14px}.warn h3{color:#9a6e2a}
+ul{margin:0 0 0 20px;padding:0}.content li{margin:0 0 7px}.muted{color:var(--muted)}.accent{color:var(--accent);font-weight:760}.mono{font-family:"JetBrains Mono","SFMono-Regular",Consolas,monospace}
+pre{margin:0;background:var(--code);border:1px solid #25313b;border-radius:14px;padding:16px 18px;color:#d9e4e9;font:12.5px/1.55 "JetBrains Mono","SFMono-Regular",Consolas,monospace;overflow:hidden;white-space:pre-wrap}
+pre .kw{color:#b6cfbf}pre .ty{color:#d9bd8c}pre .nm{color:#f0cf8c}pre .fn{color:#93cbd8}pre .cm{color:#6f7d88}pre .ok{color:#88c49f}
+.code-title{margin:0 0 7px;font-size:11px;font-weight:850;letter-spacing:.11em;text-transform:uppercase;color:#81909b}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:center;height:100%;min-width:0}
+.hero-title{font-size:72px;line-height:.96;letter-spacing:-.06em;margin:12px 0 16px;max-width:700px}.hero-title span{color:var(--accent)}
+.hero-lede{font-size:19px;line-height:1.6;color:var(--muted);max-width:700px}.hero-note{margin-top:18px;font:12px/1.55 "JetBrains Mono",Consolas,monospace;color:#7d8991}
+.mark{width:360px;height:360px;justify-self:center;align-self:center;aspect-ratio:auto;border-radius:26px;display:grid;place-items:center;text-align:center;background:conic-gradient(from 210deg,#0b1117,#294138,#93b7a7,#0b1117);border:1px solid #334741;color:#eaf3ef;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 28px 70px rgba(10,20,25,.26);padding:28px;font:800 24px/1.25 "JetBrains Mono",Consolas,monospace}
+.mark small{display:block;margin-top:9px;color:#b6cfbf;font:700 12px/1.45 Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric{border:1px solid var(--line);border-radius:14px;padding:14px 15px;background:#fafcfa}.metric .v{font-size:28px;font-weight:850;letter-spacing:-.04em}.metric .l{margin-top:3px;color:var(--muted);font-size:12px}
+.module-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}.module{border:1px solid var(--line);border-radius:12px;padding:10px 11px;background:#fbfcfb;min-height:72px}.module b{display:block;font-size:12px;color:var(--accent)}.module span{display:block;margin-top:3px;color:var(--muted);font-size:11px;line-height:1.35}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:center}.flow .node{position:relative;border:1px solid var(--line);background:#fafcfa;border-radius:14px;padding:14px;text-align:center;min-height:104px}.flow .node b{display:block;font-size:14px}.flow .node span{display:block;margin-top:6px;color:var(--muted);font-size:11px;line-height:1.35}.flow .arrow{font-size:24px;color:var(--accent);text-align:center}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(78,128,111,.11);color:var(--accent);font-size:11px;font-weight:800}
+.resources{display:grid;grid-template-columns:1fr 1fr;gap:12px}.resource{border:1px solid var(--line);border-radius:13px;padding:14px 15px;background:#fafcfa;display:flex;flex-direction:column;gap:5px}.resource a{color:#376a59;font-weight:800;text-decoration:none}.resource small{color:var(--muted);font-size:12px;line-height:1.35}.resource .url{font:11px/1.35 "JetBrains Mono",Consolas,monospace;color:#77818a;word-break:break-all}
+.footer{display:flex;justify-content:space-between;align-items:center;color:#7b878f;font-size:12px}
+.footer .left{font-weight:750}.controls{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%) scale(var(--scale));display:flex;gap:8px;z-index:50}.controls button{border:1px solid #cbd3d7;background:#fff;color:#182228;border-radius:999px;padding:9px 14px;font:700 13px Inter,system-ui;cursor:pointer;box-shadow:0 7px 20px rgba(15,23,42,.12)}.controls button:disabled{opacity:.4;cursor:not-allowed}.controls button:hover:not(:disabled){transform:translateY(-1px)}
+.slide-no{font:700 11px/1 "JetBrains Mono",Consolas,monospace;color:#8a969f}
+.title-link{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:10px 14px;border-radius:10px;background:#f1f6f3;border:1px solid #d6e4dc;color:#386956;font-weight:800;text-decoration:none}.title-link:hover{background:#e8f1ec}
+.fs-hint{position:fixed;top:12px;right:14px;color:#81909b;font:11px/1.2 "JetBrains Mono",Consolas,monospace;z-index:60}
+</style>
+</head>
+<body>
+<div class="fs-hint">← → navigate · Home / End · F fullscreen</div>
+<div class="deck">
+  <div class="frame" id="frame">
+    <div class="progress" id="progress"></div>
+
+    <section class="slide active" data-title="CASTLE 2.0">
+      <div></div>
+      <div class="hero">
+        <div>
+          <div class="kicker">Prototype 2.0</div>
+          <h1 class="hero-title">CASTLE</h1>
+          <p class="hero-lede"><b>Compliant Automotive Safety Template Library for Embedded</b> — a header-only C++17 toolkit inspired by the ETL (Embedded Template Library), shaped around bounded storage, explicit outcomes, compile-time configuration, and familiar C++ APIs.</p>
+          <a class="title-link" href="https://github.com/nguyenchiemminhvu/castle" target="_blank" rel="noreferrer">Visit github page ↗</a>
+          <div class="hero-note">Design contract:<br>· no heap allocation<br>· no exceptions<br>· no RTTI<br>· no virtual functions<br>· no STL dependency<br>· deterministic behavior</div>
+        </div>
+        <div class="mark">CASTLE 2.0<small>Deterministic C++ for embedded</small></div>
+      </div>
+      <div class="footer"><span class="left">CASTLE — Compliant Automotive Safety Template Library for Embedded</span><span class="slide-no">1 / 9</span></div>
+    </section>
+
+    <section class="slide" data-title="Why Castle">
+      <div>
+        <div class="kicker">01 · Motivation</div>
+        <h2 class="slide-title" style="margin-top:10px;">Make the important costs explicit.</h2>
+        <p class="slide-subtitle">Embedded software does not lack C++ features. What it lacks is "invisible" budgets.</p>
+      </div>
+      <div class="content">
+        <div class="metric-grid">
+          <div class="metric"><div class="v">0</div><div class="l">mandatory heap allocation</div></div>
+          <div class="metric"><div class="v">0</div><div class="l">exception-driven error path</div></div>
+          <div class="metric"><div class="v">0</div><div class="l">RTTI requirement</div></div>
+          <div class="metric"><div class="v">N</div><div class="l">compile-time capacity / bound</div></div>
+        </div>
+        <div class="two" style="display:grid;gap:12px;min-height:0;">
+          <div class="callout"><h3>Instead of “it probably fits”</h3><p><span class="accent">vector&lt;T, N&gt;</span>, <span class="accent">ring_buffer&lt;T, N&gt;</span>, fixed strings, fixed registries and inline callable storage expose the budget in the type.</p></div>
+          <div class="warn"><h3>Instead of “something threw”</h3><p><span class="accent">castle::status</span> makes normal bounded failures visible: <span class="mono">ok</span>, <span class="mono">full</span>, <span class="mono">empty</span>, <span class="mono">not_found</span>, <span class="mono">invalid_config</span>.</p></div>
+        </div>
+        <div class="card"><h3>Why this matters for automotive / firmware work</h3><p>Deterministic behaviors make memory, capacity, failure paths, and timing assumptions easier to review, test, and integrate into a project’s own safety process.<br>Reducing the hidden cost behind dynamic memory allocation and handling exceptions can improve the performance and stability.</p></div>
+      </div>
+      <div class="footer"><span class="left">The runtime contract is deliberately small.</span><span class="slide-no">2 / 9</span></div>
+    </section>
+
+    <section class="slide" data-title="Library Model">
+      <div>
+        <div class="kicker">02 · Mental model</div>
+        <h2 class="slide-title" style="margin-top:10px;">Small parts. Composable by design.</h2>
+        <p class="slide-subtitle">The supplied Castle 2.0 snapshot highlights 17 core module families for this workshop.</p>
+      </div>
+      <div class="content">
+        <div class="module-grid">
+          <div class="module"><b>algorithm</b><span>range algorithms, iterator utilities</span></div>
+          <div class="module"><b>atomic</b><span>atomic values, memory ordering</span></div>
+          <div class="module"><b>bit</b><span>masks, rotations, flags</span></div>
+          <div class="module"><b>callbacks</b><span>function, registry, delegate, policies</span></div>
+          <div class="module"><b>chrono</b><span>durations, clocks, time points</span></div>
+          <div class="module"><b>container</b><span>vector, ring buffer, maps, sets, strings</span></div>
+          <div class="module"><b>core</b><span>compiler, config, traits, types</span></div>
+          <div class="module"><b>design patterns</b><span>observer, singleton, visitor</span></div>
+          <div class="module"><b>error</b><span>status/error values</span></div>
+          <div class="module"><b>events</b><span>dispatchers, signals, timers, IPC</span></div>
+          <div class="module"><b>filter</b><span>debounce and sampling</span></div>
+          <div class="module"><b>iterator</b><span>bounded and circular iterators</span></div>
+          <div class="module"><b>math</b><span>integer math, geometry, linalg</span></div>
+          <div class="module"><b>memory</b><span>storage, lifetime, construction</span></div>
+          <div class="module"><b>serialization</b><span>CSV, INI, JSON, XML</span></div>
+          <div class="module"><b>sync</b><span>mutexes, semaphores, wait policies</span></div>
+          <div class="module"><b>utility</b><span>optional, variant, tuple, bitset, hash, flags</span></div>
+        </div>
+        <div class="two" style="display:grid;gap:12px;min-height:0;">
+          <div class="card"><h3>Bottom-up composition</h3><p><span class="mono">core → memory → utility → containers → callbacks → events</span>. Higher layers reuse the same bounded building blocks instead of introducing a second runtime model.</p></div>
+          <div class="card"><h3>Familiar shapes, embedded semantics</h3><p>Think “vector”, “function”, “optional”, “variant”, “chrono”, “event bus” — but with fixed capacity and explicit failure semantics where the target needs them.</p></div>
+        </div>
+      </div>
+      <div class="footer"><span class="left">From primitives to ECU-level orchestration.</span><span class="slide-no">3 / 9</span></div>
+    </section>
+
+    <section class="slide" data-title="Deterministic Building Blocks">
+      <div>
+        <div class="kicker">03 · Bounded data</div>
+        <h2 class="slide-title" style="margin-top:10px;">Put memory shape and failure on the API.</h2>
+        <p class="slide-subtitle">The same model repeats across storage, containers, and text/serialization. For example:</p>
+      </div>
+      <div class="content two">
+        <div class="stack">
+          <div class="card"><h3>Fixed-capacity sequence</h3><p><span class="mono">castle::container::vector&lt;T, N&gt;</span> stores up to <span class="mono">N</span> live elements in the object; append returns <span class="mono">castle::status::ok</span> or <span class="mono">full</span>.</p></div>
+          <div class="card"><h3>Deterministic FIFO</h3><p><span class="mono">ring_buffer&lt;T, N&gt;</span> gives O(1) push/pop and makes overflow policy explicit via <span class="mono">push()</span> vs <span class="mono">force_push()</span>.</p></div>
+          <div class="card"><h3>Inline object lifetime</h3><p><span class="mono">memory::construct_at</span>, <span class="mono">destroy_at</span>, aligned storage, and SOO buffers support caller-owned memory without a general-purpose allocator.</p></div>
+        </div>
+        <div class="stack">
+          <div class="code-title">A familiar API with a bounded contract</div>
+          <pre><span class="kw">castle::container::vector</span>&lt;<span class="ty">uint16_t</span>, 8U&gt; samples;
+
+<span class="kw">auto</span> s1 = samples.<span class="fn">push_back</span>(1024U);
+<span class="kw">auto</span> s2 = samples.<span class="fn">push_back</span>(2048U);
+
+<span class="kw">if</span> (s1 == <span class="kw">castle::status::ok</span>) {
+    <span class="cm">// capacity is part of the type — not a surprise</span>
+}
+
+<span class="kw">if</span> (samples.<span class="fn">full</span>()) {
+    <span class="cm">// choose the failure policy explicitly</span>
+}</pre>
+          <div class="callout"><h3>Review-friendly behavior</h3><p>There is no growth event hidden inside <span class="mono">push_back()</span>, and no exception is required to represent a normal capacity boundary.</p></div>
+        </div>
+      </div>
+      <div class="footer"><span class="left">Determinism starts with visible resource bounds.</span><span class="slide-no">4 / 9</span></div>
+    </section>
+
+    <section class="slide" data-title="Callbacks">
+      <div>
+        <div class="kicker">04 · Callbacks</div>
+        <h2 class="slide-title" style="margin-top:10px;">Stateful callbacks without a heap-backed <span class="mono">std::function</span>.</h2>
+        <p class="slide-subtitle">Castle’s owning <span class="mono">callbacks::function</span> uses caller-selected inline storage and compile-time size/alignment checks.</p>
+      </div>
+      <div class="content two">
+        <div class="stack">
+          <div class="card"><h3>Inline storage</h3><p>Callable bytes live inside the function object. A lambda larger than the configured buffer fails at compile time.</p></div>
+          <div class="card"><h3>No RTTI-based type erasure</h3><p>Invocation, copy, move, and destruction are routed through stored function pointers over the inline object.</p></div>
+          <div class="card"><h3>Then build registries on top</h3><p><span class="mono">function_registry&lt;Max, void(Args...)&gt;</span> keeps multiple callbacks in fixed slots and invokes them in slot order.</p></div>
+        </div>
+        <div class="stack">
+          <div class="code-title">Fixed storage + explicit registration</div>
+          <pre><span class="kw">castle::callbacks::function_registry</span>&lt;4U, <span class="kw">void</span>(<span class="ty">int</span>)&gt; registry;
+<span class="ty">int</span> total = 0;
+
+<span class="kw">auto</span> sub = registry.<span class="fn">subscribe</span>(
+    [&amp;total](<span class="ty">int</span> value) <span class="kw">noexcept</span> {
+        total += value;
+    });
+
+registry.<span class="fn">invoke</span>(2);
+registry(2); // equivalent to invoke(2)
+
+<span class="kw">if</span> (sub.<span class="fn">valid</span>()) {
+    sub.<span class="fn">unsubscribe</span>();
+}</pre>
+          <div class="callout"><h3>Developer comfort</h3><p>The programming model still feels like ordinary callback code: capture state, subscribe, invoke, unsubscribe. The key difference is that storage and capacity are explicit.</p></div>
+        </div>
+      </div>
+      <div class="footer"><span class="left">A small type-erasure mechanism, kept inside a deterministic budget.</span><span class="slide-no">5 / 9</span></div>
+    </section>
+
+    <section class="slide" data-title="Typed Events">
+      <div>
+        <div class="kicker">05 · Events</div>
+        <h2 class="slide-title" style="margin-top:10px;">Compile-time event sets make the wiring visible.</h2>
+        <p class="slide-subtitle"><span class="mono">event_tag_config</span> defines the event type, subscriber bound, signature, and callback storage budget.</p>
+      </div>
+      <div class="content">
+        <div class="flow">
+          <div class="node"><b>ISR / driver</b><span>produces a fact</span></div><div class="arrow">→</div>
+          <div class="node"><b>event tag</b><span>e.g. SensorReady</span></div><div class="arrow">→</div>
+          <div class="node"><b>fixed registry</b><span>bounded subscribers</span></div>
+        </div>
+        <div class="two" style="display:grid;gap:12px;min-height:0;">
+          <div class="stack">
+            <div class="code-title">Declare the event set once</div>
+            <pre><span class="kw">struct</span> <span class="ty">SensorReady</span> {};
+<span class="kw">struct</span> <span class="ty">ControlUpdate</span> {};
+
+<span class="kw">using</span> sensor_event_tag = <span class="kw">castle::events::event_tag_config</span>&lt;
+  SensorReady, 4U, <span class="kw">void</span>(<span class="ty">int</span>), 32U&gt;;
+
+<span class="kw">using</span> control_event_tag = <span class="kw">castle::events::event_tag_config</span>&lt;
+  ControlUpdate, 2U, <span class="kw">void</span>(<span class="ty">int</span>), 32U&gt;;
+
+<span class="kw">using</span> bus = <span class="kw">castle::events::event_dispatcher</span>&lt;
+  sensor_event_tag, control_event_tag&gt;;</pre>
+          </div>
+          <div class="stack">
+            <div class="code-title">Subscribe + publish</div>
+            <pre><span class="ty">int</span> received = 0;
+<span class="kw">auto</span> sub = dispatcher.<span class="fn">register_callback</span>&lt;SensorReady&gt;(
+  [&amp;received](<span class="ty">int</span> value) <span class="kw">noexcept</span> {
+    received += value;
+  });
+
+dispatcher.<span class="fn">dispatch_event</span>&lt;SensorReady&gt;(7);
+
+<span class="cm">// only configured tags are dispatchable</span></pre>
+            <div class="callout"><h3>Why it feels safer</h3><p>Event identity and callback signature are selected from the type system. Capacity is also visible at the same declaration point.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span class="left">Typed wiring, fixed subscriber counts, synchronous dispatch.</span><span class="slide-no">6 / 9</span></div>
+    </section>
+
+    <section class="slide" data-title="Timer + Policies">
+      <div>
+        <div class="kicker">06 · Timing &amp; scheduling</div>
+        <h2 class="slide-title" style="margin-top:10px;">Turn callbacks into behavior: timers and exec policies.</h2>
+        <p class="slide-subtitle">The library separates “what to call” from “when to call it” — without requiring hidden threads or heap state.</p>
+      </div>
+      <div class="content two">
+        <div class="stack">
+          <div class="card"><h3><span class="mono">tick_timer</span></h3><p>Set a period, register fixed-capacity callbacks, then advance explicitly with <span class="mono">on_tick()</span>. Supports periodic, one-shot, and N-repeat modes.</p></div>
+          <div class="card"><h3><span class="mono">exec_policy</span></h3><p>Policies such as <span class="mono">once</span>, <span class="mono">every_n</span>, <span class="mono">on_change</span>, <span class="mono">throttle</span>, and <span class="mono">periodic</span> keep gating rules explicit and poll-driven.</p></div>
+          <div class="warn"><h3>Deterministic integration point</h3><p>Timer callbacks run synchronously from the caller of <span class="mono">on_tick()</span>; policy callbacks execute in the caller’s thread. Threading is not smuggled in by the abstraction.</p></div>
+        </div>
+        <div class="stack">
+          <div class="code-title">Example: periodic sensor publication</div>
+          <pre><span class="kw">castle::events::tick_timer</span>&lt;4U&gt; timer;
+
+<span class="kw">auto</span> sub = timer.<span class="fn">register_callback</span>(
+  []() <span class="kw">noexcept</span> {
+    <span class="cm">// sample + publish one bounded event</span>
+  });
+
+timer.<span class="fn">set_period</span>(10U);
+timer.<span class="fn">start</span>(
+  castle::events::tick_timer_mode::periodic);
+
+<span class="cm">// from the scheduler / tick source:</span>
+timer.<span class="fn">on_tick</span>(1U);</pre>
+          <div class="callout"><h3>A useful design pattern</h3><p><span class="mono">driver → timer/policy → callback → event_dispatcher → fixed containers</span> gives a readable path from hardware-facing timing to application logic.</p></div>
+        </div>
+      </div>
+      <div class="footer"><span class="left">Keep scheduling policy explicit; keep execution local.</span><span class="slide-no">7 / 9</span></div>
+    </section>
+
+    <section class="slide" data-title="Engineering View">
+      <div>
+        <div class="kicker">07 · Engineering view</div>
+        <h2 class="slide-title" style="margin-top:10px;">What changes for the developer?</h2>
+        <p class="slide-subtitle">The goal is not “more templates”. The goal is making embedded constraints feel like normal API choices.</p>
+      </div>
+      <div class="content three">
+        <div class="card"><h3>Before code review</h3><p>Capacity, alignment, callback storage, and configuration are visible in types and template parameters.</p></div>
+        <div class="card"><h3>During testing</h3><p>Boundary conditions become ordinary test cases: full, empty, invalid configuration, expired subscription, repeated timer expiry...</p></div>
+        <div class="card"><h3>During integration</h3><p>Compiler abstraction, no-STL dependency, explicit status codes, and platform-aware low-level primitives keep integration surfaces small.</p></div>
+        <div class="callout"><h3>Portable by construction</h3><p>Compiler variants cover GCC / Clang / ARM families in the supplied snapshot. The library centralizes portability macros rather than spreading toolchain conditionals through application code.</p></div>
+        <div class="callout"><h3>Predictable complexity</h3><p>Many core operations document O(1) behavior or O(capacity) scans explicitly. Bounded storage removes reallocation as a hidden runtime event.</p></div>
+        <div class="callout"><h3>Process-compatible</h3><p>CASTLE is designed with automotive safety requirements in mind, aiming to align with relevant standards and practices such as MISRA and AUTOSAR.</p></div>
+      </div>
+      <div class="footer"><span class="left">Library mechanisms support the safety process; they do not replace it.</span><span class="slide-no">8 / 9</span></div>
+    </section>
+
+    <section class="slide" data-title="Explore">
+      <div>
+        <div class="kicker">08 · Explore the project</div>
+        <h2 class="slide-title" style="margin-top:10px;">Visit the GitHub repository.</h2>
+        <p class="slide-subtitle">Start with one component, trace its constraints, then compose upward into your firmware architecture.</p>
+      </div>
+      <div class="content">
+        <div class="resources">
+          <div class="resource"><a href="https://github.com/nguyenchiemminhvu/castle" target="_blank" rel="noreferrer">GitHub repository ↗</a><small>Main project page and source history.</small><div class="url">github.com/nguyenchiemminhvu/castle</div></div>
+          <div class="resource"><a href="https://nguyenchiemminhvu.github.io/castle" target="_blank" rel="noreferrer">Web introduction ↗</a><small>Project overview, module map, getting started, roadmap.</small><div class="url">nguyenchiemminhvu.github.io/castle</div></div>
+          <div class="resource"><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/docs" target="_blank" rel="noreferrer">Documentation ↗</a><small>Module-by-module API notes and constraints.</small><div class="url">github.com/nguyenchiemminhvu/castle/tree/main/docs</div></div>
+          <div class="resource"><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/samples" target="_blank" rel="noreferrer">Samples ↗</a><small>Runnable examples for the library components.</small><div class="url">github.com/nguyenchiemminhvu/castle/tree/main/samples</div></div>
+          <div class="resource"><a href="https://github.com/nguyenchiemminhvu/castle/tree/main/benchmarks" target="_blank" rel="noreferrer">Benchmarks ↗</a><small>Performance measurements — use the repository results rather than assuming a generic STL comparison.</small><div class="url">github.com/nguyenchiemminhvu/castle/tree/main/benchmarks</div></div>
+        </div>
+        <div class="callout"><h3>Summary</h3><p>CASTLE 2.0 brings modern C++ abstractions to embedded systems without sacrificing determinism, predictability, or resource control.</p></div>
+      </div>
+      <div class="footer"><span class="left">CASTLE 2.0 · Compliant Automotive Safety Template Library for Embedded</span><span class="slide-no">9 / 9</span></div>
+    </section>
+  </div>
+</div>
+
+<div class="controls" aria-label="Slide controls">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <button id="counter" aria-label="Current slide">1 / 9</button>
+  <button id="next" aria-label="Next slide">→</button>
+  <button id="full" aria-label="Fullscreen">Fullscreen</button>
+</div>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const progress=document.getElementById('progress');
+  const counter=document.getElementById('counter');
+  const prev=document.getElementById('prev');
+  const next=document.getElementById('next');
+  const full=document.getElementById('full');
+  let index=0;
+
+  function scaleDeck(){
+    const W=1200,H=720;
+    const pad=44;
+    const sx=(innerWidth-pad*2)/W;
+    const sy=(innerHeight-pad*2)/H;
+    const s=Math.min(1,sx,sy);
+    document.documentElement.style.setProperty('--scale',String(Math.max(.45,s)));
+  }
+
+  function show(i){
+    index=Math.max(0,Math.min(slides.length-1,i));
+    slides.forEach((s,n)=>s.classList.toggle('active',n===index));
+    const pct=((index+1)/slides.length)*100;
+    progress.style.width=pct+'%';
+    counter.textContent=(index+1)+' / '+slides.length;
+    prev.disabled=index===0; next.disabled=index===slides.length-1;
+    document.title='CASTLE 2.0 — '+(slides[index].dataset.title||'Prototype 2.0');
+  }
+
+  function go(step){show(index+step)}
+  prev.addEventListener('click',()=>go(-1));
+  next.addEventListener('click',()=>go(1));
+  counter.addEventListener('click',()=>{
+    const n=prompt('Go to slide (1-'+slides.length+'):',String(index+1));
+    if(n!==null && /^\\d+$/.test(n)){show(parseInt(n,10)-1)}
+  });
+  full.addEventListener('click',async()=>{
+    try{
+      if(!document.fullscreenElement) await document.documentElement.requestFullscreen();
+      else await document.exitFullscreen();
+    }catch(_){ }
+  });
+  addEventListener('keydown',e=>{
+    if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    switch(e.key){
+      case 'ArrowRight':case 'PageDown':case ' ':e.preventDefault();go(1);break;
+      case 'ArrowLeft':case 'PageUp':e.preventDefault();go(-1);break;
+      case 'Home':e.preventDefault();show(0);break;
+      case 'End':e.preventDefault();show(slides.length-1);break;
+      case 'f':case 'F':full.click();break;
+      case 'Escape': if(document.fullscreenElement) document.exitFullscreen(); break;
+    }
+  });
+  let touchX=null;
+  addEventListener('touchstart',e=>{touchX=e.changedTouches[0].clientX},{passive:true});
+  addEventListener('touchend',e=>{if(touchX===null)return;const dx=e.changedTouches[0].clientX-touchX;if(Math.abs(dx)>45)go(dx<0?1:-1);touchX=null},{passive:true});
+  addEventListener('resize',scaleDeck);
+  document.addEventListener('fullscreenchange',()=>document.body.classList.toggle('presentation',!!document.fullscreenElement));
+  scaleDeck(); show(0);
+})();
+</script>
+</body>
+</html>

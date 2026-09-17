@@ -1,55 +1,42 @@
-# `castle/bit/bit_count.h` — Counting & log2 helpers
+# BitCount
 
-**Header:** `castle/bit/bit_count.h`
-**Namespace:** `castle::bit`
-**Sample:** [`samples/sample_bit.cpp`](../../samples/sample_bit.cpp) — `demo_bit_count()`
+## Overview
+Bit-counting helpers for population counts, zero counts, bit widths, and parity. Use this header when code needs deterministic bit metrics without lookup tables or compiler-specific intrinsics.
 
-## Purpose
+## Header
+`#include "castle/bit/bit_count.hpp"`
 
-Population counting and bit-scan primitives used across CRC tables,
-parity checks, alignment math, and CAN/UDS diagnostic services.
-Implementations are **branch-free, `constexpr`, and portable** — no
-compiler intrinsics required.
+## Dependencies
+- [compiler](../core/compiler.md)
+- [types](../core/types.md)
+- [traits](../core/traits.md)
 
-## Design notes
+## Public API
+| Signature | Description |
+|---|---|
+| `uint32_t popcount(uint64_t value)` | Counts set bits in a 64-bit value with a branch-free SWAR reduction. Complexity: O(1). |
+| `template <typename T> uint32_t popcount(T value)` | Counts set bits in the corresponding unsigned representation of `value`. Complexity: O(1). |
+| `template <typename T> uint32_t count_ones(T value)` | Alias for `popcount(value)`. Complexity: O(1). |
+| `template <typename T> uint32_t count_zeros(T value)` | Counts zero bits across the full width of `T`. Complexity: O(1). |
+| `template <typename T> uint32_t count_leading_zeros(T value)` | Counts consecutive zero bits from the most-significant side. Returns the full bit width when `value == 0`. Complexity: O(log bit-width). |
+| `template <typename T> uint32_t count_trailing_zeros(T value)` | Counts consecutive zero bits from the least-significant side. Returns the full bit width when `value == 0`. Complexity: O(log bit-width). |
+| `template <typename T> uint32_t bit_width(T value)` | Returns the number of bits needed to represent the corresponding unsigned value. Returns `0` for `0`. Complexity: O(log bit-width). |
+| `template <typename T> uint32_t log2_floor(T value)` | Returns `bit_width(value) - 1` for non-zero values. This implementation returns `0` for `0` even though the mathematical operation is undefined there. Complexity: O(log bit-width). |
+| `template <typename T> uint32_t parity(T value)` | Returns `1` for an odd number of set bits and `0` for an even number. Complexity: O(1). |
+| `template <size_type N> uint32_t parity()` | Compile-time parity helper for `castle::size_type` constants. Complexity: O(1). |
 
-- `popcount` uses a SWAR (SIMD Within A Register) algorithm on a
-  64-bit lane; smaller integral types are widened to `uint64_t` first.
-- `count_leading_zeros` / `count_trailing_zeros` use a `log2 N`
-  binary-search reduction — deterministic time regardless of input.
-- Every helper returns `sizeof(T) * CHAR_BIT` when the input is zero
-  where "count zeros from that end" would otherwise be undefined.
-- `log2_floor(0)` is defensively defined as `0` (mathematically
-  undefined) so it never triggers UB in safety-critical code.
-
-## API
-
-| Function                                      | Returns          | Notes                                            |
-| --------------------------------------------- | ---------------- | ------------------------------------------------ |
-| `popcount(v)`                                 | `uint32_t`       | Number of 1-bits                                 |
-| `count_ones(v)`                               | `uint32_t`       | Alias of `popcount`                              |
-| `count_zeros(v)`                              | `uint32_t`       | `sizeof(T)*8 - popcount(v)`                      |
-| `count_leading_zeros(v)`                      | `uint32_t`       | `sizeof(T)*8` for `v == 0`                       |
-| `count_trailing_zeros(v)`                     | `uint32_t`       | `sizeof(T)*8` for `v == 0`                       |
-| `bit_width(v)`                                | `uint32_t`       | `floor(log2(v)) + 1`, `0` for `v == 0`           |
-| `log2_floor(v)`                               | `uint32_t`       | `floor(log2(v))`, `0` for `v == 0` (defensive)   |
-| `parity(v)` / `parity<N>()`                   | `uint32_t`       | 1 if odd number of set bits, 0 otherwise         |
-
-All functions require `castle::types::is_valid_integer_v<T>`.
-
-## Example
-
+## Usage Example
 ```cpp
-#include <castle/bit/bit_count.h>
-using namespace castle::bit;
+#include "castle/bit/bit_count.hpp"
 
-static_assert(popcount(0xFFu) == 8);
-static_assert(count_leading_zeros<uint32_t>(0x1u) == 31);
-static_assert(bit_width(0x0F) == 4);
-static_assert(parity<0b1011>() == 1);   // odd
+const uint8_t sample = 0x30U;
+const uint32_t ones = castle::bit::count_ones(sample);
+const uint32_t leading = castle::bit::count_leading_zeros(sample);
+const uint32_t odd_parity = castle::bit::parity<7U>();
 ```
+See `samples/sample_bit_count.cpp` for a complete example.
 
-## See also
-
-- `bit_math.h` — `is_power_of_two`, `next_power_of_two`.
-- `bit_utils.h` — `extract_lowest_set_bit` / `extract_highest_set_bit`.
+## Constraints & Notes
+- Accepts Castle valid integer types only.
+- Generic overloads interpret signed inputs through their corresponding unsigned representation.
+- Zero handling is explicit: leading/trailing zero counts return the full width, `bit_width(0)` returns `0`, and `log2_floor(0)` returns `0` defensively.
