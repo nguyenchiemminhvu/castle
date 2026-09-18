@@ -6,7 +6,6 @@
 #include "castle/core/types.hpp"
 #include "castle/math/abs.hpp"
 #include "castle/math/sqrt_real.hpp"
-#include "castle/math/minmax.hpp"
 
 namespace castle
 {

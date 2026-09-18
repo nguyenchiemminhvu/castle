@@ -24,7 +24,6 @@
 #include "castle/math/is_power_of_two.hpp"
 #include "castle/math/isqrt.hpp"
 #include "castle/math/lerp.hpp"
-#include "castle/math/minmax.hpp"
 #include "castle/math/mod.hpp"
 #include "castle/math/near_equal.hpp"
 #include "castle/math/powi.hpp"

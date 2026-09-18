@@ -914,6 +914,20 @@ CASTLE_CONSTEXPR T CASTLE_CONST& max(T CASTLE_CONST& lhs,
     return lhs < rhs ? rhs : lhs;
 }
 
+template <typename T>
+CASTLE_NODISCARD CASTLE_CONSTEXPR
+T min3(T a, T b, T c) CASTLE_NOEXCEPT
+{
+    return min(min(a, b), c);
+}
+
+template <typename T>
+CASTLE_NODISCARD CASTLE_CONSTEXPR
+T max3(T a, T b, T c) CASTLE_NOEXCEPT
+{
+    return max(max(a, b), c);
+}
+
 template <typename TForwardIterator, typename TCompare>
 TForwardIterator min_element(TForwardIterator first,
                              TForwardIterator last,

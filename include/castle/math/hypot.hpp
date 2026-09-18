@@ -4,8 +4,8 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/math/abs.hpp"
-#include "castle/math/minmax.hpp"
 #include "castle/math/sqrt_real.hpp"
+#include "castle/algorithm/algorithm.hpp"
 
 namespace castle
 {
@@ -45,7 +45,7 @@ hypot(T x, T y, T z) CASTLE_NOEXCEPT
     CASTLE_CONST T ax = abs(x);
     CASTLE_CONST T ay = abs(y);
     CASTLE_CONST T az = abs(z);
-    CASTLE_CONST T scale = max(ax, max(ay, az));
+    CASTLE_CONST T scale = castle::max(ax, castle::max(ay, az));
 
     if (scale == static_cast<T>(0))
     {

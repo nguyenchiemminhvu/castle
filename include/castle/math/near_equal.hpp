@@ -4,7 +4,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/math/abs.hpp"
-#include "castle/math/minmax.hpp"
+#include "castle/algorithm/algorithm.hpp"
 
 namespace castle
 {
@@ -24,8 +24,7 @@ typename meta::enable_if<meta::is_floating_point<T>::value, bool>::type
 near_equal(T a, T b, T epsilon) CASTLE_NOEXCEPT
 {
     CASTLE_CONST T difference = abs(static_cast<T>(a - b));
-    CASTLE_CONST T scale = max(static_cast<T>(1),
-                        max(abs(a), abs(b)));
+    CASTLE_CONST T scale = castle::max(static_cast<T>(1), castle::max(abs(a), abs(b)));
     return difference <= epsilon * scale;
 }
 
