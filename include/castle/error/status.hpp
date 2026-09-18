@@ -22,7 +22,8 @@ enum class status : uint8_t
     invalid_subscription,
     already_exists,
     system_call_error,
-    unknown_error    
+    data_loss,
+    unknown_error
 };
 
 CASTLE_CONSTEXPR bool succeeded(status value) CASTLE_NOEXCEPT
