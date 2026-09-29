@@ -83,6 +83,22 @@
 /// @brief Evaluates to true when pointers are 64 bits wide.
 #define CASTLE_PLATFORM_64BIT (sizeof(void*) == 8)
 
+/// @def CASTLE_HAS_BUILTIN_BIT_CAST
+/// @brief Evaluates to true when the active compiler provides `__builtin_bit_cast`.
+#if !defined(CASTLE_HAS_BUILTIN_BIT_CAST)
+    #if defined(__has_builtin)
+        #if __has_builtin(__builtin_bit_cast)
+            #define CASTLE_HAS_BUILTIN_BIT_CAST 1
+        #endif
+    #endif
+    #if !defined(CASTLE_HAS_BUILTIN_BIT_CAST) && defined(__GNUC__) && !defined(__clang__) && (__GNUC__ >= 11)
+        #define CASTLE_HAS_BUILTIN_BIT_CAST 1
+    #endif
+    #if !defined(CASTLE_HAS_BUILTIN_BIT_CAST)
+        #define CASTLE_HAS_BUILTIN_BIT_CAST 0
+    #endif
+#endif // !defined(CASTLE_HAS_BUILTIN_BIT_CAST)
+
 /// @def CASTLE_USING_STD_NEW
 /// @brief Reports whether the standard <new> header is available.
 #if !defined(CASTLE_USING_STD_NEW)
@@ -114,6 +130,39 @@
         #define CASTLE_USING_STD_INITIALIZER_LIST 0
     #endif
 #endif // !defined(CASTLE_USING_STD_INITIALIZER_LIST)
+
+/// @def CASTLE_USING_POSIX_APIS
+/// @brief Reports whether POSIX APIs appear to be available on the target.
+#if !defined(CASTLE_USING_POSIX_APIS)
+    #if defined(__has_include)
+        #if __has_include(<unistd.h>)
+            #include <unistd.h>
+            #if defined(_POSIX_VERSION)
+                #define CASTLE_USING_POSIX_APIS 1
+            #else
+                #define CASTLE_USING_POSIX_APIS 0
+            #endif
+        #else
+            #define CASTLE_USING_POSIX_APIS 0
+        #endif
+    #else
+        #define CASTLE_USING_POSIX_APIS 0
+    #endif
+#endif // !defined(CASTLE_USING_POSIX_APIS)
+
+/// @def CASTLE_USING_TIMEX
+/// @brief Reports whether the <sys/time.h> header is available for time-related functions.
+#if !defined(CASTLE_USING_TIMEX)
+    #if defined(__has_include)
+        #if __has_include(<sys/time.h>)
+            #define CASTLE_USING_TIMEX 1
+        #else
+            #define CASTLE_USING_TIMEX 0
+        #endif
+    #else
+        #define CASTLE_USING_TIMEX 0
+    #endif
+#endif // !defined(CASTLE_USING_TIMEX)
 
 /// @def CASTLE_USING_PTHREAD
 /// @brief Reports whether POSIX threads appear to be available on the target.

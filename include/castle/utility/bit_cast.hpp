@@ -20,22 +20,8 @@
 #define CASTLE_UTILITY_BIT_CAST_HPP
 
 #include "castle/core/compiler.hpp"
+#include "castle/core/config.hpp"
 #include "castle/core/traits.hpp"
-
-/**
- * @brief Indicates whether the active compiler provides `__builtin_bit_cast`.
- */
-#if defined(__has_builtin)
-    #if __has_builtin(__builtin_bit_cast)
-        #define CASTLE_HAS_BUILTIN_BIT_CAST 1
-    #endif
-#endif
-#if !defined(CASTLE_HAS_BUILTIN_BIT_CAST) && defined(__GNUC__) && !defined(__clang__) && (__GNUC__ >= 11)
-    #define CASTLE_HAS_BUILTIN_BIT_CAST 1
-#endif
-#if !defined(CASTLE_HAS_BUILTIN_BIT_CAST)
-    #define CASTLE_HAS_BUILTIN_BIT_CAST 0
-#endif
 
 namespace castle
 {

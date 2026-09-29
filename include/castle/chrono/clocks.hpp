@@ -8,10 +8,10 @@
  * Include this header when code needs current time points instead of manually
  * constructing durations or time points. Compiler detection in
  * @c castle/core/compiler.hpp selects one of the clock-variant headers in this
- * order: ARM, Clang, GCC, then the default fallback. All currently selected
- * variants reuse the GCC-compatible POSIX @c clock_gettime backend unless a
- * project overrides the source with the @c CASTLE_CHRONO_*_NOW_API macros or
- * provides the required external C functions.
+ * order: ARM, Clang, GCC, then the default fallback. The selected variant
+ * provides @c system_clock_adapter unless a project overrides the source with
+ * the @c CASTLE_CHRONO_*_NOW_API macros or provides the required external C
+ * functions.
  *
  * Key constraints:
  * - The default tick resolution for both clocks is nanoseconds unless
@@ -125,14 +125,14 @@ public:
     /**
      * @brief Reads the current wall-clock time.
      * @return A @c system_clock::time_point whose tick count is expressed in @c system_clock::duration units.
-     * @note The selected source is, in order of precedence, the GCC-compatible variant macro path,
+    * @note The selected source is, in order of precedence, the selected adapter backend,
      *       the @c CASTLE_CHRONO_SYSTEM_CLOCK_NOW_API macro expression, or the external C hook.
      * @warning The returned value is only as accurate and stable as the supplied platform clock source.
      */
     static time_point now() CASTLE_NOEXCEPT
     {
-#if defined(CASTLE_CHRONO_SYSTEM_CLOCK_GCC_VARIANT)
-        struct timespec ts = detail::clock_variant::realtime_ns();
+#if defined(CASTLE_CHRONO_SYSTEM_CLOCK_VARIANT)
+        struct timespec ts = system_clock_adapter::realtime_ns();
         return time_point(
             duration(
                 // Convert whole seconds to clock ticks, then add the remaining nanoseconds field.
@@ -199,14 +199,14 @@ public:
     /**
      * @brief Reads the current monotonic time.
      * @return A @c steady_clock::time_point whose tick count is expressed in @c steady_clock::duration units.
-     * @note The selected source is, in order of precedence, the GCC-compatible variant macro path,
+    * @note The selected source is, in order of precedence, the selected adapter backend,
      *       the @c CASTLE_CHRONO_STEADY_CLOCK_NOW_API macro expression, or the external C hook.
      * @warning If the supplied backend is not actually monotonic, elapsed-time calculations become unreliable.
      */
     static time_point now() CASTLE_NOEXCEPT
     {
-#if defined(CASTLE_CHRONO_STEADY_CLOCK_GCC_VARIANT)
-        struct timespec ts = detail::clock_variant::monotonic_ns();
+#if defined(CASTLE_CHRONO_STEADY_CLOCK_VARIANT)
+        struct timespec ts = system_clock_adapter::monotonic_ns();
         return time_point(
             duration(
                 // Convert whole seconds to clock ticks, then add the remaining nanoseconds field.

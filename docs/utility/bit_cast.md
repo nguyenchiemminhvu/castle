@@ -7,7 +7,9 @@
 `#include "castle/utility/bit_cast.hpp"`
 
 ## Dependencies
-[compiler.md](../core/compiler.md), [traits.md](../core/traits.md)
+- [compiler.md](../core/compiler.md)
+- [traits.md](../core/traits.md)
+- [config.md](../core/config.md)
 
 ## Public API
 | API | Description |

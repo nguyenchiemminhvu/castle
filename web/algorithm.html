@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CASTLE algorithms for STL-free deterministic range operations.">
+  <meta name="theme-color" content="#0a1015">
+  <title>Algorithm | CASTLE 2.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="module.css"><script defer src="main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="guide-header"><div class="guide-bar-inner"><a class="guide-brand" href="../index.html"><span class="guide-brand-mark">C</span> CASTLE <small>/ MODULE NOTES</small></a><nav aria-label="Site navigation"><a href="../index.html#modules"><span>←</span> All modules</a><a href="https://github.com/nguyenchiemminhvu/castle" target="_blank" rel="noreferrer">Repository ↗</a></nav></div></header>
+  <main class="guide-shell" id="content">
+    <div class="guide-breadcrumb"><a href="../index.html">CASTLE</a><span>/</span><a href="../index.html#modules">Modules</a><span>/</span>Algorithm</div>
+    <section class="guide-title"><p class="guide-kicker">MODULE <span>01 / 18</span></p><h1>Algorithm</h1><p class="guide-deck">Deterministic, STL-free generic algorithms for Castle iterators and raw pointers, including search, copy, transform, remove, sort, and ordered lookup.</p><code class="guide-include">#include "castle/algorithm/algorithm.hpp"</code></section>
+    <div class="guide-layout">
+      <article class="guide-content">
+        <section id="overview"><h2>Overview</h2><p>Deterministic, STL-free generic algorithms for Castle iterators and raw pointers. Use this header when you need common search, copy, transform, remove, sort, and ordered-lookup operations without heap allocation or recursion-heavy implementations.</p></section>
+        <section id="dependencies"><h2>Dependencies</h2><ul><li><a href="iterator.html"><code>iterator/iterator.hpp</code></a></li><li><code>castle/utility/move.hpp</code></li><li><code>castle/utility/pair.hpp</code></li><li><code>castle/utility/swap.hpp</code></li></ul></section>
+        <section id="api"><h2>Public API</h2><div class="table-wrap"><table><thead><tr><th>API</th><th>Description</th></tr></thead><tbody>
+          <tr><td><code>find</code>, <code>find_if</code>, <code>find_if_not</code></td><td>Linear search over an input range; return the first matching iterator or <code>last</code>.</td></tr>
+          <tr><td><code>count</code>, <code>count_if</code></td><td>Count matching elements in an input range; <code>O(N)</code>.</td></tr>
+          <tr><td><code>all_of</code>, <code>any_of</code>, <code>none_of</code></td><td>Predicate checks over an input range with short-circuit behavior.</td></tr>
+          <tr><td><code>equal</code></td><td>Sequence equality checks for 3-iterator and 4-iterator forms, with optional predicate overloads.</td></tr>
+          <tr><td><code>mismatch</code></td><td>Returns <code>castle::pair</code> of the first mismatching iterators, with optional predicate overloads.</td></tr>
+          <tr><td><code>copy</code>, <code>copy_n</code>, <code>copy_if</code>, <code>move</code></td><td>Copy or move ranges into an output iterator; no allocation.</td></tr>
+          <tr><td><code>fill</code>, <code>fill_n</code>, <code>transform</code>, <code>generate</code></td><td>Overwrite or generate values in-place or into an output range.</td></tr>
+          <tr><td><code>replace</code>, <code>replace_if</code></td><td>In-place replacement on forward ranges.</td></tr>
+          <tr><td><code>remove</code>, <code>remove_if</code>, <code>unique</code></td><td>Non-erasing algorithms that compact the logical range and return the new end iterator.</td></tr>
+          <tr><td><code>sort</code></td><td>In-place heapsort for random-access iterators; deterministic <code>O(N log N)</code> worst case and <code>O(1)</code> extra storage.</td></tr>
+          <tr><td><code>lower_bound</code>, <code>upper_bound</code>, <code>binary_search</code></td><td>Ordered-range lookup helpers for forward iterators.</td></tr>
+          <tr><td><code>min</code>, <code>max</code>, <code>min3</code>, <code>max3</code></td><td>Value comparisons without STL dependency.</td></tr>
+          <tr><td><code>min_element</code>, <code>max_element</code></td><td>Find the smallest or largest element in a forward range.</td></tr>
+        </tbody></table></div></section>
+        <section id="example"><h2>Usage example</h2><p>See <code>samples/sample_algorithm.cpp</code>.</p><pre><code>#include "castle/algorithm/algorithm.hpp"&#10;&#10;int values[6] = {4, 1, 7, 1, 9, 2};&#10;castle::sort(values, values + 6);&#10;&#10;int* found = castle::find(values, values + 6, 7);&#10;bool has_nine = castle::binary_search(values, values + 6, 9);&#10;&#10;(void)found;&#10;(void)has_nine;</code></pre></section>
+        <section id="notes"><h2>Constraints &amp; notes</h2><ul><li>No heap allocation, exceptions, RTTI, or STL algorithms.</li><li>Iterator categories are checked with <code>static_assert</code>; unsupported iterator types fail at compile time.</li><li><code>sort()</code> uses iterative heapsort, not quicksort or mergesort.</li><li><code>remove</code>, <code>remove_if</code>, and <code>unique</code> do not resize containers; callers must treat the returned iterator as the new logical end.</li><li>Ordered lookup assumes the range is already sorted with the same comparator.</li></ul></section>
+        <nav class="guide-pager" aria-label="Module pages"><span></span><a href="atomic.html"><small>Next module →</small><strong>Atomic</strong></a></nav>
+      </article>
+      <aside class="guide-aside"><h2>On this page</h2><nav aria-label="Page sections"><a href="#overview">Overview</a><a href="#dependencies">Dependencies</a><a href="#api">Public API</a><a href="#example">Usage example</a><a href="#notes">Constraints &amp; notes</a></nav><div class="aside-rule"></div><h2>Header</h2><p><code>castle/algorithm/algorithm.hpp</code><br>Header-only · no allocation</p></aside>
+    </div>
+    <footer class="guide-footer"><a href="../index.html#modules">← Return to the module map</a><span>© 2026 nguyenchiemminhvu</span></footer>
+  </main>
+</body>
+</html>
