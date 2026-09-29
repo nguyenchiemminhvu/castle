@@ -39,19 +39,46 @@ if command -v lcov >/dev/null 2>&1; then
         --output-file "$build_dir/coverage.raw.info" \
         --rc lcov_branch_coverage=1
 
-    # Keep only the CASTLE public headers in the report.
+    # Extract CASTLE
     lcov --extract "$build_dir/coverage.raw.info" \
         "*/include/castle/*" \
         --output-file "$build_dir/castle.info" \
         --rc lcov_branch_coverage=1
 
+    # Extract CASTLE_EXT
+    lcov --extract "$build_dir/coverage.raw.info" \
+        "*/include/castle_ext/*" \
+        --output-file "$build_dir/castle_ext.info" \
+        --rc lcov_branch_coverage=1
+
+    # Merge both
+    lcov -a "$build_dir/castle.info" \
+        -a "$build_dir/castle_ext.info" \
+        -o "$build_dir/all.info" \
+        --rc lcov_branch_coverage=1
+
     lcov --list "$build_dir/castle.info" --rc lcov_branch_coverage=1
+    lcov --list "$build_dir/castle_ext.info" --rc lcov_branch_coverage=1
+    lcov --list "$build_dir/all.info" --rc lcov_branch_coverage=1
 
     if command -v genhtml >/dev/null 2>&1; then
-        genhtml "$build_dir/castle.info" \
-            --output-directory "$cov_dir" \
+        genhtml "$build_dir/all.info" \
+            --output-directory "$cov_dir/all" \
             --branch-coverage \
-            --legend
+            --legend \
+            --prefix "$cur_pwd"
+
+            genhtml "$build_dir/castle.info" \
+            --output-directory "$cov_dir/castle" \
+            --branch-coverage \
+            --legend \
+            --prefix "$cur_pwd"
+
+            genhtml "$build_dir/castle_ext.info" \
+            --output-directory "$cov_dir/castle_ext" \
+            --branch-coverage \
+            --legend \
+            --prefix "$cur_pwd"
         echo "Coverage report: $cov_dir/index.html"
     fi
 else

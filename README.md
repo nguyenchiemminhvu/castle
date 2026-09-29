@@ -82,6 +82,7 @@ This is useful for register definitions, buffer sizes, time periods, and other f
 - [`serialization/`](docs/serialization/ini.md) — Fixed-capacity INI, JSON, and XML support.
 - [`sync/`](docs/sync/mutex.md) — Mutexes, semaphores, shared locking, and wait policies.
 - [`utility/`](docs/utility/utility.md) — Bit cast, bitset, compare, hash, optional, pair, tuple, variant, and basic move/forward utilities.
+- [`castle_ext/`](docs/castle_ext/README.md) - External standards and common automotive utilities
 
 See the module guides in [`docs/`](docs/README.md).
 

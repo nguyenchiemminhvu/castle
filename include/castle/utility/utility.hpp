@@ -19,7 +19,6 @@
 #include "castle/utility/forward.hpp"
 #include "castle/utility/move.hpp"
 #include "castle/utility/swap.hpp"
-#include "castle/utility/safe_cast.hpp"
 #include "castle/utility/bit_cast.hpp"
 #include "castle/utility/tuple.hpp"
 #include "castle/utility/pair.hpp"
