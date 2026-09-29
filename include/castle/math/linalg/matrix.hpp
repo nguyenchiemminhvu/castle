@@ -864,7 +864,7 @@ struct determinant_helper
         T result{};
         for (size_type column = 0U; column < N; ++column)
         {
-            matrix<T, N - 1U, N - 1U> minor;
+            matrix<T, N - 1U, N - 1U> minor_matrix;
             size_type minor_row = 0U;
             for (size_type row = 1U; row < N; ++row)
             {
@@ -875,13 +875,13 @@ struct determinant_helper
                     {
                         continue;
                     }
-                    minor(minor_row, minor_column) = value(row, current_column);
+                    minor_matrix(minor_row, minor_column) = value(row, current_column);
                     ++minor_column;
                 }
                 ++minor_row;
             }
 
-            CASTLE_CONST T cofactor = determinant_helper<T, N - 1U>::compute(minor);
+            CASTLE_CONST T cofactor = determinant_helper<T, N - 1U>::compute(minor_matrix);
             CASTLE_CONST T signed_term = ((column & 1U) == 0U)
                                   ? static_cast<T>(value(0U, column) * cofactor)
                                   : static_cast<T>(-value(0U, column) * cofactor);

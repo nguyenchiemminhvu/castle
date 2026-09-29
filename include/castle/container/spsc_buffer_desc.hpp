@@ -27,9 +27,9 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
-#include "castle/atomic/atomic.hpp"
 #include "castle/container/array.hpp"
 #include "castle/container/array_view.hpp"
+#include "castle/sync/atomic.hpp"
 
 #include <stdint.h>
 

@@ -66,7 +66,6 @@ This is useful for register definitions, buffer sizes, time periods, and other f
 ## Module map
 
 - [`algorithm/`](docs/algorithm/algorithm.md) — Range algorithms and iterator-based utilities.
-- [`atomic/`](docs/atomic/atomic.md) — Atomic values and memory ordering.
 - [`bit/`](docs/bit/bit.md) — Bit operations, masks, rotations, and flags.
 - [`callbacks/`](docs/callbacks/delegate.md) — Fixed-storage delegates, functions, registries, and execution policies.
 - [`chrono/`](docs/chrono/chrono.md) — Durations, time points, clocks, and literals.
@@ -75,13 +74,12 @@ This is useful for register definitions, buffer sizes, time periods, and other f
 - [`design_patterns/`](docs/design_patterns/observer.md) — Observer, singleton, and visitor helpers.
 - [`error/`](docs/error/status.md) — Common status/error values.
 - [`events/`](docs/events/delegate_dispatcher.md) — Event dispatch, signal/slot, IPC, timers, and thread-pool helpers.
-- [`filter/`](docs/filter/debounce_sampling.md) — Deterministic signal sampling helpers.
 - [`iterator/`](docs/iterator/iterator.md) — Iterator tags, traits, operations, and bounded iterators.
 - [`math/`](docs/math/geometry/geometry.md) — Integer math, geometry, linear algebra, ratios, roots, random helpers, and more.
 - [`memory/`](docs/memory/memory.md) — Alignment, storage, object lifetime, construction, and destruction helpers.
-- [`serialization/`](docs/serialization/ini.md) — Fixed-capacity INI, JSON, and XML support.
 - [`sync/`](docs/sync/mutex.md) — Mutexes, semaphores, shared locking, and wait policies.
 - [`utility/`](docs/utility/utility.md) — Bit cast, bitset, compare, hash, optional, pair, tuple, variant, and basic move/forward utilities.
+- [`castle_ext/`](docs/castle_ext/README.md) - External standards and domain-specific implementations
 
 See the module guides in [`docs/`](docs/README.md).
 

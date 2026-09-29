@@ -40,7 +40,7 @@ struct nullopt_t
 };
 
 /** @brief Constant tag used to construct or assign an empty optional. */
-inline CASTLE_CONSTEXPR nullopt_t nullopt{};
+CASTLE_INLINE CASTLE_CONSTEXPR nullopt_t nullopt{};
 
 /**
  * @brief Stores zero or one value of type `T` in-place.

@@ -75,7 +75,7 @@ enum class signal : int
  * @param s Signal enumerator to convert.
  * @return Platform `int` value that can be passed to POSIX signal APIs.
  */
-static inline CASTLE_CONSTEXPR int to_signum(signal s) CASTLE_NOEXCEPT
+static CASTLE_INLINE CASTLE_CONSTEXPR int to_signum(signal s) CASTLE_NOEXCEPT
 {
     return static_cast<int>(s);
 }

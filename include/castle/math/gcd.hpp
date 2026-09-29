@@ -30,6 +30,16 @@ namespace castle
 namespace math
 {
 
+namespace detail
+{
+
+constexpr uintmax_t gcd_value(uintmax_t lhs, uintmax_t rhs) noexcept
+{
+    return rhs == 0U ? lhs : gcd_value(rhs, lhs % rhs);
+}
+
+}
+
 /**
  * @brief Computes the greatest common divisor of `A` and `B` at compile time.
  * @tparam A First compile-time operand.
@@ -49,35 +59,52 @@ struct gcd
      * @warning Intended for non-negative operands when a canonical positive GCD
      * is required.
      */
-    static CASTLE_CONSTEXPR intmax_t value = gcd<B, A % B>::value;
-};
-
-/**
- * @brief Base case for Euclid's algorithm.
- * @tparam A Remaining divisor when the remainder becomes zero.
- * @note `gcd<A, 0>::value` is `A`.
- * @warning The sign of `A` is preserved; callers needing a positive canonical
- * result should instantiate the template with non-negative operands.
- */
-template <intmax_t A>
-struct gcd<A, 0>
-{
-    /**
-     * @brief The terminating value of the Euclidean recursion.
-     * @return `A`.
-     * @note This specialization also makes `gcd<0, 0>::value` equal to `0`.
-     * @warning No additional normalization is performed.
-     */
-    static CASTLE_CONSTEXPR intmax_t value = A;
+    static CASTLE_CONSTEXPR intmax_t value = static_cast<intmax_t>(
+        detail::gcd_value(uabs(A), uabs(B))
+    );
 };
 
 template <intmax_t A, intmax_t B>
 CASTLE_CONSTEXPR intmax_t gcd<A, B>::value;
 
-template <intmax_t A>
-CASTLE_CONSTEXPR intmax_t gcd<A, 0>::value;
-
 }
 }
 
 #endif
+
+
+////
+
+// MIT License
+// Copyright (c) 2026 nguyenchiemminhvu@gmail.com
+
+/**
+ * @file gcd.hpp
+ * @brief Compile-time greatest-common-divisor utility for integral constants.
+ *
+ * This small math primitive is used by ratio and duration arithmetic. It is
+ * entirely compile-time and introduces no runtime state or allocation.
+ */
+#ifndef CASTLE_MATH_GCD_HPP
+#define CASTLE_MATH_GCD_HPP
+
+#include <stdint.h>
+
+namespace castle
+{
+namespace math
+{
+
+
+template <intmax_t A, intmax_t B>
+struct gcd
+{
+    
+};
+
+
+
+} // namespace math
+} // namespace castle
+
+#endif // CASTLE_MATH_GCD_HPP

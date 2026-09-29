@@ -11,7 +11,7 @@ This header is Castle's STL-free metaprogramming foundation: it supplies compile
 
 ## Public API
 - **Foundation:** `castle::meta::integral_constant`, `bool_constant`, `true_type`, `false_type`, `void_t`, `type_identity`, `always_false`, `dependent_false`.
-- **Logic and SFINAE:** `conjunction`, `disjunction`, `negation`, `enable_if`, `conditional`.
+- **Logic and SFINAE:** `conjunction`, `disjunction`, `negation`, `all_of`, `any_of`, `not_`, `enable_if`, `conditional`.
 - **Reference and cv transforms:** `remove_reference`, `add_lvalue_reference`, `add_rvalue_reference`, `remove_const`, `remove_volatile`, `remove_cv`, `add_const`, `add_volatile`, `add_cv`, `declval`.
 - **Primary and composite categories:** `is_void`, `is_null_pointer`, `is_integral`, `is_floating_point`, `floating_epsilon`, `is_array`, `is_pointer`, `is_enum`, `is_class`, `is_union`, `is_function`, `is_member_pointer`, `is_member_function_pointer`, `is_arithmetic`, `is_fundamental`, `is_scalar`, `is_object`, `is_compound`.
 - **Signedness and layout:** `is_signed`, `is_unsigned`, `make_signed`, `make_unsigned`, `is_trivially_copyable`, `is_trivially_destructible`, `alignment_of`, `max_align_t`, and builtin-backed class-shape traits where supported.

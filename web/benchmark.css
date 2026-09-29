@@ -1,0 +1,23 @@
+.benchmark-layout { grid-template-columns: minmax(0,1fr) 205px; }
+.benchmark-content section + section { margin-top: 47px; }
+.benchmark-content .benchmark-judgment { padding: 20px 22px; border-left: 2px solid var(--guide-cyan); background: #121d23; color: #dce6e1; }
+.benchmark-judgment h3 { margin: 0 0 8px; color: var(--guide-cyan); font: 600 21px/1.1 var(--guide-display); }
+.benchmark-judgment p { margin: 0; color: #b0bdbc; font-size: 12px; }
+.benchmark-content ul.benchmark-findings { margin: 17px 0 0; padding: 0; list-style: none; }
+.benchmark-findings li { display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 15px; padding: 12px 0; border-bottom: 1px solid var(--guide-line); }
+.benchmark-findings strong { color: var(--guide-ink); font-size: 11px; }
+.benchmark-findings span { color: #aab6b8; font-size: 11px; line-height: 1.7; }
+.benchmark-content .benchmark-caveat { margin-top: 19px; padding: 14px 16px; border: 1px solid #574239; background: #211b19; color: #d8b6a8; font-size: 11px; line-height: 1.8; }
+.benchmark-content .benchmark-caveat strong { color: #ffad8f; }
+.benchmark-source { display: inline-block; margin-top: 15px; color: var(--guide-cyan); font: 10px/1.5 var(--guide-mono); text-decoration: underline; text-underline-offset: 3px; }
+.benchmark-transcript { margin-top: 17px; border: 1px solid #25343b; background: #0d151b; }
+.benchmark-transcript summary { padding: 13px 16px; color: #c9d3d1; cursor: pointer; font: 10px/1.5 var(--guide-mono); }
+.benchmark-transcript[open] summary { border-bottom: 1px solid #25343b; }
+.benchmark-content pre.benchmark-output { max-width: 100%; max-height: 76vh; margin: 0; padding: 17px; overflow: auto; border: 0; background: transparent; color: #c9d3d1; font: 10px/1.65 var(--guide-mono); white-space: pre; }
+.benchmark-content pre.benchmark-output code { color: inherit; font: inherit; }
+.benchmark-aside-note { color: #a0adb0; font-size: 10px; line-height: 1.8; }
+@media (max-width: 760px) {
+  .benchmark-layout { grid-template-columns: 1fr; }
+  .benchmark-findings li { grid-template-columns: 88px minmax(0,1fr); gap: 10px; }
+  .benchmark-content pre.benchmark-output { max-height: 70vh; padding: 13px; font-size: 9px; }
+}

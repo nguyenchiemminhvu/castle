@@ -20,13 +20,13 @@
 #ifndef CASTLE_CONTAINER_MIRRORED_RING_BUFFER_HPP
 #define CASTLE_CONTAINER_MIRRORED_RING_BUFFER_HPP
 
-#include "castle/atomic/atomic.hpp"
 #include "castle/container/array_view.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
 #include "castle/utility/move.hpp"
+#include "castle/sync/atomic.hpp"
 
 namespace castle
 {

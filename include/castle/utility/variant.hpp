@@ -52,7 +52,7 @@ struct in_place_index_t
  * @tparam Index Alternative index to activate.
  */
 template <size_type Index>
-inline CASTLE_CONSTEXPR in_place_index_t<Index> in_place_index{};
+CASTLE_INLINE CASTLE_CONSTEXPR in_place_index_t<Index> in_place_index{};
 
 
 
@@ -607,7 +607,7 @@ struct variant_size<variant<Ts...>>
  * @tparam Variant Variant type to inspect.
  */
 template <typename Variant>
-inline CASTLE_CONSTEXPR size_type variant_size_v = variant_size<Variant>::value;
+CASTLE_INLINE CASTLE_CONSTEXPR size_type variant_size_v = variant_size<Variant>::value;
 
 
 

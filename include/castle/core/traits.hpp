@@ -112,13 +112,40 @@ struct conditional<true, T, F> { using type = T; };
 template <bool Condition, typename T, typename F>
 using conditional_t = typename conditional<Condition, T, F>::type;
 
+/// @brief Logical AND over a pack of trait types.
+/// @tparam T First trait type whose ::value is considered.
+/// @tparam ...Ts Remaining trait types whose ::value members are combined.
 template <typename T, typename... Ts>
 struct conjunction<T, Ts...>
     : conditional_t<bool(T::value), conjunction<Ts...>, T> {};
 
+/// @brief Logical OR over a pack of trait types.
+/// @tparam T First trait type whose ::value is considered.
+/// @tparam ...Ts Remaining trait types whose ::value members are combined.
 template <typename T, typename... Ts>
 struct disjunction<T, Ts...>
     : conditional_t<bool(T::value), T, disjunction<Ts...>> {};
+
+/// @brief True only when every expression's ::value is true.
+/// @tparam Expressions Trait types whose ::value members are combined.
+template <typename... Expressions>
+struct all_of : bool_constant<conjunction<Expressions...>::value>
+{
+    static_assert(sizeof...(Expressions) > 0U, "all_of requires at least one expression");
+};
+
+/// @brief True when at least one expression's ::value is true.
+/// @tparam Expressions Trait types whose ::value members are combined.
+template <typename... Expressions>
+struct any_of : bool_constant<disjunction<Expressions...>::value>
+{
+    static_assert(sizeof...(Expressions) > 0U, "any_of requires at least one expression");
+};
+
+/// @brief Negates one expression's ::value.
+/// @tparam Expression Trait type whose ::value is negated.
+template <typename Expression>
+struct not_ : negation<Expression> {};
 
 /// @brief Removes lvalue and rvalue reference qualifiers from a type.
 /// @tparam T Type to transform.
@@ -470,10 +497,16 @@ template <typename T> struct is_trivial            : bool_constant<__is_trivial(
 template <typename T>
 struct alignment_of : integral_constant<size_t, alignof(T)> {};
 
-/// @brief Castle-aligned storage block matching long double alignment.
+/// @brief Storage whose alignment is the largest fundamental alignment.
 struct max_align_t
 {
-    alignas(long double) unsigned char data[sizeof(long double)];
+    union
+    {
+        long long   ll;
+        long double ld;
+        void*       ptr;
+        void (*fn)();
+    };
 };
 
 #if defined(__clang__) && defined(__has_builtin)
@@ -871,7 +904,7 @@ struct in_place_t
     explicit CASTLE_CONSTEXPR in_place_t() {}
 };
 
-inline CASTLE_CONSTEXPR in_place_t in_place{};
+CASTLE_INLINE CASTLE_CONSTEXPR in_place_t in_place{};
 
 /// @brief Tag type for in-place construction of a specific type.
 /// @tparam T Target type.
@@ -883,7 +916,7 @@ struct in_place_type_t
 };
 
 template <typename T>
-inline CASTLE_CONSTEXPR in_place_type_t<T> in_place_type{};
+CASTLE_INLINE CASTLE_CONSTEXPR in_place_type_t<T> in_place_type{};
 
 }
 

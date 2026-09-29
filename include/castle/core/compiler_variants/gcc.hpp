@@ -17,7 +17,7 @@
 
 /// @def CASTLE_INLINE
 /// @brief Requests aggressive inlining using GCC-style attributes.
-#define CASTLE_INLINE        __attribute__((always_inline)) inline
+#define CASTLE_INLINE        inline
 /// @def CASTLE_HOT
 /// @brief Marks a function as performance-critical.
 #define CASTLE_HOT           __attribute__((hot))

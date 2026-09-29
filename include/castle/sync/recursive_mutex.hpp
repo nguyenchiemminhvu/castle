@@ -55,7 +55,7 @@ using thread_id_type = CASTLE_CONST void*;
  * @return The unique identifier for the current thread.
  * @note The returned identifier is unique for each thread and remains constant for the thread's lifetime.
  */
-inline thread_id_type current_thread_id() CASTLE_NOEXCEPT
+CASTLE_INLINE thread_id_type current_thread_id() CASTLE_NOEXCEPT
 {
     static thread_local unsigned char marker = 0U; // The address is unique for each thread-local instance.
     return &marker;
@@ -67,7 +67,7 @@ inline thread_id_type current_thread_id() CASTLE_NOEXCEPT
  * @param rhs The second thread identifier to compare.
  * @return `true` if the thread identifiers are equal, `false` otherwise.
  */
-inline bool thread_id_equal(CASTLE_CONST thread_id_type& lhs, CASTLE_CONST thread_id_type& rhs) CASTLE_NOEXCEPT
+CASTLE_INLINE bool thread_id_equal(CASTLE_CONST thread_id_type& lhs, CASTLE_CONST thread_id_type& rhs) CASTLE_NOEXCEPT
 {
     return lhs == rhs;
 }

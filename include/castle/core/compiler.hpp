@@ -29,6 +29,9 @@
 /// @def CASTLE_NODISCARD
 /// @brief Requests a diagnostic when a return value is ignored.
 #define CASTLE_NODISCARD         [[nodiscard]]
+/// @def CASTLE_NORETURN
+/// @brief Expands to the C++ [[noreturn]] attribute.
+#define CASTLE_NORETURN          [[noreturn]]
 /// @def CASTLE_FALL_THROUGH
 /// @brief Marks an intentional fallthrough between switch labels.
 #define CASTLE_FALL_THROUGH      [[fallthrough]]

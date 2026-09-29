@@ -12,11 +12,24 @@ TEST(Trigonometry, BasicFloatDoubleAndLongDoubleWrappers)
     EXPECT_EQ(castle::math::cos(static_cast<long double>(0.0)), static_cast<long double>(1.0));
 }
 
+TEST(Trigonometry, Atan2AndAsinFloatDoubleAndLongDoubleWrappers)
+{
+    EXPECT_FLOAT_EQ(castle::math::atan2(0.0F, 1.0F), 0.0F);
+    EXPECT_FLOAT_EQ(castle::math::asin(0.0F), 0.0F);
+    EXPECT_DOUBLE_EQ(castle::math::atan2(0.0, 1.0), 0.0);
+    EXPECT_DOUBLE_EQ(castle::math::asin(0.0), 0.0);
+    EXPECT_EQ(castle::math::atan2(static_cast<long double>(0.0), static_cast<long double>(1.0)),
+              static_cast<long double>(0.0));
+    EXPECT_EQ(castle::math::asin(static_cast<long double>(0.0)), static_cast<long double>(0.0));
+}
+
 TEST(Trigonometry, TypedRadiansWrappers)
 {
     constexpr float half_pi = 1.57079632679F;
     EXPECT_NEAR(castle::math::radians_sin(half_pi), 1.0F, 1.0e-5F);
     EXPECT_NEAR(castle::math::radians_cos(half_pi), 0.0F, 1.0e-5F);
+    EXPECT_NEAR(castle::math::radians_atan2(1.0F, 1.0F), 0.78539816F, 1.0e-5F);
+    EXPECT_NEAR(castle::math::radians_asin(1.0F), half_pi, 1.0e-5F);
 }
 
 TEST(Trigonometry, SinCosPair)

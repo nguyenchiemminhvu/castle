@@ -31,36 +31,25 @@ namespace castle
 namespace math
 {
 
-/**
- * @brief Computes the least common multiple of `A` and `B` at compile time.
- * @tparam A First positive compile-time operand.
- * @tparam B Second positive compile-time operand.
- * @note The calculation divides before multiplying to reduce intermediate
- * growth relative to `A * B / gcd<A, B>::value`.
- * @warning `A` and `B` must both be strictly positive; zero or negative values
- * fail at compile time, and large results can still overflow `intmax_t`.
- */
 template <intmax_t A, intmax_t B>
 struct lcm
 {
-    static_assert(A > 0, "castle::chrono::lcm expects a positive value");
-    static_assert(B > 0, "castle::chrono::lcm expects a positive value");
+private:
+    static CASTLE_CONSTEXPR intmax_t divisor = gcd<A, B>::value;
 
-    /**
-     * @brief The compile-time least common multiple of `A` and `B`.
-     * @return The least common multiple as `intmax_t`.
-     * @note Access as `castle::math::lcm<A, B>::value`.
-     * @warning The computation is not overflow-checked beyond the positive
-     * operand `static_assert`s.
-     */
+public:
     static CASTLE_CONSTEXPR intmax_t value =
-        (A / gcd<A, B>::value) * B;
+        (A == 0 || B == 0)
+        ? 0
+        : ((A / divisor) * B < 0
+            ? -((A / divisor) * B)
+            : ((A / divisor) * B));
 };
 
 template <intmax_t A, intmax_t B>
 CASTLE_CONSTEXPR intmax_t lcm<A, B>::value;
 
-}
-}
+} // namespace math
+} // namespace castle
 
 #endif

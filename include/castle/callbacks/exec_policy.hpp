@@ -60,12 +60,12 @@
 #include "castle/core/error_handler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/core/traits.hpp"
-#include "castle/atomic/atomic.hpp"
-#include "castle/sync/mutex.hpp"
-#include "castle/sync/scoped_mutex.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/optional.hpp"
 #include "castle/chrono/chrono.hpp"
+#include "castle/sync/atomic.hpp"
+#include "castle/sync/mutex.hpp"
+#include "castle/sync/scoped_mutex.hpp"
 
 #include <stddef.h>
 #include <stdint.h>

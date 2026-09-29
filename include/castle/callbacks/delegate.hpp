@@ -205,6 +205,8 @@ public:
 
         static_assert(sizeof(decayed_callable) <= StorageSize,
                       "Callable is too large for function storage");
+        static_assert(alignof(decayed_callable) <= StorageAlignment,
+                      "Callable alignment exceeds delegate StorageAlignment; pass a larger StorageAlignment");
         static_assert(StorageAlignment != 0U && (StorageAlignment & (StorageAlignment - 1U)) == 0U,
                       "StorageAlignment must be a non-zero power of two");
     }

@@ -44,7 +44,11 @@ int main()
 
 ## Constraints & Notes
 - Backend selection follows compiler detection order in `castle/core/compiler.hpp`: ARM, Clang, GCC, then default.
-- The current ARM, Clang, and default paths all reuse the GCC-compatible `clock_gettime` backend unless the application overrides the source with `CASTLE_CHRONO_*_NOW_API` or supplies the external C hook functions.
+- `system_clock_adapter` selects its read source in this order: POSIX `clock_gettime()` when `CASTLE_USING_POSIX_APIS` is `1`, Zephyr `precision_clock_read()` otherwise on Zephyr, then an assertion-reporting zero `timespec` fallback.
+- When POSIX reads are selected, system and steady time use `clock_gettime(CLOCK_REALTIME, ...)` and `clock_gettime(CLOCK_MONOTONIC, ...)`, including on Zephyr targets that advertise POSIX APIs.
+- When the Zephyr precision-clock read path is selected, define `CASTLE_CHRONO_ZEPHYR_SYSTEM_PRECISION_CLOCK` and `CASTLE_CHRONO_ZEPHYR_STEADY_PRECISION_CLOCK` as expressions yielding configured `precision_clock const*` values.
+- PTP adjustments use a separate priority: Zephyr always delegates `step()` and `slew()` to the configured `precision_clock`; non-Zephyr POSIX builds use `clock_settime()` and `clock_adjtime()` when their corresponding APIs are available.
+- ARM, Clang, and default paths currently reuse the adapter header; applications can override the source with `CASTLE_CHRONO_*_NOW_API` or the external C hook functions.
 - `system_clock` is not monotonic. `steady_clock` is intended to be monotonic, but the platform hook must preserve that property.
 - Default tick periods are nanoseconds; defining `CASTLE_CHRONO_SYSTEM_CLOCK_PERIOD` or `CASTLE_CHRONO_STEADY_CLOCK_PERIOD` changes the interpretation of returned tick counts.
 - Conversions and arithmetic are unchecked and may overflow the underlying `int64_t` representation.

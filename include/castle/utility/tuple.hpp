@@ -338,7 +338,7 @@ get(CASTLE_CONST tuple<Ts...>&& value) CASTLE_NOEXCEPT
  * @tparam Tuple Tuple type to inspect.
  */
 template <typename Tuple>
-inline CASTLE_CONSTEXPR size_type tuple_size_v = castle::tuple_size<Tuple>::value;
+CASTLE_INLINE CASTLE_CONSTEXPR size_type tuple_size_v = castle::tuple_size<Tuple>::value;
 
 template <size_type Index, typename Tuple>
 using tuple_element_t = typename castle::tuple_element<Index, Tuple>::type;
@@ -386,7 +386,7 @@ struct ignore_t
 };
 
 /** @brief Global ignore sink object. */
-inline ignore_t ignore{};
+CASTLE_INLINE ignore_t ignore{};
 
 /**
  * @brief Creates a tuple of forwarding references.

@@ -7,7 +7,7 @@
 `#include "castle/container/mirrored_ring_buffer.hpp"`
 
 ## Dependencies
-- [`../atomic/atomic.md`](../atomic/atomic.md)
+- [`../sync/atomic.md`](../sync/atomic.md)
 - [`array_view.md`](array_view.md)
 - [`../core/compiler.md`](../core/compiler.md)
 - [`../core/traits.md`](../core/traits.md)

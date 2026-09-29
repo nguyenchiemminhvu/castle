@@ -18,7 +18,7 @@ using sensor_ready_config =
         4U,
         void(uint16_t),
         32U,
-        alignof(uint32_t)>;
+        alignof(void*)>;
 
 int main()
 {

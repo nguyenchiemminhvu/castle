@@ -101,8 +101,8 @@ private:
                       "event_dispatcher: event_tag_config::MaxCallback must be > 0");
         static_assert(StorageSize > 0,
                       "event_dispatcher: event_tag_config::CallbackStorageSize must be > 0");
-        static_assert(StorageAlignment > 0,
-                      "event_dispatcher: event_tag_config::CallbackStorageAlignment must be > 0");
+        static_assert(StorageAlignment != 0U && (StorageAlignment & (StorageAlignment - 1U)) == 0U,
+                      "event_dispatcher: event_tag_config::CallbackStorageAlignment must be a non-zero power of two");
     };
 
     template <typename Target, typename... Rest>

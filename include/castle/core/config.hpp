@@ -83,6 +83,22 @@
 /// @brief Evaluates to true when pointers are 64 bits wide.
 #define CASTLE_PLATFORM_64BIT (sizeof(void*) == 8)
 
+/// @def CASTLE_HAS_BUILTIN_BIT_CAST
+/// @brief Evaluates to true when the active compiler provides `__builtin_bit_cast`.
+#if !defined(CASTLE_HAS_BUILTIN_BIT_CAST)
+    #if defined(__has_builtin)
+        #if __has_builtin(__builtin_bit_cast)
+            #define CASTLE_HAS_BUILTIN_BIT_CAST 1
+        #endif
+    #endif
+    #if !defined(CASTLE_HAS_BUILTIN_BIT_CAST) && defined(__GNUC__) && !defined(__clang__) && (__GNUC__ >= 11)
+        #define CASTLE_HAS_BUILTIN_BIT_CAST 1
+    #endif
+    #if !defined(CASTLE_HAS_BUILTIN_BIT_CAST)
+        #define CASTLE_HAS_BUILTIN_BIT_CAST 0
+    #endif
+#endif // !defined(CASTLE_HAS_BUILTIN_BIT_CAST)
+
 /// @def CASTLE_USING_STD_NEW
 /// @brief Reports whether the standard <new> header is available.
 #if !defined(CASTLE_USING_STD_NEW)
@@ -115,6 +131,71 @@
     #endif
 #endif // !defined(CASTLE_USING_STD_INITIALIZER_LIST)
 
+/// @def CASTLE_USING_POSIX_APIS
+/// @brief Reports whether POSIX APIs appear to be available on the target.
+#if !defined(CASTLE_USING_POSIX_APIS)
+    #if defined(__has_include)
+        #if __has_include(<unistd.h>)
+            #include <unistd.h>
+            #if defined(_POSIX_VERSION)
+                #define CASTLE_USING_POSIX_APIS 1
+            #else
+                #define CASTLE_USING_POSIX_APIS 0
+            #endif
+        #else
+            #define CASTLE_USING_POSIX_APIS 0
+        #endif
+    #else
+        #define CASTLE_USING_POSIX_APIS 0
+    #endif
+#endif // !defined(CASTLE_USING_POSIX_APIS)
+
+#if CASTLE_USING_POSIX_APIS && defined(__linux__)
+    #if !defined(CASTLE_USING_IO_I2C_VIA_I2CDEV)
+        #if defined(__has_include)
+            #if __has_include(<linux/i2c-dev.h>) && __has_include(<linux/i2c.h>)
+                #define CASTLE_USING_IO_I2C_VIA_I2CDEV 1
+            #else
+                #define CASTLE_USING_IO_I2C_VIA_I2CDEV 0
+            #endif
+        #else
+            #define CASTLE_USING_IO_I2C_VIA_I2CDEV 0
+        #endif
+    #endif
+#else
+    #define CASTLE_USING_IO_I2C_VIA_I2CDEV 0
+#endif
+
+#if CASTLE_USING_POSIX_APIS && defined(__linux__)
+    #if !defined(CASTLE_USING_IO_SPI_VIA_SPIDEV)
+        #if defined(__has_include)
+            #if __has_include(<linux/spi/spidev.h>)
+                #define CASTLE_USING_IO_SPI_VIA_SPIDEV 1
+            #else
+                #define CASTLE_USING_IO_SPI_VIA_SPIDEV 0
+            #endif
+        #else
+            #define CASTLE_USING_IO_SPI_VIA_SPIDEV 0
+        #endif
+    #endif
+#else
+    #define CASTLE_USING_IO_SPI_VIA_SPIDEV 0
+#endif
+
+/// @def CASTLE_USING_TIMEX
+/// @brief Reports whether the <sys/time.h> header is available for time-related functions.
+#if !defined(CASTLE_USING_TIMEX)
+    #if defined(__has_include)
+        #if __has_include(<sys/time.h>)
+            #define CASTLE_USING_TIMEX 1
+        #else
+            #define CASTLE_USING_TIMEX 0
+        #endif
+    #else
+        #define CASTLE_USING_TIMEX 0
+    #endif
+#endif // !defined(CASTLE_USING_TIMEX)
+
 /// @def CASTLE_USING_PTHREAD
 /// @brief Reports whether POSIX threads appear to be available on the target.
 #if !defined(CASTLE_USING_PTHREAD)
@@ -131,6 +212,12 @@
         #endif
     #endif
 #endif // !defined(CASTLE_USING_PTHREAD)
+
+/// @def CASTLE_INPLACE_ALIGNMENT_DEFAULT
+/// @brief Default inplace storage alignment; define before inclusion to override (e.g. 32 for AVX types).
+#if !defined(CASTLE_INPLACE_ALIGNMENT_DEFAULT)
+    #define CASTLE_INPLACE_ALIGNMENT_DEFAULT alignof(castle::meta::max_align_t)
+#endif
 
 namespace castle
 {
@@ -154,18 +241,18 @@ static CASTLE_CONSTEXPR bool is_little_endian = CASTLE_IS_LITTLE_ENDIAN;
 static CASTLE_CONSTEXPR bool is_big_endian    = CASTLE_IS_BIG_ENDIAN;
 
 /// @brief Compile-time flag that is true on 16-bit pointer targets.
-static inline CASTLE_CONSTEXPR bool platform_16bit = CASTLE_PLATFORM_16BIT;
+static CASTLE_INLINE CASTLE_CONSTEXPR bool platform_16bit = CASTLE_PLATFORM_16BIT;
 /// @brief Compile-time flag that is true on 32-bit pointer targets.
-static inline CASTLE_CONSTEXPR bool platform_32bit = CASTLE_PLATFORM_32BIT;
+static CASTLE_INLINE CASTLE_CONSTEXPR bool platform_32bit = CASTLE_PLATFORM_32BIT;
 /// @brief Compile-time flag that is true on 64-bit pointer targets.
-static inline CASTLE_CONSTEXPR bool platform_64bit = CASTLE_PLATFORM_64BIT;
+static CASTLE_INLINE CASTLE_CONSTEXPR bool platform_64bit = CASTLE_PLATFORM_64BIT;
 
 /// @brief Default number of machine words reserved for inplace function storage.
-static inline CASTLE_CONSTEXPR size_type inplace_function_storage_words = 8U;
+static CASTLE_INLINE CASTLE_CONSTEXPR size_type inplace_function_storage_words = 8U;
 /// @brief Default byte capacity reserved for Castle's inplace storage helpers.
-static inline CASTLE_CONSTEXPR size_type inplace_storage_reserved = inplace_function_storage_words * sizeof(void*);
+static CASTLE_INLINE CASTLE_CONSTEXPR size_type inplace_storage_reserved = inplace_function_storage_words * sizeof(void*);
 /// @brief Default alignment used for Castle's inplace storage helpers.
-static inline CASTLE_CONSTEXPR size_type inplace_alignment_default = alignof(meta::max_align_t);
+static CASTLE_INLINE CASTLE_CONSTEXPR size_type inplace_alignment_default = CASTLE_INPLACE_ALIGNMENT_DEFAULT;
 
 } // namespace castle
 

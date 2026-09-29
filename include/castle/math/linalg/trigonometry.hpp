@@ -7,11 +7,12 @@
  *
  * This header centralizes Castle's trigonometric entry points behind a small
  * wrapper layer around the C math library. Use it when fixed-size matrix,
- * quaternion, or transform code needs sine and cosine without introducing any
- * STL dependency. The functions are allocation-free and exception-free; their
- * precision and determinism are those of the platform's `sinf`, `sin`,
- * `sinl`, `cosf`, `cos`, and `cosl` implementations rather than custom Castle
- * approximations.
+ * quaternion, or transform code needs sine, cosine, arc tangent, or arc sine
+ * without introducing any STL dependency. The functions are allocation-free
+ * and exception-free; their precision and determinism are those of the
+ * platform's `sinf`, `sin`, `sinl`, `cosf`, `cos`, `cosl`, `atan2f`, `atan2`,
+ * `atan2l`, `asinf`, `asin`, and `asinl` implementations rather than custom
+ * Castle approximations.
  *
  * @code
  * #include "castle/math/linalg/trigonometry.hpp"
@@ -40,7 +41,7 @@ namespace math
  * @return `sinf(radians)`.
  * @note Precision and range reduction come from the platform C math library.
  */
-inline float sin(float radians) CASTLE_NOEXCEPT
+CASTLE_INLINE float sin(float radians) CASTLE_NOEXCEPT
 {
     return ::sinf(radians);
 }
@@ -51,7 +52,7 @@ inline float sin(float radians) CASTLE_NOEXCEPT
  * @return `sin(radians)`.
  * @note Precision and range reduction come from the platform C math library.
  */
-inline double sin(double radians) CASTLE_NOEXCEPT
+CASTLE_INLINE double sin(double radians) CASTLE_NOEXCEPT
 {
     return ::sin(radians);
 }
@@ -62,7 +63,7 @@ inline double sin(double radians) CASTLE_NOEXCEPT
  * @return `sinl(radians)`.
  * @note Precision and range reduction come from the platform C math library.
  */
-inline long double sin(long double radians) CASTLE_NOEXCEPT
+CASTLE_INLINE long double sin(long double radians) CASTLE_NOEXCEPT
 {
     return ::sinl(radians);
 }
@@ -73,7 +74,7 @@ inline long double sin(long double radians) CASTLE_NOEXCEPT
  * @return `cosf(radians)`.
  * @note Precision and range reduction come from the platform C math library.
  */
-inline float cos(float radians) CASTLE_NOEXCEPT
+CASTLE_INLINE float cos(float radians) CASTLE_NOEXCEPT
 {
     return ::cosf(radians);
 }
@@ -84,7 +85,7 @@ inline float cos(float radians) CASTLE_NOEXCEPT
  * @return `cos(radians)`.
  * @note Precision and range reduction come from the platform C math library.
  */
-inline double cos(double radians) CASTLE_NOEXCEPT
+CASTLE_INLINE double cos(double radians) CASTLE_NOEXCEPT
 {
     return ::cos(radians);
 }
@@ -95,9 +96,81 @@ inline double cos(double radians) CASTLE_NOEXCEPT
  * @return `cosl(radians)`.
  * @note Precision and range reduction come from the platform C math library.
  */
-inline long double cos(long double radians) CASTLE_NOEXCEPT
+CASTLE_INLINE long double cos(long double radians) CASTLE_NOEXCEPT
 {
     return ::cosl(radians);
+}
+
+/**
+ * @brief Returns the arc tangent of `y / x` as `float`, using the signs of
+ * both arguments to determine the correct quadrant.
+ * @param y Ordinate value.
+ * @param x Abscissa value.
+ * @return `atan2f(y, x)` in radians, in the range `[-pi, pi]`.
+ * @note Precision and range reduction come from the platform C math library.
+ */
+CASTLE_INLINE float atan2(float y, float x) CASTLE_NOEXCEPT
+{
+    return ::atan2f(y, x);
+}
+
+/**
+ * @brief Returns the arc tangent of `y / x` as `double`, using the signs of
+ * both arguments to determine the correct quadrant.
+ * @param y Ordinate value.
+ * @param x Abscissa value.
+ * @return `atan2(y, x)` in radians, in the range `[-pi, pi]`.
+ * @note Precision and range reduction come from the platform C math library.
+ */
+CASTLE_INLINE double atan2(double y, double x) CASTLE_NOEXCEPT
+{
+    return ::atan2(y, x);
+}
+
+/**
+ * @brief Returns the arc tangent of `y / x` as `long double`, using the signs
+ * of both arguments to determine the correct quadrant.
+ * @param y Ordinate value.
+ * @param x Abscissa value.
+ * @return `atan2l(y, x)` in radians, in the range `[-pi, pi]`.
+ * @note Precision and range reduction come from the platform C math library.
+ */
+CASTLE_INLINE long double atan2(long double y, long double x) CASTLE_NOEXCEPT
+{
+    return ::atan2l(y, x);
+}
+
+/**
+ * @brief Returns the arc sine of a `float` value in `[-1, 1]`.
+ * @param value Input value, expected to lie in `[-1, 1]`.
+ * @return `asinf(value)` in radians, in the range `[-pi/2, pi/2]`.
+ * @note Precision and range reduction come from the platform C math library.
+ */
+CASTLE_INLINE float asin(float value) CASTLE_NOEXCEPT
+{
+    return ::asinf(value);
+}
+
+/**
+ * @brief Returns the arc sine of a `double` value in `[-1, 1]`.
+ * @param value Input value, expected to lie in `[-1, 1]`.
+ * @return `asin(value)` in radians, in the range `[-pi/2, pi/2]`.
+ * @note Precision and range reduction come from the platform C math library.
+ */
+CASTLE_INLINE double asin(double value) CASTLE_NOEXCEPT
+{
+    return ::asin(value);
+}
+
+/**
+ * @brief Returns the arc sine of a `long double` value in `[-1, 1]`.
+ * @param value Input value, expected to lie in `[-1, 1]`.
+ * @return `asinl(value)` in radians, in the range `[-pi/2, pi/2]`.
+ * @note Precision and range reduction come from the platform C math library.
+ */
+CASTLE_INLINE long double asin(long double value) CASTLE_NOEXCEPT
+{
+    return ::asinl(value);
 }
 
 /**
@@ -128,6 +201,38 @@ CASTLE_NODISCARD T radians_cos(T radians) CASTLE_NOEXCEPT
     static_assert(meta::is_floating_point<T>::value,
                   "radians_cos requires a floating-point type");
     return castle::math::cos(radians);
+}
+
+/**
+ * @brief Returns the arc tangent of `y / x` for a floating-point type, using
+ * the signs of both arguments to determine the correct quadrant.
+ * @tparam T Floating-point argument and result type.
+ * @param y Ordinate value.
+ * @param x Abscissa value.
+ * @return `atan2(y, x)` in radians, in the range `[-pi, pi]`.
+ * @warning This template is restricted to floating-point types.
+ */
+template <typename T>
+CASTLE_NODISCARD T radians_atan2(T y, T x) CASTLE_NOEXCEPT
+{
+    static_assert(meta::is_floating_point<T>::value,
+                  "radians_atan2 requires a floating-point type");
+    return castle::math::atan2(y, x);
+}
+
+/**
+ * @brief Returns the arc sine of a floating-point value in `[-1, 1]`.
+ * @tparam T Floating-point argument and result type.
+ * @param value Input value, expected to lie in `[-1, 1]`.
+ * @return `asin(value)` in radians, in the range `[-pi/2, pi/2]`.
+ * @warning This template is restricted to floating-point types.
+ */
+template <typename T>
+CASTLE_NODISCARD T radians_asin(T value) CASTLE_NOEXCEPT
+{
+    static_assert(meta::is_floating_point<T>::value,
+                  "radians_asin requires a floating-point type");
+    return castle::math::asin(value);
 }
 
 /**

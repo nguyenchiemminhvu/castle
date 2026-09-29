@@ -11,7 +11,7 @@
 - [`../core/error_handler.md`](../core/error_handler.md)
 - [`../core/types.md`](../core/types.md)
 - [`../core/traits.md`](../core/traits.md)
-- [`../atomic/atomic.md`](../atomic/atomic.md)
+- [`../sync/atomic.md`](../sync/atomic.md)
 - [`../sync/mutex.md`](../sync/mutex.md)
 - [`../sync/scoped_mutex.md`](../sync/scoped_mutex.md)
 - [`../utility/forward.md`](../utility/forward.md)

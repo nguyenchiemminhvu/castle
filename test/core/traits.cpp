@@ -84,6 +84,13 @@ TEST(CoreTraitsTest, LogicalOperators)
 
     static_assert(!cm::negation<cm::true_type>::value, "not true");
     static_assert(cm::negation<cm::false_type>::value, "not false");
+
+    static_assert(cm::all_of<cm::true_type, cm::true_type>::value, "all_of true");
+    static_assert(!cm::all_of<cm::true_type, cm::false_type>::value, "all_of false");
+    static_assert(cm::any_of<cm::false_type, cm::true_type>::value, "any_of true");
+    static_assert(!cm::any_of<cm::false_type, cm::false_type>::value, "any_of false");
+    static_assert(cm::not_<cm::false_type>::value, "not_ false");
+    static_assert(!cm::not_<cm::true_type>::value, "not_ true");
 }
 
 // ===========================================================================

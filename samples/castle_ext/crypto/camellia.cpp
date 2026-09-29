@@ -1,0 +1,57 @@
+#include <assert.h>
+#include <stdint.h>
+#include "castle_ext/crypto/camellia.hpp"
+
+int main()
+{
+    const uint8_t plaintext[16] = {
+        0x01U,0x23U,0x45U,0x67U,0x89U,0xABU,0xCDU,0xEFU,
+        0xFEU,0xDCU,0xBAU,0x98U,0x76U,0x54U,0x32U,0x10U
+    };
+    const uint8_t keys[3][32] = {
+        {0x01U,0x23U,0x45U,0x67U,0x89U,0xABU,0xCDU,0xEFU,0xFEU,0xDCU,0xBAU,0x98U,0x76U,0x54U,0x32U,0x10U},
+        {0x01U,0x23U,0x45U,0x67U,0x89U,0xABU,0xCDU,0xEFU,0xFEU,0xDCU,0xBAU,0x98U,0x76U,0x54U,0x32U,0x10U,0x00U,0x11U,0x22U,0x33U,0x44U,0x55U,0x66U,0x77U},
+        {0x01U,0x23U,0x45U,0x67U,0x89U,0xABU,0xCDU,0xEFU,0xFEU,0xDCU,0xBAU,0x98U,0x76U,0x54U,0x32U,0x10U,0x00U,0x11U,0x22U,0x33U,0x44U,0x55U,0x66U,0x77U,0x88U,0x99U,0xAAU,0xBBU,0xCCU,0xDDU,0xEEU,0xFFU}
+    };
+    const uint8_t expected[3][16] = {
+        {0x67U,0x67U,0x31U,0x38U,0x54U,0x96U,0x69U,0x73U,0x08U,0x57U,0x06U,0x56U,0x48U,0xEAU,0xBEU,0x43U},
+        {0xB4U,0x99U,0x34U,0x01U,0xB3U,0xE9U,0x96U,0xF8U,0x4EU,0xE5U,0xCEU,0xE7U,0xD7U,0x9BU,0x09U,0xB9U},
+        {0x9AU,0xCCU,0x23U,0x7DU,0xFFU,0x16U,0xD7U,0x6CU,0x20U,0xEFU,0x7CU,0x91U,0x9EU,0x3AU,0x75U,0x09U}
+    };
+
+    castle::crypto::camellia<128> c128(keys[0]);
+    castle::crypto::camellia<192> c192(keys[1]);
+    castle::crypto::camellia<256> c256(keys[2]);
+
+    uint8_t encrypted[16];
+    uint8_t decrypted[16];
+    c128.encrypt_block(plaintext, encrypted);
+    for (size_t i = 0U; i < sizeof(encrypted); ++i) assert(encrypted[i] == expected[0][i]);
+    c128.decrypt_block(encrypted, decrypted);
+    for (size_t i = 0U; i < sizeof(decrypted); ++i) assert(decrypted[i] == plaintext[i]);
+
+    c192.encrypt_block(plaintext, encrypted);
+    for (size_t i = 0U; i < sizeof(encrypted); ++i) assert(encrypted[i] == expected[1][i]);
+    c192.decrypt_block(encrypted, decrypted);
+    for (size_t i = 0U; i < sizeof(decrypted); ++i) assert(decrypted[i] == plaintext[i]);
+
+    c256.encrypt_block(plaintext, encrypted);
+    for (size_t i = 0U; i < sizeof(encrypted); ++i) assert(encrypted[i] == expected[2][i]);
+    c256.decrypt_block(encrypted, decrypted);
+    for (size_t i = 0U; i < sizeof(decrypted); ++i) assert(decrypted[i] == plaintext[i]);
+
+    uint8_t message[37];
+    uint8_t original[37];
+    uint8_t encrypt_counter[16] = {0U};
+    uint8_t decrypt_counter[16] = {0U};
+    for (size_t i = 0U; i < sizeof(message); ++i)
+    {
+        message[i] = static_cast<uint8_t>(i);
+        original[i] = message[i];
+    }
+    assert(c128.crypt_ctr(message, sizeof(message), encrypt_counter) == castle::status::ok);
+    assert(c128.crypt_ctr(message, sizeof(message), decrypt_counter) == castle::status::ok);
+    for (size_t i = 0U; i < sizeof(message); ++i) assert(message[i] == original[i]);
+
+    return 0;
+}

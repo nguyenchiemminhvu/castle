@@ -12,7 +12,7 @@
 - [`../core/traits.md`](../core/traits.md)
 - [`../core/types.md`](../core/types.md)
 - [`../error/status.md`](../error/status.md)
-- [`../atomic/atomic.md`](../atomic/atomic.md)
+- [`../sync/atomic.md`](../sync/atomic.md)
 - [`array.md`](array.md)
 - [`array_view.md`](array_view.md)
 

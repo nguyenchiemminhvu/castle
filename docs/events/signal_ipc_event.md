@@ -13,7 +13,7 @@
 - [`subscription`](../callbacks/subscription.md)
 - [`tuple`](../utility/tuple.md)
 - [`bitset`](../utility/bitset.md)
-- [`atomic`](../atomic/atomic.md)
+- [`atomic`](../sync/atomic.md)
 - [`status`](../error/status.md)
 
 ## Public API

@@ -49,7 +49,7 @@
 #include "castle/utility/forward.hpp"
 #include "castle/utility/tuple.hpp"
 #include "castle/utility/bitset.hpp"
-#include "castle/atomic/atomic.hpp"
+#include "castle/sync/atomic.hpp"
 
 #include "castle/callbacks/function.hpp"
 #include "castle/callbacks/function_registry.hpp"
@@ -110,8 +110,8 @@ private:
                       "signal_ipc_event: signal_ipc_config::MaxCallback must be > 0");
         static_assert(StorageSize > 0,
                       "signal_ipc_event: signal_ipc_config::StorageSize must be > 0");
-        static_assert(StorageAlignment > 0,
-                      "signal_ipc_event: signal_ipc_config::StorageAlignment must be > 0");
+        static_assert(StorageAlignment != 0U && (StorageAlignment & (StorageAlignment - 1U)) == 0U,
+                      "signal_ipc_event: signal_ipc_config::StorageAlignment must be a non-zero power of two");
     };
 
     template <signal Target, typename... Rest>
@@ -507,13 +507,13 @@ private:
         invoke_impl<0>(idx);
     }
 
-    static inline registry_tuple registries_{};
-    static inline castle::bitset<signal_count> enabled_{};
+    static CASTLE_INLINE registry_tuple registries_{};
+    static CASTLE_INLINE castle::bitset<signal_count> enabled_{};
 
     static_assert(castle::atomic<bool>::is_always_lock_free,
                   "signal_ipc_event: castle::atomic<bool> must be lock-free "
                   "for async-signal-safe release/acquire gating");
-    static inline castle::atomic<bool> ready_{false};
+    static CASTLE_INLINE castle::atomic<bool> ready_{false};
 
     static CASTLE_CONSTEXPR int signal_list_[signal_count] = {
         to_signum(config_traits<SignalConfigs>::signum)...

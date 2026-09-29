@@ -289,8 +289,8 @@ class signal<
     static_assert(StorageSize > 0,
                   "signal requires StorageSize > 0");
 
-    static_assert(StorageAlignment > 0,
-                  "signal requires StorageAlignment > 0");
+    static_assert(StorageAlignment != 0U && (StorageAlignment & (StorageAlignment - 1U)) == 0U,
+                  "signal requires StorageAlignment to be a non-zero power of two");
 
     static_assert(meta::is_void<ReturnType>::value,
                   "signal currently supports void return type only");

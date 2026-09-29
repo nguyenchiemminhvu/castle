@@ -12,8 +12,8 @@ Compiler-selection shim used when Castle detects an ARM compiler for chrono cloc
 ## Public API
 | API | Description |
 | --- | --- |
-| `castle::chrono::detail::clock_variant::realtime_ns()` | Returns a `timespec` read from `CLOCK_REALTIME` through the reused GCC-compatible backend. Constant time. |
-| `castle::chrono::detail::clock_variant::monotonic_ns()` | Returns a `timespec` read from `CLOCK_MONOTONIC` through the reused GCC-compatible backend. Constant time. |
+| `castle::chrono::system_clock_adapter::realtime_ns()` | Returns a `timespec` read from the selected system-clock backend. Constant time. |
+| `castle::chrono::system_clock_adapter::monotonic_ns()` | Returns a `timespec` read from the selected steady-clock backend. Constant time. |
 
 ## Usage Example
 See `samples/sample_arm_clock_variant.cpp`.
@@ -23,7 +23,7 @@ See `samples/sample_arm_clock_variant.cpp`.
 
 int main()
 {
-    const auto ts = castle::chrono::detail::clock_variant::monotonic_ns();
+    const auto ts = castle::chrono::system_clock_adapter::monotonic_ns();
     (void)ts;
     return 0;
 }
