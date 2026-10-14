@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1015">
+  <meta name="description" content="An introduction to CASTLE, a C++17 header-only library for bounded embedded systems.">
+  <title>CASTLE — C++ built for bounded systems</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a1015;
+      --panel: #10181e;
+      --panel-2: #131e24;
+      --ink: #e5ece8;
+      --muted: #a0adb0;
+      --muted-2: #74838a;
+      --cyan: #68f2e3;
+      --orange: #ff8059;
+      --stl: #849ba8;
+      --line: #2a363d;
+      --line-strong: #43515a;
+      --display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+      --body: "Manrope", "Avenir Next", "Segoe UI", Arial, sans-serif;
+      --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --text-min: clamp(15px, 1.7vw, 19px);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--bg); }
+    body {
+      color: var(--ink);
+      font-family: var(--body);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      background-image:
+        radial-gradient(ellipse at 78% 48%, rgba(36, 133, 132, .12), transparent 38%),
+        linear-gradient(rgba(181, 211, 209, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(181, 211, 209, .035) 1px, transparent 1px);
+      background-size: auto, 54px 54px, 54px 54px;
+    }
+
+    button { font: inherit; }
+    button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
+    ::selection { color: var(--bg); background: var(--cyan); }
+
+    .top-progress { position: fixed; z-index: 20; inset: 0 0 auto; height: 3px; background: rgba(104, 242, 227, .12); }
+    .top-progress-fill { display: block; width: 10%; height: 100%; background: var(--cyan); box-shadow: 0 0 14px rgba(104, 242, 227, .5); transition: width .28s ease; }
+    .brandline {
+      position: fixed; z-index: 10; top: 22px; left: clamp(22px, 4vw, 64px);
+      display: flex; align-items: center; gap: 11px; color: var(--muted-2);
+      font: var(--text-min)/1.2 var(--mono); letter-spacing: .09em; text-transform: uppercase;
+    }
+    .brand-mark { display: grid; place-items: center; width: 27px; height: 27px; border: 1px solid var(--cyan); color: var(--cyan); font: 700 17px/1 var(--display); }
+    .brandline strong { color: var(--ink); font: 700 17px/1 var(--display); letter-spacing: .05em; }
+    .slide-index {
+      position: fixed; z-index: 10; top: 27px; right: clamp(22px, 4vw, 64px);
+      color: var(--muted-2); font: var(--text-min)/1.2 var(--mono); letter-spacing: .08em;
+    }
+
+    .slide {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; min-height: 100svh;
+      overflow-x: hidden; overflow-y: auto;
+      display: grid; align-items: center;
+      padding: clamp(76px, 8vh, 100px) clamp(24px, 7vw, 108px) clamp(100px, 12vh, 130px);
+      opacity: 1; visibility: visible;
+      animation: slide-in .28s ease both;
+      scrollbar-color: var(--line-strong) transparent;
+    }
+    .slide[hidden] { display: none; }
+    .slide::after {
+      content: ""; position: fixed; z-index: -1; right: -12vw; bottom: -28vh;
+      width: 52vw; height: 52vw; max-width: 760px; max-height: 760px;
+      border: 1px solid rgba(104, 242, 227, .07); border-radius: 50%;
+      box-shadow: 0 0 0 46px rgba(104, 242, 227, .018), 0 0 0 92px rgba(104, 242, 227, .012);
+      pointer-events: none;
+    }
+    .slide-inner { width: min(1240px, 100%); margin: 0 auto; }
+    .eyebrow, .section-tag {
+      margin: 0 0 18px; color: var(--muted-2);
+      font: 500 var(--text-min)/1.5 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    }
+    .eyebrow .dot { display: inline-block; width: 7px; height: 7px; margin: 0 8px 1px 0; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px rgba(104, 242, 227, .7); }
+    .eyebrow .slash, .section-tag span { color: var(--orange); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { text-wrap: balance; }
+    h1, h2 { margin-bottom: 18px; color: var(--ink); font-family: var(--display); font-weight: 700; letter-spacing: -.015em; line-height: .95; }
+    h1 { font-size: clamp(78px, 13vw, 176px); letter-spacing: -.025em; }
+    h2 { max-width: 1000px; font-size: clamp(48px, 7.1vw, 92px); }
+    h3 { margin-bottom: 8px; color: var(--ink); font: 600 clamp(19px, 2vw, 25px)/1.05 var(--display); }
+    .lead { max-width: 760px; color: #bdc9c8; font-size: clamp(17px, 2.05vw, 23px); line-height: 1.6; }
+    .muted { color: var(--muted); }
+    .mono { font-family: var(--mono); }
+    .accent { color: var(--cyan); }
+    .orange { color: var(--orange); }
+    .small-note { color: var(--muted-2); font: var(--text-min)/1.6 var(--mono); letter-spacing: .045em; }
+
+    /* Cover */
+    .cover-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(36px, 7vw, 100px); align-items: center; }
+    .cover h1 { margin: 10px 0 6px -5px; }
+    .cover-subtitle { margin: 0 0 18px; color: var(--cyan); font: 600 clamp(27px, 4vw, 45px)/1.1 var(--display); }
+    .cover-copy { max-width: 610px; color: #aab7b9; font-size: clamp(15px, 1.6vw, 19px); line-height: 1.75; }
+    .cover-meta { display: flex; flex-wrap: wrap; gap: 10px 20px; margin-top: 32px; color: var(--muted-2); font: var(--text-min)/1.5 var(--mono); text-transform: uppercase; letter-spacing: .08em; }
+    .cover-meta b { color: var(--orange); font-weight: 500; }
+    .cover-visual { position: relative; min-height: 340px; display: grid; place-items: center; }
+    .architecture { position: relative; width: 100%; margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); --arch-text: clamp(10px, min(1vw, 1.5vh), 13.5px); --arch-title: clamp(15px, min(1.7vw, 2.6vh), 22px); --arch-small: clamp(9px, min(.9vw, 1.35vh), 12px); --arch-gap: clamp(3px, min(.55vw, .8vh), 7px); --arch-row: clamp(24px, 2.8vh, 32px); filter: drop-shadow(0 0 18px rgba(104, 242, 227, .1)); }
+    .architecture-layer { min-width: 0; display: grid; gap: var(--arch-gap); padding: clamp(7px, min(.9vw, 1.25vh), 12px) clamp(11px, 1.35vw, 20px); border: 1px solid rgba(104, 242, 227, .48); border-left: 3px solid rgba(104, 242, 227, .76); background: linear-gradient(110deg, rgba(17, 34, 40, .94), rgba(13, 24, 30, .84)); box-shadow: inset 0 0 26px rgba(42, 164, 160, .06), 0 0 14px rgba(104, 242, 227, .05); }
+    .layer-kicker { color: #8da7a7; font: var(--arch-text)/1.3 var(--mono); text-transform: uppercase; }
+    .architecture-layer strong { color: #e5efea; font: 600 var(--arch-title)/1.15 var(--display); }
+    .layer-detail { color: #9aabad; font: var(--arch-text)/1.45 var(--mono); }
+    .applications-layer { border-left-color: #a5c9c3; }
+    .architecture-middle-row, .architecture-relationships { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(6px, .8vw, 12px); }
+    .architecture-middle-row { align-items: stretch; }
+    .architecture-relationships { min-height: var(--arch-row); align-items: center; text-align: center; }
+    .castle-relationship { color: #d9a18e; font: var(--arch-small)/1.45 var(--mono); text-transform: uppercase; }
+    .architecture-link, .architecture-foundation-link { display: flex; flex-direction: column-reverse; align-items: center; justify-content: center; gap: 3px; color: #9aabad; font: var(--arch-small)/1.35 var(--mono); text-align: center; text-transform: uppercase; }
+    .architecture-link { min-width: 0; }
+    .castle-layer { border-color: rgba(255, 128, 89, .7); border-left-color: var(--orange); background: linear-gradient(110deg, rgba(48, 34, 31, .95), rgba(26, 28, 29, .92)); }
+    .castle-layer .layer-kicker { color: #d9a18e; }
+    .castle-layer .layer-detail { color: #d5b2a5; }
+    .middleware-layer { border-left-color: #a5c9c3; }
+    .platform-layer { border-color: rgba(133, 157, 169, .55); border-left-color: #849ba8; background: rgba(19, 28, 34, .94); }
+    .bsp-layer { border-left-color: #84a9b7; }
+    .architecture-foundation-link { min-height: var(--arch-row); }
+    .architecture-connector { position: relative; width: 1px; height: clamp(8px, min(1vw, 1.5vh), 13px); flex: 0 0 clamp(8px, min(1vw, 1.5vh), 13px); align-self: center; background: rgba(104, 242, 227, .62); box-shadow: 0 0 8px rgba(104, 242, 227, .35); }
+    .architecture-connector::before { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); border-right: 3px solid transparent; border-bottom: 4px solid var(--cyan); border-left: 3px solid transparent; content: ""; }
+    .cover-foot { margin-top: 10px; color: var(--muted-2); font: var(--text-min)/1.7 var(--mono); }
+
+    /* Shared panels / grids */
+    .grid-2, .grid-3, .grid-4, .grid-5 { display: grid; gap: 13px; margin-top: 32px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .panel { min-width: 0; padding: clamp(17px, 2.2vw, 27px); border: 1px solid var(--line); background: linear-gradient(145deg, rgba(19, 30, 36, .92), rgba(13, 21, 27, .88)); }
+    .panel-kicker { margin: 0 0 13px; color: var(--orange); font: var(--text-min)/1.4 var(--mono); text-transform: uppercase; letter-spacing: .1em; }
+    .panel p { margin: 0; color: var(--muted); font-size: var(--text-min); line-height: 1.65; }
+    .panel .big-word { display: block; margin-bottom: 9px; color: var(--cyan); font: 700 clamp(27px, 3.2vw, 39px)/1 var(--display); }
+    .cost-grid .panel { min-height: 155px; }
+    .cost-grid .panel:nth-child(5) { border-color: rgba(255, 128, 89, .45); }
+    .bottom-line { margin: 24px 0 0; padding-left: 16px; border-left: 2px solid var(--cyan); color: #d5dfdb; font-size: clamp(15px, 1.7vw, 19px); line-height: 1.55; }
+
+    /* Memory slide */
+    .memory-layout { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(270px, .92fr); gap: clamp(20px, 4vw, 55px); align-items: stretch; margin-top: 26px; }
+    .code-panel { overflow: hidden; border: 1px solid #2c3d43; background: #0d151b; box-shadow: 9px 9px 0 rgba(104, 242, 227, .075); }
+    .code-head, .code-foot { display: flex; align-items: center; justify-content: space-between; min-height: 39px; padding: 0 16px; color: var(--muted-2); font: var(--text-min)/1.3 var(--mono); letter-spacing: .07em; text-transform: uppercase; }
+    .code-head { border-bottom: 1px solid #25343b; }
+    .code-foot { border-top: 1px solid #25343b; color: var(--cyan); }
+    .code-body { padding: clamp(20px, 2.4vw, 31px); }
+    pre { margin: 0; overflow-x: auto; color: #dbe6e0; font: clamp(12px, 1.28vw, 15px)/1.9 var(--mono); tab-size: 4; white-space: pre; }
+    .code-muted { color: #7f9297; }
+    .code-type { color: var(--cyan); }
+    .code-number { color: #ffad83; }
+    .code-keyword { color: #ffa18a; }
+    .memory-aside { display: flex; flex-direction: column; gap: 12px; }
+    .stat { flex: 1; padding: 16px 20px; border: 1px solid var(--line); background: rgba(16, 24, 30, .82); }
+    .stat-label { display: block; margin-bottom: 5px; color: var(--muted-2); font: var(--text-min)/1.3 var(--mono); text-transform: uppercase; letter-spacing: .1em; }
+    .stat strong { color: var(--ink); font: 600 clamp(21px, 2.4vw, 29px)/1.1 var(--display); }
+    .slot-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin: 16px 0 6px; }
+    .slot-grid i { display: block; height: 17px; border: 1px solid rgba(104, 242, 227, .52); background: rgba(104, 242, 227, .08); }
+    .slot-grid i:first-child { background: rgba(104, 242, 227, .52); }
+
+    /* Status flow */
+    .flow-wrap { margin-top: 38px; }
+    .flow-origin { width: min(440px, 100%); margin: 0 auto; padding: 19px; text-align: center; border: 1px solid var(--line-strong); background: #111c22; }
+    .flow-origin strong { display: block; font: 600 25px/1.1 var(--display); }
+    .flow-origin span { color: var(--muted-2); font: var(--text-min)/1.6 var(--mono); text-transform: uppercase; }
+    .flow-stem { width: 1px; height: 28px; margin: 0 auto; background: var(--cyan); }
+    .flow-branches { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; padding-top: 14px; }
+    .flow-branches::before { content: ""; position: absolute; top: 0; left: calc((100% - 26px) / 6); right: calc((100% - 26px) / 6); height: 1px; background: var(--cyan); }
+    .flow-card { position: relative; padding: 23px; border: 1px solid var(--line); background: var(--panel); text-align: center; }
+    .flow-card::before { content: ""; position: absolute; top: -14px; left: 50%; width: 1px; height: 14px; background: var(--cyan); }
+    .flow-card strong { display: block; margin-bottom: 9px; color: var(--cyan); font: 600 29px/1 var(--display); }
+    .flow-card:nth-child(2) strong { color: var(--orange); }
+    .flow-card p { margin: 0; color: var(--muted); font-size: var(--text-min); line-height: 1.55; }
+    .flow-note { margin-top: 25px; text-align: center; color: #cfdbd5; font-size: clamp(15px, 1.75vw, 20px); }
+
+    /* Dispatch */
+    .dispatch-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; margin-top: 34px; }
+    .dispatch-card { min-height: 245px; padding: 24px; border: 1px solid var(--line); background: rgba(16, 24, 30, .9); }
+    .dispatch-card.featured { border-color: rgba(104, 242, 227, .48); box-shadow: inset 0 2px 0 var(--cyan); }
+    .dispatch-number { display: block; margin-bottom: 24px; color: var(--orange); font: var(--text-min)/1 var(--mono); }
+    .dispatch-card p { margin: 0; color: var(--muted); font-size: var(--text-min); line-height: 1.65; }
+    .dispatch-foot { margin-top: 19px; padding: 13px 16px; border-left: 2px solid var(--orange); background: rgba(255, 128, 89, .055); color: #c2cbca; font-size: var(--text-min); line-height: 1.55; }
+
+    /* Module map */
+    .module-map { display: grid; grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); gap: 14px; align-items: stretch; margin-top: 32px; }
+    .module-column { padding: clamp(18px, 2.5vw, 31px); border: 1px solid var(--line); background: rgba(16, 24, 30, .88); }
+    .module-column.ext { border-color: rgba(255, 128, 89, .4); }
+    .module-column h3 { margin-bottom: 18px; color: var(--cyan); font-size: 28px; }
+    .module-column.ext h3 { color: var(--orange); }
+    .module-row { display: flex; justify-content: space-between; gap: 15px; padding: 10px 0; border-top: 1px solid rgba(67, 81, 90, .5); color: #d9e1dc; font-size: var(--text-min); }
+    .module-row span:last-child { color: var(--muted-2); text-align: right; font-size: var(--text-min); }
+    .module-cross { display: grid; place-items: center; color: var(--orange); font: var(--text-min)/1.4 var(--mono); text-align: center; writing-mode: vertical-rl; letter-spacing: .15em; }
+    .module-foot { margin-top: 17px; color: var(--muted-2); font: var(--text-min)/1.6 var(--mono); }
+
+    /* Review checklist */
+    .review-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin-top: 33px; }
+    .review-item { display: grid; grid-template-columns: 38px 1fr; gap: 14px; min-height: 145px; padding: 21px; border: 1px solid var(--line); background: rgba(16, 24, 30, .88); }
+    .review-item .num { color: var(--orange); font: var(--text-min)/1.5 var(--mono); }
+    .review-item h3 { margin-bottom: 7px; }
+    .review-item p { margin: 0; color: var(--muted); font-size: var(--text-min); line-height: 1.55; }
+
+    /* Impact / closing */
+    .impact-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin-top: 32px; }
+    .impact-panel { padding: clamp(19px, 2.5vw, 31px); border: 1px solid var(--line); background: rgba(16, 24, 30, .9); }
+    .impact-panel.good { border-top: 2px solid var(--cyan); }
+    .impact-panel.verify { border-top: 2px solid var(--orange); }
+    .impact-panel ul { list-style: none; display: grid; gap: 13px; padding: 0; margin: 15px 0 0; }
+    .impact-panel li { position: relative; padding-left: 18px; color: #c5d0cd; font-size: var(--text-min); line-height: 1.5; }
+    .impact-panel li::before { content: ""; position: absolute; top: .62em; left: 0; width: 6px; height: 6px; border: 1px solid var(--cyan); transform: rotate(45deg); }
+    .impact-panel.verify li::before { border-color: var(--orange); }
+    .equation { margin-top: 23px; padding: 17px 19px; border: 1px solid rgba(104, 242, 227, .28); color: var(--ink); font: 500 clamp(12px, 1.45vw, 16px)/1.7 var(--mono); text-align: center; }
+    .closing-title { max-width: 900px; }
+    .closing-points { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 25px; margin-top: 27px; max-width: 760px; }
+    .closing-points p { margin: 0; color: #c3ceca; font-size: var(--text-min); }
+    .closing-points b { margin-right: 8px; color: var(--orange); font: var(--text-min)/1 var(--mono); }
+    .closing-line { margin-top: 34px; color: var(--cyan); font: 600 clamp(21px, 3vw, 33px)/1.15 var(--display); }
+
+    /* Appendix charts */
+    .chart-panel { min-width: 0; padding: clamp(17px, 2.2vw, 27px); border: 1px solid var(--line); background: linear-gradient(145deg, rgba(19, 30, 36, .92), rgba(13, 21, 27, .88)); }
+    .chart-legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0 0 18px; color: var(--muted); font: 500 clamp(12px, 1.2vw, 15px)/1.4 var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+    .chart-legend i { display: inline-block; width: 11px; height: 11px; margin-right: 8px; vertical-align: -1px; }
+    .legend-castle { background: var(--cyan); }
+    .legend-stl { background: var(--stl); }
+    .legend-parity { background: var(--muted-2); }
+    .legend-down { background: var(--orange); }
+    .bar-chart { display: grid; gap: 8px; }
+    .bar-row { display: grid; grid-template-columns: minmax(150px, 210px) minmax(0, 1fr); gap: 14px; align-items: center; }
+    .bar-name { color: #d9e1dc; font: 500 clamp(12px, 1.3vw, 16px)/1.3 var(--mono); text-align: right; }
+    .bar-stack { display: grid; gap: 5px; min-width: 0; }
+    .bar-line { display: grid; grid-template-columns: minmax(0, 1fr) 80px; gap: 10px; align-items: center; }
+    .bar-track { position: relative; height: 12px; background: rgba(116, 131, 138, .1); }
+    .bar-track.ratio::after { content: ""; position: absolute; top: -4px; bottom: -4px; left: 45.45%; width: 1px; background: var(--ink); opacity: .55; }
+    .bar-fill { display: block; height: 100%; min-width: 2px; }
+    .bar-fill.castle, .bar-fill.up { background: var(--cyan); }
+    .bar-fill.stl { background: var(--stl); }
+    .bar-fill.flat { background: var(--muted-2); }
+    .bar-fill.down { background: var(--orange); }
+    .bar-value { color: var(--muted); font: 500 clamp(12px, 1.2vw, 15px)/1 var(--mono); text-align: right; white-space: nowrap; }
+    .chart-note { margin: 16px 0 0; color: var(--muted-2); font: 500 clamp(12px, 1.2vw, 15px)/1.5 var(--mono); letter-spacing: .04em; }
+    @media (max-width: 620px) {
+      .bar-row { grid-template-columns: 1fr; gap: 5px; }
+      .bar-name { text-align: left; }
+    }
+
+    .controls {
+      position: fixed; z-index: 30; right: clamp(18px, 4vw, 64px); bottom: 22px; left: clamp(18px, 4vw, 64px);
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      pointer-events: none;
+    }
+    .controls > * { pointer-events: auto; }
+    .key-hint { color: var(--muted-2); font: var(--text-min)/1.4 var(--mono); letter-spacing: .05em; }
+    .control-center { display: flex; align-items: center; gap: 7px; }
+    .dot-button { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: #405057; cursor: pointer; transition: width .18s ease, background .18s ease; }
+    .dot-button[aria-current="true"] { width: 23px; border-radius: 5px; background: var(--cyan); }
+    .control-actions { display: flex; align-items: center; gap: 8px; }
+    .nav-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 86px; padding: 10px 13px; border: 1px solid var(--line-strong); background: rgba(16, 24, 30, .95); color: var(--ink); cursor: pointer; font: var(--text-min)/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; transition: border-color .16s ease, color .16s ease; }
+    .nav-button:hover:not(:disabled) { border-color: var(--cyan); color: var(--cyan); }
+    .nav-button:disabled { opacity: .35; cursor: default; }
+    .live-region { position: fixed; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+
+    @keyframes slide-in { from { opacity: .25; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) {
+      .cover-grid { grid-template-columns: 1fr; gap: 16px; }
+      .cover-visual { min-height: 200px; }
+      .grid-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .dispatch-grid { grid-template-columns: 1fr 1fr; }
+      .dispatch-card:last-child { grid-column: span 2; min-height: 0; }
+      .module-map { grid-template-columns: 1fr; }
+      .module-cross { writing-mode: initial; min-height: 18px; }
+      .module-cross::before, .module-cross::after { content: ""; display: inline-block; width: 40px; height: 1px; margin: 0 9px 3px; background: var(--orange); }
+    }
+    @media (max-width: 620px) {
+      .brandline { top: 13px; }
+      .slide-index { top: 20px; }
+      .slide { padding: 70px 21px 106px; }
+      .eyebrow, .section-tag { font-size: var(--text-min); }
+      h2 { font-size: clamp(43px, 12vw, 64px); }
+      .lead { font-size: 16px; }
+      .grid-2, .grid-3, .grid-4, .grid-5, .dispatch-grid, .review-grid, .impact-layout { grid-template-columns: 1fr; }
+      .cost-grid .panel { min-height: 0; }
+      .memory-layout { grid-template-columns: 1fr; }
+      .memory-aside { display: grid; grid-template-columns: 1fr 1fr; }
+      .slot-stat { grid-column: span 2; }
+      .flow-branches { grid-template-columns: 1fr; gap: 20px; }
+      .flow-branches { padding-top: 0; }
+      .flow-branches::before, .flow-card::before { display: none; }
+      .dispatch-card, .dispatch-card:last-child { grid-column: auto; min-height: 0; }
+      .review-item { min-height: 0; }
+      .closing-points { grid-template-columns: 1fr; }
+      .controls { bottom: 12px; gap: 8px; }
+      .key-hint { max-width: 120px; }
+      .control-center { gap: 4px; }
+      .dot-button { width: 5px; height: 5px; }
+      .dot-button[aria-current="true"] { width: 15px; }
+      .nav-button { min-width: 39px; padding: 10px; }
+      .nav-button .label { display: none; }
+      .module-row { font-size: var(--text-min); }
+    }
+    @media (max-height: 650px) and (min-width: 621px) {
+      .slide { padding-top: 65px; padding-bottom: 78px; }
+      .grid-2, .grid-3, .grid-4, .grid-5, .dispatch-grid, .review-grid, .impact-layout { margin-top: 19px; }
+      .panel { padding: 15px 18px; }
+      .dispatch-card { min-height: 0; padding: 17px; }
+      .dispatch-number { margin-bottom: 12px; }
+      .review-item { min-height: 0; padding: 15px; }
+      .impact-panel { padding: 18px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-progress" aria-hidden="true"><span class="top-progress-fill" id="progress-fill"></span></div>
+  <div class="brandline" aria-label="CASTLE workshop"><span class="brand-mark">C</span><strong>CASTLE</strong><span>Compliant Automotive Safety Template Library for Embedded</span></div>
+  <div class="slide-index" id="slide-index">01 / 14</div>
+
+  <main id="presentation" aria-label="CASTLE workshop presentation">
+    <section class="slide cover" data-title="CASTLE — C++ built for bounded systems" role="group" aria-roledescription="slide" aria-label="Slide 1 of 14" tabindex="-1">
+      <div class="slide-inner cover-grid">
+        <div>
+          <p class="eyebrow"><span class="dot"></span> Embedded C++ library <span class="slash">/</span> Prototype 2.0</p>
+          <h1>CASTLE</h1>
+          <p class="cover-subtitle">C++ built for bounded systems.</p>
+          <p class="cover-copy">A C++17 header-only library for embedded software, where memory, timing, and failure behavior matter a great deal.</p>
+          <p class="cover-foot">CORE IDEA: MAKE THE COST VISIBLE BEFORE THE CODE RUNS.</p>
+        </div>
+        <div class="cover-visual" aria-hidden="true">
+          <div class="architecture">
+            <div class="architecture-layer applications-layer">
+              <span class="layer-kicker">Automotive applications</span>
+              <strong>Automotive services / applications</strong>
+              <span class="layer-detail">ADAS · Infotainment · Diagnostics</span>
+            </div>
+            <div class="architecture-relationships">
+              <span class="castle-relationship">CASTLE contributes to middleware + application development</span>
+              <span class="architecture-link">Middleware serves applications <span class="architecture-connector"></span></span>
+            </div>
+            <div class="architecture-middle-row">
+              <div class="architecture-layer castle-layer">
+                <span class="layer-kicker">Cross-cutting C++ template library</span>
+                <strong>CASTLE library</strong>
+                <span class="layer-detail">Replaces STL &amp; common-purpose libraries</span>
+              </div>
+              <div class="architecture-layer middleware-layer">
+                <span class="layer-kicker">Hardware adapter</span>
+                <strong>Middleware</strong>
+                <span class="layer-detail">Interfaces with Platform</span>
+                <span class="layer-detail">Hardware abstraction</span>
+              </div>
+            </div>
+            <div class="architecture-relationships">
+              <span></span>
+              <span class="architecture-link">Platform foundation for middleware <span class="architecture-connector"></span></span>
+            </div>
+            <div class="architecture-layer platform-layer">
+              <span class="layer-kicker">Execution environment</span>
+              <strong>Platform</strong>
+              <span class="layer-detail">Bare metal · Embedded Linux · Zephyr · QNX · VxWorks · AUTOSAR Classic</span>
+            </div>
+            <div class="architecture-foundation-link">
+              <span class="architecture-connector"></span>
+              <span>BSP provides boot management + drivers</span>
+            </div>
+            <div class="architecture-layer bsp-layer">
+              <span class="layer-kicker">Hardware foundation</span>
+              <strong>Board Support Package (BSP)</strong>
+              <span class="layer-detail">Bootloader · MCU / SoC device drivers · Hardware interfaces (CAN · Ethernet · SPI)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Embedded systems pay for hidden decisions" role="group" aria-roledescription="slide" aria-label="Slide 2 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">01 <span>/</span> The problem space</p>
+        <h2>Embedded systems pay for <span class="accent">hidden decisions.</span></h2>
+        <p class="lead">Many C++ features are useful on a desktop, but an embedded product has a much smaller budget and stricter timing.</p>
+        <div class="grid-5 cost-grid">
+          <article class="panel"><p class="panel-kicker">01 / Memory</p><span class="big-word">HEAP</span><p>The memory left depends on what ran earlier. Allocation can fail, and fragmentation makes memory hard to use.</p></article>
+          <article class="panel"><p class="panel-kicker">02 / Control</p><span class="big-word">EXCEPTIONS</span><p>Control can jump across several stack frames, which is hard to see at the call site.</p></article>
+          <article class="panel"><p class="panel-kicker">03 / Dispatch</p><span class="big-word">VIRTUAL</span><p>Virtual interfaces add runtime indirection and make the call target less visible.</p></article>
+          <article class="panel"><p class="panel-kicker">04 / Dependencies</p><span class="big-word">STL</span><p>Library facilities may rely on assumptions, headers, or runtime support that a target does not fit.</p></article>
+          <article class="panel"><p class="panel-kicker">05 / Timing</p><span class="big-word">UNKNOWN</span><p>Any operation with unclear worst-case work makes timing analysis harder.</p></article>
+        </div>
+        <p class="bottom-line">These tools are not "bad practices", but unsuitable for embedded work.<br>Before we adopt a feature, we ask: <strong>how much memory, how can it fail, and how much work can it do?</strong></p>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Make the memory budget visible" role="group" aria-roledescription="slide" aria-label="Slide 3 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">02 <span>/</span> Storage by design</p>
+        <h2>Make the memory <span class="accent">budget visible.</span></h2>
+        <p class="lead">The capacity is part of the type. The container owns its storage inside the object and does not silently grow.</p>
+        <div class="memory-layout">
+          <div class="code-panel">
+            <div class="code-head"><span>quick-start.cpp</span><span>FIXED CAPACITY</span></div>
+            <div class="code-body"><pre><span class="code-muted">#include</span> <span class="code-type">"castle/container/vector.hpp"</span>
+<span class="code-muted">#include</span> <span class="code-type">"castle/error/status.hpp"</span>
+
+castle::container::vector&lt;uint16_t, <span class="code-number">16U</span>&gt; samples;
+
+<span class="code-keyword">if</span> (samples.push_back(<span class="code-number">42U</span>) == castle::status::ok)
+{
+    <span class="code-muted">// Use the stored sample.</span>
+}</pre></div>
+            <div class="code-foot"><span>CAPACITY IS EXPLICIT</span><span>NO REALLOCATION</span></div>
+          </div>
+          <div class="memory-aside">
+            <div class="stat"><span class="stat-label">Compile-time bound</span><strong>16 elements</strong></div>
+            <div class="stat"><span class="stat-label">Storage model</span><strong>Inside the object</strong></div>
+            <div class="stat slot-stat"><span class="stat-label">Conceptual slots / 16 total</span><div class="slot-grid" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="small-note">The illustration shows capacity, not the current size.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Make failure an ordinary result" role="group" aria-roledescription="slide" aria-label="Slide 4 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">03 <span>/</span> Failure as data</p>
+        <h2>Make failure an <span class="accent">ordinary result.</span></h2>
+        <p class="lead">A full buffer or an empty queue is a normal condition that the system must handle every day. CASTLE returns a status for the caller to check.</p>
+        <div class="flow-wrap">
+          <div class="flow-origin"><span>Typical container operation</span><strong>Read / write</strong></div>
+          <div class="flow-stem" aria-hidden="true"></div>
+          <div class="flow-branches">
+            <article class="flow-card"><strong>status::ok</strong><p>Continue with the accepted data.</p></article>
+            <article class="flow-card"><strong>status::full</strong><p>Reject the item, apply backpressure, or record a diagnostic.</p></article>
+            <article class="flow-card"><strong>status::empty</strong><p>Handle “nothing to read” as an expected state.</p></article>
+          </div>
+        </div>
+        <p class="flow-note">Expected runtime outcomes use <span class="accent mono">status</span> or <span class="accent mono">bool</span>. Programmer-contract violations use the configured assertion policy.</p>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Pay for abstraction deliberately" role="group" aria-roledescription="slide" aria-label="Slide 5 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">04 <span>/</span> Abstraction with a budget</p>
+        <h2>Pay for abstraction <span class="accent">deliberately.</span></h2>
+        <p class="lead">The goal is not to remove abstraction. It is to choose where work happens and make storage and dispatch costs inspectable.</p>
+        <div class="dispatch-grid">
+          <article class="dispatch-card featured"><span class="dispatch-number">01 / DEFAULT PATH</span><h3>Templates and static dispatch</h3><p>Types and behavior are selected at compile time. The compiler can specialize the code without a runtime base-class lookup.</p></article>
+          <article class="dispatch-card"><span class="dispatch-number">02 / OWNED CALLABLES</span><h3>In-place storage</h3><p>The function wrapper keeps a callable in a bounded local buffer. A callable that does not fit is rejected at compile time.</p></article>
+          <article class="dispatch-card"><span class="dispatch-number">03 / EXPLICIT SEAMS</span><h3>Limited virtual interfaces</h3><p>Core data structures avoid virtual dispatch. Observer, visitor, and delegate interfaces use it, so explain its cost and why it helps.</p></article>
+        </div>
+        <p class="dispatch-foot">The same discipline applies to language and library features: no exceptions or RTTI, and no required STL containers or algorithms.</p>
+      </div>
+    </section>
+
+    <section class="slide" data-title="One library, two layers" role="group" aria-roledescription="slide" aria-label="Slide 6 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">05 <span>/</span> The library shape</p>
+        <h2>One library. <span class="accent">Two layers.</span></h2>
+        <p class="lead">The core gives reusable building blocks. The extensions apply them to more specific jobs.</p>
+        <div class="module-map">
+          <div class="module-column">
+            <h3>CASTLE CORE</h3>
+            <div class="module-row"><span>Containers and memory</span><span>storage and lifetime helpers</span></div>
+            <div class="module-row"><span>Utility, algorithms, bit</span><span>language building blocks</span></div>
+            <div class="module-row"><span>Chrono and math</span><span>time and computation</span></div>
+            <div class="module-row"><span>Callbacks and events</span><span>controlled behavior</span></div>
+            <div class="module-row"><span>Sync, iterators, traits</span><span>synchronization and errors</span></div>
+            <p class="module-foot">HEADER-ONLY / C++17 / NO REQUIRED STL</p>
+          </div>
+          <div class="module-cross" aria-hidden="true">BUILDS ON</div>
+          <div class="module-column ext">
+            <h3>CASTLE EXTENSIONS</h3>
+            <div class="module-row"><span>Protocols and parsers</span><span>CAN · LIN · NMEA · UBX · PTP</span></div>
+            <div class="module-row"><span>Input / output</span><span>GPIO · UART · SPI · I²C</span></div>
+            <div class="module-row"><span>Data formats</span><span>CSV · INI · JSON · XML</span></div>
+            <div class="module-row"><span>Checksums and codecs</span><span>CRC · Base64 · hex</span></div>
+            <div class="module-row"><span>Domain services</span><span>crypto · geodetic · diagnostics · filtering</span></div>
+            <p class="module-foot">INCLUDE ONLY WHAT YOUR PLATFORM SUPPORTS</p>
+          </div>
+        </div>
+        <p class="small-note">Some facilities use POSIX or Linux APIs, some use pthreads, and there is also a Zephyr GPIO backend.</p>
+      </div>
+    </section>
+
+    <section class="slide" data-title="A different everyday coding habit" role="group" aria-roledescription="slide" aria-label="Slide 7 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">06 <span>/</span> The daily coding shift</p>
+        <h2>A different everyday <span class="accent">coding habit.</span></h2>
+        <p class="lead">The code has a few more explicit lines. Those lines are not noise. They record decisions the system already had to make.</p>
+        <div class="grid-2">
+          <div class="code-panel">
+            <div class="code-head"><span>event dispatch</span><span>CASTLE STYLE</span></div>
+            <div class="code-body"><pre><span class="code-keyword">struct</span> TickEvent {};
+
+<span class="code-keyword">using</span> dispatcher_type = castle::events::event_dispatcher&lt;
+  castle::events::event_tag_config&lt;TickEvent, <span class="code-number">4U</span>, void(uint32_t)&gt;&gt;;
+
+dispatcher_type dispatcher;
+<span class="code-keyword">auto</span> sub = dispatcher.register_callback&lt;TickEvent&gt;([](uint32_t){});
+dispatcher.dispatch_event&lt;TickEvent&gt;(<span class="code-number">1U</span>);
+sub.unsubscribe();</pre></div>
+            <div class="code-foot"><span>FIXED TAG CAPACITY</span><span>VISIBLE</span></div>
+          </div>
+          <div>
+            <div class="stat"><span class="stat-label">In the type</span><strong>How much can exist?</strong></div>
+            <div class="stat" style="margin-top:12px"><span class="stat-label">At the call site</span><strong>What can go wrong?</strong></div>
+            <div class="stat" style="margin-top:12px"><span class="stat-label">In the owner</span><strong>Who decides how long it lives?</strong></div>
+            <p class="bottom-line">Before you add a buffer, decide its size. Before you add a callback, decide who owns it.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="A CASTLE code review asks different questions" role="group" aria-roledescription="slide" aria-label="Slide 8 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">07 <span>/</span> Review mindset</p>
+        <h2>A code review asks <span class="accent">different questions.</span></h2>
+        <p class="lead">We still check correctness and tests, but we also ask four resource questions.</p>
+        <div class="review-grid">
+          <article class="review-item"><span class="num">01</span><div><h3>Memory</h3><p>Where does the storage live, and who owns it? Is it borrowed or owned by the object? What is the maximum size?</p></div></article>
+          <article class="review-item"><span class="num">02</span><div><h3>Capacity and failure</h3><p>What happens when the queue is full, the buffer is empty, or a lookup fails? Is it handled or ignored?</p></div></article>
+          <article class="review-item"><span class="num">03</span><div><h3>Timing and work</h3><p>What work happens in the worst case? Is that cost right for the task period?</p></div></article>
+          <article class="review-item"><span class="num">04</span><div><h3>Concurrency and lifetime</h3><p>Can this run from more than one task or an interrupt? Who protects shared state? Can a callback outlive its object?</p></div></article>
+        </div>
+        <p class="bottom-line">A strong review explains these answers from the design and code, not only from a passing test.</p>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Predictability improves, but still must be proven" role="group" aria-roledescription="slide" aria-label="Slide 9 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">08 <span>/</span> Impact and limits</p>
+        <h2>Predictability improves. <span class="accent">It still must be proven.</span></h2>
+        <p class="lead">CASTLE makes component behavior easier to reason about. It does not replace evidence at the system level.</p>
+        <div class="impact-layout">
+          <section class="impact-panel good"><p class="panel-kicker">What becomes easier</p><h3>Clearer engineering budgets</h3><ul><li>Known storage bounds help with RAM budgeting.</li><li>Explicit statuses help define recovery behavior.</li><li>No heap, exceptions, RTTI, or STL means less runtime machinery to account for.</li><li>Consistent patterns make code easier to maintain across teams.</li></ul></section>
+          <section class="impact-panel verify"><p class="panel-kicker">What still needs evidence</p><h3>System-level validation</h3><ul><li>Measure worst-case timing on the actual microcontroller.</li><li>Size buffers using real traffic and fault scenarios.</li><li>Understand the OS backend, scheduler, and interrupt constraints.</li><li>Check synchronization, compiler, and processor behavior.</li></ul></section>
+        </div>
+        <div class="equation">BOUNDED COMPONENTS + EXPLICIT POLICY + TARGET VALIDATION = MORE PREDICTABLE SYSTEMS</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Design the bounds, then write the code" role="group" aria-roledescription="slide" aria-label="Slide 10 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">09 <span>/</span> Take it into the next change</p>
+        <h2 class="closing-title">Design the bounds.<br><span class="accent">Then write the code.</span></h2>
+        <p class="lead">When we review a component, we should explain how much memory it can own, what happens at its limit, and what work it can do.</p>
+        <div class="closing-points">
+          <p><b>01</b> Choose storage and capacity up front.</p>
+          <p><b>02</b> Make expected outcomes explicit.</p>
+          <p><b>03</b> Keep lifetimes and dispatch visible.</p>
+          <p><b>04</b> Measure timing and concurrency on the real target.</p>
+        </div>
+        <p class="closing-line">Fewer hidden decisions. More deliberate systems.</p>
+        <p class="small-note">THANK YOU / CASTLE 2.0 / C++17 EMBEDDED TEMPLATE LIBRARY</p>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Appendix A — Benchmark setup and reading notes" role="group" aria-roledescription="slide" aria-label="Slide 11 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> A · Method</p>
+        <h2>Benchmark <span class="accent">setup.</span></h2>
+        <p class="lead">Each CASTLE operation has an STL counterpart run under the same harness. The figures come from one captured run, so read them as a guide, not a statistical result.</p>
+        <div class="grid-4">
+          <div class="stat"><span class="stat-label">Host CPU</span><strong>16 CPUs · ~2.0 GHz</strong></div>
+          <div class="stat"><span class="stat-label">Harness</span><strong>Google Benchmark</strong></div>
+          <div class="stat"><span class="stat-label">Metric</span><strong>CPU ns per op</strong></div>
+          <div class="stat"><span class="stat-label">Captured</span><strong>2026-09-17</strong></div>
+        </div>
+        <div class="impact-layout">
+          <section class="impact-panel good"><p class="panel-kicker">How to read</p><h3>Lower is faster</h3><ul><li>Each pair runs the same operation: CASTLE and STL.</li><li>Ratio = STL time ÷ CASTLE time. Above 1.00x favors CASTLE.</li></ul></section>
+          <section class="impact-panel verify"><p class="panel-kicker">Excluded from charts</p><h3>Unreliable rows</h3><ul><li>One-iteration rows report about 1.4e+11 ns (algorithm, iterator, most lookups).</li><li>Rows near 0.2 ns sit at the loop floor; the work was likely optimized away.</li><li>Build flags and compiler version are not recorded in this capture.</li></ul></section>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Appendix B — Speed ratio overview" role="group" aria-roledescription="slide" aria-label="Slide 12 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> B · Overview</p>
+        <h2>Speed ratio <span class="accent">overview.</span></h2>
+        <p class="lead">Most common operations sit at parity. The clearest CASTLE gains are string search, array access, and associative containers.</p>
+        <div class="chart-panel">
+          <div class="chart-legend">
+            <span><i class="legend-castle"></i>CASTLE faster</span>
+            <span><i class="legend-parity"></i>Parity (±3%)</span>
+            <span><i class="legend-down"></i>STL faster</span>
+          </div>
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-name">string_find</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill up" style="width:95.9%"></span></div><span class="bar-value">2.11x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">hash_set_insert</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill up" style="width:60.0%"></span></div><span class="bar-value">1.32x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">array_access</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill up" style="width:59.5%"></span></div><span class="bar-value">1.31x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">tree_map_erase</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill up" style="width:58.2%"></span></div><span class="bar-value">1.28x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">hash_map_insert</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill up" style="width:57.3%"></span></div><span class="bar-value">1.26x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">bitset_to_string</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill up" style="width:57.3%"></span></div><span class="bar-value">1.26x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">hash_set_erase</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill up" style="width:56.8%"></span></div><span class="bar-value">1.25x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">tree_set_insert</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill up" style="width:53.2%"></span></div><span class="bar-value">1.17x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">steady_clock_now</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill up" style="width:47.7%"></span></div><span class="bar-value">1.05x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">inplace_function_call</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill flat" style="width:46.8%"></span></div><span class="bar-value">1.03x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">vector_push_back</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill flat" style="width:45.5%"></span></div><span class="bar-value">1.00x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">stack_push_pop</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill flat" style="width:45.5%"></span></div><span class="bar-value">1.00x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">string_view_find_substring</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill flat" style="width:44.1%"></span></div><span class="bar-value">0.97x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">queue_push_pop</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill down" style="width:43.2%"></span></div><span class="bar-value">0.95x</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">string_construct</span><div class="bar-stack"><div class="bar-line"><div class="bar-track ratio"><span class="bar-fill down" style="width:42.7%"></span></div><span class="bar-value">0.94x</span></div></div></div>
+          </div>
+          <p class="chart-note">Ratio = STL ÷ CASTLE, CPU ns per op. Vertical line marks 1.00x (parity). Bar scale 0–2.2x.</p>
+        </div>
+        <p class="bottom-line">Results within ±3% are treated as parity, so single-run noise is not read as a win.</p>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Appendix C — Associative containers" role="group" aria-roledescription="slide" aria-label="Slide 13 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> C · Containers</p>
+        <h2>Associative <span class="accent">containers.</span></h2>
+        <p class="lead">All eight associative operations are faster on CASTLE in this run, between about 1.17x and 1.32x.</p>
+        <div class="chart-panel">
+          <div class="chart-legend">
+            <span><i class="legend-castle"></i>CASTLE</span>
+            <span><i class="legend-stl"></i>STL</span>
+          </div>
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-name">hash_map insert</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:54.0%"></span></div><span class="bar-value">864 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:67.8%"></span></div><span class="bar-value">1085 ns</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">hash_map erase</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:53.6%"></span></div><span class="bar-value">857 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:67.5%"></span></div><span class="bar-value">1080 ns</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">hash_set insert</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:54.1%"></span></div><span class="bar-value">865 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:71.3%"></span></div><span class="bar-value">1141 ns</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">hash_set erase</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:53.4%"></span></div><span class="bar-value">855 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:67.0%"></span></div><span class="bar-value">1072 ns</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">tree_map insert</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:81.6%"></span></div><span class="bar-value">1306 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:96.6%"></span></div><span class="bar-value">1546 ns</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">tree_map erase</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:69.4%"></span></div><span class="bar-value">1110 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:89.1%"></span></div><span class="bar-value">1425 ns</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">tree_set insert</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:80.2%"></span></div><span class="bar-value">1283 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:94.1%"></span></div><span class="bar-value">1505 ns</span></div></div></div>
+            <div class="bar-row"><span class="bar-name">tree_set erase</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:69.6%"></span></div><span class="bar-value">1114 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:89.2%"></span></div><span class="bar-value">1427 ns</span></div></div></div>
+          </div>
+          <p class="chart-note">CPU ns per op. Scale 0–1600 ns. Shorter bar is faster.</p>
+        </div>
+        <p class="bottom-line">The source of each gap is not shown in this capture; check the implementation before naming a cause.</p>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Appendix D — Sequence, string and bit operations" role="group" aria-roledescription="slide" aria-label="Slide 14 of 14" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> D · Sequences and strings</p>
+        <h2>Sequences, strings, <span class="accent">bits.</span></h2>
+        <p class="lead">Most rows are at parity. The notable gaps are string_find (2.1x faster on CASTLE) and small CASTLE deficits in queue push/pop and string construct.</p>
+        <div class="chart-legend">
+          <span><i class="legend-castle"></i>CASTLE</span>
+          <span><i class="legend-stl"></i>STL</span>
+        </div>
+        <div class="grid-2">
+          <div class="chart-panel">
+            <p class="panel-kicker">Containers and stacks · 0–1000 ns</p>
+            <div class="bar-chart">
+              <div class="bar-row"><span class="bar-name">vector push_back</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:79.4%"></span></div><span class="bar-value">794 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:79.4%"></span></div><span class="bar-value">794 ns</span></div></div></div>
+              <div class="bar-row"><span class="bar-name">vector emplace_back</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:79.5%"></span></div><span class="bar-value">795 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:81.5%"></span></div><span class="bar-value">815 ns</span></div></div></div>
+              <div class="bar-row"><span class="bar-name">stack push+pop</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:93.1%"></span></div><span class="bar-value">931 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:93.5%"></span></div><span class="bar-value">935 ns</span></div></div></div>
+              <div class="bar-row"><span class="bar-name">queue push+pop</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:92.6%"></span></div><span class="bar-value">926 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:87.9%"></span></div><span class="bar-value">879 ns</span></div></div></div>
+              <div class="bar-row"><span class="bar-name">string append</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:72.3%"></span></div><span class="bar-value">723 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:73.2%"></span></div><span class="bar-value">732 ns</span></div></div></div>
+            </div>
+          </div>
+          <div class="chart-panel">
+            <p class="panel-kicker">Small operations · 0–70 ns</p>
+            <div class="bar-chart">
+              <div class="bar-row"><span class="bar-name">array access</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:27.3%"></span></div><span class="bar-value">19.1 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:35.9%"></span></div><span class="bar-value">25.1 ns</span></div></div></div>
+              <div class="bar-row"><span class="bar-name">string find</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:5.7%"></span></div><span class="bar-value">4.00 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:12.0%"></span></div><span class="bar-value">8.43 ns</span></div></div></div>
+              <div class="bar-row"><span class="bar-name">string construct</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:21.0%"></span></div><span class="bar-value">14.7 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:19.7%"></span></div><span class="bar-value">13.8 ns</span></div></div></div>
+              <div class="bar-row"><span class="bar-name">bitset to_string</span><div class="bar-stack"><div class="bar-line"><div class="bar-track"><span class="bar-fill castle" style="width:71.7%"></span></div><span class="bar-value">50.2 ns</span></div><div class="bar-line"><div class="bar-track"><span class="bar-fill stl" style="width:90.1%"></span></div><span class="bar-value">63.1 ns</span></div></div></div>
+            </div>
+          </div>
+        </div>
+        <p class="bottom-line">Outside the highlighted rows the gaps are small, so speed alone should not drive the design choice.</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="controls" aria-label="Slide controls">
+    <div class="key-hint">← → MOVE<br>↑ FIRST / ↓ LAST</div>
+    <div class="control-center" id="slide-dots" aria-label="Choose slide">
+      <button class="dot-button" type="button" data-go="0" aria-label="Go to slide 1" aria-current="true"></button>
+      <button class="dot-button" type="button" data-go="1" aria-label="Go to slide 2" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="2" aria-label="Go to slide 3" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="3" aria-label="Go to slide 4" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="4" aria-label="Go to slide 5" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="5" aria-label="Go to slide 6" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="6" aria-label="Go to slide 7" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="7" aria-label="Go to slide 8" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="8" aria-label="Go to slide 9" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="9" aria-label="Go to slide 10" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="10" aria-label="Go to slide 11" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="11" aria-label="Go to slide 12" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="12" aria-label="Go to slide 13" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="13" aria-label="Go to slide 14" aria-current="false"></button>
+    </div>
+    <div class="control-actions">
+      <button class="nav-button" id="previous" type="button" disabled><span aria-hidden="true">←</span><span class="label">Previous</span></button>
+      <button class="nav-button" id="next" type="button"><span class="label">Next</span><span aria-hidden="true">→</span></button>
+    </div>
+  </div>
+  <p class="live-region" id="slide-announcer" aria-live="polite" aria-atomic="true">Slide 1 of 14: CASTLE — C++ built for bounded systems</p>
+
+  <script>
+    (function () {
+      'use strict';
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const dots = Array.from(document.querySelectorAll('[data-go]'));
+      const previous = document.getElementById('previous');
+      const next = document.getElementById('next');
+      const indexLabel = document.getElementById('slide-index');
+      const progress = document.getElementById('progress-fill');
+      const announcer = document.getElementById('slide-announcer');
+      let current = 0;
+
+      function showSlide(requestedIndex) {
+        const nextIndex = Math.max(0, Math.min(slides.length - 1, requestedIndex));
+        current = nextIndex;
+        slides.forEach(function (slide, index) {
+          const active = index === current;
+          slide.hidden = !active;
+          slide.setAttribute('aria-hidden', String(!active));
+          if (active) slide.scrollTop = 0;
+        });
+        dots.forEach(function (dot, index) {
+          dot.setAttribute('aria-current', String(index === current));
+        });
+        previous.disabled = current === 0;
+        next.disabled = current === slides.length - 1;
+        indexLabel.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+        progress.style.width = ((current + 1) / slides.length * 100) + '%';
+        const title = slides[current].dataset.title || ('Slide ' + (current + 1));
+        announcer.textContent = 'Slide ' + (current + 1) + ' of ' + slides.length + ': ' + title;
+        document.title = 'CASTLE — ' + title;
+      }
+
+      previous.addEventListener('click', function () { showSlide(current - 1); });
+      next.addEventListener('click', function () { showSlide(current + 1); });
+      dots.forEach(function (dot) {
+        dot.addEventListener('click', function () { showSlide(Number(dot.dataset.go)); });
+      });
+
+      document.addEventListener('keydown', function (event) {
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
+        const target = event.target;
+        if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+        switch (event.key) {
+          case 'ArrowRight':
+            event.preventDefault();
+            showSlide(current + 1);
+            break;
+          case 'ArrowLeft':
+            event.preventDefault();
+            showSlide(current - 1);
+            break;
+          case 'ArrowUp':
+          case 'Home':
+            event.preventDefault();
+            showSlide(0);
+            break;
+          case 'ArrowDown':
+          case 'End':
+            event.preventDefault();
+            showSlide(slides.length - 1);
+            break;
+        }
+      });
+
+      showSlide(0);
+    }());
+  </script>
+</body>
+</html>

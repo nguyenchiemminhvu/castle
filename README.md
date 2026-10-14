@@ -31,6 +31,13 @@ CASTLE is a good fit for firmware, device drivers, control software, protocol
 stacks, communication buffers, sensor pipelines, schedulers, and other code
 where memory and timing are important.
 
+## Why "CAS"?
+
+"CAS" stands for **Compliant Automotive Safety**. In a car, a software fault can
+move beyond one program: a late control task or a lost message can affect the
+vehicle. CASTLE is built to follow automotive safety coding rules, so behavior
+stays predictable.
+
 ---
 
 ## Design principles
@@ -60,6 +67,19 @@ and small low-level building blocks instead.
 Many utilities can be evaluated at compile time.
 
 This is useful for register definitions, buffer sizes, time periods, and other firmware configuration.
+
+### Predictable behavior
+
+Code should behave the same way every time, with bounded memory and time.
+Ask for every module:
+
+- Is memory allocated only at start-up?
+- Is execution time bounded?
+- Are ownership and lifetime clear?
+- Can it be tested on a PC without hardware?
+
+See [design principles](docs/design_principles.md) for the full guide and the
+standards it follows (MISRA C++, AUTOSAR C++14, CERT C++, ISO 26262).
 
 ---
 

@@ -7,17 +7,39 @@
 .benchmark-findings li { display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 15px; padding: 12px 0; border-bottom: 1px solid var(--guide-line); }
 .benchmark-findings strong { color: var(--guide-ink); font-size: 11px; }
 .benchmark-findings span { color: #aab6b8; font-size: 11px; line-height: 1.7; }
+.benchmark-content .benchmark-reminder { margin-top: 19px; padding: 14px 16px; border-left: 2px solid var(--guide-cyan); background: #121d23; color: #dce6e1; font-size: 12px; line-height: 1.8; }
+.benchmark-content .benchmark-reminder strong { color: var(--guide-cyan); }
 .benchmark-content .benchmark-caveat { margin-top: 19px; padding: 14px 16px; border: 1px solid #574239; background: #211b19; color: #d8b6a8; font-size: 11px; line-height: 1.8; }
 .benchmark-content .benchmark-caveat strong { color: #ffad8f; }
 .benchmark-source { display: inline-block; margin-top: 15px; color: var(--guide-cyan); font: 10px/1.5 var(--guide-mono); text-decoration: underline; text-underline-offset: 3px; }
-.benchmark-transcript { margin-top: 17px; border: 1px solid #25343b; background: #0d151b; }
-.benchmark-transcript summary { padding: 13px 16px; color: #c9d3d1; cursor: pointer; font: 10px/1.5 var(--guide-mono); }
-.benchmark-transcript[open] summary { border-bottom: 1px solid #25343b; }
-.benchmark-content pre.benchmark-output { max-width: 100%; max-height: 76vh; margin: 0; padding: 17px; overflow: auto; border: 0; background: transparent; color: #c9d3d1; font: 10px/1.65 var(--guide-mono); white-space: pre; }
-.benchmark-content pre.benchmark-output code { color: inherit; font: inherit; }
+.benchmark-chart-note { margin: 0; color: #a0adb0; font: 11px/1.7 var(--guide-mono); }
+.benchmark-chart { margin-top: 17px; padding: 18px 20px; border: 1px solid #25343b; background: #10181e; }
+.benchmark-chart-title { margin: 0 0 12px; color: var(--guide-ink); font: 600 18px/1.1 var(--guide-display); }
+.benchmark-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 12px; color: #a0adb0; font: 10px/1.4 var(--guide-mono); text-transform: uppercase; letter-spacing: .06em; }
+.benchmark-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 7px; vertical-align: -1px; }
+.bench-faster { background: var(--guide-cyan); }
+.bench-parity { background: #74838a; }
+.bench-slower { background: #ff8059; }
+.benchmark-chart-group { margin: 14px 0 6px; color: #74838a; font: 10px/1.4 var(--guide-mono); text-transform: uppercase; letter-spacing: .08em; }
+.benchmark-ratio-row { display: grid; grid-template-columns: minmax(150px, 210px) minmax(0, 1fr) 62px; gap: 12px; align-items: center; margin-bottom: 5px; }
+.benchmark-row-name { color: #d9e1dc; font: 10px/1.3 var(--guide-mono); text-align: right; }
+.benchmark-ratio-track, .benchmark-stack { position: relative; height: 10px; background: rgba(116, 131, 138, .1); }
+.benchmark-ratio-track::after { content: ""; position: absolute; top: -3px; bottom: -3px; left: 44.44%; width: 1px; background: #e5ece8; opacity: .55; }
+.benchmark-ratio-bar { position: absolute; top: 0; bottom: 0; left: 0; min-width: 2px; }
+.benchmark-stack { display: flex; }
+.benchmark-stack span { display: block; height: 100%; }
+.benchmark-ratio-value { color: #a0adb0; font: 10px/1 var(--guide-mono); text-align: right; white-space: nowrap; }
+.benchmark-table-wrap { max-height: 78vh; overflow: auto; margin-top: 17px; border: 1px solid #25343b; background: #0d151b; }
+.benchmark-table { width: 100%; border-collapse: collapse; color: #c9d3d1; font: 11px/1.5 var(--guide-mono); }
+.benchmark-table th, .benchmark-table td { padding: 6px 12px; border-bottom: 1px solid #1d2a31; text-align: right; white-space: nowrap; }
+.benchmark-table th { position: sticky; top: 0; z-index: 1; background: #0d151b; color: #a0adb0; font-weight: 500; }
+.benchmark-table th:first-child, .benchmark-table td:first-child, .benchmark-table th:last-child, .benchmark-table td:last-child { text-align: left; }
+.benchmark-table tr.bench-group th { position: static; background: #121d23; color: var(--guide-cyan); }
 .benchmark-aside-note { color: #a0adb0; font-size: 10px; line-height: 1.8; }
 @media (max-width: 760px) {
   .benchmark-layout { grid-template-columns: 1fr; }
   .benchmark-findings li { grid-template-columns: 88px minmax(0,1fr); gap: 10px; }
-  .benchmark-content pre.benchmark-output { max-height: 70vh; padding: 13px; font-size: 9px; }
+  .benchmark-ratio-row { grid-template-columns: minmax(0, 1fr) 62px; }
+  .benchmark-row-name { grid-column: 1 / -1; text-align: left; }
+  .benchmark-table { font-size: 10px; }
 }

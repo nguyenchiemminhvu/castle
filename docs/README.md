@@ -4,7 +4,9 @@ The layout mirrors `include/castle`: for example, `include/castle/container/vect
 
 ## Design focus
 
-Castle is aimed at embedded systems where deterministic behavior, fixed memory use, and small dependencies matter. The documentation emphasizes fixed-capacity storage, explicit lifetime, status-code error handling, and the small number of places where runtime type erasure or virtual dispatch is intentionally used.
+Castle is aimed at automotive and other safety-critical embedded systems, where deterministic behavior, fixed memory use, and small dependencies matter. The documentation emphasizes fixed-capacity storage, explicit lifetime, status-code error handling, and the small number of places where runtime type erasure or virtual dispatch is intentionally used.
+
+For the safety rules behind these choices, see [design principles](design_principles.md).
 
 ## How to read a page
 
