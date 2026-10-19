@@ -75,4 +75,29 @@ TEST(ConstantsTest, Phi)
     EXPECT_DOUBLE_EQ(castle::math::golden_ratio<double>(), 1.61803398874989484820);
 }
 
+TEST(ConstantsTest, Pow10Negative)
+{
+    EXPECT_DOUBLE_EQ(castle::math::pow10< -1, double>(), 1e-1);
+    EXPECT_DOUBLE_EQ(castle::math::pow10< -6, double>(), 1e-6);
+    EXPECT_DOUBLE_EQ(castle::math::pow10< -12, double>(), 1e-12);
+}
+
+TEST(ConstantsTest, Pow10Positive)
+{
+    EXPECT_DOUBLE_EQ(castle::math::pow10<1, double>(), 1e1);
+    EXPECT_DOUBLE_EQ(castle::math::pow10<6, double>(), 1e6);
+    EXPECT_DOUBLE_EQ(castle::math::pow10<12, double>(), 1e12);
+}
+
+TEST(ConstantsTest, Pow10Zero)
+{
+    EXPECT_DOUBLE_EQ(castle::math::pow10<0, double>(), 1.0);
+}
+
+TEST(ConstantsTest, Pow10FloatType)
+{
+    EXPECT_FLOAT_EQ(castle::math::pow10< -3, float>(), 1e-3f);
+    EXPECT_FLOAT_EQ(castle::math::pow10<3, float>(), 1e3f);
+}
+
 } // namespace

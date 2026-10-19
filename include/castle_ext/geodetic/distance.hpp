@@ -38,6 +38,7 @@
 #include "castle/core/constants.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
+#include "castle/core/constants.hpp"
 #include "castle/error/status.hpp"
 #include "castle/math/abs.hpp"
 #include "castle/math/sqrt_real.hpp"
@@ -262,7 +263,7 @@ CASTLE_NODISCARD castle::status vincenty_inverse(CASTLE_CONST geo_point<T>& from
                 * (sigma + (big_c * sin_sigma
                      * (cos_2sigma_m + (big_c * cos_sigma * (static_cast<T>(-1) + (static_cast<T>(2) * cos_2sigma_m * cos_2sigma_m)))))));
 
-        if (castle::math::abs(lambda - lambda_prev) < static_cast<T>(1e-12)) // LCOV_EXCL_BR_LINE
+        if (castle::math::abs(lambda - lambda_prev) < castle::math::pow10< -12, T>()) // LCOV_EXCL_BR_LINE
         {
             converged = true;
             break;
@@ -367,7 +368,7 @@ CASTLE_NODISCARD castle::status vincenty_direct(CASTLE_CONST geo_point<T>& start
         sigma_prev = sigma;
         sigma = (distance_m / (b * big_a)) + delta_sigma;
 
-        if (castle::math::abs(sigma - sigma_prev) < static_cast<T>(1e-12))
+        if (castle::math::abs(sigma - sigma_prev) < castle::math::pow10< -12, T>())
         {
             converged = true;
             break;

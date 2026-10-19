@@ -6,6 +6,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
+#include "castle/core/constants.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 
@@ -89,22 +90,22 @@ struct nav_pvt
 
     CASTLE_NODISCARD double longitude_deg() CASTLE_CONST CASTLE_NOEXCEPT
     {
-        return static_cast<double>(lon) * 1e-7;
+        return static_cast<double>(lon) * castle::math::pow10< -7, double>();
     }
 
     CASTLE_NODISCARD double latitude_deg() CASTLE_CONST CASTLE_NOEXCEPT
     {
-        return static_cast<double>(lat) * 1e-7;
+        return static_cast<double>(lat) * castle::math::pow10< -7, double>();
     }
 
     CASTLE_NODISCARD double height_m() CASTLE_CONST CASTLE_NOEXCEPT
     {
-        return static_cast<double>(height) / 1000.0;
+        return static_cast<double>(height) / castle::math::pow10<3, double>();
     }
 
     CASTLE_NODISCARD double pdop_value() CASTLE_CONST CASTLE_NOEXCEPT
     {
-        return static_cast<double>(p_dop) * 0.01;
+        return static_cast<double>(p_dop) * castle::math::pow10< -2, double>();
     }
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT

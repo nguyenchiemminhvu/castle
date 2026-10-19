@@ -16,6 +16,7 @@ This header collects constexpr math constants, angle-conversion helpers, charact
 | API | Description |
 |---|---|
 | `castle::math::pi<T>()`, `tau<T>()`, `e<T>()`, `golden_ratio<T>()`, `log2_e<T>()`, `log10_e<T>()`, `ln_2<T>()`, `ln_10<T>()`, `sqrt_2<T>()`, `sqrt_3<T>()`, `inv_sqrt_2<T>()` | Return common mathematical constants in a caller-selected floating-point type. |
+| `castle::math::pow10<Exponent, T>()` | Return 10^Exponent for `Exponent` in `[-12, 12]`; out-of-range values fail at compile time. |
 | `castle::math::degrees_to_radians(T)`, `castle::math::radians_to_degrees(T)` | Convert angles between degrees and radians with `constexpr` arithmetic. |
 | `castle::characters::*` | ASCII, UTF-8, and UTF-16 boundary constants used by text and parser code. |
 | `castle::serialization::*` | String-length limits, Unicode bounds, and XML character-range constants used by serializers. |

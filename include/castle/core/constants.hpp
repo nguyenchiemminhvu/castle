@@ -168,6 +168,33 @@ inv_sqrt_2() CASTLE_NOEXCEPT
     return static_cast<T>(0.70710678118654752440L);
 }
 
+namespace detail
+{
+
+/// Decimal powers 1e-12 .. 1e12, indexed by exponent + 12.
+CASTLE_INLINE CASTLE_CONSTEXPR long double pow10_table[25] = {
+    1e-12L, 1e-11L, 1e-10L, 1e-9L,  1e-8L,
+    1e-7L,  1e-6L,  1e-5L,  1e-4L,  1e-3L,
+    1e-2L,  1e-1L,  1e0L,   1e1L,   1e2L,
+    1e3L,   1e4L,   1e5L,   1e6L,   1e7L,
+    1e8L,   1e9L,   1e10L,  1e11L,  1e12L
+};
+
+} // namespace detail
+
+/// @brief Returns 10 raised to Exponent in the requested floating-point type.
+/// @tparam Exponent Integer power in the range [-12, 12].
+/// @tparam T Floating-point result type.
+/// @return 10^Exponent converted to T.
+template <int Exponent, typename T>
+CASTLE_NODISCARD CASTLE_CONSTEXPR
+typename meta::enable_if<meta::is_floating_point<T>::value, T>::type
+pow10() CASTLE_NOEXCEPT
+{
+    static_assert(Exponent >= -12 && Exponent <= 12, "pow10: Exponent must be in [-12, 12]");
+    return static_cast<T>(detail::pow10_table[Exponent + 12]);
+}
+
 } // namespace math
 
 /// @brief Character-set boundary values shared by text and serialization code.
