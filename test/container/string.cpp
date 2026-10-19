@@ -25,6 +25,17 @@ TEST(StringTest, AssignAppendInsertEraseResize)
     EXPECT_STREQ(s.c_str(),"Hello!?");
 }
 
+TEST(StringTest, CopyKeepsNullTerminator)
+{
+    S source("copy");
+    S copy_constructed(source);
+    S copy_assigned;
+    copy_assigned = source;
+    EXPECT_STREQ(copy_constructed.c_str(), "copy");
+    EXPECT_STREQ(copy_assigned.c_str(), "copy");
+    EXPECT_EQ(copy_assigned.c_str()[copy_assigned.size()], '\0');
+}
+
 TEST(StringTest, CapacityComparisonFindAndOtherOverloads)
 {
     S s("abc");

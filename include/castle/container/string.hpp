@@ -105,6 +105,7 @@ public:
         : size_(other.size_)
     {
         copy_chars(data_, other.data_, size_);
+        data_[size_] = CharT();
     }
 
     /**
@@ -119,6 +120,7 @@ public:
         {
             size_ = other.size_;
             copy_chars(data_, other.data_, size_);
+            data_[size_] = CharT();
         }
         return *this;
     }
