@@ -1,12 +1,24 @@
 // MIT License
 // Copyright (c) 2026 nguyenchiemminhvu@gmail.com
 
+/**
+ * @file nav_odo.hpp
+ * @brief UBX-NAV-ODO (0x01 0x09): odometer solution.
+ *
+ * Periodic/polled output of the ground distance travelled since the last
+ * odometer reset, the accumulated total and its 1-sigma accuracy.
+ *
+ * @note UBX-NAV-ODO is not listed in the ZED-F9R interface description
+ * (UBX-19056845 R01); the layout follows the generic u-blox protocol
+ * definition (version U1, reserved U1[3], iTOW U4, distance U4,
+ * totalDistance U4, distanceStd U4).
+ */
 #ifndef CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_NAV_ODO_HPP
 #define CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_NAV_ODO_HPP
 
 #include "castle/core/compiler.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
-#include "castle_ext/protocols/ubx/payload_reader.hpp"
+#include "castle_ext/protocols/ubx/messages/detail/fixed_message.hpp"
 
 #include <stdint.h>
 
@@ -19,40 +31,24 @@ namespace ubx
 namespace messages
 {
 
-/** @brief UBX-NAV-ODO: accumulated odometer distance. */
-struct nav_odo
+/** @brief UBX-NAV-ODO output payload. */
+struct nav_odo : detail::fixed_message<nav_odo, UBX_CLASS_NAV, UBX_ID_NAV_ODO, 20U>
 {
-    static CASTLE_CONSTEXPR uint8_t msg_class = UBX_CLASS_NAV;
-    static CASTLE_CONSTEXPR uint8_t msg_id = UBX_ID_NAV_ODO;
-    static CASTLE_CONSTEXPR castle::size_type payload_length = 20U;
+    uint8_t version = 0U;          ///< Message version (0x00 for this version).
+    uint32_t i_tow = 0U;           ///< GPS time of week [ms].
+    uint32_t distance = 0U;        ///< Ground distance since last reset [m].
+    uint32_t total_distance = 0U;  ///< Total cumulative ground distance [m].
+    uint32_t distance_std = 0U;    ///< Ground distance accuracy, 1-sigma [m].
 
-    uint8_t version = 0U;
-    uint32_t i_tow = 0U;
-    uint32_t distance = 0U;
-    uint32_t total_distance = 0U;
-    uint32_t distance_std = 0U;
-
-    CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
+    template <typename Self, typename Stream>
+    static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT
     {
-        return raw.is(msg_class, msg_id);
-    }
-
-    CASTLE_NODISCARD static bool decode(CASTLE_CONST message_view& raw, nav_odo& out) CASTLE_NOEXCEPT
-    {
-        if (raw.payload_length() != payload_length)
-        {
-            return false;
-        }
-
-        payload_reader reader(raw.payload);
-        out = nav_odo{};
-        out.version = reader.read_u8();
-        reader.skip(3U);
-        out.i_tow = reader.read_u32();
-        out.distance = reader.read_u32();
-        out.total_distance = reader.read_u32();
-        out.distance_std = reader.read_u32();
-        return reader.ok();
+        stream.field(self.version);
+        stream.reserved(3U);
+        stream.field(self.i_tow);
+        stream.field(self.distance);
+        stream.field(self.total_distance);
+        stream.field(self.distance_std);
     }
 };
 

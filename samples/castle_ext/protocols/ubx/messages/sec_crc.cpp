@@ -1,6 +1,5 @@
 #include "sample_support.hpp"
 
-#include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/sec_crc.hpp"
 
 int main()
@@ -8,52 +7,44 @@ int main()
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // Build a UBX-SEC-CRC payload.
-    uint8_t payload[sec_crc::payload_length] = {};
+    // A CRC report (generic u-blox layout; not part of the ZED-F9R spec).
+    sec_crc report{};
+    report.version = 0x01U;
+    report.crc_type = 0x02U;
+    report.reserved = 0U;
+    report.crc32 = 0xCAFEBABEU;
 
-    payload[0U] = 1U; // version
-    payload[1U] = 2U; // crc_type
-
-    castle::write_le16(&payload[2U], 0x1234U);       // reserved
-    castle::write_le32(&payload[4U], 0x89ABCDEFU);   // crc32
-
-    // Encode payload into a UBX frame.
-    uint8_t frame[64U];
+    uint8_t frame[UBX_FRAME_OVERHEAD + sec_crc::payload_length];
     castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(report, frame, sizeof(frame), written)));
+    CASTLE_SAMPLE_CHECK(written == sizeof(frame));
 
-    castle::status status = encode_frame(
-        sec_crc::msg_class,
-        sec_crc::msg_id,
-        castle::container::array_view<const uint8_t>(payload, sizeof(payload)),
-        frame,
-        sizeof(frame),
-        written);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(status));
-
-    // Decode the frame into a generic UBX message view.
-    message_view raw;
-    bool decoded = decode_frame(
-        castle::container::array_view<const uint8_t>(frame, written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(decoded);
-
-    // Verify message identity.
+    message_view raw{};
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(sec_crc::matches(raw));
 
-    // Decode the SEC-CRC payload.
-    sec_crc crc;
-    CASTLE_SAMPLE_CHECK(sec_crc::decode(raw, crc));
+    sec_crc decoded{};
+    CASTLE_SAMPLE_CHECK(sec_crc::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.version == 0x01U);
+    CASTLE_SAMPLE_CHECK(decoded.crc_type == 0x02U);
+    CASTLE_SAMPLE_CHECK(decoded.crc32 == 0xCAFEBABEU);
 
-    // Verify decoded fields.
-    CASTLE_SAMPLE_CHECK(crc.version == 1U);
-    CASTLE_SAMPLE_CHECK(crc.crc_type == 2U);
-    CASTLE_SAMPLE_CHECK(crc.reserved == 0x1234U);
-    CASTLE_SAMPLE_CHECK(crc.crc32 == 0x89ABCDEFU);
+    // Firmware extensions after the 8-byte prefix are ignored.
+    uint8_t extended[sec_crc::payload_length + 4U] = {};
+    for (castle::size_type index = 0U; index < sec_crc::payload_length; ++index)
+    {
+        extended[index] = raw.payload[index];
+    }
+    extended[sec_crc::payload_length] = 0xFFU;
+    message_view longer{{UBX_CLASS_SEC, UBX_ID_SEC_CRC, static_cast<uint16_t>(sizeof(extended))},
+                        castle::container::array_view<const uint8_t>(extended, sizeof(extended)),
+                        checksum{}};
+    CASTLE_SAMPLE_CHECK(sec_crc::decode(longer, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.crc32 == 0xCAFEBABEU);
 
-    // Different class/ID should not match SEC-CRC.
-    CASTLE_SAMPLE_CHECK(!raw.is(UBX_CLASS_CFG, UBX_ID_CFG_VALSET));
+    // Truncated payloads are rejected.
+    longer.header.payload_length = sec_crc::payload_length - 1U;
+    CASTLE_SAMPLE_CHECK(!sec_crc::decode(longer, decoded));
 
     return 0;
 }

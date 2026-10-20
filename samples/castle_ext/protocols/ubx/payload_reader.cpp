@@ -81,5 +81,39 @@ int main()
     CASTLE_SAMPLE_CHECK(failing_reader.read_bytes(1U) == nullptr);
     CASTLE_SAMPLE_CHECK(!failing_reader.ok());
 
+    // Floating point (R4/R8), typed field reads, fixed text and constant bytes.
+    uint8_t typed_payload[19U] = {};
+    typed_payload[0U] = 0x01U;                                         // version constant
+    castle::write_le32(&typed_payload[1U], castle::bit_cast<uint32_t>(2.5F));
+    castle::write_le64(&typed_payload[5U], castle::bit_cast<uint64_t>(-0.5));
+    castle::write_le16(&typed_payload[13U], static_cast<uint16_t>(-7));
+    typed_payload[15U] = 'F';
+    typed_payload[16U] = '9';                                          // CH[4] "F9" + NUL padding
+
+    payload_reader typed_reader(
+        castle::container::array_view<const uint8_t>(typed_payload, sizeof(typed_payload)));
+
+    typed_reader.constant(0x01U);
+    float speed = typed_reader.read_r4();
+    double offset = typed_reader.read_r8();
+    int16_t delta = 0;
+    typed_reader.field(delta);
+    castle::container::string<4U> name{};
+    typed_reader.text(name);
+
+    CASTLE_SAMPLE_CHECK(typed_reader.ok());
+    CASTLE_SAMPLE_CHECK(speed == 2.5F);
+    CASTLE_SAMPLE_CHECK(offset == -0.5);
+    CASTLE_SAMPLE_CHECK(delta == -7);
+    CASTLE_SAMPLE_CHECK(name.size() == 2U);
+    CASTLE_SAMPLE_CHECK(name[0U] == 'F');
+    CASTLE_SAMPLE_CHECK(typed_reader.remaining() == 0U);
+
+    // A mismatching constant byte latches the reader, like an overrun.
+    payload_reader version_reader(
+        castle::container::array_view<const uint8_t>(typed_payload, sizeof(typed_payload)));
+    version_reader.constant(0x02U);
+    CASTLE_SAMPLE_CHECK(!version_reader.ok());
+
     return 0;
 }

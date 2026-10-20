@@ -7,66 +7,39 @@ int main()
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // Build a NAV-ODO payload.
-    uint8_t payload[nav_odo::payload_length] = {};
+    nav_odo odometer;
+    odometer.version = 0U;
+    odometer.i_tow = 123456U;
+    odometer.distance = 1500U;          // m since last reset
+    odometer.total_distance = 987654U;  // m cumulative
+    odometer.distance_std = 12U;        // m, 1-sigma
 
-    payload[0U] = 1U; // version
-    // bytes [1..3] reserved
-
-    castle::write_le32(&payload[4U], 123456U); // iTOW
-    castle::write_le32(&payload[8U], 1500U);   // distance
-    castle::write_le32(&payload[12U], 25000U); // totalDistance
-    castle::write_le32(&payload[16U], 15U);    // distanceStd
-
-    // Encode a UBX-NAV-ODO frame.
-    uint8_t frame[128U];
+    uint8_t frame[frame_size(nav_odo::payload_length)];
     castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(encode_message(odometer, frame, sizeof(frame), written) == castle::status::ok);
 
-    castle::status status = encode_frame(
-        nav_odo::msg_class,
-        nav_odo::msg_id,
-        castle::container::array_view<const uint8_t>(
-            payload,
-            nav_odo::payload_length),
-        frame,
-        sizeof(frame),
-        written);
+    // version is the first payload byte, iTOW starts after 3 reserved bytes.
+    CASTLE_SAMPLE_CHECK(frame[UBX_FRAME_INDEX_PAYLOAD] == 0U);
+    CASTLE_SAMPLE_CHECK(castle::read_le32(&frame[UBX_FRAME_INDEX_PAYLOAD + 4U]) == 123456U);
 
-    CASTLE_SAMPLE_CHECK(castle::succeeded(status));
-
-    // Decode the UBX frame.
     message_view raw;
-    bool frame_ok = decode_frame(
-        castle::container::array_view<const uint8_t>(
-            frame,
-            written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(frame_ok);
-
-    // Verify message identification helpers.
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(nav_odo::matches(raw));
-    CASTLE_SAMPLE_CHECK(raw.is(UBX_CLASS_NAV, UBX_ID_NAV_ODO));
 
-    // Decode the NAV-ODO payload.
-    nav_odo odo;
-    bool decoded = nav_odo::decode(raw, odo);
+    nav_odo decoded;
+    CASTLE_SAMPLE_CHECK(nav_odo::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.version == 0U);
+    CASTLE_SAMPLE_CHECK(decoded.i_tow == 123456U);
+    CASTLE_SAMPLE_CHECK(decoded.distance == 1500U);
+    CASTLE_SAMPLE_CHECK(decoded.total_distance == 987654U);
+    CASTLE_SAMPLE_CHECK(decoded.distance_std == 12U);
 
-    CASTLE_SAMPLE_CHECK(decoded);
+    // A buffer too small for the frame reports castle::status::full.
+    CASTLE_SAMPLE_CHECK(encode_message(odometer, frame, sizeof(frame) - 1U, written) == castle::status::full);
 
-    // Verify decoded values.
-    CASTLE_SAMPLE_CHECK(odo.version == 1U);
-    CASTLE_SAMPLE_CHECK(odo.i_tow == 123456U);
-    CASTLE_SAMPLE_CHECK(odo.distance == 1500U);
-    CASTLE_SAMPLE_CHECK(odo.total_distance == 25000U);
-    CASTLE_SAMPLE_CHECK(odo.distance_std == 15U);
-
-    // Different message types do not match NAV-ODO.
-    message_view different{};
-    different.header.msg_class = UBX_CLASS_CFG;
-    different.header.msg_id = UBX_ID_CFG_VALSET;
-
-    CASTLE_SAMPLE_CHECK(!nav_odo::matches(different));
+    // A different message does not match NAV-ODO.
+    raw.header.msg_id = UBX_ID_NAV_PVT;
+    CASTLE_SAMPLE_CHECK(!nav_odo::matches(raw));
 
     return 0;
 }

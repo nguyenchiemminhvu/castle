@@ -2,117 +2,76 @@
 
 #include "castle_ext/protocols/ubx/messages/nav2_pvt.hpp"
 
+namespace
+{
+bool near(double actual, double expected)
+{
+    CASTLE_CONST double diff = actual - expected;
+    return (diff < 1e-9) && (diff > -1e-9);
+}
+} // namespace
+
 int main()
 {
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    uint8_t payload_data[nav2_pvt::payload_length] = {};
+    // NAV2-PVT is the secondary-output instance of the NAV-PVT layout.
+    nav2_pvt solution;
+    solution.i_tow = 654321U;
+    solution.year = 2026U;
+    solution.month = 10U;
+    solution.day = 20U;
+    solution.hour = 8U;
+    solution.minute = 15U;
+    solution.second = 30U;
+    solution.valid = nav2_pvt::VALID_DATE | nav2_pvt::VALID_TIME | nav2_pvt::VALID_MAG_DEC;
+    solution.fix_type = nav_pvt_fix_type::gnss_dr;
+    solution.flags = static_cast<uint8_t>(nav2_pvt::FLAGS_GNSS_FIX_OK | nav2_pvt::FLAGS_DIFF_SOLN
+                                          | (static_cast<uint8_t>(nav_pvt_psm_state::tracking)
+                                             << nav2_pvt::FLAGS_PSM_STATE_SHIFT));
+    solution.flags3 = nav2_pvt::FLAGS3_INVALID_LLH;
+    solution.num_sv = 9U;
+    solution.lon = -1223456789;  // -122.3456789 deg
+    solution.lat = 473456789;    // 47.3456789 deg
+    solution.h_msl = -5000;      // -5 m
+    solution.vel_d = -250;       // -0.25 m/s (climbing)
+    solution.head_veh = 18000000; // 180 deg
+    solution.mag_acc = 50U;      // 0.5 deg
 
-    castle::write_le32(&payload_data[0U], 1000U);            // iTOW
-    castle::write_le16(&payload_data[4U], 2026U);            // year
-    payload_data[6U] = 10U;                          // month
-    payload_data[7U] = 2U;                           // day
-    payload_data[8U] = 12U;                          // hour
-    payload_data[9U] = 34U;                          // min
-    payload_data[10U] = 56U;                         // sec
-    payload_data[11U] = nav2_pvt::VALID_DATE
-                       | nav2_pvt::VALID_TIME;       // valid
-
-    castle::write_le32(&payload_data[12U], 50U);             // tAcc
-    castle::write_le32(&payload_data[16U], 100U);            // nano
-
-    payload_data[20U] = static_cast<uint8_t>(nav2_pvt_fix_type::fix_3d);
-    payload_data[21U] = nav2_pvt::FLAGS_GNSS_FIX_OK;
-    payload_data[22U] = 0U;                          // flags2
-    payload_data[23U] = 12U;                         // numSV
-
-    castle::write_le32(&payload_data[24U], 123456789U);      // lon
-    castle::write_le32(&payload_data[28U], 987654321U);      // lat
-    castle::write_le32(&payload_data[32U], 100U);            // height
-    castle::write_le32(&payload_data[36U], 80U);             // hMSL
-
-    castle::write_le32(&payload_data[40U], 5U);              // hAcc
-    castle::write_le32(&payload_data[44U], 7U);              // vAcc
-
-    castle::write_le32(&payload_data[48U], 10U);             // velN
-    castle::write_le32(&payload_data[52U], 20U);             // velE
-    castle::write_le32(&payload_data[56U], 30U);             // velD
-    castle::write_le32(&payload_data[60U], 40U);             // gSpeed
-    castle::write_le32(&payload_data[64U], 50U);             // headMot
-
-    castle::write_le32(&payload_data[68U], 2U);              // sAcc
-    castle::write_le32(&payload_data[72U], 3U);              // headAcc
-
-    castle::write_le16(&payload_data[76U], 150U);            // pDOP
-
-    payload_data[78U] = 0U;                          // flags3
-    // bytes 79..83 reserved
-
-    castle::write_le32(&payload_data[84U], 60U);             // headVeh
-    castle::write_le16(&payload_data[88U], 15U);             // magDec
-    castle::write_le16(&payload_data[90U], 5U);              // magAcc
+    uint8_t frame[frame_size(nav2_pvt::payload_length)];
+    castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(encode_message(solution, frame, sizeof(frame), written) == castle::status::ok);
 
     message_view raw;
-    raw.header.msg_class = UBX_CLASS_NAV2;
-    raw.header.msg_id = UBX_ID_NAV2_PVT;
-    raw.header.payload_length = nav2_pvt::payload_length;
-    raw.payload =
-        castle::container::array_view<const uint8_t>(
-            payload_data,
-            sizeof(payload_data));
-
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(raw.is(UBX_CLASS_NAV2, UBX_ID_NAV2_PVT));
     CASTLE_SAMPLE_CHECK(nav2_pvt::matches(raw));
+    CASTLE_SAMPLE_CHECK(!nav_pvt::matches(raw)); // same ID, different class
 
-    nav2_pvt message;
-    bool decoded = nav2_pvt::decode(raw, message);
+    nav2_pvt pvt;
+    CASTLE_SAMPLE_CHECK(nav2_pvt::decode(raw, pvt));
+    CASTLE_SAMPLE_CHECK(pvt.i_tow == 654321U);
+    CASTLE_SAMPLE_CHECK(pvt.minute == 15U);
+    CASTLE_SAMPLE_CHECK(pvt.second == 30U);
+    CASTLE_SAMPLE_CHECK(pvt.fix_type == nav_pvt_fix_type::gnss_dr);
+    CASTLE_SAMPLE_CHECK(pvt.fix_ok() && pvt.diff_soln());
+    CASTLE_SAMPLE_CHECK(pvt.valid_mag());
+    CASTLE_SAMPLE_CHECK(pvt.psm_state() == nav_pvt_psm_state::tracking);
+    CASTLE_SAMPLE_CHECK(pvt.carr_soln() == nav_pvt_carr_soln::none);
+    CASTLE_SAMPLE_CHECK(!pvt.confirmed_time());
+    CASTLE_SAMPLE_CHECK(pvt.invalid_llh());
+    CASTLE_SAMPLE_CHECK(pvt.longitude_deg() < -122.34 && pvt.longitude_deg() > -122.35);
+    CASTLE_SAMPLE_CHECK(near(pvt.h_msl_m(), -5.0));
+    CASTLE_SAMPLE_CHECK(near(pvt.vel_d_m_s(), -0.25));
+    CASTLE_SAMPLE_CHECK(near(pvt.head_veh_deg(), 180.0));
+    CASTLE_SAMPLE_CHECK(near(pvt.mag_acc_deg(), 0.5));
 
-    CASTLE_SAMPLE_CHECK(decoded);
-
-    CASTLE_SAMPLE_CHECK(message.i_tow == 1000U);
-    CASTLE_SAMPLE_CHECK(message.year == 2026U);
-    CASTLE_SAMPLE_CHECK(message.month == 10U);
-    CASTLE_SAMPLE_CHECK(message.day == 2U);
-    CASTLE_SAMPLE_CHECK(message.hour == 12U);
-    CASTLE_SAMPLE_CHECK(message.min == 34U);
-    CASTLE_SAMPLE_CHECK(message.sec == 56U);
-
-    CASTLE_SAMPLE_CHECK(
-        message.fix_type == nav2_pvt_fix_type::fix_3d);
-
-    CASTLE_SAMPLE_CHECK(
-        (message.flags & nav2_pvt::FLAGS_GNSS_FIX_OK) != 0U);
-
-    CASTLE_SAMPLE_CHECK(message.num_sv == 12U);
-
-    CASTLE_SAMPLE_CHECK(message.lon == 123456789);
-    CASTLE_SAMPLE_CHECK(message.lat == 987654321);
-    CASTLE_SAMPLE_CHECK(message.height == 100);
-    CASTLE_SAMPLE_CHECK(message.h_msl == 80);
-
-    CASTLE_SAMPLE_CHECK(message.h_acc == 5U);
-    CASTLE_SAMPLE_CHECK(message.v_acc == 7U);
-
-    CASTLE_SAMPLE_CHECK(message.vel_n == 10);
-    CASTLE_SAMPLE_CHECK(message.vel_e == 20);
-    CASTLE_SAMPLE_CHECK(message.vel_d == 30);
-    CASTLE_SAMPLE_CHECK(message.g_speed == 40);
-    CASTLE_SAMPLE_CHECK(message.head_mot == 50);
-
-    CASTLE_SAMPLE_CHECK(message.s_acc == 2U);
-    CASTLE_SAMPLE_CHECK(message.head_acc == 3U);
-    CASTLE_SAMPLE_CHECK(message.p_dop == 150U);
-
-    CASTLE_SAMPLE_CHECK(message.head_veh == 60);
-    CASTLE_SAMPLE_CHECK(message.mag_dec == 15);
-    CASTLE_SAMPLE_CHECK(message.mag_acc == 5U);
-
-    // Wrong payload length must be rejected.
-    message_view invalid = raw;
-    invalid.header.payload_length = nav2_pvt::payload_length - 1U;
-
-    nav2_pvt rejected;
-    CASTLE_SAMPLE_CHECK(!nav2_pvt::decode(invalid, rejected));
+    // A NAV-PVT frame is not accepted as NAV2-PVT.
+    nav_pvt primary;
+    CASTLE_SAMPLE_CHECK(encode_message(primary, frame, sizeof(frame), written) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(!nav2_pvt::decode(raw, pvt));
 
     return 0;
 }

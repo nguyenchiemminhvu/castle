@@ -2,7 +2,7 @@
 
 ## Overview
 
-Defines the UBX MON-IO decoded model with one fixed-capacity record per monitored I/O port.
+Model of UBX-MON-IO (0x0a 0x02), the per-port I/O system status (periodic/polled, deprecated in favour of UBX-MON-COMMS). The payload is a sequence of 20-byte port blocks with no header and no count field (`[0..n]·20`); the port count is implied by the payload length, and the decoded blocks are stored in a fixed-capacity vector.
 
 ## Header
 
@@ -10,65 +10,83 @@ Defines the UBX MON-IO decoded model with one fixed-capacity record per monitore
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
-- [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
-- [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
+- [castle/core/compiler.hpp](../../../../core/compiler.md)
+- [castle/core/types.hpp](../../../../core/types.md)
+- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
+- [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
+- [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
+- [detail/repeated_group.hpp](detail/repeated_group.md)
 - `stdint.h`
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `mon_io_port` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `mon_io<MaxPorts=8U>` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `mon_io::msg_class` | `static constexpr uint8_t` protocol/configuration constant (`UBX_CLASS_MON`). |
-| `mon_io::msg_id` | `static constexpr uint8_t` protocol/configuration constant (`UBX_ID_MON_IO`). |
-| `mon_io::block_length` | `static constexpr castle::size_type` protocol/configuration constant (`20U`). |
-| `mon_io::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `mon_io::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
+| `mon_io_port` | One 20-byte port block (`wire_size = 20`, `layout()`). |
+| `mon_io<MaxPorts = 8>` | Message model; stores up to `MaxPorts` port blocks. |
 
-### `mon_io_port` data members
+### Constants
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `rx_bytes` | `uint32_t` | `0U` | Received byte count for the port. |
-| `tx_bytes` | `uint32_t` | `0U` | Transmitted byte count for the port. |
-| `parity_errs` | `uint16_t` | `0U` | Parity error counter. |
-| `framing_errs` | `uint16_t` | `0U` | Framing error counter. |
-| `overrun_errs` | `uint16_t` | `0U` | Overrun error counter. |
-| `break_cond` | `uint16_t` | `0U` | Break-condition counter/status field. |
-| `rx_busy` | `uint8_t` | `0U` | Receive-busy status. |
-| `tx_busy` | `uint8_t` | `0U` | Transmit-busy status. |
+| Constant | Value | Description |
+| --- | --- | --- |
+| `mon_io::msg_class` / `msg_id` | `0x0A` / `0x02` | UBX class / ID. |
+| `mon_io::header_length` | `0` | No header before the repeated group. |
+| `mon_io::block_length` | `20` | Port block size. |
 
-### `mon_io` data members
+### `mon_io_port` fields
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `num_ports` | `uint8_t` | `0U` | Number of I/O port records decoded. |
-| `ports` | `castle::container::array<mon_io_port,MaxPorts>` | `—` | Fixed-capacity I/O port records. |
+| Field | Type | Offset | Unit | Description |
+| --- | --- | --- | --- | --- |
+| `rx_bytes` | `uint32_t` | 0 + n·20 | bytes | Number of bytes ever received. |
+| `tx_bytes` | `uint32_t` | 4 + n·20 | bytes | Number of bytes ever sent. |
+| `parity_errs` | `uint16_t` | 8 + n·20 | - | 100 ms timeslots with parity errors. |
+| `framing_errs` | `uint16_t` | 10 + n·20 | - | 100 ms timeslots with framing errors. |
+| `overrun_errs` | `uint16_t` | 12 + n·20 | - | 100 ms timeslots with overrun errors. |
+| `break_cond` | `uint16_t` | 14 + n·20 | - | 100 ms timeslots with break conditions. |
+| (reserved0) | `U1[4]` | 16 + n·20 | - | Skipped on decode, written as zero. |
+
+### `mon_io` fields
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `ports` | `castle::container::vector<mon_io_port, MaxPorts>` | Port blocks in wire order; `ports.size()` is the number stored. |
+
+### Functions
+
+| Function | Description |
+| --- | --- |
+| `static bool matches(const message_view&)` | `true` for class `0x0A` / ID `0x02`. |
+| `static bool decode(const message_view&, mon_io&)` | `false` for wrong class/ID or a length that is not a multiple of 20; an empty payload decodes to zero ports. |
+| `void encode(payload_writer&) const` | Writes every stored port block. |
+
 
 ## Usage Example
 
 ```cpp
-#include "castle_ext/protocols/ubx/messages/mon_io.hpp"
-
-using castle::protocols::ubx::message_view;
+using namespace castle::protocols::ubx;
 using castle::protocols::ubx::messages::mon_io;
 
-void handle(const message_view& raw) {
-    mon_io<4U> value{};
-    if (mon_io::decode(raw, value)) {
-        // The fixed-capacity arrays contain at most the configured bound.
+void on_message(const message_view& raw) {
+    mon_io<6U> io{};
+    if (mon_io<6U>::decode(raw, io)) {
+        for (const auto& port : io.ports) {
+            (void)port.rx_bytes;
+        }
     }
 }
 ```
 
+The full, runnable example is `samples/castle_ext/protocols/ubx/messages/mon_io.cpp`.
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Payload must be non-empty and its size must be an exact multiple of the record block length.
-- Template capacity parameters bound retained records/text; excess protocol records are skipped or ignored after validation rather than dynamically allocated.
+- Payload length must be a whole multiple of 20 bytes (`implied_group_count`). Zero ports (an empty payload, which `decode_frame()` presents as a null view) is accepted explicitly.
+- Ports beyond `MaxPorts` are skipped; `ports.size()` is then `MaxPorts`. The on-wire count is `raw.payload_length() / 20`.
+- Earlier versions exposed `rx_busy` / `tx_busy` and `num_ports`. `rx_busy` / `tx_busy` were not in the spec (bytes 16..19 are `reserved0`) and are removed; use `ports.size()` instead of `num_ports`.
+- No heap allocation: every member lives in the value itself (fixed-capacity Castle containers only); no exceptions, no RTTI.
+- `decode()` sets `out` to a value-initialised object first and resets it again on any failure, so callers never observe partial state.
+- `message_view` is non-owning; its payload must stay valid during `decode()`. Decoded values own their data and may outlive the frame.
+- Thread-safety: none. Values are plain value types; concurrent access to one instance needs external synchronisation.

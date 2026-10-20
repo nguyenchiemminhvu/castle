@@ -1,64 +1,59 @@
 #include "sample_support.hpp"
 
-#include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/tim_tp.hpp"
+
+namespace
+{
+bool near(double value, double expected, double tolerance)
+{
+    const double difference = value - expected;
+    return (difference <= tolerance) && (difference >= -tolerance);
+}
+} // namespace
 
 int main()
 {
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // Build a UBX-TIM-TP payload.
-    uint8_t payload[tim_tp::payload_length] = {};
+    // Next pulse at TOW 345600000 ms + 0.5 ms, UTC(USNO) time base, RAIM active.
+    tim_tp pulse{};
+    pulse.tow_ms = 345600000U;
+    pulse.tow_sub_ms = 0x80000000U;
+    pulse.q_err = -1500;
+    pulse.week = 2300U;
+    pulse.flags = static_cast<uint8_t>(tim_tp::FLAGS_TIME_BASE | tim_tp::FLAGS_UTC
+                                       | (static_cast<uint8_t>(tim_tp_raim::active) << 2U));
+    pulse.ref_info = static_cast<uint8_t>((static_cast<uint8_t>(nav_timeutc_utc_standard::usno) << 4U)
+                                          | static_cast<uint8_t>(tim_tp_time_ref_gnss::unknown));
 
-    castle::write_le32(&payload[0U], 123456U);                        // tow_ms
-    castle::write_le32(&payload[4U], 789U);                           // tow_sub_ms
-    castle::write_le32(&payload[8U], static_cast<uint32_t>(-250));    // q_err
-
-    castle::write_le16(&payload[12U], 2045U); // week
-
-    payload[14U] = 0xA5U; // flags
-    payload[15U] = 0x03U; // ref_info
-
-    // Encode payload into a UBX frame.
-    uint8_t frame[64U];
+    uint8_t frame[UBX_FRAME_OVERHEAD + tim_tp::payload_length];
     castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(pulse, frame, sizeof(frame), written)));
 
-    castle::status status = encode_frame(
-        tim_tp::msg_class,
-        tim_tp::msg_id,
-        castle::container::array_view<const uint8_t>(payload, sizeof(payload)),
-        frame,
-        sizeof(frame),
-        written);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(status));
-
-    // Decode frame into a generic UBX message view.
-    message_view raw;
-    bool decoded = decode_frame(
-        castle::container::array_view<const uint8_t>(frame, written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(decoded);
-
-    // Verify message identity.
+    message_view raw{};
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(tim_tp::matches(raw));
 
-    // Decode TIM-TP payload.
-    tim_tp tp;
-    CASTLE_SAMPLE_CHECK(tim_tp::decode(raw, tp));
+    tim_tp decoded{};
+    CASTLE_SAMPLE_CHECK(tim_tp::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.tow_ms == 345600000U);
+    CASTLE_SAMPLE_CHECK(decoded.week == 2300U);
+    CASTLE_SAMPLE_CHECK(decoded.time_base() == tim_tp_time_base::utc);
+    CASTLE_SAMPLE_CHECK(decoded.utc_available());
+    CASTLE_SAMPLE_CHECK(decoded.raim() == tim_tp_raim::active);
+    CASTLE_SAMPLE_CHECK(!decoded.q_err_invalid());
+    CASTLE_SAMPLE_CHECK(decoded.utc_standard() == nav_timeutc_utc_standard::usno);
+    CASTLE_SAMPLE_CHECK(decoded.time_ref_gnss() == tim_tp_time_ref_gnss::unknown);
 
-    // Verify decoded fields.
-    CASTLE_SAMPLE_CHECK(tp.tow_ms == 123456U);
-    CASTLE_SAMPLE_CHECK(tp.tow_sub_ms == 789U);
-    CASTLE_SAMPLE_CHECK(tp.q_err == -250);
-    CASTLE_SAMPLE_CHECK(tp.week == 2045U);
-    CASTLE_SAMPLE_CHECK(tp.flags == 0xA5U);
-    CASTLE_SAMPLE_CHECK(tp.ref_info == 0x03U);
+    // Scaled helpers.
+    CASTLE_SAMPLE_CHECK(near(decoded.tow_sub_ms_ms(), 0.5, 1e-12));
+    CASTLE_SAMPLE_CHECK(near(decoded.q_err_ns(), -1.5, 1e-12));
 
-    // Different message type must not match TIM-TP.
-    CASTLE_SAMPLE_CHECK(!raw.is(UBX_CLASS_SEC, UBX_ID_SEC_SIG));
+    // A wrong length is rejected.
+    message_view shorter = raw;
+    shorter.header.payload_length = 15U;
+    CASTLE_SAMPLE_CHECK(!tim_tp::decode(shorter, decoded));
 
     return 0;
 }

@@ -2,7 +2,13 @@
 
 ## Overview
 
-Defines the UBX ESF-INS inertial-sensor decoded model, including validity flags, time of week, angular-rate measurements, and acceleration measurements.
+Model of UBX-ESF-INS (0x10 0x15), the periodic/polled vehicle-dynamics output: compensated angular rates and
+gravity-free accelerations in the vehicle frame, plus per-axis validity flags. Fixed 36-byte payload through
+`detail::fixed_message`.
+
+**Change:** the `BF0_*` masks were wrong (bits 0..5). The spec puts the message version in `bitfield0` bits 7..0
+and the validity flags in bits 8..13; masks are now `0x100`..`0x2000`, with a new `BF0_VERSION`, `version()`
+and per-axis validity accessors.
 
 ## Header
 
@@ -10,60 +16,66 @@ Defines the UBX ESF-INS inertial-sensor decoded model, including validity flags,
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
-- [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
-- `stdint.h`
+- [castle/core/compiler.hpp](../../../../core/compiler.md)
+- [castle/core/constants.hpp](../../../../core/constants.md)
+- [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
+- [detail/fixed_message.hpp](detail/fixed_message.md)
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `esf_ins` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `esf_ins::msg_class` | `static constexpr uint8_t` protocol/configuration constant (`UBX_CLASS_ESF`). |
-| `esf_ins::msg_id` | `static constexpr uint8_t` protocol/configuration constant (`UBX_ID_ESF_INS`). |
-| `esf_ins::payload_length` | `static constexpr castle::size_type` protocol/configuration constant (`36U`). |
-| `esf_ins::BF0_X_ANG_RATE_VALID` | `static constexpr uint32_t` protocol/configuration constant (`1U`). |
-| `esf_ins::BF0_Y_ANG_RATE_VALID` | `static constexpr uint32_t` protocol/configuration constant (`2U`). |
-| `esf_ins::BF0_Z_ANG_RATE_VALID` | `static constexpr uint32_t` protocol/configuration constant (`4U`). |
-| `esf_ins::BF0_X_ACCEL_VALID` | `static constexpr uint32_t` protocol/configuration constant (`8U`). |
-| `esf_ins::BF0_Y_ACCEL_VALID` | `static constexpr uint32_t` protocol/configuration constant (`16U`). |
-| `esf_ins::BF0_Z_ACCEL_VALID` | `static constexpr uint32_t` protocol/configuration constant (`32U`). |
-| `esf_ins::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `esf_ins::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
+| `esf_ins` | UBX-ESF-INS payload; `fixed_message<esf_ins, UBX_CLASS_ESF, UBX_ID_ESF_INS, 36U>`. |
 
-### `esf_ins` data members
+### Constants
 
-| Field | Type | Default | Description |
+| Name | Value | Meaning |
+| --- | --- | --- |
+| `msg_class` / `msg_id` / `payload_length` | `0x10` / `0x15` / `36` | Frame identity and exact length. |
+| `BF0_VERSION` | `0x000000FF` | `bitfield0` bits 7..0: message version. |
+| `BF0_X_ANG_RATE_VALID` / `BF0_Y_ANG_RATE_VALID` / `BF0_Z_ANG_RATE_VALID` | `0x100` / `0x200` / `0x400` | Bits 8 / 9 / 10. |
+| `BF0_X_ACCEL_VALID` / `BF0_Y_ACCEL_VALID` / `BF0_Z_ACCEL_VALID` | `0x800` / `0x1000` / `0x2000` | Bits 11 / 12 / 13. |
+
+### Fields
+
+| Offset | Field | Type | Unit / scale |
 | --- | --- | --- | --- |
-| `bitfield0` | `uint32_t` | `0U` | Packed ESF-INS validity/status flags. |
-| `i_tow` | `uint32_t` | `0U` | GNSS time-of-week field. |
-| `x_ang_rate` | `int32_t` | `0` | X-axis angular-rate measurement. |
-| `y_ang_rate` | `int32_t` | `0` | Y-axis angular-rate measurement. |
-| `z_ang_rate` | `int32_t` | `0` | Z-axis angular-rate measurement. |
-| `x_accel` | `int32_t` | `0` | X-axis acceleration measurement. |
-| `y_accel` | `int32_t` | `0` | Y-axis acceleration measurement. |
-| `z_accel` | `int32_t` | `0` | Z-axis acceleration measurement. |
+| 0 | `bitfield0` | `uint32_t` | version + `BF0_*` bits |
+| 4 | reserved | 4 bytes | written as zero |
+| 8 | `i_tow` | `uint32_t` | ms |
+| 12 / 16 / 20 | `x_ang_rate` / `y_ang_rate` / `z_ang_rate` | `int32_t` | 1e-3 deg/s |
+| 24 / 28 / 32 | `x_accel` / `y_accel` / `z_accel` | `int32_t` | 1e-2 m/s^2 |
+
+### Functions
+
+| Function | Description |
+| --- | --- |
+| `static bool matches(const message_view&)` | Class/ID check. |
+| `static bool decode(const message_view&, esf_ins&)` | Exact-length decode; `out` value-initialised on failure. |
+| `void encode(payload_writer&) const` | Used by `encode_message()`. |
+| `uint8_t version() const` | `bitfield0` bits 7..0. |
+| `bool x_ang_rate_valid() const` … `z_accel_valid() const` | One accessor per validity bit. |
+| `double x_ang_rate_deg_s() const` … `z_ang_rate_deg_s()` | Raw × 1e-3. |
+| `double x_accel_m_s2() const` … `z_accel_m_s2()` | Raw × 1e-2. |
 
 ## Usage Example
 
 ```cpp
-#include "castle_ext/protocols/ubx/messages/esf_ins.hpp"
-
-using castle::protocols::ubx::message_view;
-using castle::protocols::ubx::messages::esf_ins;
-
-void handle(const message_view& raw) {
-    esf_ins value{};
-    if (esf_ins::decode(raw, value)) {
-        // `value` contains the decoded, typed fields.
-    }
+esf_ins dynamics;
+if (esf_ins::decode(raw, dynamics) && dynamics.z_ang_rate_valid())
+{
+    double yaw_rate = dynamics.z_ang_rate_deg_s();
 }
 ```
 
+Full walk-through: `samples/castle_ext/protocols/ubx/messages/esf_ins.cpp`.
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Payload length must exactly equal the protocol `payload_length` constant before field extraction.
+- `decode()` accepts exactly 36 payload bytes and checks the class/ID; anything else returns `false`.
+- Check the matching `*_valid()` accessor before using an axis value.
+- Value type: every member lives in the object; no heap allocation, no exceptions.
+- `message_view` is non-owning; its payload must stay valid while `decode()` runs.
+- Thread-safety: none. Instances are plain values and are not thread-safe; synchronise externally when shared.

@@ -2,79 +2,54 @@
 
 #include "castle_ext/protocols/ubx/messages/nav_att.hpp"
 
+namespace
+{
+bool near(double actual, double expected)
+{
+    CASTLE_CONST double diff = actual - expected;
+    return (diff < 1e-9) && (diff > -1e-9);
+}
+} // namespace
+
 int main()
 {
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // Build a NAV-ATT payload.
-    uint8_t payload[nav_att::payload_length] = {};
-
-    castle::write_le32(&payload[0U], 123456U);               // iTOW
-    payload[4U] = 1U;                               // version
-
-    castle::write_le32(&payload[8U],  static_cast<uint32_t>(1000));   // roll
-    castle::write_le32(&payload[12U], static_cast<uint32_t>(-2000));  // pitch
-    castle::write_le32(&payload[16U], static_cast<uint32_t>(3000));   // heading
-
-    castle::write_le32(&payload[20U], 100U);  // accRoll
-    castle::write_le32(&payload[24U], 200U);  // accPitch
-    castle::write_le32(&payload[28U], 300U);  // accHeading
-
-    // Encode a UBX-NAV-ATT frame.
-    uint8_t frame[128U];
-    castle::size_type written = 0U;
-
-    castle::status status = encode_frame(
-        nav_att::msg_class,
-        nav_att::msg_id,
-        castle::container::array_view<const uint8_t>(
-            payload,
-            nav_att::payload_length),
-        frame,
-        sizeof(frame),
-        written);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(status));
-
-    // Decode the UBX frame.
-    message_view raw;
-    bool frame_ok = decode_frame(
-        castle::container::array_view<const uint8_t>(
-            frame,
-            written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(frame_ok);
-
-    // Verify message identification helpers.
-    CASTLE_SAMPLE_CHECK(nav_att::matches(raw));
-    CASTLE_SAMPLE_CHECK(raw.is(UBX_CLASS_NAV, UBX_ID_NAV_ATT));
-
-    // Decode the NAV-ATT payload.
+    // Angles and accuracies are transmitted in 1e-5 deg.
     nav_att attitude;
-    bool decoded = nav_att::decode(raw, attitude);
+    attitude.i_tow = 123456U;
+    attitude.version = 0U;
+    attitude.roll = -150000;       // -1.5 deg
+    attitude.pitch = 250000;       // 2.5 deg
+    attitude.heading = 9000000;    // 90 deg
+    attitude.acc_roll = 50000U;    // 0.5 deg
+    attitude.acc_pitch = 60000U;   // 0.6 deg
+    attitude.acc_heading = 0U;     // heading not available
 
-    CASTLE_SAMPLE_CHECK(decoded);
+    uint8_t frame[frame_size(nav_att::payload_length)];
+    castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(encode_message(attitude, frame, sizeof(frame), written) == castle::status::ok);
 
-    // Verify decoded values.
-    CASTLE_SAMPLE_CHECK(attitude.i_tow == 123456U);
-    CASTLE_SAMPLE_CHECK(attitude.version == 1U);
+    message_view raw;
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(nav_att::matches(raw));
 
-    CASTLE_SAMPLE_CHECK(attitude.roll == 1000);
-    CASTLE_SAMPLE_CHECK(attitude.pitch == -2000);
-    CASTLE_SAMPLE_CHECK(attitude.heading == 3000);
+    nav_att decoded;
+    CASTLE_SAMPLE_CHECK(nav_att::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.i_tow == 123456U);
+    CASTLE_SAMPLE_CHECK(decoded.roll == -150000);
+    CASTLE_SAMPLE_CHECK(near(decoded.roll_deg(), -1.5));
+    CASTLE_SAMPLE_CHECK(near(decoded.pitch_deg(), 2.5));
+    CASTLE_SAMPLE_CHECK(near(decoded.heading_deg(), 90.0));
+    CASTLE_SAMPLE_CHECK(near(decoded.acc_roll_deg(), 0.5));
+    CASTLE_SAMPLE_CHECK(near(decoded.acc_pitch_deg(), 0.6));
+    CASTLE_SAMPLE_CHECK(decoded.acc_heading == 0U); // zero accuracy: heading unavailable
+    CASTLE_SAMPLE_CHECK(near(decoded.acc_heading_deg(), 0.0));
 
-    CASTLE_SAMPLE_CHECK(attitude.acc_roll == 100U);
-    CASTLE_SAMPLE_CHECK(attitude.acc_pitch == 200U);
-    CASTLE_SAMPLE_CHECK(attitude.acc_heading == 300U);
-
-    // A different message type should not match NAV-ATT.
-    message_view different{};
-    different.header.msg_class = UBX_CLASS_CFG;
-    different.header.msg_id = UBX_ID_CFG_VALSET;
-
-    CASTLE_SAMPLE_CHECK(!nav_att::matches(different));
+    // A different message does not match NAV-ATT.
+    raw.header.msg_id = UBX_ID_NAV_PVT;
+    CASTLE_SAMPLE_CHECK(!nav_att::matches(raw));
 
     return 0;
 }

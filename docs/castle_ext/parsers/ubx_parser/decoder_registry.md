@@ -30,7 +30,8 @@ This design keeps the UBX API concise while allowing the same architecture to be
 | `raw_view_type` | Alias for `castle::protocols::ubx::message_view`, the validated zero-copy view consumed by UBX decoders. |
 | `message_decoder<Message, MaxSubscribers, StorageSize, StorageAlignment>` | UBX-bound alias of the generic `castle::parsers::message_decoder`. |
 | `decoder_registry<Decoders...>` | UBX-bound alias of the generic fixed-capacity `castle::parsers::decoder_registry`. |
-| `default_decoder_registry<MaxSubscribers, StorageSize, StorageAlignment>` | Pre-configured UBX decoder registry covering all built-in UBX message decoders. |
+| `default_decoder_registry<MaxSubscribers, StorageSize, StorageAlignment>` | Pre-configured UBX decoder registry covering every built-in receiver output (73 decoders). |
+| `<name>_decoder<MaxSubscribers, StorageSize, StorageAlignment>` | One convenience alias per receiver output, e.g. `nav_pvt_decoder`, `nav_relposned_decoder`, `mon_rf_decoder`, `rxm_rawx_decoder`, `upd_sos_restored_decoder`. |
 | `dispatch_result` | Alias for the generic dispatch outcome containing `matched` and `decoded` counts. |
 | `attach(Parser&, Registry&)` | Connects a UBX parser's message callback to a UBX decoder registry with compile-time raw-view validation. |
 
@@ -91,9 +92,11 @@ using default_decoder_registry = castle::parsers::decoder_registry<...>;
 
 ```
 
-`default_decoder_registry` is a batteries-included, compile-time registry that packs decoders for all built-in UBX message types (ACK, CFG, ESF, INF, MON, NAV, NAV2, RXM, SEC, TIM, UPD).
+`default_decoder_registry` is a batteries-included compile-time registry with one decoder for every message the receiver can send: ACK, CFG (VALGET response, SPT), ESF, INF (any severity), MGA (ACK, DBD), MON, NAV, NAV2, RXM (except PMREQ), SEC, TIM and UPD-SOS (ack, restored). Each frame matches exactly one of them.
 
-It allows applications to listen to any standard UBX message out of the box without needing to manually specify a custom decoder list.
+Host-to-receiver messages are deliberately left out: CFG-RST/VALSET/VALDEL/VALGET-poll, RXM-PMREQ, UPD-SOS save/clear, and the MGA assistance inputs (GPS, GAL, BDS, QZSS, GLO, INI). The application encodes these with `encode_message()`. For loop-back testing, register their decoders in a custom `decoder_registry<...>`.
+
+The default registry is large: one signal per decoder, so roughly 9 KB with `MaxSubscribers = 1` on x86-64. On small targets, prefer a custom registry with only the messages you subscribe to.
 
 ### `dispatch_result`
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Defines the UBX NAV2-PVT navigation solution model, including UTC/GNSS validity, fix type, position, velocity, heading, and accuracy fields.
+Typed model of UBX-NAV2-PVT (class 0x29, ID 0x07), the secondary-output navigation position, velocity and time solution. Its payload is identical to UBX-NAV-PVT, so `nav2_pvt` is an alias of the shared template `basic_nav_pvt` with the NAV2 class/ID; every field, mask, enum and helper is documented in [`nav_pvt.md`](nav_pvt.md).
 
 ## Header
 
@@ -10,81 +10,39 @@ Defines the UBX NAV2-PVT navigation solution model, including UTC/GNSS validity,
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
-- [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
-- `stdint.h`
+- [`castle_ext/protocols/ubx/messages/nav_pvt.hpp`](nav_pvt.md) (`basic_nav_pvt`, `nav_pvt_fix_type`, `nav_pvt_psm_state`, `nav_pvt_carr_soln`)
+- [`detail/fixed_message.hpp`](detail/fixed_message.md)
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `nav2_pvt` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `nav2_pvt::msg_class` | `static constexpr uint8_t` protocol/configuration constant (`UBX_CLASS_NAV2`). |
-| `nav2_pvt::msg_id` | `static constexpr uint8_t` protocol/configuration constant (`UBX_ID_NAV2_PVT`). |
-| `nav2_pvt::payload_length` | `static constexpr castle::size_type` protocol/configuration constant (`92U`). |
-| `nav2_pvt::VALID_DATE` | `static constexpr uint8_t` protocol/configuration constant (`1U`). |
-| `nav2_pvt::VALID_TIME` | `static constexpr uint8_t` protocol/configuration constant (`2U`). |
-| `nav2_pvt::VALID_FULLY` | `static constexpr uint8_t` protocol/configuration constant (`4U`). |
-| `nav2_pvt::VALID_MAG_DEC` | `static constexpr uint8_t` protocol/configuration constant (`8U`). |
-| `nav2_pvt::FLAGS_GNSS_FIX_OK` | `static constexpr uint8_t` protocol/configuration constant (`1U`). |
-| `nav2_pvt::FLAGS_DIFF_SOLN` | `static constexpr uint8_t` protocol/configuration constant (`2U`). |
-| `nav2_pvt::FLAGS_PSM_STATE_MASK` | `static constexpr uint8_t` protocol/configuration constant (`0x1CU`). |
-| `nav2_pvt::FLAGS_HEAD_VEH_VALID` | `static constexpr uint8_t` protocol/configuration constant (`0x20U`). |
-| `nav2_pvt::FLAGS_CARR_SOLN_MASK` | `static constexpr uint8_t` protocol/configuration constant (`0xC0U`). |
-| `nav2_pvt_fix_type` | Strongly typed protocol enumeration used by the decoded model. |
-| `nav2_pvt::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `nav2_pvt::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
+| `nav2_pvt` | `basic_nav_pvt<UBX_CLASS_NAV2, UBX_ID_NAV2_PVT>`. |
 
-### `nav2_pvt` data members
+### Constants
 
-| Field | Type | Default | Description |
+| Constant | Type | Value | Description |
 | --- | --- | --- | --- |
-| `i_tow` | `uint32_t` | `0U` | GNSS time-of-week field. |
-| `year` | `uint16_t` | `0U` | Calendar year. |
-| `month` | `uint8_t` | `0U` | Calendar month. |
-| `day` | `uint8_t` | `0U` | Calendar day. |
-| `hour` | `uint8_t` | `0U` | Decoded `hour` field. |
-| `min` | `uint8_t` | `0U` | Minute component. |
-| `sec` | `uint8_t` | `0U` | Second component. |
-| `valid` | `uint8_t` | `0U` | True when decoding completed successfully for the sentence. |
-| `t_acc` | `uint32_t` | `0U` | Time accuracy estimate. |
-| `nano` | `int32_t` | `0` | Nanosecond/fractional-time component. |
-| `fix_type` | `nav2_pvt_fix_type` | `nav2_pvt_fix_type::no_fix` | Navigation fix-type enumeration. |
-| `flags` | `uint8_t` | `0U` | Protocol-defined packed flags. |
-| `flags2` | `uint8_t` | `0U` | Secondary packed flags. |
-| `num_sv` | `uint8_t` | `0U` | Number of satellites used/reported. |
-| `lon` | `int32_t` | `0` | Raw longitude navigation value. |
-| `lat` | `int32_t` | `0` | Raw latitude navigation value. |
-| `height` | `int32_t` | `0` | Raw ellipsoidal height value. |
-| `h_msl` | `int32_t` | `0` | Raw mean-sea-level height value. |
-| `h_acc` | `uint32_t` | `0U` | Horizontal accuracy estimate. |
-| `v_acc` | `uint32_t` | `0U` | Vertical accuracy estimate. |
-| `vel_n` | `int32_t` | `0` | North velocity component. |
-| `vel_e` | `int32_t` | `0` | East velocity component. |
-| `vel_d` | `int32_t` | `0` | Down velocity component. |
-| `g_speed` | `int32_t` | `0` | Ground-speed value. |
-| `head_mot` | `int32_t` | `0` | Motion heading. |
-| `s_acc` | `uint32_t` | `0U` | Speed accuracy estimate. |
-| `head_acc` | `uint32_t` | `0U` | Heading accuracy estimate. |
-| `p_dop` | `uint16_t` | `0U` | Position dilution of precision. |
-| `flags3` | `uint8_t` | `0U` | Tertiary packed flags. |
-| `head_veh` | `int32_t` | `0` | Vehicle heading. |
-| `mag_dec` | `int16_t` | `0` | Magnetic declination. |
-| `mag_acc` | `uint16_t` | `0U` | Magnetic-declination accuracy estimate. |
+| `nav2_pvt::msg_class` | `uint8_t` | `UBX_CLASS_NAV2` (0x29) | UBX class. |
+| `nav2_pvt::msg_id` | `uint8_t` | `UBX_ID_NAV2_PVT` (0x07) | UBX message ID. |
+| `nav2_pvt::payload_length` | `castle::size_type` | `92U` | Exact payload length. |
+| `VALID_*`, `FLAGS_*`, `FLAGS2_*`, `FLAGS3_*` | `uint8_t` | see [`nav_pvt.md`](nav_pvt.md) | Same bit masks as NAV-PVT. |
 
-### Enumerations
+### Fields
 
-#### `nav2_pvt_fix_type`
+Identical to [`nav_pvt`](nav_pvt.md#fields): `i_tow`, `year`, `month`, `day`, `hour`, `minute`, `second`, `valid`, `t_acc`, `nano`, `fix_type` (`nav_pvt_fix_type`), `flags`, `flags2`, `num_sv`, `lon`, `lat`, `height`, `h_msl`, `h_acc`, `v_acc`, `vel_n`, `vel_e`, `vel_d`, `g_speed`, `head_mot`, `s_acc`, `head_acc`, `p_dop`, `flags3`, `head_veh`, `mag_dec`, `mag_acc`.
 
-| Enumerator | Value |
-| --- | --- |
-| `no_fix` | `0U` |
-| `dead_reck` | `1U` |
-| `fix_2d` | `2U` |
-| `fix_3d` | `3U` |
-| `gnss_dr` | `4U` |
-| `time_only` | `5U` |
+### Functions
+
+| Function | Returns | Description |
+| --- | --- | --- |
+| `static bool matches(const message_view& raw)` | `bool` | True only for class 0x29 / ID 0x07 (a NAV-PVT frame does not match). |
+| `static bool decode(const message_view& raw, nav2_pvt& out)` | `bool` | Decodes an exactly 92-byte payload; `out` is value-initialised on failure. |
+| `void encode(payload_writer& writer) const` | - | Writes the payload; used by `encode_message()`. |
+| Bit accessors and scaled helpers | - | Same as [`nav_pvt`](nav_pvt.md#functions) (`fix_ok()`, `carr_soln()`, `psm_state()`, `invalid_llh()`, `latitude_deg()`, `g_speed_m_s()`, ...). |
 
 ## Usage Example
 
@@ -94,17 +52,22 @@ Defines the UBX NAV2-PVT navigation solution model, including UTC/GNSS validity,
 using castle::protocols::ubx::message_view;
 using castle::protocols::ubx::messages::nav2_pvt;
 
-void handle(const message_view& raw) {
-    nav2_pvt value{};
-    if (nav2_pvt::decode(raw, value)) {
-        // `value` contains the decoded, typed fields.
+void on_message(const message_view& raw)
+{
+    nav2_pvt pvt{};
+    if (nav2_pvt::decode(raw, pvt) && pvt.fix_ok())
+    {
+        const double heading = pvt.head_veh_deg();
+        static_cast<void>(heading);
     }
 }
 ```
 
+A complete, self-checking example is in [`samples/castle_ext/protocols/ubx/messages/nav2_pvt.cpp`](../../../../../samples/castle_ext/protocols/ubx/messages/nav2_pvt.cpp).
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Payload length must exactly equal the protocol `payload_length` constant before field extraction.
+- `nav2_pvt` and `nav_pvt` are distinct types (different template arguments) sharing one layout definition, so the two cannot drift.
+- The former `nav2_pvt_fix_type` enum and the `min` / `sec` field names were removed; use `nav_pvt_fix_type`, `minute` and `second`.
+- Fixed-size value type (no heap, no exceptions, no RTTI, no virtual); `decode()` rejects any payload that is not exactly 92 bytes.
+- Thread-safety: none. Instances are plain values and are not thread-safe; synchronise externally when shared.

@@ -1,15 +1,35 @@
 // MIT License
 // Copyright (c) 2026 nguyenchiemminhvu@gmail.com
 
+/**
+ * @file cfg_valget.hpp
+ * @brief UBX-CFG-VALGET (0x06 0x8b): get configuration items.
+ *
+ * Two layouts share the class/ID and are told apart by the version byte:
+ *  - `cfg_valget_poll` (version 0): poll request sent by the host, naming a
+ *    source layer, a skip `position` and up to 64 key IDs (complete keys or
+ *    group / all-groups wild cards);
+ *  - `cfg_valget` (version 1): polled response from the receiver carrying up
+ *    to 64 key/value pairs (`cfgData`), each value as wide as its key's size code.
+ *
+ * @code
+ * castle::protocols::ubx::messages::cfg_valget_poll<> poll{};
+ * poll.layer = castle::protocols::ubx::config::UBX_CFG_VALGET_LAYER_RAM;
+ * static_cast<void>(poll.keys.push_back(0x30210001U)); // CFG-RATE-MEAS
+ * uint8_t frame[16U];
+ * castle::size_type written = 0U;
+ * castle::status result = castle::protocols::ubx::encode_message(poll, frame, sizeof(frame), written);
+ * @endcode
+ */
 #ifndef CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_CFG_VALGET_HPP
 #define CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_CFG_VALGET_HPP
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
+#include "castle/container/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
-#include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/ubx_config.hpp"
+#include "castle_ext/protocols/ubx/messages/detail/cfg_data.hpp"
 
 #include <stdint.h>
 
@@ -22,81 +42,44 @@ namespace ubx
 namespace messages
 {
 
-/** @brief One decoded UBX-CFG-VALGET key/value pair. */
+/** @brief One UBX-CFG-VALGET response key/value pair. */
 struct cfg_valget_entry
 {
-    uint32_t key_id = 0U;
-    uint64_t value = 0U;
+    uint32_t key_id = 0U; ///< Configuration key ID.
+    uint64_t value = 0U;  ///< Raw value, zero-extended from `value_byte_size(key_id)` bytes.
 };
 
-/** @brief UBX-CFG-VALGET: configuration key/value poll response. */
-template <castle::size_type MaxEntries = 32U>
-struct cfg_valget
+/** @brief UBX-CFG-VALGET poll request (version 0). */
+template <castle::size_type MaxKeys = CFG_MAX_KEYS>
+struct cfg_valget_poll : detail::cfg_message<cfg_valget_poll<MaxKeys>, UBX_ID_CFG_VALGET, 0x00U>
 {
-    static CASTLE_CONSTEXPR uint8_t msg_class = UBX_CLASS_CFG;
-    static CASTLE_CONSTEXPR uint8_t msg_id = UBX_ID_CFG_VALGET;
-    static CASTLE_CONSTEXPR castle::size_type header_length = 4U;
+    uint8_t layer = config::UBX_CFG_VALGET_LAYER_RAM; ///< Source layer: 0 RAM, 1 BBR, 2 Flash, 7 Default.
+    uint16_t position = 0U;                           ///< Key values to skip before building the response.
+    castle::container::vector<uint32_t, MaxKeys> keys{}; ///< Key IDs (or wild cards) to retrieve.
 
-    uint8_t version = 0U;
-    uint8_t layer = 0U;
-    uint16_t position = 0U;
-    castle::container::array<cfg_valget_entry, MaxEntries> entries{};
-    castle::size_type entry_count = 0U;
-
-    CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
+    template <typename Self, typename Stream>
+    static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT
     {
-        return raw.is(msg_class, msg_id);
+        stream.field(self.layer);
+        stream.field(self.position);
+        detail::cfg_keys(stream, self.keys);
     }
+};
 
-    CASTLE_NODISCARD static uint8_t value_size(uint32_t key) CASTLE_NOEXCEPT
+/** @brief UBX-CFG-VALGET polled response (version 1). */
+template <castle::size_type MaxEntries = CFG_MAX_KEYS>
+struct cfg_valget : detail::cfg_message<cfg_valget<MaxEntries>, UBX_ID_CFG_VALGET, 0x01U>
+{
+    uint8_t layer = config::UBX_CFG_VALGET_LAYER_RAM; ///< Layer the values were read from: 0 RAM, 1 BBR, 2 Flash, 7 Default.
+    uint16_t position = 0U;                           ///< Items skipped before this message (mirrors the request).
+    castle::container::vector<cfg_valget_entry, MaxEntries> entries{}; ///< Decoded key/value pairs in wire order.
+
+    template <typename Self, typename Stream>
+    static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT
     {
-        return value_byte_size(key);
-    }
-
-    CASTLE_NODISCARD static bool decode(CASTLE_CONST message_view& raw, cfg_valget& out) CASTLE_NOEXCEPT
-    {
-        if (raw.payload_length() < header_length)
-        {
-            return false;
-        }
-
-        payload_reader reader(raw.payload);
-        out = cfg_valget{};
-        out.version = reader.read_u8();
-        out.layer = reader.read_u8();
-        out.position = reader.read_u16();
-        while (reader.remaining() >= 4U)
-        {
-            uint32_t key = reader.read_u32();
-            uint8_t size = value_size(key);
-            if (size == 0U)
-            {
-                break;
-            }
-            if (reader.remaining() < size)
-            {
-                return false;
-            }
-
-            uint64_t value = 0U;
-            switch (size)
-            {
-                case 1U: value = reader.read_u8(); break;
-                case 2U: value = reader.read_u16(); break;
-                case 4U: value = reader.read_u32(); break;
-                case 8U: value = reader.read_u64(); break;
-                default: return false; // LCOV_EXCL_BR_LINE
-            }
-
-            if (out.entry_count < MaxEntries)
-            {
-                out.entries[out.entry_count].key_id = key;
-                out.entries[out.entry_count].value = value;
-                ++out.entry_count;
-            }
-        }
-
-        return reader.ok();
+        stream.field(self.layer);
+        stream.field(self.position);
+        detail::cfg_data(stream, self.entries);
     }
 };
 

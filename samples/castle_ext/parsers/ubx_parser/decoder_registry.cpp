@@ -6,8 +6,6 @@
 #include "castle_ext/protocols/ubx/messages/nav_status.hpp"
 #include "castle_ext/protocols/ubx/messages/nav_timeutc.hpp"
 
-#include <stdio.h>
-
 // This sample shows the decoder_registry fan-out path: one parser callback
 // dispatches each validated frame to every registered message decoder, which
 // decodes (if it matches) and notifies its own subscribers. No per-message
@@ -19,92 +17,13 @@ using namespace castle::protocols::ubx::messages;
 namespace
 {
 
-// Builds a 92-byte UBX-NAV-PVT payload describing a stationary 3D fix.
-castle::size_type build_nav_pvt_payload(uint8_t* out)
-{
-    castle::size_type pos = 0U;
-    castle::write_le32(&out[pos], 123456789U); pos += 4U;             // iTOW
-    castle::write_le16(&out[pos], 2026U); pos += 2U;                   // year
-    out[pos++] = 10U;                                          // month
-    out[pos++] = 2U;                                           // day
-    out[pos++] = 8U;                                           // hour
-    out[pos++] = 30U;                                          // min
-    out[pos++] = 15U;                                          // sec
-    out[pos++] = nav_pvt::VALID_DATE | nav_pvt::VALID_TIME | nav_pvt::VALID_FULLY;
-    castle::write_le32(&out[pos], 25U); pos += 4U;                     // tAcc (ns)
-    castle::write_le32(&out[pos], 0U); pos += 4U;                      // nano
-    out[pos++] = static_cast<uint8_t>(nav_pvt_fix_type::fix_3d);
-    out[pos++] = nav_pvt::FLAGS_GNSS_FIX_OK;                   // flags
-    out[pos++] = 0U;                                           // flags2
-    out[pos++] = 12U;                                          // numSV
-    castle::write_le32(&out[pos], 1068850000U); pos += 4U;             // lon: 106.8850000 deg
-    castle::write_le32(&out[pos], 104048500U); pos += 4U;              // lat: 10.4048500 deg
-    castle::write_le32(&out[pos], 15000U); pos += 4U;                  // height (mm)
-    castle::write_le32(&out[pos], 12000U); pos += 4U;                  // hMSL (mm)
-    castle::write_le32(&out[pos], 2500U); pos += 4U;                   // hAcc (mm)
-    castle::write_le32(&out[pos], 3000U); pos += 4U;                   // vAcc (mm)
-    castle::write_le32(&out[pos], 0U); pos += 4U;                      // velN
-    castle::write_le32(&out[pos], 0U); pos += 4U;                      // velE
-    castle::write_le32(&out[pos], 0U); pos += 4U;                      // velD
-    castle::write_le32(&out[pos], 0U); pos += 4U;                      // gSpeed
-    castle::write_le32(&out[pos], 0U); pos += 4U;                      // headMot
-    castle::write_le32(&out[pos], 100U); pos += 4U;                    // sAcc
-    castle::write_le32(&out[pos], 5000000U); pos += 4U;                // headAcc
-    castle::write_le16(&out[pos], 120U); pos += 2U;                    // pDOP: 1.20
-    out[pos++] = 0U;                                           // flags3
-    for (castle::size_type i = 0U; i < 5U; ++i)                // reserved0
-    {
-        out[pos++] = 0U;
-    }
-    castle::write_le32(&out[pos], 0U); pos += 4U;                      // headVeh
-    castle::write_le16(&out[pos], 0U); pos += 2U;                      // magDec
-    castle::write_le16(&out[pos], 0U); pos += 2U;                      // magAcc
-    return pos;
-}
-
-// Builds a 16-byte UBX-NAV-STATUS payload reporting a settled 3D fix.
-castle::size_type build_nav_status_payload(uint8_t* out)
-{
-    castle::size_type pos = 0U;
-    castle::write_le32(&out[pos], 123456789U); pos += 4U;              // iTOW
-    out[pos++] = static_cast<uint8_t>(nav_status_gps_fix::fix_3d);
-    out[pos++] = nav_status::FLAGS_GPS_FIX_OK | nav_status::FLAGS_WKN_SET | nav_status::FLAGS_TOW_SET;
-    out[pos++] = 0U;                                           // fixStat
-    out[pos++] = 0U;                                           // flags2
-    castle::write_le32(&out[pos], 29000U); pos += 4U;                  // ttff (ms)
-    castle::write_le32(&out[pos], 456789U); pos += 4U;                 // msss (ms)
-    return pos;
-}
-
-// Builds a 20-byte UBX-NAV-TIMEUTC payload with a fully resolved UTC time.
-castle::size_type build_nav_timeutc_payload(uint8_t* out)
-{
-    static CASTLE_CONSTEXPR uint8_t VALID_TOW_WKN_UTC = 0x07U;
-
-    castle::size_type pos = 0U;
-    castle::write_le32(&out[pos], 123456789U); pos += 4U;              // iTOW
-    castle::write_le32(&out[pos], 30U); pos += 4U;                     // tAcc (ns)
-    castle::write_le32(&out[pos], 0U); pos += 4U;                      // nano
-    castle::write_le16(&out[pos], 2026U); pos += 2U;                   // year
-    out[pos++] = 10U;                                          // month
-    out[pos++] = 2U;                                           // day
-    out[pos++] = 8U;                                           // hour
-    out[pos++] = 30U;                                          // min
-    out[pos++] = 15U;                                          // sec
-    out[pos++] = VALID_TOW_WKN_UTC;                            // valid
-    return pos;
-}
-
-// Encodes `payload` as one UBX frame and feeds it into `parser` byte-by-byte.
-template <typename Parser>
-void send_frame(Parser& parser, uint8_t msg_class, uint8_t msg_id,
-                 castle::container::array_view<CASTLE_CONST uint8_t> payload)
+/** @brief Encodes `message` as one UBX frame and feeds it into `parser`. */
+template <typename Parser, typename Message>
+void send_message(Parser& parser, CASTLE_CONST Message& message)
 {
     uint8_t frame[128U];
     castle::size_type written = 0U;
-    CASTLE_CONST castle::status status =
-        encode_frame(msg_class, msg_id, payload, frame, sizeof(frame), written);
-    CASTLE_SAMPLE_CHECK(castle::succeeded(status));
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(message, frame, sizeof(frame), written)));
     parser.feed(frame, written);
 }
 
@@ -126,61 +45,88 @@ int main()
     // destruction, so each connection must be kept alive for as long as the
     // subscription should remain active.
     uint32_t pvt_count = 0U;
+    nav_pvt last_pvt{};
     CASTLE_CONST auto pvt_connection = registry.decoder<nav_pvt>().connect(
-        [&pvt_count](CASTLE_CONST nav_pvt& pvt)
+        [&pvt_count, &last_pvt](CASTLE_CONST nav_pvt& pvt)
         {
             ++pvt_count;
-            printf("NAV-PVT:     fix=%s lat=%.7f lon=%.7f sats=%u\n",
-                   pvt.fix_ok() ? "3D" : "none",
-                   pvt.latitude_deg(), pvt.longitude_deg(),
-                   static_cast<unsigned>(pvt.num_sv));
-            CASTLE_SAMPLE_CHECK(pvt.fix_ok());
+            last_pvt = pvt;
         });
 
     uint32_t status_count = 0U;
+    uint32_t last_ttff = 0U;
     CASTLE_CONST auto status_connection = registry.decoder<nav_status>().connect(
-        [&status_count](CASTLE_CONST nav_status& status)
+        [&status_count, &last_ttff](CASTLE_CONST nav_status& status)
         {
             ++status_count;
-            printf("NAV-STATUS:  fix_ok=%d ttff=%u ms\n",
-                   static_cast<int>(status.fix_ok()),
-                   static_cast<unsigned>(status.ttff));
+            CASTLE_SAMPLE_CHECK(status.fix_ok());
+            last_ttff = status.ttff;
         });
 
     uint32_t timeutc_count = 0U;
+    nav_timeutc last_utc{};
     CASTLE_CONST auto timeutc_connection = registry.decoder<nav_timeutc>().connect(
-        [&timeutc_count](CASTLE_CONST nav_timeutc& utc)
+        [&timeutc_count, &last_utc](CASTLE_CONST nav_timeutc& utc)
         {
             ++timeutc_count;
-            printf("NAV-TIMEUTC: %04u-%02u-%02u %02u:%02u:%02u\n",
-                   static_cast<unsigned>(utc.year), static_cast<unsigned>(utc.month),
-                   static_cast<unsigned>(utc.day), static_cast<unsigned>(utc.hour),
-                   static_cast<unsigned>(utc.min), static_cast<unsigned>(utc.sec));
+            last_utc = utc;
         });
 
     // Wire the parser's message callback to dispatch into the registry.
     castle::parsers::ubx_parser::attach(parser, registry);
 
-    uint8_t nav_pvt_payload[nav_pvt::payload_length];
-    build_nav_pvt_payload(nav_pvt_payload);
-    send_frame(parser, nav_pvt::msg_class, nav_pvt::msg_id,
-               castle::container::array_view<CASTLE_CONST uint8_t>(nav_pvt_payload, sizeof(nav_pvt_payload)));
+    // A stationary 3D fix.
+    nav_pvt pvt{};
+    pvt.i_tow = 123456789U;
+    pvt.year = 2026U;
+    pvt.month = 10U;
+    pvt.day = 2U;
+    pvt.hour = 8U;
+    pvt.minute = 30U;
+    pvt.second = 15U;
+    pvt.valid = nav_pvt::VALID_DATE | nav_pvt::VALID_TIME | nav_pvt::VALID_FULLY;
+    pvt.fix_type = nav_pvt_fix_type::fix_3d;
+    pvt.flags = nav_pvt::FLAGS_GNSS_FIX_OK;
+    pvt.num_sv = 12U;
+    pvt.lon = 1068850000;   // 106.8850000 deg
+    pvt.lat = 104048500;    // 10.4048500 deg
+    pvt.p_dop = 120U;       // 1.20
+    send_message(parser, pvt);
 
-    uint8_t nav_status_payload[nav_status::payload_length];
-    build_nav_status_payload(nav_status_payload);
-    send_frame(parser, nav_status::msg_class, nav_status::msg_id,
-               castle::container::array_view<CASTLE_CONST uint8_t>(nav_status_payload, sizeof(nav_status_payload)));
+    // A settled navigation status.
+    nav_status status{};
+    status.i_tow = 123456789U;
+    status.gps_fix = nav_status_gps_fix::fix_3d;
+    status.flags = nav_status::FLAGS_GPS_FIX_OK | nav_status::FLAGS_WKN_SET | nav_status::FLAGS_TOW_SET;
+    status.ttff = 29000U;
+    send_message(parser, status);
 
-    uint8_t nav_timeutc_payload[nav_timeutc::payload_length];
-    build_nav_timeutc_payload(nav_timeutc_payload);
-    send_frame(parser, nav_timeutc::msg_class, nav_timeutc::msg_id,
-               castle::container::array_view<CASTLE_CONST uint8_t>(nav_timeutc_payload, sizeof(nav_timeutc_payload)));
+    // A fully resolved UTC time.
+    nav_timeutc utc{};
+    utc.i_tow = 123456789U;
+    utc.year = 2026U;
+    utc.month = 10U;
+    utc.day = 2U;
+    utc.hour = 8U;
+    utc.min = 30U;
+    utc.sec = 15U;
+    utc.valid = nav_timeutc::VALID_TOW | nav_timeutc::VALID_WKN | nav_timeutc::VALID_UTC;
+    send_message(parser, utc);
 
     CASTLE_SAMPLE_CHECK(pvt_count == 1U);
+    CASTLE_SAMPLE_CHECK(last_pvt.fix_ok());
+    CASTLE_SAMPLE_CHECK(last_pvt.num_sv == 12U);
+    CASTLE_SAMPLE_CHECK(last_pvt.lat == 104048500);
+    CASTLE_SAMPLE_CHECK(last_pvt.latitude_deg() > 10.40484 && last_pvt.latitude_deg() < 10.40486);
+
     CASTLE_SAMPLE_CHECK(status_count == 1U);
+    CASTLE_SAMPLE_CHECK(last_ttff == 29000U);
+
     CASTLE_SAMPLE_CHECK(timeutc_count == 1U);
+    CASTLE_SAMPLE_CHECK(last_utc.year == 2026U);
+    CASTLE_SAMPLE_CHECK(last_utc.sec == 15U);
+
     CASTLE_SAMPLE_CHECK(parser.frames_decoded() == 3U);
 
     return 0;
 }
-

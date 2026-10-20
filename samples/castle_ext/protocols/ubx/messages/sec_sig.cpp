@@ -1,6 +1,5 @@
 #include "sample_support.hpp"
 
-#include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/sec_sig.hpp"
 
 int main()
@@ -8,69 +7,47 @@ int main()
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // Build a UBX-SEC-SIG payload.
-    uint8_t payload[sec_sig::payload_length] = {};
+    // Jamming detection on with a warning; spoofing detection on, spoofing indicated.
+    sec_sig sig{};
+    sig.version = 0x01U;
+    sig.jam_flags = static_cast<uint8_t>(sec_sig::JAM_FLAGS_JAM_DET_ENABLED
+                                         | (static_cast<uint8_t>(sec_sig_jamming_state::warning) << 1U));
+    sig.spf_flags = static_cast<uint8_t>(sec_sig::SPF_FLAGS_SPF_DET_ENABLED
+                                         | (static_cast<uint8_t>(sec_sig_spoofing_state::indicated) << 1U));
 
-    payload[0U] = 1U; // version
-
-    // bytes 1..3 reserved
-
-    // jam_flags:
-    // bit0 = jam_det_enabled
-    // bits1..2 = jamming_state
-    payload[4U] = static_cast<uint8_t>((2U << 1U) | 1U);
-
-    // bytes 5..7 reserved
-
-    // spf_flags:
-    // bit0 = spf_det_enabled
-    // bits1..3 = spoofing_state
-    payload[8U] = static_cast<uint8_t>((5U << 1U) | 1U);
-
-    // bytes 9..11 reserved
-
-    // Encode payload into a UBX frame.
-    uint8_t frame[64U];
+    uint8_t frame[UBX_FRAME_OVERHEAD + sec_sig::payload_length];
     castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(sig, frame, sizeof(frame), written)));
 
-    castle::status status = encode_frame(
-        sec_sig::msg_class,
-        sec_sig::msg_id,
-        castle::container::array_view<const uint8_t>(payload, sizeof(payload)),
-        frame,
-        sizeof(frame),
-        written);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(status));
-
-    // Decode frame into a generic UBX message view.
-    message_view raw;
-    bool decoded = decode_frame(
-        castle::container::array_view<const uint8_t>(frame, written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(decoded);
-
-    // Verify message identity.
+    message_view raw{};
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(sec_sig::matches(raw));
 
-    // Decode SEC-SIG payload.
-    sec_sig sig;
-    CASTLE_SAMPLE_CHECK(sec_sig::decode(raw, sig));
+    sec_sig decoded{};
+    CASTLE_SAMPLE_CHECK(sec_sig::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.version == 0x01U);
+    CASTLE_SAMPLE_CHECK(decoded.jam_det_enabled());
+    CASTLE_SAMPLE_CHECK(decoded.jamming_state() == sec_sig_jamming_state::warning);
+    CASTLE_SAMPLE_CHECK(decoded.spf_det_enabled());
+    CASTLE_SAMPLE_CHECK(decoded.spoofing_state() == sec_sig_spoofing_state::indicated);
 
-    // Verify decoded fields.
-    CASTLE_SAMPLE_CHECK(sig.version == 1U);
+    // Newer versions append data after the 12-byte prefix; it is ignored.
+    uint8_t extended[sec_sig::payload_length + 8U] = {};
+    for (castle::size_type index = 0U; index < sec_sig::payload_length; ++index)
+    {
+        extended[index] = raw.payload[index];
+    }
+    message_view longer{{UBX_CLASS_SEC, UBX_ID_SEC_SIG, static_cast<uint16_t>(sizeof(extended))},
+                        castle::container::array_view<const uint8_t>(extended, sizeof(extended)),
+                        checksum{}};
+    CASTLE_SAMPLE_CHECK(sec_sig::decode(longer, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.jamming_state() == sec_sig_jamming_state::warning);
 
-    CASTLE_SAMPLE_CHECK(sig.jam_flags == ((2U << 1U) | 1U));
-    CASTLE_SAMPLE_CHECK(sig.jam_det_enabled == 1U);
-    CASTLE_SAMPLE_CHECK(sig.jamming_state == 2U);
-
-    CASTLE_SAMPLE_CHECK(sig.spf_flags == ((5U << 1U) | 1U));
-    CASTLE_SAMPLE_CHECK(sig.spf_det_enabled == 1U);
-    CASTLE_SAMPLE_CHECK(sig.spoofing_state == 5U);
-
-    // Different message type must not match SEC-SIG.
-    CASTLE_SAMPLE_CHECK(!raw.is(UBX_CLASS_CFG, UBX_ID_CFG_VALSET));
+    // SEC-CRC is not SEC-SIG.
+    message_view other = raw;
+    other.header.msg_id = UBX_ID_SEC_CRC;
+    CASTLE_SAMPLE_CHECK(!sec_sig::matches(other));
+    CASTLE_SAMPLE_CHECK(!sec_sig::decode(other, decoded));
 
     return 0;
 }

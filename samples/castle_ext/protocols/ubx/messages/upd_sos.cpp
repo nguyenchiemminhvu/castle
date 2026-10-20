@@ -1,6 +1,5 @@
 #include "sample_support.hpp"
 
-#include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/upd_sos.hpp"
 
 int main()
@@ -8,78 +7,54 @@ int main()
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // Build a UBX-UPD-SOS response payload.
-    uint8_t payload[upd_sos_output::payload_length] = {};
-
-    payload[0U] = UPD_SOS_CMD_ACK; // cmd
-
-    // bytes 1..3 reserved
-
-    payload[4U] = UPD_SOS_RESP_ACK; // response
-
-    // bytes 5..7 reserved
-
-    // Encode payload into a UBX frame.
-    uint8_t frame[64U];
     castle::size_type written = 0U;
+    message_view raw{};
 
-    castle::status status = encode_frame(
-        upd_sos_output::msg_class,
-        upd_sos_output::msg_id,
-        castle::container::array_view<const uint8_t>(payload, sizeof(payload)),
-        frame,
-        sizeof(frame),
-        written);
+    // Before power-off: ask the receiver to save its BBR into flash.
+    uint8_t save_frame[UBX_FRAME_OVERHEAD + upd_sos_save::payload_length];
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(upd_sos_save{}, save_frame, sizeof(save_frame), written)));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(save_frame, written), raw));
+    CASTLE_SAMPLE_CHECK(upd_sos_save::matches(raw));
+    CASTLE_SAMPLE_CHECK(!upd_sos_clear::matches(raw));
+    CASTLE_SAMPLE_CHECK(raw.payload[0U] == static_cast<uint8_t>(upd_sos_cmd::save));
 
-    CASTLE_SAMPLE_CHECK(castle::succeeded(status));
+    // The receiver acknowledges the backup.
+    upd_sos_ack ack{};
+    ack.response = upd_sos_ack_response::acknowledged;
+    uint8_t ack_frame[UBX_FRAME_OVERHEAD + upd_sos_ack::payload_length];
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(ack, ack_frame, sizeof(ack_frame), written)));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(ack_frame, written), raw));
+    CASTLE_SAMPLE_CHECK(upd_sos_ack::matches(raw));
+    CASTLE_SAMPLE_CHECK(!upd_sos_restored::matches(raw));
 
-    // Decode the frame into a generic UBX message view.
-    message_view raw;
-    bool decoded = decode_frame(
-        castle::container::array_view<const uint8_t>(frame, written),
-        raw);
+    upd_sos_ack decoded_ack{};
+    CASTLE_SAMPLE_CHECK(upd_sos_ack::decode(raw, decoded_ack));
+    CASTLE_SAMPLE_CHECK(decoded_ack.response == upd_sos_ack_response::acknowledged);
 
-    CASTLE_SAMPLE_CHECK(decoded);
+    // After power-on: poll the restore status (empty payload).
+    uint8_t poll[UBX_FRAME_OVERHEAD];
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_poll<upd_sos_restored>(poll, sizeof(poll), written)));
+    CASTLE_SAMPLE_CHECK(written == UBX_FRAME_OVERHEAD);
 
-    // Verify message identity.
-    CASTLE_SAMPLE_CHECK(upd_sos_output::matches(raw));
+    // The receiver reports that it restored from the backup.
+    upd_sos_restored restored{};
+    restored.response = upd_sos_restore_response::restored;
+    uint8_t restored_frame[UBX_FRAME_OVERHEAD + upd_sos_restored::payload_length];
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(restored, restored_frame, sizeof(restored_frame), written)));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(restored_frame, written), raw));
 
-    // Decode UPD-SOS payload.
-    upd_sos_output sos;
-    CASTLE_SAMPLE_CHECK(upd_sos_output::decode(raw, sos));
+    upd_sos_restored decoded_restored{};
+    CASTLE_SAMPLE_CHECK(upd_sos_restored::decode(raw, decoded_restored));
+    CASTLE_SAMPLE_CHECK(decoded_restored.response == upd_sos_restore_response::restored);
+    CASTLE_SAMPLE_CHECK(!upd_sos_ack::decode(raw, decoded_ack));
 
-    // Verify decoded fields.
-    CASTLE_SAMPLE_CHECK(sos.cmd == UPD_SOS_CMD_ACK);
-    CASTLE_SAMPLE_CHECK(sos.response == UPD_SOS_RESP_ACK);
-
-    // RESTORE response is also a valid output message.
-    uint8_t restore_payload[upd_sos_output::payload_length] = {};
-
-    restore_payload[0U] = UPD_SOS_CMD_RESTORE;
-    restore_payload[4U] = UPD_SOS_RESP_NOT_ACK;
-
-    castle::status restore_status = encode_frame(
-        upd_sos_output::msg_class,
-        upd_sos_output::msg_id,
-        castle::container::array_view<const uint8_t>(
-            restore_payload,
-            sizeof(restore_payload)),
-        frame,
-        sizeof(frame),
-        written);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(restore_status));
-
-    decoded = decode_frame(
-        castle::container::array_view<const uint8_t>(frame, written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(decoded);
-
-    upd_sos_output restore;
-    CASTLE_SAMPLE_CHECK(upd_sos_output::decode(raw, restore));
-    CASTLE_SAMPLE_CHECK(restore.cmd == UPD_SOS_CMD_RESTORE);
-    CASTLE_SAMPLE_CHECK(restore.response == UPD_SOS_RESP_NOT_ACK);
+    // Then clear the backup file.
+    uint8_t clear_frame[UBX_FRAME_OVERHEAD + upd_sos_clear::payload_length];
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(upd_sos_clear{}, clear_frame, sizeof(clear_frame), written)));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(clear_frame, written), raw));
+    CASTLE_SAMPLE_CHECK(upd_sos_clear::matches(raw));
+    upd_sos_clear decoded_clear{};
+    CASTLE_SAMPLE_CHECK(upd_sos_clear::decode(raw, decoded_clear));
 
     return 0;
 }

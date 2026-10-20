@@ -2,60 +2,52 @@
 
 #include "castle_ext/protocols/ubx/messages/nav2_eell.hpp"
 
+namespace
+{
+bool near(double actual, double expected)
+{
+    CASTLE_CONST double diff = actual - expected;
+    return (diff < 1e-9) && (diff > -1e-9);
+}
+} // namespace
+
 int main()
 {
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // UBX-NAV2-EELL payload (16 bytes).
-    //
-    // iTOW      = 1000
-    // version   = 1
-    // errMaj    = 250
-    // errMin    = 150
-    // errOrient = 45
-    uint8_t payload_data[16U] =
-    {
-        0xE8U, 0x03U, 0x00U, 0x00U, // iTOW = 1000
+    // NAV2-EELL is the secondary-output instance of the NAV-EELL layout.
+    nav2_eell ellipse;
+    ellipse.i_tow = 777000U;
+    ellipse.version = 0U;
+    ellipse.err_orient = 9000U;  // 90.00 deg: semi-major axis points east
+    ellipse.err_maj = 80000U;    // 80 m
+    ellipse.err_min = 1500U;     // 1.5 m
 
-        0x01U, // version
-        0x00U, 0x00U, 0x00U, // reserved
+    uint8_t frame[frame_size(nav2_eell::payload_length)];
+    castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(encode_message(ellipse, frame, sizeof(frame), written) == castle::status::ok);
 
-        0xFAU, 0x00U, // errMaj = 250
-        0x96U, 0x00U, // errMin = 150
-        0x2DU, 0x00U, // errOrient = 45
-
-        0x00U, 0x00U // reserved
-    };
+    // Wire check: orientation is a U2 at offset 6, the axes are U4 at 8 and 12.
+    CASTLE_SAMPLE_CHECK(castle::read_le16(&frame[UBX_FRAME_INDEX_PAYLOAD + 6U]) == 9000U);
+    CASTLE_SAMPLE_CHECK(castle::read_le32(&frame[UBX_FRAME_INDEX_PAYLOAD + 8U]) == 80000U);
+    CASTLE_SAMPLE_CHECK(castle::read_le32(&frame[UBX_FRAME_INDEX_PAYLOAD + 12U]) == 1500U);
 
     message_view raw;
-    raw.header.msg_class = UBX_CLASS_NAV2;
-    raw.header.msg_id = UBX_ID_NAV2_EELL;
-    raw.header.payload_length = sizeof(payload_data);
-    raw.payload =
-        castle::container::array_view<const uint8_t>(
-            payload_data,
-            sizeof(payload_data));
-
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(raw.is(UBX_CLASS_NAV2, UBX_ID_NAV2_EELL));
     CASTLE_SAMPLE_CHECK(nav2_eell::matches(raw));
+    CASTLE_SAMPLE_CHECK(!nav_eell::matches(raw));
 
-    nav2_eell message;
-    bool decoded = nav2_eell::decode(raw, message);
-
-    CASTLE_SAMPLE_CHECK(decoded);
-
-    CASTLE_SAMPLE_CHECK(message.i_tow == 1000U);
-    CASTLE_SAMPLE_CHECK(message.version == 1U);
-    CASTLE_SAMPLE_CHECK(message.err_maj == 250U);
-    CASTLE_SAMPLE_CHECK(message.err_min == 150U);
-    CASTLE_SAMPLE_CHECK(message.err_orient == 45U);
-
-    // Wrong payload length must be rejected.
-    message_view invalid = raw;
-    invalid.header.payload_length = 15U;
-
-    nav2_eell rejected;
-    CASTLE_SAMPLE_CHECK(!nav2_eell::decode(invalid, rejected));
+    nav2_eell decoded;
+    CASTLE_SAMPLE_CHECK(nav2_eell::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.i_tow == 777000U);
+    CASTLE_SAMPLE_CHECK(decoded.err_orient == 9000U);
+    CASTLE_SAMPLE_CHECK(decoded.err_maj == 80000U);
+    CASTLE_SAMPLE_CHECK(decoded.err_min == 1500U);
+    CASTLE_SAMPLE_CHECK(near(decoded.err_orient_deg(), 90.0));
+    CASTLE_SAMPLE_CHECK(near(decoded.err_maj_m(), 80.0));
+    CASTLE_SAMPLE_CHECK(near(decoded.err_min_m(), 1.5));
 
     return 0;
 }

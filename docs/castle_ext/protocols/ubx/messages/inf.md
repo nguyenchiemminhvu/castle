@@ -2,7 +2,12 @@
 
 ## Overview
 
-Defines a bounded UBX INF text message model. The message ID determines the INF subtype and the text is copied into caller-owned fixed storage with no heap allocation.
+Typed models of the UBX-INF text messages (class 0x04): ERROR (0x00), WARNING (0x01), NOTICE (0x02), TEST (0x03) and DEBUG (0x04). The receiver sends them as output. The whole payload (`[0..n]` bytes, possibly empty) is an ASCII string that is not NUL-terminated on the wire, and the message ID carries the severity.
+
+- `basic_inf<MaxText, MsgId>` models one severity, so a decoder registry can subscribe to a single one (`inf_error<>`, `inf_warning<>`, `inf_notice<>`, `inf_test<>`, `inf_debug<>`).
+- `inf<MaxText>` matches all five IDs and records which one arrived.
+
+Both use the same text decoder.
 
 ## Header
 
@@ -12,62 +17,73 @@ Defines a bounded UBX INF text message model. The message ID determines the INF 
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
-- [`castle/container/string_view.hpp`](../../../../container/string_view.md)
+- [`castle/container/string.hpp`](../../../../container/string.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
+- [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
+- `stdint.h`
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `inf<MaxText=256U>` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `inf_subtype` | Strongly typed protocol enumeration used by the decoded model. |
-| `inf::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `inf::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
-| `inf::text()` | Returns a non-owning `string_view` over the copied INF text. |
+| `enum class inf_subtype : uint8_t` | `error`, `warning`, `notice`, `test`, `debug`. Each enumerator's value is its message ID. |
+| `basic_inf<MaxText, MsgId>` | Single-severity model (`MsgId` 0x00..0x04, checked with `static_assert`). |
+| `inf_error<MaxText = 256>` ... `inf_debug<MaxText = 256>` | Aliases of `basic_inf` for each ID. |
+| `inf<MaxText = 256>` | Any-severity model. |
 
-### `inf` data members
+### Constants
 
-| Field | Type | Default | Description |
+| Constant | Type | Value | Description |
 | --- | --- | --- | --- |
-| `msg_class` | `uint8_t` | `UBX_CLASS_INF` | UBX message class byte. |
-| `message_id` | `uint8_t` | `0U` | UBX INF message identifier and subtype selector. |
-| `subtype` | `inf_subtype` | `inf_subtype::error` | Decoded INF subtype derived from message_id. |
-| `text_storage` | `castle::container::array<char,MaxText>` | `—` | Fixed-capacity character storage for the copied INF text. |
-| `text_length` | `castle::size_type` | `0U` | Number of characters copied into text_storage. |
+| `basic_inf::msg_class`, `inf::msg_class` | `uint8_t` | `UBX_CLASS_INF` (0x04) | UBX class. |
+| `basic_inf::msg_id` | `uint8_t` | `MsgId` | UBX message ID. |
+| `basic_inf::subtype` | `inf_subtype` | `static_cast<inf_subtype>(MsgId)` | Severity of this model. |
 
-### Enumerations
+### Fields
 
-#### `inf_subtype`
+| Model | Field | Type | Description |
+| --- | --- | --- | --- |
+| both | `text` | `castle::container::string<MaxText>` | Up to `MaxText` characters, stopping at the first NUL if one is present. |
+| `inf` | `message_id` | `uint8_t` | ID that was received. |
+| `inf` | `subtype` | `inf_subtype` | Severity (same value as `message_id`). |
 
-| Enumerator | Value |
-| --- | --- |
-| `error` | `0x00U` |
-| `warning` | `0x01U` |
-| `notice` | `0x02U` |
-| `test` | `0x03U` |
-| `debug` | `0x04U` |
+### Functions
+
+| Function | Returns | Description |
+| --- | --- | --- |
+| `static bool basic_inf::matches(const message_view& raw)` | `bool` | True for class 0x04 / `MsgId` only. |
+| `static bool basic_inf::decode(const message_view& raw, basic_inf& out)` | `bool` | Copies the text. Any payload length, including 0, is valid. For another class/ID returns `false` and leaves `out` value-initialised. |
+| `void basic_inf::encode(payload_writer& writer) const` | - | Writes the stored characters without a terminator. Used for loop-back and simulation through `encode_message()`. |
+| `static bool inf::matches(const message_view& raw)` | `bool` | True for class 0x04 and IDs 0x00..0x04. |
+| `static bool inf::decode(const message_view& raw, inf& out)` | `bool` | Records `message_id` / `subtype` and copies the text. Any payload length is valid. For another class/ID returns `false` and leaves `out` value-initialised. |
 
 ## Usage Example
 
 ```cpp
 #include "castle_ext/protocols/ubx/messages/inf.hpp"
 
-using castle::protocols::ubx::message_view;
-using castle::protocols::ubx::messages::inf;
+using namespace castle::protocols::ubx;
+using namespace castle::protocols::ubx::messages;
 
-void handle(const message_view& raw) {
-    inf<128U> value{};
-    if (inf::decode(raw, value)) {
-        // The fixed-capacity arrays contain at most the configured bound.
+void on_message(const message_view& raw)
+{
+    inf_error<128U> error{};
+    if (inf_error<128U>::decode(raw, error))
+    {
+        const char* line = error.text.c_str(); // NUL-terminated copy
+        static_cast<void>(line);
     }
 }
 ```
 
+A complete, self-checking example is in [`samples/castle_ext/protocols/ubx/messages/inf.cpp`](../../../../../samples/castle_ext/protocols/ubx/messages/inf.cpp).
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Template capacity parameters bound retained records/text; excess protocol records are skipped or ignored after validation rather than dynamically allocated.
-- INF text is copied up to `MaxText` bytes and is exposed through `text()` as a non-owning view over that fixed storage.
+- Capacity: text longer than `MaxText` is cut off; nothing is allocated. `string<MaxText>` stores `MaxText + 1` bytes inline, so its `c_str()` is always NUL-terminated.
+- An empty INF frame reaches `decode()` as a null payload view. It decodes to an empty `text` without creating a payload reader.
+- Fixed-size value types: no heap, exceptions, RTTI or virtual functions.
+- `message_view` is non-owning. The decoded struct owns a copy of the text.
+- Thread-safety: none. Instances are plain values and are not thread-safe.

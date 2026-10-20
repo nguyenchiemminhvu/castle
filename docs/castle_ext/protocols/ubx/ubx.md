@@ -19,7 +19,7 @@
 | `UBX_SYNC_CHAR_1`, `UBX_SYNC_CHAR_2` | Frame synchronization bytes (`0xB5`, `0x62`). |
 | `UBX_FRAME_OVERHEAD` | Fixed byte count outside the payload (8). |
 | `UBX_MAX_PAYLOAD_LEN`, `UBX_SAFE_MAX_PAYLOAD_LEN` | 16-bit length-field ceiling and a practical embedded default (4096). |
-| `UBX_CLASS_*`, `UBX_ID_*` | Well-known message class and message ID constants (NAV, RXM, INF, ACK, CFG, UPD, MON, TIM, ESF, SEC, NAV2, ...). |
+| `UBX_CLASS_*`, `UBX_ID_*` | Message class and ID constants for every modelled message: NAV (0x01), RXM (0x02), INF (0x04), ACK (0x05), CFG (0x06), UPD (0x09), MON (0x0A), TIM (0x0D), ESF (0x10), MGA (0x13), SEC (0x27), NAV2 (0x29). IDs are named `UBX_ID_<CLASS>_<NAME>`, e.g. `UBX_ID_NAV_RELPOSNED`, `UBX_ID_MGA_INI`. |
 | `message_header` | `msg_class`, `msg_id`, `payload_length`. |
 | `checksum` | `ck_a`, `ck_b` pair. |
 | `message_view` | Non-owning decoded message: `header`, `payload` (`array_view<const uint8_t>`), `check`. Accessors: `msg_class()`, `msg_id()`, `payload_length()`, `is(class, id)`, `key()`. |
@@ -57,4 +57,4 @@ castle::protocols::ubx::decode_frame(
 - `encode_frame()`/`decode_frame()` never read or write outside the caller-provided buffer.
 - `message_view::payload` aliases the buffer passed to `decode_frame()` (or the parser's internal buffer when produced by `ubx_parser`); it is only valid while that storage is unchanged.
 - `encode_frame()` rejects payloads larger than `UBX_MAX_PAYLOAD_LEN` (the UBX 16-bit length field ceiling), not `UBX_SAFE_MAX_PAYLOAD_LEN` (which is only the parser's default capacity).
-- This header only defines protocol-level primitives for known message classes/IDs; it does not decode specific message payloads (e.g. NAV-PVT fields). Use `castle::read_le16/32/64` or `castle::read_le16s/32s/64s` from `castle/utility/bytes.hpp` to decode specific fields.
+- This header only defines protocol-level primitives; it does not decode specific message payloads. Typed message models live in [`messages/`](messages/messages.md); they are built on [`payload_reader`](payload_reader.md) and [`payload_writer`](payload_writer.md), so use `Message::decode(view, out)` and `encode_message(message, ...)` instead of decoding fields by hand.

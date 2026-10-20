@@ -5,95 +5,51 @@
 int main()
 {
     using namespace castle::protocols::ubx;
-    using namespace castle::protocols::ubx::messages;
+    using castle::protocols::ubx::messages::mon_span;
+    using castle::protocols::ubx::messages::mon_span_rf_block;
+    using castle::protocols::ubx::messages::MON_SPAN_SPECTRUM_BINS;
 
-    // Build a synthetic UBX-MON-SPAN payload containing one RF block.
-    static constexpr castle::size_type payload_size =
-        mon_span<>::header_length + mon_span<>::block_length;
-
-    uint8_t payload_data[payload_size] = {};
-
-    // Header
-    payload_data[0U] = 0x01U; // version
-    payload_data[1U] = 0x01U; // declared RF block count
-    payload_data[2U] = 0x00U;
-    payload_data[3U] = 0x00U;
-
-    castle::size_type offset = mon_span<>::header_length;
-
-    // Spectrum bins
-    for (castle::size_type i = 0U; i < MON_SPAN_SPECTRUM_BINS; ++i)
+    // One RF path (L1) spectrum: 128 MHz span centred on 1575.42 MHz.
+    mon_span<2U> span{};
+    mon_span_rf_block l1{};
+    for (castle::size_type bin = 0U; bin < MON_SPAN_SPECTRUM_BINS; ++bin)
     {
-        payload_data[offset + i] = static_cast<uint8_t>(i);
+        l1.spectrum[bin] = static_cast<uint8_t>(bin);
     }
-    offset += MON_SPAN_SPECTRUM_BINS;
+    l1.span = 128000000U;
+    l1.res = 500000U;
+    l1.center = 1575420000U;
+    l1.pga = 54U;
+    CASTLE_SAMPLE_CHECK(span.rf_blocks.push_back(l1) == castle::status::ok);
 
-    // RF block metadata
-    castle::write_le32(&payload_data[offset], 1000000UL); // span
-    offset += 4U;
+    // Frequency of bin i: center + span * (i - 128) / 256.
+    CASTLE_SAMPLE_CHECK(l1.bin_frequency_hz(128U) == 1575420000.0);
+    CASTLE_SAMPLE_CHECK(l1.bin_frequency_hz(0U) == 1511420000.0);
 
-    castle::write_le32(&payload_data[offset], 1000UL); // resolution
-    offset += 4U;
+    uint8_t frame[mon_span<2U>::header_length + mon_span<2U>::block_length + UBX_FRAME_OVERHEAD];
+    castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(encode_message(span, frame, sizeof(frame), written) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(written == sizeof(frame));
 
-    castle::write_le32(&payload_data[offset], 1575420000UL); // center frequency
-    offset += 4U;
+    message_view raw{};
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(mon_span<2U>::matches(raw));
 
-    payload_data[offset] = 12U; // PGA
-    offset += 1U;
+    mon_span<2U> decoded{};
+    CASTLE_SAMPLE_CHECK(mon_span<2U>::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.version == 0U);
+    CASTLE_SAMPLE_CHECK(decoded.num_rf_blocks == 1U); // taken from rf_blocks.size() on encode
+    CASTLE_SAMPLE_CHECK(decoded.rf_blocks.size() == 1U);
+    CASTLE_SAMPLE_CHECK(decoded.rf_blocks[0U].spectrum[255U] == 255U);
+    CASTLE_SAMPLE_CHECK(decoded.rf_blocks[0U].span == 128000000U);
+    CASTLE_SAMPLE_CHECK(decoded.rf_blocks[0U].res == 500000U);
+    CASTLE_SAMPLE_CHECK(decoded.rf_blocks[0U].center == 1575420000U);
+    CASTLE_SAMPLE_CHECK(decoded.rf_blocks[0U].pga == 54U);
 
-    // Reserved bytes
-    payload_data[offset++] = 0U;
-    payload_data[offset++] = 0U;
-    payload_data[offset++] = 0U;
+    // Too small an output buffer is reported, not overrun.
+    CASTLE_SAMPLE_CHECK(encode_message(span, frame, sizeof(frame) - 1U, written) == castle::status::full);
 
-    CASTLE_SAMPLE_CHECK(offset == payload_size);
-
-    // Encode the payload into a UBX frame.
-    castle::container::array_view<const uint8_t> payload(
-        payload_data,
-        payload_size);
-
-    uint8_t frame[512U];
-    castle::size_type bytes_written = 0U;
-
-    castle::status encode_status = encode_frame(
-        UBX_CLASS_MON,
-        UBX_ID_MON_SPAN,
-        payload,
-        frame,
-        sizeof(frame),
-        bytes_written);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_status));
-
-    // Decode the UBX frame.
-    message_view raw;
-    bool decoded = decode_frame(
-        castle::container::array_view<const uint8_t>(
-            frame,
-            bytes_written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(decoded);
-    CASTLE_SAMPLE_CHECK(mon_span<>::matches(raw));
-
-    // Decode the MON-SPAN message payload.
-    mon_span<> span;
-    CASTLE_SAMPLE_CHECK(mon_span<>::decode(raw, span));
-
-    CASTLE_SAMPLE_CHECK(span.version == 0x01U);
-    CASTLE_SAMPLE_CHECK(span.num_rf_blocks == 1U);
-
-    // Verify spectrum bins.
-    CASTLE_SAMPLE_CHECK(span.rf_blocks[0U].spectrum[0U] == 0U);
-    CASTLE_SAMPLE_CHECK(span.rf_blocks[0U].spectrum[1U] == 1U);
-    CASTLE_SAMPLE_CHECK(span.rf_blocks[0U].spectrum[255U] == 255U);
-
-    // Verify RF block metadata.
-    CASTLE_SAMPLE_CHECK(span.rf_blocks[0U].span == 1000000UL);
-    CASTLE_SAMPLE_CHECK(span.rf_blocks[0U].res == 1000UL);
-    CASTLE_SAMPLE_CHECK(span.rf_blocks[0U].center == 1575420000UL);
-    CASTLE_SAMPLE_CHECK(span.rf_blocks[0U].pga == 12U);
-
+    // Request the message with an empty poll frame.
+    CASTLE_SAMPLE_CHECK(encode_poll<mon_span<2U>>(frame, sizeof(frame), written) == castle::status::ok);
     return 0;
 }

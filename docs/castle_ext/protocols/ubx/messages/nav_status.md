@@ -2,7 +2,7 @@
 
 ## Overview
 
-Defines the UBX NAV-STATUS receiver-status model with fix type, status flags, TTFF, and milliseconds since startup.
+Typed model of UBX-NAV-STATUS (class 0x01, ID 0x03), the periodic/polled receiver navigation status: GPS fix type, fix/time validity flags, differential and carrier-phase status, map matching, power save and spoofing-detection state, time to first fix and time since startup.
 
 ## Header
 
@@ -11,52 +11,68 @@ Defines the UBX NAV-STATUS receiver-status model with fix type, status flags, TT
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/types.hpp`](../../../../core/types.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
+- [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
+- [`detail/fixed_message.hpp`](detail/fixed_message.md)
 - `stdint.h`
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `nav_status` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `nav_status::msg_class` | `static constexpr uint8_t` protocol/configuration constant (`UBX_CLASS_NAV`). |
-| `nav_status::msg_id` | `static constexpr uint8_t` protocol/configuration constant (`UBX_ID_NAV_STATUS`). |
-| `nav_status::payload_length` | `static constexpr castle::size_type` protocol/configuration constant (`16U`). |
-| `nav_status::FLAGS_GPS_FIX_OK` | `static constexpr uint8_t` protocol/configuration constant (`0x01U`). |
-| `nav_status::FLAGS_DIFF_SOLN` | `static constexpr uint8_t` protocol/configuration constant (`0x02U`). |
-| `nav_status::FLAGS_WKN_SET` | `static constexpr uint8_t` protocol/configuration constant (`0x04U`). |
-| `nav_status::FLAGS_TOW_SET` | `static constexpr uint8_t` protocol/configuration constant (`0x08U`). |
-| `nav_status_gps_fix` | Strongly typed protocol enumeration used by the decoded model. |
-| `nav_status::fix_ok()` | Returns true when the corresponding GNSS-fix-valid flag is set. |
-| `nav_status::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `nav_status::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
+| `nav_status` | Value type for the payload; derives from `detail::fixed_message<nav_status, UBX_CLASS_NAV, UBX_ID_NAV_STATUS, 16U>`. |
+| `nav_status_gps_fix` | `enum class : uint8_t` `gpsFix`: `no_fix` 0, `dead_reck` 1, `fix_2d` 2, `fix_3d` 3, `gnss_dr` 4, `time_only` 5 (0x06..0xFF reserved). |
+| `nav_status_map_matching` | `enum class : uint8_t` `fixStat.mapMatching`: `none` 0, `valid_not_used` 1, `valid_used` 2, `valid_used_dr` 3. |
+| `nav_status_psm_state` | `enum class : uint8_t` `flags2.psmState`: `acquisition` 0 (or PSM disabled), `tracking` 1, `power_optimized_tracking` 2, `inactive` 3. |
+| `nav_status_spoof_det_state` | `enum class : uint8_t` `flags2.spoofDetState`: `unknown` 0, `no_spoofing` 1, `spoofing` 2, `multiple` 3. |
+| `nav_status_carr_soln` | `enum class : uint8_t` `flags2.carrSoln`: `none` 0, `floating` 1, `fixed` 2. |
 
-### `nav_status` data members
+### Constants
 
-| Field | Type | Default | Description |
+| Constant | Type | Value | Description |
 | --- | --- | --- | --- |
-| `i_tow` | `uint32_t` | `0U` | GNSS time-of-week field. |
-| `gps_fix` | `nav_status_gps_fix` | `nav_status_gps_fix::no_fix` | Receiver GPS fix-type enumeration. |
-| `flags` | `uint8_t` | `0U` | Protocol-defined packed flags. |
-| `fix_stat` | `uint8_t` | `0U` | Fix-status bitfield. |
-| `flags2` | `uint8_t` | `0U` | Secondary packed flags. |
-| `ttff` | `uint32_t` | `0U` | Time-to-first-fix metric. |
-| `msss` | `uint32_t` | `0U` | Milliseconds since startup. |
+| `nav_status::msg_class` | `uint8_t` | `UBX_CLASS_NAV` (0x01) | UBX class. |
+| `nav_status::msg_id` | `uint8_t` | `UBX_ID_NAV_STATUS` (0x03) | UBX message ID. |
+| `nav_status::payload_length` | `castle::size_type` | `16U` | Exact payload length. |
+| `FLAGS_GPS_FIX_OK` | `uint8_t` | `0x01U` | `flags.gpsFixOk`. |
+| `FLAGS_DIFF_SOLN` | `uint8_t` | `0x02U` | `flags.diffSoln`. |
+| `FLAGS_WKN_SET` | `uint8_t` | `0x04U` | `flags.wknSet`. |
+| `FLAGS_TOW_SET` | `uint8_t` | `0x08U` | `flags.towSet`. |
+| `FIX_STAT_DIFF_CORR` | `uint8_t` | `0x01U` | `fixStat.diffCorr`. |
+| `FIX_STAT_CARR_SOLN_VALID` | `uint8_t` | `0x02U` | `fixStat.carrSolnValid`. |
+| `FIX_STAT_MAP_MATCHING_MASK` / `_SHIFT` | `uint8_t` | `0xC0U` / `6U` | `fixStat.mapMatching` (bits 7..6). |
+| `FLAGS2_PSM_STATE_MASK` / `_SHIFT` | `uint8_t` | `0x03U` / `0U` | `flags2.psmState` (bits 1..0). |
+| `FLAGS2_SPOOF_DET_STATE_MASK` / `_SHIFT` | `uint8_t` | `0x18U` / `3U` | `flags2.spoofDetState` (bits 4..3). |
+| `FLAGS2_CARR_SOLN_MASK` / `_SHIFT` | `uint8_t` | `0xC0U` / `6U` | `flags2.carrSoln` (bits 7..6). |
 
-### Enumerations
+### Fields
 
-#### `nav_status_gps_fix`
+| Offset | Field | Type | Unit / scale | Description |
+| --- | --- | --- | --- | --- |
+| 0 | `i_tow` | `uint32_t` | ms | GPS time of week of the navigation epoch. |
+| 4 | `gps_fix` | `nav_status_gps_fix` | - | GPS fix type; does not by itself qualify a fix as valid. |
+| 5 | `flags` | `uint8_t` | - | Navigation status flags (`FLAGS_*`). |
+| 6 | `fix_stat` | `uint8_t` | - | Fix status information (`FIX_STAT_*`). |
+| 7 | `flags2` | `uint8_t` | - | Further navigation output information (`FLAGS2_*`). |
+| 8 | `ttff` | `uint32_t` | ms | Time to first fix. |
+| 12 | `msss` | `uint32_t` | ms | Milliseconds since startup/reset. |
 
-| Enumerator | Value |
-| --- | --- |
-| `no_fix` | `0U` |
-| `dead_reck` | `1U` |
-| `fix_2d` | `2U` |
-| `fix_3d` | `3U` |
-| `gnss_dr` | `4U` |
-| `time_only` | `5U` |
+### Functions
+
+| Function | Returns | Description |
+| --- | --- | --- |
+| `static bool matches(const message_view& raw)` | `bool` | True when `raw` carries class 0x01 / ID 0x03. |
+| `static bool decode(const message_view& raw, nav_status& out)` | `bool` | Decodes an exactly 16-byte payload; `out` is value-initialised on failure. |
+| `void encode(payload_writer& writer) const` | - | Writes the payload; used by `encode_message()`. |
+| `fix_ok()`, `diff_soln()`, `wkn_set()`, `tow_set()` | `bool` | `flags` bit tests. |
+| `diff_corr()`, `carr_soln_valid()` | `bool` | `fix_stat` bit tests. |
+| `map_matching()` | `nav_status_map_matching` | `fix_stat` bits 7..6, shifted. |
+| `psm_state()` | `nav_status_psm_state` | `flags2` bits 1..0. |
+| `spoof_det_state()` | `nav_status_spoof_det_state` | `flags2` bits 4..3, shifted. |
+| `carr_soln()` | `nav_status_carr_soln` | `flags2` bits 7..6, shifted. |
 
 ## Usage Example
 
@@ -65,18 +81,23 @@ Defines the UBX NAV-STATUS receiver-status model with fix type, status flags, TT
 
 using castle::protocols::ubx::message_view;
 using castle::protocols::ubx::messages::nav_status;
+using castle::protocols::ubx::messages::nav_status_spoof_det_state;
 
-void handle(const message_view& raw) {
-    nav_status value{};
-    if (nav_status::decode(raw, value)) {
-        // `value` contains the decoded, typed fields.
-    }
+bool trustworthy_fix(const message_view& raw)
+{
+    nav_status status{};
+    return nav_status::decode(raw, status) && status.fix_ok()
+        && (status.spoof_det_state() != nav_status_spoof_det_state::spoofing)
+        && (status.spoof_det_state() != nav_status_spoof_det_state::multiple);
 }
 ```
 
+A complete, self-checking example is in [`samples/castle_ext/protocols/ubx/messages/nav_status.cpp`](../../../../../samples/castle_ext/protocols/ubx/messages/nav_status.cpp).
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Payload length must exactly equal the protocol `payload_length` constant before field extraction.
+- Fixed-size value type (no heap, no exceptions, no RTTI, no virtual).
+- `decode()` accepts only a payload of exactly 16 bytes; shorter or longer payloads are rejected rather than partially decoded.
+- `gps_fix` stores the raw byte; reserved values (0x06..0xFF) are kept as-is.
+- `psmState` is not supported before protocol 13.01 and `spoofDetState` not before 18.00; older receivers report 0.
+- Thread-safety: none. Instances are plain values and are not thread-safe; synchronise externally when shared.

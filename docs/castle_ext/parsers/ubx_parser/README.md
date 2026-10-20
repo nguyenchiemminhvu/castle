@@ -689,30 +689,40 @@ if (nav_pvt::decode(message, pvt))
 
 ## 14. Building UBX Messages
 
-### Encode a frame
+### Encode a message
 
-`encode_frame()` writes the complete frame, including sync, little-endian payload length, and checksum, into a caller-provided buffer. It returns `castle::status` and sets `bytes_written` to zero on failure. `decode_frame()` can validate the resulting bytes when working with complete-frame buffers.
-
-### Build a CFG-VALSET request
-
-CFG helpers are protocol utilities in `ubx_config.hpp`; they do not open a serial port, wait for an ACK, or manage a configuration transaction. The application sends the returned bytes and handles the receiver's ACK/NAK itself.
+Every message model can be encoded with `encode_message()` from `payload_writer.hpp`. It writes the payload directly into the caller's frame buffer and then fills in sync bytes, little-endian length and checksum. It returns `castle::status` and sets `bytes_written` to zero on failure. Polls with an empty payload use `encode_poll<Message>()`. For raw payloads, `encode_frame()` is still available, and `decode_frame()` validates complete-frame buffers.
 
 ```cpp
-#include "castle_ext/protocols/ubx/ubx_config.hpp"
+#include "castle_ext/protocols/ubx/messages/cfg_rst.hpp"
+#include "castle_ext/protocols/ubx/messages/mon_ver.hpp"
 
 using namespace castle::protocols::ubx;
-using namespace castle::protocols::ubx::config;
 
-config_entry entries[1U] = {
-    {0x30210001U, config_value(static_cast<uint16_t>(1000U))} // CFG-RATE-MEAS
-};
 uint8_t frame[64U];
 castle::size_type written = 0U;
 
-castle::status result = build_valset_frame(
-    castle::container::array_view<const config_entry>(entries, 1U),
-    static_cast<uint8_t>(config_layer::ram),
-    frame, sizeof(frame), written);
+castle::status result = encode_message(messages::cfg_rst::cold_start(), frame, sizeof(frame), written);
+result = encode_poll<messages::mon_ver<>>(frame, sizeof(frame), written); // poll UBX-MON-VER
+```
+
+### Build a CFG-VALSET request
+
+The CFG models (`cfg_valset`, `cfg_valget_poll` / `cfg_valget`, `cfg_valdel`) are protocol utilities. They do not open a serial port, wait for an ACK, or drive a configuration transaction. The application sends the bytes and handles the receiver's ACK/NAK itself.
+
+```cpp
+#include "castle_ext/protocols/ubx/messages/cfg_valset.hpp"
+
+using namespace castle::protocols::ubx;
+
+messages::cfg_valset<> set{};
+set.layers = config::config_layer::ram | config::config_layer::flash;
+static_cast<void>(set.entries.push_back(
+    config::config_entry{0x30210001U, config::config_value(static_cast<uint16_t>(1000U))})); // CFG-RATE-MEAS
+
+uint8_t frame[64U];
+castle::size_type written = 0U;
+castle::status result = encode_message(set, frame, sizeof(frame), written);
 
 if (castle::succeeded(result))
 {
@@ -720,7 +730,7 @@ if (castle::succeeded(result))
 }
 ```
 
-`build_valget_frame()` creates a poll for one or more key IDs, and `parse_valget_response()` decodes response entries into caller-provided storage. Configuration keys are specified by u-blox; `value_byte_size()` derives the wire width from each key's size code.
+`cfg_valget_poll<>` builds a poll for one or more key IDs. The receiver's answer decodes with `cfg_valget<>::decode()` (or by subscribing to `cfg_valget_decoder<>` in a registry). Configuration keys are specified by u-blox; `value_byte_size()` derives each value's wire width from the key's size code, and encoding a key with an unknown size code returns `castle::status::invalid_argument`.
 
 ---
 

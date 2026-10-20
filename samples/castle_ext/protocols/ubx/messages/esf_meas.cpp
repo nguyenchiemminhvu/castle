@@ -7,110 +7,64 @@ int main()
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // Build a UBX-ESF-MEAS payload:
-    //
-    // time_tag      = 1000 (0x000003E8)
-    // flags         = 0 (no calib_ttag field present)
-    // id            = 7
-    // measurement   = type 11, value 12345
+    // Host -> receiver: feed one speed measurement (data type 11) and one
+    // rear-left wheel tick count (data type 8) for the fusion filter.
+    esf_meas<4U> input{};
+    input.time_tag = 1000U;
+    input.id = 7U;
+    esf_meas_datum speed{};
+    speed.data_type = 11U;
+    speed.data_value = -1234; // signed 24-bit value (e.g. reversing)
+    esf_meas_datum ticks{};
+    ticks.data_type = 8U;
+    ticks.data_value = 0x7FFFFF; // largest positive dataField
+    CASTLE_SAMPLE_CHECK(input.data.push_back(speed) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(input.data.push_back(ticks) == castle::status::ok);
 
-    uint8_t payload[12U];
-
-    castle::write_le32(&payload[0U], 1000U);     // time_tag
-    castle::write_le16(&payload[4U], 0U);        // flags
-    castle::write_le16(&payload[6U], 7U);        // id
-
-    uint32_t measurement_word =
-        (static_cast<uint32_t>(11U) << 24U)
-        | 12345U;
-
-    castle::write_le32(&payload[8U], measurement_word);
-
-    castle::container::array_view<const uint8_t> payload_view(
-        payload,
-        sizeof(payload));
-
-    // Encode a complete UBX frame.
+    // numMeas in flags bits 15..11 is written from data.size(); no calibTtag.
     uint8_t frame[64U];
     castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(encode_message(input, frame, sizeof(frame), written) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(written == frame_size(esf_meas<4U>::header_length + (2U * esf_meas<4U>::block_length)));
 
-    castle::status encode_status = encode_frame(
-        UBX_CLASS_ESF,
-        UBX_ID_ESF_MEAS,
-        payload_view,
-        frame,
-        sizeof(frame),
-        written);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_status));
-
-    // Decode the UBX frame.
     message_view raw;
-    bool frame_ok =
-        decode_frame(
-            castle::container::array_view<const uint8_t>(frame, written),
-            raw);
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(esf_meas<4U>::matches(raw));
 
-    CASTLE_SAMPLE_CHECK(frame_ok);
-    CASTLE_SAMPLE_CHECK(esf_meas<>::matches(raw));
+    esf_meas<4U> decoded;
+    CASTLE_SAMPLE_CHECK(esf_meas<4U>::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.time_tag == 1000U);
+    CASTLE_SAMPLE_CHECK(decoded.id == 7U);
+    CASTLE_SAMPLE_CHECK(decoded.num_meas() == 2U);
+    CASTLE_SAMPLE_CHECK(decoded.data.size() == 2U);
+    CASTLE_SAMPLE_CHECK(decoded.data[0U].data_type == 11U);
+    CASTLE_SAMPLE_CHECK(decoded.data[0U].data_value == -1234);
+    CASTLE_SAMPLE_CHECK(decoded.data[1U].data_type == 8U);
+    CASTLE_SAMPLE_CHECK(decoded.data[1U].data_value == 0x7FFFFF);
+    CASTLE_SAMPLE_CHECK(!decoded.calib_ttag_valid());
+    CASTLE_SAMPLE_CHECK(decoded.time_mark_sent() == esf_meas<4U>::TIME_MARK_NONE);
+    CASTLE_SAMPLE_CHECK(!decoded.time_mark_edge());
 
-    // Decode the ESF-MEAS payload.
-    esf_meas<> message;
+    // Receiver output with a time mark on EXT1 (falling edge) and a calibrated time tag.
+    esf_meas<4U> output{};
+    output.time_tag = 2000U;
+    output.flags = static_cast<uint16_t>(esf_meas<4U>::TIME_MARK_EXT1
+                                         | esf_meas<4U>::FLAGS_TIME_MARK_EDGE
+                                         | esf_meas<4U>::FLAGS_CALIB_TTAG_VALID);
+    output.calib_ttag = 9999U;
+    CASTLE_SAMPLE_CHECK(output.data.push_back(speed) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(encode_message(output, frame, sizeof(frame), written) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(raw.payload_length() == 16U);
+    CASTLE_SAMPLE_CHECK(esf_meas<4U>::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.time_mark_sent() == esf_meas<4U>::TIME_MARK_EXT1);
+    CASTLE_SAMPLE_CHECK(decoded.time_mark_edge());
+    CASTLE_SAMPLE_CHECK(decoded.calib_ttag_valid());
+    CASTLE_SAMPLE_CHECK(decoded.calib_ttag == 9999U);
 
-    bool decoded = esf_meas<>::decode(raw, message);
-
-    CASTLE_SAMPLE_CHECK(decoded);
-
-    CASTLE_SAMPLE_CHECK(message.time_tag == 1000U);
-    CASTLE_SAMPLE_CHECK(message.flags == 0U);
-    CASTLE_SAMPLE_CHECK(message.id == 7U);
-
-    CASTLE_SAMPLE_CHECK(message.num_meas == 1U);
-
-    CASTLE_SAMPLE_CHECK(message.data[0U].data_type == 11U);
-    CASTLE_SAMPLE_CHECK(message.data[0U].data_value == 12345);
-
-    CASTLE_SAMPLE_CHECK(!message.has_calib_ttag);
-
-    // Example with calibration time tag present.
-    uint8_t payload_with_calib[16U];
-
-    castle::write_le32(&payload_with_calib[0U], 2000U); // time_tag
-    castle::write_le16(&payload_with_calib[4U], 1U);    // FLAGS_TIME_TAG_TYPE_MASK set
-    castle::write_le16(&payload_with_calib[6U], 42U);   // id
-
-    uint32_t measurement_word2 =
-        (static_cast<uint32_t>(3U) << 24U)
-        | 500U;
-
-    castle::write_le32(&payload_with_calib[8U], measurement_word2);
-    castle::write_le32(&payload_with_calib[12U], 9999U); // calib_ttag
-
-    castle::size_type written2 = 0U;
-
-    encode_status = encode_frame(
-        UBX_CLASS_ESF,
-        UBX_ID_ESF_MEAS,
-        castle::container::array_view<const uint8_t>(
-            payload_with_calib,
-            sizeof(payload_with_calib)),
-        frame,
-        sizeof(frame),
-        written2);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_status));
-
-    frame_ok = decode_frame(
-        castle::container::array_view<const uint8_t>(frame, written2),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(frame_ok);
-
-    decoded = esf_meas<>::decode(raw, message);
-
-    CASTLE_SAMPLE_CHECK(decoded);
-    CASTLE_SAMPLE_CHECK(message.has_calib_ttag);
-    CASTLE_SAMPLE_CHECK(message.calib_ttag == 9999U);
+    // A dataField outside the signed 24-bit range is refused, never truncated.
+    output.data[0U].data_value = 0x00800000;
+    CASTLE_SAMPLE_CHECK(encode_message(output, frame, sizeof(frame), written) == castle::status::out_of_range);
 
     return 0;
 }

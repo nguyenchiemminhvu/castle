@@ -1,14 +1,26 @@
 // MIT License
 // Copyright (c) 2026 nguyenchiemminhvu@gmail.com
 
+/**
+ * @file mon_ver.hpp
+ * @brief UBX-MON-VER (0x0a 0x04): receiver and software version.
+ *
+ * Polled output: `swVersion` CH[30] and `hwVersion` CH[10] followed by
+ * `[0..n]` CH[30] extension strings (`40 + [0..n]·30`). The extension count
+ * is implied by the payload length. Request it with
+ * `encode_poll<mon_ver<>>(buffer, capacity, written)`.
+ */
 #ifndef CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_MON_VER_HPP
 #define CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_MON_VER_HPP
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
+#include "castle/container/string.hpp"
+#include "castle/container/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
+#include "castle_ext/protocols/ubx/payload_writer.hpp"
+#include "castle_ext/protocols/ubx/messages/detail/repeated_group.hpp"
 
 #include <stdint.h>
 
@@ -21,7 +33,7 @@ namespace ubx
 namespace messages
 {
 
-/** @brief UBX-MON-VER: software/hardware version and extension strings. */
+/** @brief UBX-MON-VER output payload. */
 template <castle::size_type MaxExtensions = 10U>
 struct mon_ver
 {
@@ -30,61 +42,62 @@ struct mon_ver
     static CASTLE_CONSTEXPR castle::size_type sw_version_len = 30U;
     static CASTLE_CONSTEXPR castle::size_type hw_version_len = 10U;
     static CASTLE_CONSTEXPR castle::size_type extension_len = 30U;
-    static CASTLE_CONSTEXPR castle::size_type min_payload_length = 40U;
+    static CASTLE_CONSTEXPR castle::size_type header_length = sw_version_len + hw_version_len;
+    static CASTLE_CONSTEXPR castle::size_type block_length = extension_len;
 
-    char sw_version[sw_version_len]{};
-    char hw_version[hw_version_len]{};
-    castle::container::array<castle::container::array<char, extension_len>, MaxExtensions> extensions{};
-    castle::size_type extension_count = 0U;
+    castle::container::string<sw_version_len> sw_version{}; ///< Software version (NUL padding stripped).
+    castle::container::string<hw_version_len> hw_version{}; ///< Hardware version (NUL padding stripped).
+    /** @brief Extension strings in wire order; extensions beyond `MaxExtensions` are skipped. */
+    castle::container::vector<castle::container::string<extension_len>, MaxExtensions> extensions{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {
         return raw.is(msg_class, msg_id);
     }
 
+    /**
+     * @brief Decodes both version strings and up to `MaxExtensions` extensions.
+     * @return `false` unless the payload length is exactly `40 + n·30`.
+     */
     CASTLE_NODISCARD static bool decode(CASTLE_CONST message_view& raw, mon_ver& out) CASTLE_NOEXCEPT
     {
-        if (raw.payload_length() < min_payload_length)
-        {
-            return false;
-        }
-
-        CASTLE_CONST castle::size_type extra = raw.payload_length() - min_payload_length;
-        if ((extra % extension_len) != 0U)
+        out = mon_ver{};
+        castle::size_type count = 0U;
+        if (!matches(raw) || !detail::implied_group_count(raw.payload_length(), header_length, block_length, count))
         {
             return false;
         }
 
         payload_reader reader(raw.payload);
-        out = mon_ver{};
-        CASTLE_CONST uint8_t* sw = reader.read_bytes(sw_version_len);
-        CASTLE_CONST uint8_t* hw = reader.read_bytes(hw_version_len);
-        if (!reader.ok())
-        {
-            return false;
-        }
-
-        copy_field(out.sw_version, sw, sw_version_len);
-        copy_field(out.hw_version, hw, hw_version_len);
-        while (reader.remaining() >= extension_len)
-        {
-            CASTLE_CONST uint8_t* extension = reader.read_bytes(extension_len);
-            if (out.extension_count < MaxExtensions)
-            {
-                copy_field(out.extensions[out.extension_count].data(), extension, extension_len);
-                ++out.extension_count;
-            }
-        }
-
-        return reader.ok();
-    }
-
-private:
-    static void copy_field(char* dst, CASTLE_CONST uint8_t* src, castle::size_type count) CASTLE_NOEXCEPT
-    {
+        reader.text(out.sw_version);
+        reader.text(out.hw_version);
         for (castle::size_type index = 0U; index < count; ++index)
         {
-            dst[index] = static_cast<char>(src[index]);
+            if (out.extensions.full())
+            {
+                reader.reserved((count - index) * extension_len);
+                break;
+            }
+            castle::container::string<extension_len> extension{};
+            reader.text(extension);
+            static_cast<void>(out.extensions.push_back(extension));
+        }
+        if (!reader.ok())
+        {
+            out = mon_ver{};
+            return false;
+        }
+        return true;
+    }
+
+    /** @brief Writes both version strings and every stored extension, NUL-padded to their wire widths. */
+    void encode(payload_writer& writer) CASTLE_CONST CASTLE_NOEXCEPT
+    {
+        writer.text(sw_version);
+        writer.text(hw_version);
+        for (CASTLE_CONST castle::container::string<extension_len>& extension : extensions)
+        {
+            writer.text(extension);
         }
     }
 };

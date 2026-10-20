@@ -2,7 +2,7 @@
 
 ## Overview
 
-Defines a bounded UBX MON-VER model containing fixed-size software/hardware version strings and a fixed-capacity extension list.
+Model of UBX-MON-VER (0x0a 0x04), the receiver and software version report (polled). The payload is `swVersion` CH[30] and `hwVersion` CH[10], followed by `[0..n]` CH[30] extension strings (`40 + [0..n]·30`). The extension count is implied by the payload length. Strings are stored as fixed-capacity `castle::container::string` with the NUL padding stripped. Request the message with `encode_poll<mon_ver<>>()`.
 
 ## Header
 
@@ -10,57 +10,75 @@ Defines a bounded UBX MON-VER model containing fixed-size software/hardware vers
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
-- [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
-- [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
+- [castle/core/compiler.hpp](../../../../core/compiler.md)
+- [castle/core/types.hpp](../../../../core/types.md)
+- [castle/container/string.hpp](../../../../container/string.md)
+- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
+- [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
+- [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
+- [detail/repeated_group.hpp](detail/repeated_group.md)
 - `stdint.h`
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `mon_ver<MaxExtensions=10U>` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `mon_ver::msg_class` | `static constexpr uint8_t` protocol/configuration constant (`UBX_CLASS_MON`). |
-| `mon_ver::msg_id` | `static constexpr uint8_t` protocol/configuration constant (`UBX_ID_MON_VER`). |
-| `mon_ver::sw_version_len` | `static constexpr castle::size_type` protocol/configuration constant (`30U`). |
-| `mon_ver::hw_version_len` | `static constexpr castle::size_type` protocol/configuration constant (`10U`). |
-| `mon_ver::extension_len` | `static constexpr castle::size_type` protocol/configuration constant (`30U`). |
-| `mon_ver::min_payload_length` | `static constexpr castle::size_type` protocol/configuration constant (`40U`). |
-| `mon_ver::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `mon_ver::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
+| `mon_ver<MaxExtensions = 10>` | Message model; stores up to `MaxExtensions` extension strings. |
 
-### `mon_ver` data members
+### Constants
 
-| Field | Type | Default | Description |
+| Constant | Value | Description |
+| --- | --- | --- |
+| `msg_class` / `msg_id` | `0x0A` / `0x04` | UBX class / ID. |
+| `sw_version_len` / `hw_version_len` / `extension_len` | `30` / `10` / `30` | Wire widths of the CH[] fields. |
+| `header_length` | `40` | `swVersion` + `hwVersion`. |
+| `block_length` | `30` | Extension size. |
+
+### Fields
+
+| Field | Type | Offset | Description |
 | --- | --- | --- | --- |
-| `sw_version` | `char` | `—` | Software-version field copied from the payload. |
-| `hw_version` | `char` | `—` | Hardware-version field copied from the payload. |
-| `extensions` | `castle::container::array<castle::container::array<char,extension_len>,MaxExtensions>` | `—` | Fixed-capacity MON-VER extension strings. |
-| `extension_count` | `castle::size_type` | `0U` | Number of MON-VER extension fields stored. |
+| `sw_version` | `castle::container::string<30>` | 0 | Software version, up to the first NUL. |
+| `hw_version` | `castle::container::string<10>` | 30 | Hardware version, up to the first NUL. |
+| `extensions` | `castle::container::vector<castle::container::string<30>, MaxExtensions>` | 40 + n·30 | Extension strings in wire order; `extensions.size()` is the number stored. |
+
+### Functions
+
+| Function | Description |
+| --- | --- |
+| `static bool matches(const message_view&)` | `true` for class `0x0A` / ID `0x04`. |
+| `static bool decode(const message_view&, mon_ver&)` | `false` for wrong class/ID or a length that is not `40 + n·30`. |
+| `void encode(payload_writer&) const` | Writes all strings, NUL-padded to their wire widths. |
+
 
 ## Usage Example
 
 ```cpp
-#include "castle_ext/protocols/ubx/messages/mon_ver.hpp"
-
-using castle::protocols::ubx::message_view;
+using namespace castle::protocols::ubx;
 using castle::protocols::ubx::messages::mon_ver;
+using castle::container::string_view;
 
-void handle(const message_view& raw) {
-    mon_ver<4U> value{};
-    if (mon_ver::decode(raw, value)) {
-        // The fixed-capacity arrays contain at most the configured bound.
+void on_message(const message_view& raw) {
+    mon_ver<> version{};
+    if (mon_ver<>::decode(raw, version)) {
+        for (const auto& extension : version.extensions) {
+            if (extension.view().starts_with(string_view("PROTVER="))) { /* ... */ }
+        }
     }
 }
 ```
 
+The full, runnable example is `samples/castle_ext/protocols/ubx/messages/mon_ver.cpp`.
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Payload length must be at least the fixed minimum; optional/variable records are validated from the remaining bytes.
-- Template capacity parameters bound retained records/text; excess protocol records are skipped or ignored after validation rather than dynamically allocated.
-- MON-VER software/hardware fields are copied into fixed-size buffers of 30 and 10 bytes; extension fields are stored in 30-byte slots.
+- Payload length must be exactly `40 + n·30` (`implied_group_count`).
+- Extensions beyond `MaxExtensions` are skipped. A CH[] field that uses its full width without a NUL is kept whole (`size() == width`).
+- API change from the previous version: `sw_version` / `hw_version` were `char[30]` / `char[10]` and `extensions` was `array<array<char,30>, N>` with a separate `extension_count`. They are now `string<30>` / `string<10>` and a `vector<string<30>, N>`; use `extensions.size()` instead of `extension_count`.
+- No heap allocation: every member lives in the value itself (fixed-capacity Castle containers only); no exceptions, no RTTI.
+- `decode()` sets `out` to a value-initialised object first and resets it again on any failure, so callers never observe partial state.
+- `message_view` is non-owning; its payload must stay valid during `decode()`. Decoded values own their data and may outlive the frame.
+- Thread-safety: none. Values are plain value types; concurrent access to one instance needs external synchronisation.

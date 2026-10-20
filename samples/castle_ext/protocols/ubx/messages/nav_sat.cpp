@@ -7,82 +7,78 @@ int main()
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // Build a NAV-SAT payload containing two satellite entries.
-    uint8_t payload[nav_sat<>::header_length + (2U * nav_sat<>::block_length)] = {};
+    // Build a NAV-SAT value with two satellites.
+    nav_sat<4U> sat{};
+    sat.i_tow = 123456U;
+    sat.version = 1U;
 
-    castle::write_le32(&payload[0U], 123456U); // iTOW
-    payload[4U] = 1U;                  // version
-    payload[5U] = 2U;                  // numSvs
+    nav_sat_sv gps{};
+    gps.gnss_id = 0U; // GPS
+    gps.sv_id = 10U;
+    gps.cno = 45U;
+    gps.elev = 30;
+    gps.azim = 120;
+    gps.pr_res = 25; // 2.5 m
+    gps.flags = 5U /* code and carrier locked */ | nav_sat_sv::FLAGS_SV_USED | (1U << 4U) /* healthy */ |
+                (1U << 8U) /* ephemeris orbit */ | nav_sat_sv::FLAGS_EPH_AVAIL | nav_sat_sv::FLAGS_SBAS_CORR_USED;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(sat.svs.push_back(gps)));
 
-    // Satellite #1
-    payload[8U] = 0U;                  // gnssId (GPS)
-    payload[9U] = 10U;                 // svId
-    payload[10U] = 45U;                // cno
-    payload[11U] = 30U;                // elev
-    castle::write_le16(&payload[12U], 120U);   // azim
-    castle::write_le16(&payload[14U], 25U);    // prRes
-    castle::write_le32(&payload[16U], 0x00000001U);
+    nav_sat_sv galileo{};
+    galileo.gnss_id = 2U; // Galileo
+    galileo.sv_id = 20U;
+    galileo.cno = 50U;
+    galileo.elev = -15;
+    galileo.azim = 270;
+    galileo.pr_res = -10;
+    galileo.flags = 1U /* searching */ | (2U << 8U) /* almanac orbit */ | nav_sat_sv::FLAGS_ALM_AVAIL;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(sat.svs.push_back(galileo)));
 
-    // Satellite #2
-    payload[20U] = 2U;                 // gnssId (Galileo)
-    payload[21U] = 20U;                // svId
-    payload[22U] = 50U;                // cno
-    payload[23U] = static_cast<uint8_t>(-15);
-    castle::write_le16(&payload[24U], 270U);   // azim
-    castle::write_le16(&payload[26U], static_cast<uint16_t>(-10));
-    castle::write_le32(&payload[28U], 0x00000005U);
-
-    uint8_t frame[128U];
+    // Encode into a complete UBX frame; numSvs comes from svs.size().
+    uint8_t frame[64U];
     castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(sat, frame, sizeof(frame), written)));
+    CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + nav_sat<>::header_length + (2U * nav_sat<>::block_length)));
 
-    castle::status status = encode_frame(
-        nav_sat<>::msg_class,
-        nav_sat<>::msg_id,
-        castle::container::array_view<const uint8_t>(
-            payload,
-            sizeof(payload)),
-        frame,
-        sizeof(frame),
-        written);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(status));
-
-    // Decode the UBX frame.
+    // Parse the frame back.
     message_view raw;
-    bool frame_ok = decode_frame(
-        castle::container::array_view<const uint8_t>(frame, written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(frame_ok);
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(nav_sat<>::matches(raw));
 
-    // Decode the NAV-SAT message.
-    nav_sat<> sat;
-    CASTLE_SAMPLE_CHECK(nav_sat<>::decode(raw, sat));
+    nav_sat<> decoded;
+    CASTLE_SAMPLE_CHECK(nav_sat<>::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.i_tow == 123456U);
+    CASTLE_SAMPLE_CHECK(decoded.version == 1U);
+    CASTLE_SAMPLE_CHECK(decoded.num_svs == 2U);
+    CASTLE_SAMPLE_CHECK(decoded.svs.size() == 2U);
 
-    CASTLE_SAMPLE_CHECK(sat.i_tow == 123456U);
-    CASTLE_SAMPLE_CHECK(sat.version == 1U);
-    CASTLE_SAMPLE_CHECK(sat.num_svs == 2U);
+    CASTLE_SAMPLE_CHECK(decoded.svs[0U].sv_id == 10U);
+    CASTLE_SAMPLE_CHECK(decoded.svs[0U].pr_res_m() > 2.49);
+    CASTLE_SAMPLE_CHECK(decoded.svs[0U].pr_res_m() < 2.51);
+    CASTLE_SAMPLE_CHECK(decoded.svs[0U].quality_ind() == nav_signal_quality::code_carrier_locked);
+    CASTLE_SAMPLE_CHECK(decoded.svs[0U].sv_used());
+    CASTLE_SAMPLE_CHECK(decoded.svs[0U].health() == nav_sv_health::healthy);
+    CASTLE_SAMPLE_CHECK(decoded.svs[0U].orbit_source() == nav_sat_orbit_source::ephemeris);
+    CASTLE_SAMPLE_CHECK(decoded.svs[0U].eph_avail());
+    CASTLE_SAMPLE_CHECK(decoded.svs[0U].sbas_corr_used());
+    CASTLE_SAMPLE_CHECK(!decoded.svs[0U].diff_corr());
 
-    CASTLE_SAMPLE_CHECK(sat.svs[0U].gnss_id == 0U);
-    CASTLE_SAMPLE_CHECK(sat.svs[0U].sv_id == 10U);
-    CASTLE_SAMPLE_CHECK(sat.svs[0U].cno == 45U);
-    CASTLE_SAMPLE_CHECK(sat.svs[0U].elev == 30);
-    CASTLE_SAMPLE_CHECK(sat.svs[0U].azim == 120);
-    CASTLE_SAMPLE_CHECK(sat.svs[0U].pr_res == 25);
-    CASTLE_SAMPLE_CHECK(sat.svs[0U].flags == 0x00000001U);
+    CASTLE_SAMPLE_CHECK(decoded.svs[1U].elev == -15);
+    CASTLE_SAMPLE_CHECK(decoded.svs[1U].quality_ind() == nav_signal_quality::searching);
+    CASTLE_SAMPLE_CHECK(!decoded.svs[1U].sv_used());
+    CASTLE_SAMPLE_CHECK(decoded.svs[1U].health() == nav_sv_health::unknown);
+    CASTLE_SAMPLE_CHECK(decoded.svs[1U].orbit_source() == nav_sat_orbit_source::almanac);
+    CASTLE_SAMPLE_CHECK(decoded.svs[1U].alm_avail());
 
-    CASTLE_SAMPLE_CHECK(sat.svs[1U].gnss_id == 2U);
-    CASTLE_SAMPLE_CHECK(sat.svs[1U].sv_id == 20U);
-    CASTLE_SAMPLE_CHECK(sat.svs[1U].cno == 50U);
-    CASTLE_SAMPLE_CHECK(sat.svs[1U].elev == -15);
-    CASTLE_SAMPLE_CHECK(sat.svs[1U].azim == 270);
-    CASTLE_SAMPLE_CHECK(sat.svs[1U].pr_res == -10);
-    CASTLE_SAMPLE_CHECK(sat.svs[1U].flags == 0x00000005U);
+    // A smaller capacity keeps the first block and still reports the wire count.
+    nav_sat<1U> clipped;
+    CASTLE_SAMPLE_CHECK(nav_sat<1U>::decode(raw, clipped));
+    CASTLE_SAMPLE_CHECK(clipped.num_svs == 2U);
+    CASTLE_SAMPLE_CHECK(clipped.svs.size() == 1U);
 
     // A different NAV message ID does not match NAV-SAT.
     raw.header.msg_id = UBX_ID_NAV_STATUS;
     CASTLE_SAMPLE_CHECK(!nav_sat<>::matches(raw));
+    CASTLE_SAMPLE_CHECK(!nav_sat<>::decode(raw, decoded));
 
     return 0;
 }

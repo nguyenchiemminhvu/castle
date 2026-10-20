@@ -2,7 +2,7 @@
 
 ## Overview
 
-Defines the UBX NAV-ATT attitude model with time, message version, roll/pitch/heading, and corresponding accuracy fields.
+Typed model of UBX-NAV-ATT (class 0x01, ID 0x05), the periodic/polled vehicle attitude solution: roll, pitch and heading with their accuracy estimates. A zero accuracy means the corresponding angle is not available.
 
 ## Header
 
@@ -11,33 +11,52 @@ Defines the UBX NAV-ATT attitude model with time, message version, roll/pitch/he
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
+- [`castle/core/constants.hpp`](../../../../core/constants.md) (`castle::math::pow10`)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
+- [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
+- [`detail/fixed_message.hpp`](detail/fixed_message.md)
 - `stdint.h`
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `nav_att` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `nav_att::msg_class` | `static constexpr uint8_t` protocol/configuration constant (`UBX_CLASS_NAV`). |
-| `nav_att::msg_id` | `static constexpr uint8_t` protocol/configuration constant (`UBX_ID_NAV_ATT`). |
-| `nav_att::payload_length` | `static constexpr castle::size_type` protocol/configuration constant (`32U`). |
-| `nav_att::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `nav_att::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
+| `nav_att` | Value type for the payload; derives from `detail::fixed_message<nav_att, UBX_CLASS_NAV, UBX_ID_NAV_ATT, 32U>`. |
 
-### `nav_att` data members
+### Constants
 
-| Field | Type | Default | Description |
+| Constant | Type | Value | Description |
 | --- | --- | --- | --- |
-| `i_tow` | `uint32_t` | `0U` | GNSS time-of-week field. |
-| `version` | `uint8_t` | `0U` | Protocol/message version field. |
-| `roll` | `int32_t` | `0` | Decoded `roll` field. |
-| `pitch` | `int32_t` | `0` | Decoded `pitch` field. |
-| `heading` | `int32_t` | `0` | Decoded `heading` field. |
-| `acc_roll` | `uint32_t` | `0U` | Decoded `acc roll` field. |
-| `acc_pitch` | `uint32_t` | `0U` | Decoded `acc pitch` field. |
-| `acc_heading` | `uint32_t` | `0U` | Decoded `acc heading` field. |
+| `nav_att::msg_class` | `uint8_t` | `UBX_CLASS_NAV` (0x01) | UBX class. |
+| `nav_att::msg_id` | `uint8_t` | `UBX_ID_NAV_ATT` (0x05) | UBX message ID. |
+| `nav_att::payload_length` | `castle::size_type` | `32U` | Exact payload length. |
+
+### Fields
+
+| Offset | Field | Type | Unit / scale | Description |
+| --- | --- | --- | --- | --- |
+| 0 | `i_tow` | `uint32_t` | ms | GPS time of week of the navigation epoch. |
+| 4 | `version` | `uint8_t` | - | Message version (0x00 for this version). |
+| 5 | - | `U1[3]` | - | Reserved; skipped on decode, zero on encode. |
+| 8 | `roll` | `int32_t` | 1e-5 deg | Vehicle roll. |
+| 12 | `pitch` | `int32_t` | 1e-5 deg | Vehicle pitch. |
+| 16 | `heading` | `int32_t` | 1e-5 deg | Vehicle heading. |
+| 20 | `acc_roll` | `uint32_t` | 1e-5 deg | Roll accuracy (0 = roll not available). |
+| 24 | `acc_pitch` | `uint32_t` | 1e-5 deg | Pitch accuracy (0 = pitch not available). |
+| 28 | `acc_heading` | `uint32_t` | 1e-5 deg | Heading accuracy (0 = heading not available). |
+
+### Functions
+
+| Function | Returns | Description |
+| --- | --- | --- |
+| `static bool matches(const message_view& raw)` | `bool` | True when `raw` carries class 0x01 / ID 0x05. |
+| `static bool decode(const message_view& raw, nav_att& out)` | `bool` | Decodes an exactly 32-byte payload; `out` is value-initialised on failure. |
+| `void encode(payload_writer& writer) const` | - | Writes the payload (reserved bytes as zero); used by `encode_message()`. |
+| `roll_deg()`, `pitch_deg()`, `heading_deg()` | `double` | Angle × 1e-5. |
+| `acc_roll_deg()`, `acc_pitch_deg()`, `acc_heading_deg()` | `double` | Accuracy × 1e-5. |
 
 ## Usage Example
 
@@ -47,17 +66,22 @@ Defines the UBX NAV-ATT attitude model with time, message version, roll/pitch/he
 using castle::protocols::ubx::message_view;
 using castle::protocols::ubx::messages::nav_att;
 
-void handle(const message_view& raw) {
-    nav_att value{};
-    if (nav_att::decode(raw, value)) {
-        // `value` contains the decoded, typed fields.
+void on_message(const message_view& raw)
+{
+    nav_att att{};
+    if (nav_att::decode(raw, att) && (att.acc_heading != 0U))
+    {
+        const double heading = att.heading_deg();
+        static_cast<void>(heading);
     }
 }
 ```
 
+A complete, self-checking example is in [`samples/castle_ext/protocols/ubx/messages/nav_att.cpp`](../../../../../samples/castle_ext/protocols/ubx/messages/nav_att.cpp).
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Payload length must exactly equal the protocol `payload_length` constant before field extraction.
+- Fixed-size value type (no heap, no exceptions, no RTTI, no virtual).
+- `decode()` accepts only a payload of exactly 32 bytes; shorter or longer payloads are rejected rather than partially decoded.
+- Raw wire integers are stored unchanged; the `*_deg()` helpers convert to `double` on demand.
+- Thread-safety: none. Instances are plain values and are not thread-safe; synchronise externally when shared.

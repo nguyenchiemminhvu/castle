@@ -2,7 +2,7 @@
 
 ## Overview
 
-Defines the UBX MON-SPAN RF spectrum-monitor model. Each RF block contains a fixed spectrum-bin array plus span/resolution/center/PGA values.
+Model of UBX-MON-SPAN (0x0a 0x31), a basic spectrum analyzer output (periodic/polled): one 256-bin spectrum per RF path. A 4-byte header carrying `numRfBlocks` is followed by that many 272-byte RF blocks (`4 + numRfBlocks·272`). The amplitudes are for comparative analysis only; the PGA gain is not included in the spectrum.
 
 ## Header
 
@@ -10,63 +10,89 @@ Defines the UBX MON-SPAN RF spectrum-monitor model. Each RF block contains a fix
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
-- [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
-- [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
+- [castle/core/compiler.hpp](../../../../core/compiler.md)
+- [castle/core/types.hpp](../../../../core/types.md)
+- [castle/container/array.hpp](../../../../container/array.md)
+- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
+- [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
+- [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
+- [detail/repeated_group.hpp](detail/repeated_group.md)
 - `stdint.h`
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `mon_span_rf_block` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `mon_span<MaxRfBlocks=4U>` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `mon_span::msg_class` | `static constexpr uint8_t` protocol/configuration constant (`UBX_CLASS_MON`). |
-| `mon_span::msg_id` | `static constexpr uint8_t` protocol/configuration constant (`UBX_ID_MON_SPAN`). |
-| `mon_span::header_length` | `static constexpr castle::size_type` protocol/configuration constant (`4U`). |
-| `mon_span::block_length` | `static constexpr castle::size_type` protocol/configuration constant (`272U`). |
-| `mon_span::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `mon_span::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
+| `mon_span_rf_block` | One 272-byte RF block (`wire_size = 272`, `layout()`). |
+| `mon_span<MaxRfBlocks = 4>` | Message model; stores up to `MaxRfBlocks` RF blocks. |
 
-### `mon_span_rf_block` data members
+### Constants
 
-| Field | Type | Default | Description |
+| Constant | Value | Description |
+| --- | --- | --- |
+| `MON_SPAN_SPECTRUM_BINS` | `256` | Bins per spectrum (namespace scope). |
+| `mon_span::msg_class` / `msg_id` | `0x0A` / `0x31` | UBX class / ID. |
+| `mon_span::header_length` / `block_length` | `4` / `272` | Header and RF block sizes. |
+
+### `mon_span` fields
+
+| Field | Type | Offset | Description |
 | --- | --- | --- | --- |
-| `spectrum` | `castle::container::array<uint8_t,MON_SPAN_SPECTRUM_BINS>` | `—` | Fixed-capacity RF spectrum-bin values. |
-| `span` | `uint32_t` | `0U` | RF spectrum span field. |
-| `res` | `uint32_t` | `0U` | RF spectrum resolution field. |
-| `center` | `uint32_t` | `0U` | RF center-frequency field. |
-| `pga` | `uint8_t` | `0U` | Programmable-gain-amplifier setting/status. |
+| `version` | `uint8_t` | 0 | Message version (`0x00`). |
+| `num_rf_blocks` | `uint8_t` | 1 | On-wire RF block count; may exceed `rf_blocks.size()`. Encode writes `rf_blocks.size()`. |
+| (reserved0) | `U1[2]` | 2 | Skipped on decode, written as zero. |
+| `rf_blocks` | `castle::container::vector<mon_span_rf_block, MaxRfBlocks>` | 4 | RF blocks in wire order. |
 
-### `mon_span` data members
+### `mon_span_rf_block` fields
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `version` | `uint8_t` | `0U` | Protocol/message version field. |
-| `num_rf_blocks` | `uint8_t` | `0U` | Number of RF blocks decoded. |
-| `rf_blocks` | `castle::container::array<mon_span_rf_block,MaxRfBlocks>` | `—` | Fixed-capacity RF block records. |
+| Field | Type | Offset | Unit | Description |
+| --- | --- | --- | --- | --- |
+| `spectrum` | `array<uint8_t, 256>` | 4 + n·272 | dB | Amplitude per bin. |
+| `span` | `uint32_t` | 260 + n·272 | Hz | Spectrum span. |
+| `res` | `uint32_t` | 264 + n·272 | Hz | Resolution (bin width). |
+| `center` | `uint32_t` | 268 + n·272 | Hz | Center of the span. |
+| `pga` | `uint8_t` | 272 + n·272 | dB | Programmable gain amplifier gain. |
+| (reserved1) | `U1[3]` | 273 + n·272 | - | Skipped on decode, written as zero. |
+
+### Functions
+
+| Function | Description |
+| --- | --- |
+| `static bool mon_span::matches(const message_view&)` | `true` for class `0x0A` / ID `0x31`. |
+| `static bool mon_span::decode(const message_view&, mon_span&)` | `false` for wrong class/ID or a length other than `4 + numRfBlocks·272`. |
+| `void mon_span::encode(payload_writer&) const` | Writes the header (count from `rf_blocks.size()`) and every RF block. |
+| `double mon_span_rf_block::bin_frequency_hz(size_type bin) const` | Spec formula `center + span·(bin − 128)/256` [Hz]. |
+
 
 ## Usage Example
 
 ```cpp
-#include "castle_ext/protocols/ubx/messages/mon_span.hpp"
+using namespace castle::protocols::ubx;
+using namespace castle::protocols::ubx::messages;
 
-using castle::protocols::ubx::message_view;
-using castle::protocols::ubx::messages::mon_span;
-
-void handle(const message_view& raw) {
-    mon_span<2U> value{};
-    if (mon_span::decode(raw, value)) {
-        // The fixed-capacity arrays contain at most the configured bound.
+void on_message(const message_view& raw) {
+    mon_span<2U> span{};
+    if (mon_span<2U>::decode(raw, span)) {
+        for (const mon_span_rf_block& block : span.rf_blocks) {
+            double lowest_bin_hz = block.bin_frequency_hz(0U);
+            uint8_t level_db = block.spectrum[0U];
+            (void)lowest_bin_hz; (void)level_db;
+        }
     }
 }
 ```
 
+The full, runnable example is `samples/castle_ext/protocols/ubx/messages/mon_span.cpp`.
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Template capacity parameters bound retained records/text; excess protocol records are skipped or ignored after validation rather than dynamically allocated.
+- Payload length must be exactly `4 + numRfBlocks·272` (`has_group_length`). A payload whose length disagrees with the declared `numRfBlocks` is rejected (the previous implementation ignored the declared count).
+- RF blocks beyond `MaxRfBlocks` are skipped; `num_rf_blocks` still reports the on-wire count. Each stored block is 272 bytes of state, so `mon_span<4>` is about 1.1 KiB.
+- Use `rf_blocks.size()` for the number of stored blocks (previously `num_rf_blocks` meant the stored count).
+- No heap allocation: every member lives in the value itself (fixed-capacity Castle containers only); no exceptions, no RTTI.
+- `decode()` sets `out` to a value-initialised object first and resets it again on any failure, so callers never observe partial state.
+- `message_view` is non-owning; its payload must stay valid during `decode()`. Decoded values own their data and may outlive the frame.
+- Thread-safety: none. Values are plain value types; concurrent access to one instance needs external synchronisation.

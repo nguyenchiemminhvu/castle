@@ -2,7 +2,14 @@
 
 ## Overview
 
-Defines a bounded UBX ESF-STATUS decoded model with the fusion state and a fixed-capacity list of sensor status records.
+Model of UBX-ESF-STATUS (0x10 0x10), the periodic/polled sensor-fusion status: the fusion mode plus one status block
+per sensor. Payload: `16 + numSens·4`.
+
+**Change:** the `sensStatus1` masks were wrong. `TYPE_MASK 0x1F` / `USED 0x20` / `READY 0x40` are replaced by
+spec-named `SENS_STATUS1_TYPE 0x3F` (bits 5..0), `SENS_STATUS1_USED 0x40` (bit 6) and `SENS_STATUS1_READY 0x80`
+(bit 7). Also: `CALIB_STATUS_MASK` / `TIME_STATUS_MASK` were renamed `SENS_STATUS2_*`, `FAULTS_*` and accessors
+were added, `fusion_mode` is now the `esf_fusion_mode` enum, storage is a `vector`, `num_sens` is validated exactly,
+and `encode()` was added.
 
 ## Header
 
@@ -10,69 +17,76 @@ Defines a bounded UBX ESF-STATUS decoded model with the fusion state and a fixed
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
-- [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
-- [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
-- `stdint.h`
+- [castle/core/compiler.hpp](../../../../core/compiler.md)
+- [castle/core/types.hpp](../../../../core/types.md)
+- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
+- [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
+- [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
+- [detail/repeated_group.hpp](detail/repeated_group.md)
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `esf_status_sensor` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `esf_status_sensor::TYPE_MASK` | `static constexpr uint8_t` protocol/configuration constant (`0x1FU`). |
-| `esf_status_sensor::USED` | `static constexpr uint8_t` protocol/configuration constant (`0x20U`). |
-| `esf_status_sensor::READY` | `static constexpr uint8_t` protocol/configuration constant (`0x40U`). |
-| `esf_status_sensor::CALIB_STATUS_MASK` | `static constexpr uint8_t` protocol/configuration constant (`0x03U`). |
-| `esf_status_sensor::TIME_STATUS_MASK` | `static constexpr uint8_t` protocol/configuration constant (`0x0CU`). |
-| `esf_status<MaxSensors=32U>` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `esf_status::msg_class` | `static constexpr uint8_t` protocol/configuration constant (`UBX_CLASS_ESF`). |
-| `esf_status::msg_id` | `static constexpr uint8_t` protocol/configuration constant (`UBX_ID_ESF_STATUS`). |
-| `esf_status::min_payload_length` | `static constexpr castle::size_type` protocol/configuration constant (`16U`). |
-| `esf_status::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `esf_status::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
+| `esf_fusion_mode : uint8_t` | `initialization` (0), `fusion` (1), `suspended` (2), `disabled` (3). |
+| `esf_calib_status : uint8_t` | `not_calibrated` (0), `calibrating` (1), `calibrated` (2), `calibrated_alt` (3). |
+| `esf_time_status : uint8_t` | `no_data` (0), `first_byte` (1), `event_input` (2), `time_tag` (3). |
+| `esf_status_sensor` | One sensor block, `wire_size = 4`. |
+| `esf_status<MaxSensors = 32U>` | Message payload. |
 
-### `esf_status_sensor` data members
+### Constants
 
-| Field | Type | Default | Description |
+| Name | Value | Meaning |
+| --- | --- | --- |
+| `msg_class` / `msg_id` | `0x10` / `0x10` | Frame identity. |
+| `header_length` / `block_length` | `16` / `4` | Wire sizes. |
+| `SENS_STATUS1_TYPE` / `_USED` / `_READY` | `0x3F` / `0x40` / `0x80` | `sensStatus1` fields. |
+| `SENS_STATUS2_CALIB_STATUS` / `_TIME_STATUS` | `0x03` / `0x0C` | `sensStatus2` fields. |
+| `FAULTS_BAD_MEAS` / `_BAD_TTAG` / `_MISSING_MEAS` / `_NOISY_MEAS` | `0x01` / `0x02` / `0x04` / `0x08` | `faults` bits. |
+
+### Fields
+
+| Offset | Field | Type | Description |
 | --- | --- | --- | --- |
-| `sens_status1` | `uint8_t` | `0U` | Sensor status byte 1. |
-| `sens_status2` | `uint8_t` | `0U` | Sensor status byte 2. |
-| `freq` | `uint8_t` | `0U` | Sensor update-frequency/status field. |
-| `faults` | `uint8_t` | `0U` | Sensor fault bitfield. |
+| 0 | `i_tow` | `uint32_t` | ms |
+| 4 | `version` | `uint8_t` | 0x02 for this version |
+| 5 | reserved | 7 bytes | written as zero |
+| 12 | `fusion_mode` | `esf_fusion_mode` | Fusion filter mode. |
+| 13 | reserved | 2 bytes | written as zero |
+| 15 | `num_sens` | `uint8_t` | On-wire sensor count; `encode()` writes `sensors.size()`. |
+| 16 + n·4 | `sensors[n].sens_status1` / `sens_status2` / `freq` [Hz] / `faults` | `uint8_t` each | Sensor block. |
 
-### `esf_status` data members
+### Functions
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `i_tow` | `uint32_t` | `0U` | GNSS time-of-week field. |
-| `version` | `uint8_t` | `0U` | Protocol/message version field. |
-| `fusion_mode` | `uint8_t` | `0U` | ESF sensor-fusion mode field. |
-| `num_sens` | `uint8_t` | `0U` | Number of sensor status records in the payload. |
-| `sensors` | `castle::container::array<esf_status_sensor,MaxSensors>` | `—` | Fixed-capacity sensor status records. |
+| Function | Description |
+| --- | --- |
+| `static bool matches(const message_view&)` | Class/ID check. |
+| `static bool decode(const message_view&, esf_status&)` | Requires length `16 + numSens·4` exactly; `out` value-initialised on failure. |
+| `void encode(payload_writer&) const` | Header + stored sensors (loop-back/testing). |
+| `uint8_t type() const`, `bool used() const`, `bool ready() const` | `sensStatus1` fields. |
+| `esf_calib_status calib_status() const`, `bool calibrated() const` | `sensStatus2` bits 1..0; `calibrated()` is true for 10 and 11. |
+| `esf_time_status time_status() const` | `sensStatus2` bits 3..2. |
+| `bool bad_meas() / bad_ttag() / missing_meas() / noisy_meas() const` | `faults` bits 0..3. |
 
 ## Usage Example
 
 ```cpp
-#include "castle_ext/protocols/ubx/messages/esf_status.hpp"
-
-using castle::protocols::ubx::message_view;
-using castle::protocols::ubx::messages::esf_status;
-
-void handle(const message_view& raw) {
-    esf_status<8U> value{};
-    if (esf_status::decode(raw, value)) {
-        // The fixed-capacity arrays contain at most the configured bound.
-    }
+esf_status<8U> status;
+if (esf_status<8U>::decode(raw, status) && (status.fusion_mode == esf_fusion_mode::fusion))
+{
+    for (const esf_status_sensor& sensor : status.sensors) { bool ok = sensor.used() && sensor.calibrated(); }
 }
 ```
 
+Full walk-through: `samples/castle_ext/protocols/ubx/messages/esf_status.cpp`.
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Payload length must be at least the fixed minimum; optional/variable records are validated from the remaining bytes.
-- Template capacity parameters bound retained records/text; excess protocol records are skipped or ignored after validation rather than dynamically allocated.
+- Capacity: `MaxSensors` blocks are stored; the rest are skipped, and `num_sens` keeps the wire count.
+- Shorter or longer payloads than `16 + numSens·4` are rejected.
+- Value type: every member lives in the object; no heap allocation, no exceptions.
+- `message_view` is non-owning; its payload must stay valid while `decode()` runs.
+- Thread-safety: none. Instances are plain values and are not thread-safe; synchronise externally when shared.

@@ -1,6 +1,5 @@
 #include "sample_support.hpp"
 
-#include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/cfg_valget.hpp"
 
 int main()
@@ -8,110 +7,70 @@ int main()
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    uint8_t payload[64U];
-    castle::size_type offset = 0U;
+    static const uint32_t KEY_RATE_MEAS = 0x30210001U;   // CFG-RATE-MEAS, U2
+    static const uint32_t KEY_UART1_BAUD = 0x40520001U;  // CFG-UART1-BAUDRATE, U4
+    static const uint32_t KEY_NAVSPG_FIX = 0x20110011U;  // CFG-NAVSPG-FIXMODE, E1
 
-    // ---------------------------------------------------------------------
-    // CFG-VALGET response header
-    // ---------------------------------------------------------------------
+    // 1. Host: poll three items from the RAM layer.
+    cfg_valget_poll<> poll{};
+    poll.layer = config::UBX_CFG_VALGET_LAYER_RAM;
+    poll.position = 0U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(poll.keys.push_back(KEY_RATE_MEAS)));
+    CASTLE_SAMPLE_CHECK(castle::succeeded(poll.keys.push_back(KEY_UART1_BAUD)));
+    CASTLE_SAMPLE_CHECK(castle::succeeded(poll.keys.push_back(KEY_NAVSPG_FIX)));
 
-    payload[offset++] = UBX_VALGET_VERSION_RESP; // version
-    payload[offset++] = 1U;                      // RAM layer
-    castle::write_le16(&payload[offset], 0U);            // position
-    offset += 2U;
-
-    // ---------------------------------------------------------------------
-    // Entry #1 : 1-byte value
-    // key size code = 1 -> 1-byte value
-    // ---------------------------------------------------------------------
-
-    castle::write_le32(&payload[offset], 0x10000001U);
-    offset += 4U;
-
-    payload[offset++] = 0x55U;
-
-    // ---------------------------------------------------------------------
-    // Entry #2 : 2-byte value
-    // key size code = 3 -> 2-byte value
-    // ---------------------------------------------------------------------
-
-    castle::write_le32(&payload[offset], 0x30000002U);
-    offset += 4U;
-
-    castle::write_le16(&payload[offset], 0x1234U);
-    offset += 2U;
-
-    // ---------------------------------------------------------------------
-    // Entry #3 : 4-byte value
-    // key size code = 4 -> 4-byte value
-    // ---------------------------------------------------------------------
-
-    castle::write_le32(&payload[offset], 0x40000003U);
-    offset += 4U;
-
-    castle::write_le32(&payload[offset], 0x89ABCDEFU);
-    offset += 4U;
-
-    // ---------------------------------------------------------------------
-    // Build UBX frame
-    // ---------------------------------------------------------------------
-
-    uint8_t frame[128U];
+    uint8_t frame[64U];
     castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(poll, frame, sizeof(frame), written)));
+    CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + 4U + (3U * 4U)));
 
-    castle::status status = encode_frame(
-        UBX_CLASS_CFG,
-        UBX_ID_CFG_VALGET,
-        castle::container::array_view<const uint8_t>(payload, offset),
-        frame,
-        sizeof(frame),
-        written);
+    message_view raw{};
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(cfg_valget_poll<>::matches(raw));
+    CASTLE_SAMPLE_CHECK(!cfg_valget<>::matches(raw)); // version 0 is the request
 
-    CASTLE_SAMPLE_CHECK(castle::succeeded(status));
+    cfg_valget_poll<> echoed{};
+    CASTLE_SAMPLE_CHECK(cfg_valget_poll<>::decode(raw, echoed));
+    CASTLE_SAMPLE_CHECK(echoed.keys.size() == 3U);
+    CASTLE_SAMPLE_CHECK(echoed.keys[1U] == KEY_UART1_BAUD);
 
-    // ---------------------------------------------------------------------
-    // Decode raw UBX frame
-    // ---------------------------------------------------------------------
+    // 2. Receiver: the version 1 response with one value per key.
+    cfg_valget<> response{};
+    response.layer = config::UBX_CFG_VALGET_LAYER_RAM;
+    cfg_valget_entry entry{};
+    entry.key_id = KEY_RATE_MEAS;
+    entry.value = 100U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(response.entries.push_back(entry)));
+    entry.key_id = KEY_UART1_BAUD;
+    entry.value = 115200U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(response.entries.push_back(entry)));
+    entry.key_id = KEY_NAVSPG_FIX;
+    entry.value = 3U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(response.entries.push_back(entry)));
 
-    message_view raw;
-
-    bool decoded = decode_frame(
-        castle::container::array_view<const uint8_t>(frame, written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(decoded);
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(response, frame, sizeof(frame), written)));
+    CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + 4U + (4U + 2U) + (4U + 4U) + (4U + 1U)));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(cfg_valget<>::matches(raw));
+    CASTLE_SAMPLE_CHECK(!cfg_valget_poll<>::matches(raw));
 
-    // ---------------------------------------------------------------------
-    // Decode CFG-VALGET message
-    // ---------------------------------------------------------------------
+    cfg_valget<> decoded{};
+    CASTLE_SAMPLE_CHECK(cfg_valget<>::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.version == cfg_valget<>::version);
+    CASTLE_SAMPLE_CHECK(decoded.layer == config::UBX_CFG_VALGET_LAYER_RAM);
+    CASTLE_SAMPLE_CHECK(decoded.position == 0U);
+    CASTLE_SAMPLE_CHECK(decoded.entries.size() == 3U);
+    CASTLE_SAMPLE_CHECK(decoded.entries[0U].key_id == KEY_RATE_MEAS);
+    CASTLE_SAMPLE_CHECK(decoded.entries[0U].value == 100U);
+    CASTLE_SAMPLE_CHECK(decoded.entries[1U].value == 115200U);
+    CASTLE_SAMPLE_CHECK(decoded.entries[2U].value == 3U);
 
-    cfg_valget<> response;
-
-    CASTLE_SAMPLE_CHECK(cfg_valget<>::decode(raw, response));
-
-    CASTLE_SAMPLE_CHECK(response.version == UBX_VALGET_VERSION_RESP);
-    CASTLE_SAMPLE_CHECK(response.layer == 1U);
-    CASTLE_SAMPLE_CHECK(response.position == 0U);
-
-    CASTLE_SAMPLE_CHECK(response.entry_count == 3U);
-
-    // Entry #1
-    CASTLE_SAMPLE_CHECK(response.entries[0U].key_id == 0x10000001U);
-    CASTLE_SAMPLE_CHECK(response.entries[0U].value == 0x55U);
-
-    // Entry #2
-    CASTLE_SAMPLE_CHECK(response.entries[1U].key_id == 0x30000002U);
-    CASTLE_SAMPLE_CHECK(response.entries[1U].value == 0x1234U);
-
-    // Entry #3
-    CASTLE_SAMPLE_CHECK(response.entries[2U].key_id == 0x40000003U);
-    CASTLE_SAMPLE_CHECK(response.entries[2U].value == 0x89ABCDEFU);
-
-    // Verify value size extraction logic.
-    CASTLE_SAMPLE_CHECK(cfg_valget<>::value_size(0x10000001U) == 1U);
-    CASTLE_SAMPLE_CHECK(cfg_valget<>::value_size(0x30000002U) == 2U);
-    CASTLE_SAMPLE_CHECK(cfg_valget<>::value_size(0x40000003U) == 4U);
+    // 3. A response with a key of unknown size cannot be walked and is rejected.
+    uint8_t bad[8U] = {cfg_valget<>::version, 0U, 0U, 0U, 0x01U, 0x00U, 0x00U, 0x00U};
+    message_view malformed{{UBX_CLASS_CFG, UBX_ID_CFG_VALGET, 8U},
+                           castle::container::array_view<const uint8_t>(bad, 8U), checksum{}};
+    CASTLE_SAMPLE_CHECK(!cfg_valget<>::decode(malformed, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.entries.empty());
 
     return 0;
 }

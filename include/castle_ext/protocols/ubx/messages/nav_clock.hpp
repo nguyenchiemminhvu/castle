@@ -1,12 +1,19 @@
 // MIT License
 // Copyright (c) 2026 nguyenchiemminhvu@gmail.com
 
+/**
+ * @file nav_clock.hpp
+ * @brief UBX-NAV-CLOCK (0x01 0x22): receiver clock solution.
+ *
+ * Periodic/polled output with the receiver clock bias, drift and their
+ * accuracy estimates.
+ */
 #ifndef CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_NAV_CLOCK_HPP
 #define CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_NAV_CLOCK_HPP
 
 #include "castle/core/compiler.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
-#include "castle_ext/protocols/ubx/payload_reader.hpp"
+#include "castle_ext/protocols/ubx/messages/detail/fixed_message.hpp"
 
 #include <stdint.h>
 
@@ -19,39 +26,23 @@ namespace ubx
 namespace messages
 {
 
-/** @brief UBX-NAV-CLOCK: receiver clock bias/drift solution. */
-struct nav_clock
+/** @brief UBX-NAV-CLOCK output payload. */
+struct nav_clock : detail::fixed_message<nav_clock, UBX_CLASS_NAV, UBX_ID_NAV_CLOCK, 20U>
 {
-    static CASTLE_CONSTEXPR uint8_t msg_class = UBX_CLASS_NAV;
-    static CASTLE_CONSTEXPR uint8_t msg_id = UBX_ID_NAV_CLOCK;
-    static CASTLE_CONSTEXPR castle::size_type payload_length = 20U;
+    uint32_t i_tow = 0U;  ///< GPS time of week of the navigation epoch [ms].
+    int32_t clk_b = 0;    ///< Clock bias [ns].
+    int32_t clk_d = 0;    ///< Clock drift [ns/s].
+    uint32_t t_acc = 0U;  ///< Time accuracy estimate [ns].
+    uint32_t f_acc = 0U;  ///< Frequency accuracy estimate [ps/s].
 
-    uint32_t i_tow = 0U;
-    int32_t clk_b = 0;
-    int32_t clk_d = 0;
-    uint32_t t_acc = 0U;
-    uint32_t f_acc = 0U;
-
-    CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
+    template <typename Self, typename Stream>
+    static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT
     {
-        return raw.is(msg_class, msg_id);
-    }
-
-    CASTLE_NODISCARD static bool decode(CASTLE_CONST message_view& raw, nav_clock& out) CASTLE_NOEXCEPT
-    {
-        if (raw.payload_length() != payload_length)
-        {
-            return false;
-        }
-
-        payload_reader reader(raw.payload);
-        out = nav_clock{};
-        out.i_tow = reader.read_u32();
-        out.clk_b = reader.read_i32();
-        out.clk_d = reader.read_i32();
-        out.t_acc = reader.read_u32();
-        out.f_acc = reader.read_u32();
-        return reader.ok();
+        stream.field(self.i_tow);
+        stream.field(self.clk_b);
+        stream.field(self.clk_d);
+        stream.field(self.t_acc);
+        stream.field(self.f_acc);
     }
 };
 

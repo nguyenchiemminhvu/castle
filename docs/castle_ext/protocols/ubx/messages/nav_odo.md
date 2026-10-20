@@ -2,7 +2,7 @@
 
 ## Overview
 
-Defines the UBX NAV-ODO odometer model with instantaneous, total, and standard-deviation distance values.
+Typed model of UBX-NAV-ODO (class 0x01, ID 0x09), the periodic/polled odometer solution: ground distance since the last odometer reset, total cumulative distance and the distance accuracy.
 
 ## Header
 
@@ -13,28 +13,44 @@ Defines the UBX NAV-ODO odometer model with instantaneous, total, and standard-d
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
+- [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
+- [`detail/fixed_message.hpp`](detail/fixed_message.md)
 - `stdint.h`
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `nav_odo` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `nav_odo::msg_class` | `static constexpr uint8_t` protocol/configuration constant (`UBX_CLASS_NAV`). |
-| `nav_odo::msg_id` | `static constexpr uint8_t` protocol/configuration constant (`UBX_ID_NAV_ODO`). |
-| `nav_odo::payload_length` | `static constexpr castle::size_type` protocol/configuration constant (`20U`). |
-| `nav_odo::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `nav_odo::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
+| `nav_odo` | Value type for the payload; derives from `detail::fixed_message<nav_odo, UBX_CLASS_NAV, UBX_ID_NAV_ODO, 20U>`. |
 
-### `nav_odo` data members
+### Constants
 
-| Field | Type | Default | Description |
+| Constant | Type | Value | Description |
 | --- | --- | --- | --- |
-| `version` | `uint8_t` | `0U` | Protocol/message version field. |
-| `i_tow` | `uint32_t` | `0U` | GNSS time-of-week field. |
-| `distance` | `uint32_t` | `0U` | Decoded `distance` field. |
-| `total_distance` | `uint32_t` | `0U` | Decoded `total distance` field. |
-| `distance_std` | `uint32_t` | `0U` | Decoded `distance std` field. |
+| `nav_odo::msg_class` | `uint8_t` | `UBX_CLASS_NAV` (0x01) | UBX class. |
+| `nav_odo::msg_id` | `uint8_t` | `UBX_ID_NAV_ODO` (0x09) | UBX message ID. |
+| `nav_odo::payload_length` | `castle::size_type` | `20U` | Exact payload length. |
+
+### Fields
+
+| Offset | Field | Type | Unit / scale | Description |
+| --- | --- | --- | --- | --- |
+| 0 | `version` | `uint8_t` | - | Message version (0x00 for this version). |
+| 1 | - | `U1[3]` | - | Reserved; skipped on decode, zero on encode. |
+| 4 | `i_tow` | `uint32_t` | ms | GPS time of week of the navigation epoch. |
+| 8 | `distance` | `uint32_t` | m | Ground distance since the last odometer reset. |
+| 12 | `total_distance` | `uint32_t` | m | Total cumulative ground distance. |
+| 16 | `distance_std` | `uint32_t` | m | Ground distance accuracy (1-sigma). |
+
+### Functions
+
+| Function | Returns | Description |
+| --- | --- | --- |
+| `static bool matches(const message_view& raw)` | `bool` | True when `raw` carries class 0x01 / ID 0x09. |
+| `static bool decode(const message_view& raw, nav_odo& out)` | `bool` | Decodes an exactly 20-byte payload; `out` is value-initialised on failure. |
+| `void encode(payload_writer& writer) const` | - | Writes the payload (reserved bytes as zero); used by `encode_message()`. |
 
 ## Usage Example
 
@@ -44,17 +60,19 @@ Defines the UBX NAV-ODO odometer model with instantaneous, total, and standard-d
 using castle::protocols::ubx::message_view;
 using castle::protocols::ubx::messages::nav_odo;
 
-void handle(const message_view& raw) {
-    nav_odo value{};
-    if (nav_odo::decode(raw, value)) {
-        // `value` contains the decoded, typed fields.
-    }
+uint32_t trip_metres(const message_view& raw)
+{
+    nav_odo odo{};
+    return nav_odo::decode(raw, odo) ? odo.distance : 0U;
 }
 ```
 
+A complete, self-checking example is in [`samples/castle_ext/protocols/ubx/messages/nav_odo.cpp`](../../../../../samples/castle_ext/protocols/ubx/messages/nav_odo.cpp).
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Payload length must exactly equal the protocol `payload_length` constant before field extraction.
+- UBX-NAV-ODO is not listed in the ZED-F9R interface description (UBX-19056845 R01); the layout follows the generic u-blox protocol definition.
+- Fixed-size value type (no heap, no exceptions, no RTTI, no virtual).
+- `decode()` accepts only a payload of exactly 20 bytes; shorter or longer payloads are rejected rather than partially decoded.
+- All fields are integer metres; no scaled helpers are needed.
+- Thread-safety: none. Instances are plain values and are not thread-safe; synchronise externally when shared.

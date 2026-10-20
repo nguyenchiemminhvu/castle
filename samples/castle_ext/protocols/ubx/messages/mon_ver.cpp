@@ -5,72 +5,44 @@
 int main()
 {
     using namespace castle::protocols::ubx;
-    using namespace castle::protocols::ubx::messages;
+    using castle::protocols::ubx::messages::mon_ver;
+    using castle::container::string_view;
 
-    // Construct a UBX-MON-VER payload:
-    // [30 bytes SW version][10 bytes HW version][30 bytes extension]
-    uint8_t payload[70U] = {};
+    // Poll the version (empty-payload request).
+    uint8_t frame[256U];
+    castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(encode_poll<mon_ver<4U>>(frame, sizeof(frame), written) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(written == UBX_FRAME_OVERHEAD);
 
-    CASTLE_CONST char sw[] = "ROM CORE 1.00";
-    for (castle::size_type i = 0U; (i < (sizeof(sw) - 1U)) && (i < 30U); ++i)
-    {
-        payload[i] = static_cast<uint8_t>(sw[i]);
-    }
+    // A receiver answer with two extension strings.
+    mon_ver<4U> version{};
+    version.sw_version = "EXT CORE 1.00 (a59682)";
+    version.hw_version = "00190000";
+    CASTLE_SAMPLE_CHECK(version.extensions.push_back("ROM BASE 0x118B2060") == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(version.extensions.push_back("FWVER=HPS 1.30") == castle::status::ok);
 
-    CASTLE_CONST char hw[] = "HW-1234";
-    for (castle::size_type i = 0U; (i < (sizeof(hw) - 1U)) && (i < 10U); ++i)
-    {
-        payload[30U + i] = static_cast<uint8_t>(hw[i]);
-    }
+    CASTLE_SAMPLE_CHECK(encode_message(version, frame, sizeof(frame), written) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(written == frame_size(mon_ver<4U>::header_length + (2U * mon_ver<4U>::block_length)));
 
-    CASTLE_CONST char ext[] = "PROTVER=27.12";
-    for (castle::size_type i = 0U; (i < (sizeof(ext) - 1U)) && (i < 30U); ++i)
-    {
-        payload[40U + i] = static_cast<uint8_t>(ext[i]);
-    }
+    message_view raw{};
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(mon_ver<4U>::matches(raw));
 
-    // Create a validated message_view as a decoder input.
-    message_view raw;
-    raw.header.msg_class = mon_ver<>::msg_class;
-    raw.header.msg_id = mon_ver<>::msg_id;
-    raw.header.payload_length = sizeof(payload);
-    raw.payload = castle::container::array_view<const uint8_t>(
-        payload,
-        sizeof(payload));
+    mon_ver<4U> decoded{};
+    CASTLE_SAMPLE_CHECK(mon_ver<4U>::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.sw_version == string_view("EXT CORE 1.00 (a59682)"));
+    CASTLE_SAMPLE_CHECK(decoded.hw_version == string_view("00190000"));
+    CASTLE_SAMPLE_CHECK(decoded.extensions.size() == 2U);
+    CASTLE_SAMPLE_CHECK(decoded.extensions[0U] == string_view("ROM BASE 0x118B2060"));
+    CASTLE_SAMPLE_CHECK(decoded.extensions[1U] == string_view("FWVER=HPS 1.30"));
 
-    CASTLE_SAMPLE_CHECK(mon_ver<>::matches(raw));
+    // Storage for fewer extensions than the receiver reports: the rest are skipped.
+    mon_ver<1U> first_extension{};
+    CASTLE_SAMPLE_CHECK(mon_ver<1U>::decode(raw, first_extension));
+    CASTLE_SAMPLE_CHECK(first_extension.extensions.size() == 1U);
+    CASTLE_SAMPLE_CHECK(first_extension.extensions[0U] == string_view("ROM BASE 0x118B2060"));
 
-    mon_ver<> version;
-    bool decoded = mon_ver<>::decode(raw, version);
-
-    CASTLE_SAMPLE_CHECK(decoded);
-    CASTLE_SAMPLE_CHECK(version.extension_count == 1U);
-
-    CASTLE_SAMPLE_CHECK(version.sw_version[0U] == 'R');
-    CASTLE_SAMPLE_CHECK(version.sw_version[1U] == 'O');
-    CASTLE_SAMPLE_CHECK(version.sw_version[2U] == 'M');
-
-    CASTLE_SAMPLE_CHECK(version.hw_version[0U] == 'H');
-    CASTLE_SAMPLE_CHECK(version.hw_version[1U] == 'W');
-
-    CASTLE_SAMPLE_CHECK(version.extensions[0U][0U] == 'P');
-    CASTLE_SAMPLE_CHECK(version.extensions[0U][1U] == 'R');
-    CASTLE_SAMPLE_CHECK(version.extensions[0U][2U] == 'O');
-
-    // Wrong message type does not match.
-    raw.header.msg_id = UBX_ID_MON_IO;
-    CASTLE_SAMPLE_CHECK(!mon_ver<>::matches(raw));
-
-    // Payload shorter than the mandatory 40-byte MON-VER header is rejected.
-    message_view short_message;
-    short_message.header.msg_class = UBX_CLASS_MON;
-    short_message.header.msg_id = UBX_ID_MON_VER;
-    short_message.header.payload_length = 39U;
-    short_message.payload =
-        castle::container::array_view<const uint8_t>(payload, 39U);
-
-    mon_ver<> rejected;
-    CASTLE_SAMPLE_CHECK(!mon_ver<>::decode(short_message, rejected));
-
+    // Too small an output buffer is reported, not overrun.
+    CASTLE_SAMPLE_CHECK(encode_message(version, frame, written - 1U, written) == castle::status::full);
     return 0;
 }

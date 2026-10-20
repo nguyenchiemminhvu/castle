@@ -7,66 +7,61 @@ int main()
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // Build a valid UBX-NAV-TIMEUTC payload.
-    uint8_t payload[nav_timeutc::payload_length] = {};
+    // UTC 2026-10-20 23:59:60.5 (a positive leap second), steered to USNO.
+    nav_timeutc value{};
+    value.i_tow = 345618000U;
+    value.t_acc = 25U;
+    value.nano = 500000000;
+    value.year = 2026U;
+    value.month = 10U;
+    value.day = 20U;
+    value.hour = 23U;
+    value.min = 59U;
+    value.sec = 60U;
+    value.valid = static_cast<uint8_t>(nav_timeutc::VALID_TOW | nav_timeutc::VALID_WKN | nav_timeutc::VALID_UTC |
+                                       (static_cast<uint8_t>(nav_timeutc_utc_standard::usno)
+                                        << nav_timeutc::VALID_UTC_STANDARD_SHIFT));
 
-    castle::write_le32(&payload[0U], 456000U);                          // iTOW
-    castle::write_le32(&payload[4U], 100U);                             // tAcc
-    castle::write_le32(&payload[8U], static_cast<uint32_t>(-500000));  // nano
-    castle::write_le16(&payload[12U], 2026U);                           // year
-    payload[14U] = 10U;                                         // month
-    payload[15U] = 2U;                                          // day
-    payload[16U] = 14U;                                         // hour
-    payload[17U] = 30U;                                         // min
-    payload[18U] = 45U;                                         // sec
-    payload[19U] = 0x07U;                                       // valid
-
-    // Encode the payload into a UBX frame.
-    uint8_t frame[64U];
+    // Encode a complete UBX frame (header + payload + checksum) in place.
+    uint8_t frame[UBX_FRAME_OVERHEAD + nav_timeutc::payload_length];
     castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(value, frame, sizeof(frame), written)));
+    CASTLE_SAMPLE_CHECK(written == sizeof(frame));
 
-    castle::status encode_status = encode_frame(
-        nav_timeutc::msg_class,
-        nav_timeutc::msg_id,
-        castle::container::array_view<const uint8_t>(
-            payload,
-            nav_timeutc::payload_length),
-        frame,
-        sizeof(frame),
-        written);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_status));
-
-    // Decode the raw UBX frame.
-    message_view raw;
-    bool decoded = decode_frame(
-        castle::container::array_view<const uint8_t>(frame, written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(decoded);
+    // Validate the frame and identify it.
+    message_view raw{};
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(nav_timeutc::matches(raw));
+    CASTLE_SAMPLE_CHECK(raw.payload_length() == nav_timeutc::payload_length);
 
-    // Decode the NAV-TIMEUTC message fields.
-    nav_timeutc timeutc;
-    CASTLE_SAMPLE_CHECK(nav_timeutc::decode(raw, timeutc));
+    // Decode the payload back into a typed model.
+    nav_timeutc decoded{};
+    CASTLE_SAMPLE_CHECK(nav_timeutc::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.i_tow == 345618000U);
+    CASTLE_SAMPLE_CHECK(decoded.t_acc == 25U);
+    CASTLE_SAMPLE_CHECK(decoded.nano == 500000000);
+    CASTLE_SAMPLE_CHECK(decoded.year == 2026U);
+    CASTLE_SAMPLE_CHECK(decoded.month == 10U);
+    CASTLE_SAMPLE_CHECK(decoded.day == 20U);
+    CASTLE_SAMPLE_CHECK(decoded.hour == 23U);
+    CASTLE_SAMPLE_CHECK(decoded.min == 59U);
+    CASTLE_SAMPLE_CHECK(decoded.sec == 60U);
 
-    CASTLE_SAMPLE_CHECK(timeutc.i_tow == 456000U);
-    CASTLE_SAMPLE_CHECK(timeutc.t_acc == 100U);
-    CASTLE_SAMPLE_CHECK(timeutc.nano == -500000);
-    CASTLE_SAMPLE_CHECK(timeutc.year == 2026U);
-    CASTLE_SAMPLE_CHECK(timeutc.month == 10U);
-    CASTLE_SAMPLE_CHECK(timeutc.day == 2U);
-    CASTLE_SAMPLE_CHECK(timeutc.hour == 14U);
-    CASTLE_SAMPLE_CHECK(timeutc.min == 30U);
-    CASTLE_SAMPLE_CHECK(timeutc.sec == 45U);
-    CASTLE_SAMPLE_CHECK(timeutc.valid == 0x07U);
+    // Validity flags and the UTC standard in bits 7..4.
+    CASTLE_SAMPLE_CHECK(decoded.valid_tow());
+    CASTLE_SAMPLE_CHECK(decoded.valid_wkn());
+    CASTLE_SAMPLE_CHECK(decoded.valid_utc());
+    CASTLE_SAMPLE_CHECK(decoded.utc_standard() == nav_timeutc_utc_standard::usno);
+    decoded.valid = nav_timeutc::VALID_TOW;
+    CASTLE_SAMPLE_CHECK(!decoded.valid_utc());
+    CASTLE_SAMPLE_CHECK(decoded.utc_standard() == nav_timeutc_utc_standard::not_available);
 
-    // NAV-TIMEUTC decoding requires the exact payload size.
-    message_view invalid = raw;
-    invalid.header.payload_length = 0U;
-
-    nav_timeutc rejected;
-    CASTLE_SAMPLE_CHECK(!nav_timeutc::decode(invalid, rejected));
+    // A different message is not NAV-TIMEUTC; a too-small buffer is reported as full.
+    message_view other = raw;
+    other.header.msg_id = UBX_ID_NAV_CLOCK;
+    CASTLE_SAMPLE_CHECK(!nav_timeutc::matches(other));
+    CASTLE_SAMPLE_CHECK(!nav_timeutc::decode(other, decoded));
+    CASTLE_SAMPLE_CHECK(encode_message(value, frame, sizeof(frame) - 1U, written) == castle::status::full);
 
     return 0;
 }

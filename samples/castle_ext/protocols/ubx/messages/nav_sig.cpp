@@ -7,94 +7,77 @@ int main()
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
 
-    // Build a NAV-SIG payload containing two signal entries.
-    uint8_t payload[nav_sig<>::header_length + (2U * nav_sig<>::block_length)] = {};
+    // Build a NAV-SIG value with two signals.
+    nav_sig<4U> sig{};
+    sig.i_tow = 654321U;
+    sig.version = 0U;
 
-    castle::write_le32(&payload[0U], 654321U); // iTOW
-    payload[4U] = 0U;                  // version
-    payload[5U] = 2U;                  // numSigs
+    nav_sig_info l1{};
+    l1.gnss_id = 0U; // GPS
+    l1.sv_id = 5U;
+    l1.sig_id = 0U; // L1C/A
+    l1.pr_res = 12; // 1.2 m
+    l1.cno = 45U;
+    l1.qual_ind = nav_signal_quality::code_carrier_locked;
+    l1.corr_source = nav_sig_corr_source::sbas;
+    l1.iono_model = nav_sig_iono_model::sbas;
+    l1.sig_flags = 1U /* healthy */ | nav_sig_info::SIG_FLAGS_PR_USED | nav_sig_info::SIG_FLAGS_PR_CORR_USED;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(sig.signals.push_back(l1)));
 
-    // Signal #1
-    payload[8U] = 0U;                  // gnssId (GPS)
-    payload[9U] = 5U;                  // svId
-    payload[10U] = 0U;                 // sigId
-    payload[11U] = 0U;                 // freqId
-    castle::write_le16(&payload[12U], 12U);    // prRes
-    payload[14U] = 45U;                // cno
-    payload[15U] = 4U;                 // qualInd
-    payload[16U] = 1U;                 // corrSource
-    payload[17U] = 2U;                 // ionoModel
-    castle::write_le16(&payload[18U], 0x0003U); // sigFlags
+    nav_sig_info e5b{};
+    e5b.gnss_id = 2U; // Galileo
+    e5b.sv_id = 12U;
+    e5b.sig_id = 5U; // E5b I
+    e5b.pr_res = -8;
+    e5b.cno = 50U;
+    e5b.qual_ind = nav_signal_quality::code_locked;
+    e5b.iono_model = nav_sig_iono_model::dual_frequency;
+    e5b.sig_flags = 2U /* unhealthy */ | nav_sig_info::SIG_FLAGS_PR_SMOOTHED;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(sig.signals.push_back(e5b)));
 
-    // Signal #2
-    payload[24U] = 2U;                 // gnssId (Galileo)
-    payload[25U] = 12U;                // svId
-    payload[26U] = 1U;                 // sigId
-    payload[27U] = 0U;                 // freqId
-    castle::write_le16(&payload[28U], static_cast<uint16_t>(-8));
-    payload[30U] = 50U;                // cno
-    payload[31U] = 5U;                 // qualInd
-    payload[32U] = 2U;                 // corrSource
-    payload[33U] = 1U;                 // ionoModel
-    castle::write_le16(&payload[34U], 0x0010U); // sigFlags
-
-    uint8_t frame[128U];
+    // Encode into a complete UBX frame; numSigs comes from signals.size().
+    uint8_t frame[64U];
     castle::size_type written = 0U;
+    CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(sig, frame, sizeof(frame), written)));
+    CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + nav_sig<>::header_length + (2U * nav_sig<>::block_length)));
 
-    castle::status status = encode_frame(
-        nav_sig<>::msg_class,
-        nav_sig<>::msg_id,
-        castle::container::array_view<const uint8_t>(
-            payload,
-            sizeof(payload)),
-        frame,
-        sizeof(frame),
-        written);
-
-    CASTLE_SAMPLE_CHECK(castle::succeeded(status));
-
-    // Decode the UBX frame.
+    // Parse the frame back.
     message_view raw;
-    bool frame_ok = decode_frame(
-        castle::container::array_view<const uint8_t>(frame, written),
-        raw);
-
-    CASTLE_SAMPLE_CHECK(frame_ok);
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(nav_sig<>::matches(raw));
 
-    // Decode the NAV-SIG message.
-    nav_sig<> sig;
-    CASTLE_SAMPLE_CHECK(nav_sig<>::decode(raw, sig));
+    nav_sig<> decoded;
+    CASTLE_SAMPLE_CHECK(nav_sig<>::decode(raw, decoded));
+    CASTLE_SAMPLE_CHECK(decoded.i_tow == 654321U);
+    CASTLE_SAMPLE_CHECK(decoded.num_sigs == 2U);
+    CASTLE_SAMPLE_CHECK(decoded.signals.size() == 2U);
 
-    CASTLE_SAMPLE_CHECK(sig.i_tow == 654321U);
-    CASTLE_SAMPLE_CHECK(sig.version == 0U);
-    CASTLE_SAMPLE_CHECK(sig.num_sigs == 2U);
+    CASTLE_SAMPLE_CHECK(decoded.signals[0U].sv_id == 5U);
+    CASTLE_SAMPLE_CHECK(decoded.signals[0U].pr_res_m() > 1.19);
+    CASTLE_SAMPLE_CHECK(decoded.signals[0U].pr_res_m() < 1.21);
+    CASTLE_SAMPLE_CHECK(decoded.signals[0U].qual_ind == nav_signal_quality::code_carrier_locked);
+    CASTLE_SAMPLE_CHECK(decoded.signals[0U].corr_source == nav_sig_corr_source::sbas);
+    CASTLE_SAMPLE_CHECK(decoded.signals[0U].health() == nav_sv_health::healthy);
+    CASTLE_SAMPLE_CHECK(decoded.signals[0U].pr_used());
+    CASTLE_SAMPLE_CHECK(decoded.signals[0U].pr_corr_used());
+    CASTLE_SAMPLE_CHECK(!decoded.signals[0U].cr_used());
 
-    CASTLE_SAMPLE_CHECK(sig.signals[0U].gnss_id == 0U);
-    CASTLE_SAMPLE_CHECK(sig.signals[0U].sv_id == 5U);
-    CASTLE_SAMPLE_CHECK(sig.signals[0U].sig_id == 0U);
-    CASTLE_SAMPLE_CHECK(sig.signals[0U].freq_id == 0U);
-    CASTLE_SAMPLE_CHECK(sig.signals[0U].pr_res == 12);
-    CASTLE_SAMPLE_CHECK(sig.signals[0U].cno == 45U);
-    CASTLE_SAMPLE_CHECK(sig.signals[0U].qual_ind == 4U);
-    CASTLE_SAMPLE_CHECK(sig.signals[0U].corr_source == 1U);
-    CASTLE_SAMPLE_CHECK(sig.signals[0U].iono_model == 2U);
-    CASTLE_SAMPLE_CHECK(sig.signals[0U].sig_flags == 0x0003U);
+    CASTLE_SAMPLE_CHECK(decoded.signals[1U].sig_id == 5U);
+    CASTLE_SAMPLE_CHECK(decoded.signals[1U].iono_model == nav_sig_iono_model::dual_frequency);
+    CASTLE_SAMPLE_CHECK(decoded.signals[1U].health() == nav_sv_health::unhealthy);
+    CASTLE_SAMPLE_CHECK(decoded.signals[1U].pr_smoothed());
+    CASTLE_SAMPLE_CHECK(!decoded.signals[1U].pr_used());
 
-    CASTLE_SAMPLE_CHECK(sig.signals[1U].gnss_id == 2U);
-    CASTLE_SAMPLE_CHECK(sig.signals[1U].sv_id == 12U);
-    CASTLE_SAMPLE_CHECK(sig.signals[1U].sig_id == 1U);
-    CASTLE_SAMPLE_CHECK(sig.signals[1U].freq_id == 0U);
-    CASTLE_SAMPLE_CHECK(sig.signals[1U].pr_res == -8);
-    CASTLE_SAMPLE_CHECK(sig.signals[1U].cno == 50U);
-    CASTLE_SAMPLE_CHECK(sig.signals[1U].qual_ind == 5U);
-    CASTLE_SAMPLE_CHECK(sig.signals[1U].corr_source == 2U);
-    CASTLE_SAMPLE_CHECK(sig.signals[1U].iono_model == 1U);
-    CASTLE_SAMPLE_CHECK(sig.signals[1U].sig_flags == 0x0010U);
+    // A smaller capacity keeps the first block and still reports the wire count.
+    nav_sig<1U> clipped;
+    CASTLE_SAMPLE_CHECK(nav_sig<1U>::decode(raw, clipped));
+    CASTLE_SAMPLE_CHECK(clipped.num_sigs == 2U);
+    CASTLE_SAMPLE_CHECK(clipped.signals.size() == 1U);
 
     // A different NAV message ID does not match NAV-SIG.
     raw.header.msg_id = UBX_ID_NAV_PVT;
     CASTLE_SAMPLE_CHECK(!nav_sig<>::matches(raw));
+    CASTLE_SAMPLE_CHECK(!nav_sig<>::decode(raw, decoded));
 
     return 0;
 }

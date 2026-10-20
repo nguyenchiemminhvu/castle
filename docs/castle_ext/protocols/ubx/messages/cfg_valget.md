@@ -2,7 +2,10 @@
 
 ## Overview
 
-Defines a bounded UBX CFG-VALGET decoded model. Key/value entries are stored in a fixed Castle array and the key width is resolved from the UBX configuration key ID.
+Typed models of UBX-CFG-VALGET (class 0x06, ID 0x8b), which reads configuration items. Two layouts share the class/ID and are told apart by the version byte:
+
+- `cfg_valget_poll` (version 0) is the poll request the host sends. It names a source layer, a skip `position`, and up to 64 key IDs. A key can be a complete key, a group wild card (item part `0xffff`), or the all-groups wild card.
+- `cfg_valget` (version 1) is the polled response from the receiver. It carries up to 64 key/value pairs (`cfgData`), and each value is as wide as its key's size code. A response with exactly 64 pairs may have more to read: poll again with `position` increased.
 
 ## Header
 
@@ -12,62 +15,81 @@ Defines a bounded UBX CFG-VALGET decoded model. Key/value entries are stored in 
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
+- [`castle/container/vector.hpp`](../../../../container/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
-- [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
-- [`castle_ext/protocols/ubx/ubx_config.hpp`](../ubx_config.md)
+- [`castle_ext/protocols/ubx/ubx_config.hpp`](../ubx_config.md) (`UBX_CFG_VALGET_LAYER_*`)
+- [`detail/cfg_data.hpp`](detail/cfg_data.md)
 - `stdint.h`
 
 ## Public API
 
-| API | Description |
+### Types
+
+| Type | Description |
 | --- | --- |
-| `cfg_valget_entry` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `cfg_valget<MaxEntries=32U>` | Typed, value-owning decoded model with fixed-capacity storage only. |
-| `cfg_valget::msg_class` | `static constexpr uint8_t` protocol/configuration constant (`UBX_CLASS_CFG`). |
-| `cfg_valget::msg_id` | `static constexpr uint8_t` protocol/configuration constant (`UBX_ID_CFG_VALGET`). |
-| `cfg_valget::header_length` | `static constexpr castle::size_type` protocol/configuration constant (`4U`). |
-| `cfg_valget::matches()` | Returns true when the raw view identifies this message/sentence type. |
-| `cfg_valget::value_size()` | Returns the value width associated with a CFG key ID. |
-| `cfg_valget::decode()` | Validates the raw payload/field count and fills the output structure using deterministic cursor/reader operations. |
+| `cfg_valget_entry` | One response pair: `uint32_t key_id`, `uint64_t value` (zero-extended raw value). |
+| `cfg_valget_poll<MaxKeys = 64>` | Poll request. Derives from `detail::cfg_message<..., UBX_ID_CFG_VALGET, 0x00>`. |
+| `cfg_valget<MaxEntries = 64>` | Polled response. Derives from `detail::cfg_message<..., UBX_ID_CFG_VALGET, 0x01>`. |
 
-### `cfg_valget_entry` data members
+### Constants (both models)
 
-| Field | Type | Default | Description |
+| Constant | Type | Value | Description |
 | --- | --- | --- | --- |
-| `key_id` | `uint32_t` | `0U` | UBX configuration key identifier. |
-| `value` | `uint64_t` | `0U` | Decoded configuration value widened to uint64_t. |
+| `msg_class` | `uint8_t` | `UBX_CLASS_CFG` (0x06) | UBX class. |
+| `msg_id` | `uint8_t` | `UBX_ID_CFG_VALGET` (0x8b) | UBX message ID. |
+| `version` | `uint8_t` | poll `0x00`, response `0x01` | Payload byte 0. |
+| `header_length` | `castle::size_type` | `4U` | Bytes before the keys or `cfgData`. |
 
-### `cfg_valget` data members
+### Fields
 
-| Field | Type | Default | Description |
+| Offset | Field | Type | Description |
 | --- | --- | --- | --- |
-| `version` | `uint8_t` | `0U` | Protocol/message version field. |
-| `layer` | `uint8_t` | `0U` | CFG value layer selector. |
-| `position` | `uint16_t` | `0U` | CFG-VALGET position/index field. |
-| `entries` | `castle::container::array<cfg_valget_entry,MaxEntries>` | `—` | Fixed-capacity Castle container holding decoded records/values. |
-| `entry_count` | `castle::size_type` | `0U` | Number of configuration entries stored in the bounded array. |
+| 0 | (version) | `U1` | Written and checked by the base. |
+| 1 | `layer` | `uint8_t` | Layer: `config::UBX_CFG_VALGET_LAYER_RAM` (0), `_BBR` (1), `_FLASH` (2), `_DEFAULT` (7). |
+| 2 | `position` | `uint16_t` | Poll: key values to skip. Response: number skipped, copied from the request. |
+| 4 + n·4 | `keys` (poll) | `vector<uint32_t, MaxKeys>` | Key IDs to retrieve. |
+| 4 + n | `entries` (response) | `vector<cfg_valget_entry, MaxEntries>` | Key ID (4 bytes) followed by a value of `value_byte_size(key_id)` bytes. |
+
+### Functions (both models)
+
+| Function | Returns | Description |
+| --- | --- | --- |
+| `static bool matches(const message_view& raw)` | `bool` | Class/ID match, at least 4 bytes, and this layout's version byte. A poll and a response never both match. |
+| `static bool decode(const message_view& raw, T& out)` | `bool` | Decodes the header and body. Returns `false` and value-initialises `out` for a wrong version, a partial key, a key with an unknown size code, or a truncated value. |
+| `void encode(payload_writer& writer) const` | - | Writes the payload from `keys.size()` / `entries.size()`. For a response key with an unknown size code it latches `castle::status::invalid_argument`. |
 
 ## Usage Example
 
 ```cpp
 #include "castle_ext/protocols/ubx/messages/cfg_valget.hpp"
 
-using castle::protocols::ubx::message_view;
-using castle::protocols::ubx::messages::cfg_valget;
+using namespace castle::protocols::ubx;
+using namespace castle::protocols::ubx::messages;
 
-void handle(const message_view& raw) {
-    cfg_valget<16U> value{};
-    if (cfg_valget::decode(raw, value)) {
-        // The fixed-capacity arrays contain at most the configured bound.
+castle::status poll_rate(uint8_t* frame, castle::size_type capacity, castle::size_type& written)
+{
+    cfg_valget_poll<1U> poll{};
+    poll.layer = config::UBX_CFG_VALGET_LAYER_RAM;
+    static_cast<void>(poll.keys.push_back(0x30210001U)); // CFG-RATE-MEAS
+    return encode_message(poll, frame, capacity, written);
+}
+
+void on_message(const message_view& raw)
+{
+    cfg_valget<> response{};
+    if (cfg_valget<>::decode(raw, response))
+    {
+        for (const cfg_valget_entry& entry : response.entries) { static_cast<void>(entry); }
     }
 }
 ```
 
+A complete, self-checking example is in [`samples/castle_ext/protocols/ubx/messages/cfg_valget.cpp`](../../../../../samples/castle_ext/protocols/ubx/messages/cfg_valget.cpp).
+
 ## Constraints & Notes
 
-- All decoded members are stored directly in the destination object or fixed-capacity Castle containers; no heap allocation is required.
-- `message_view` is non-owning and its payload must remain valid while decoding or while any field view aliases parser storage.
-- UBX payload bytes are consumed through `payload_reader`; malformed lengths cause `decode()` to return false instead of exposing partial state.
-- Payload length must be at least the fixed header length; variable records are then validated against their encoded block count.
-- Template capacity parameters bound retained records/text; excess protocol records are skipped or ignored after validation rather than dynamically allocated.
+- Capacity: at most 64 keys or pairs (spec limit, enforced by `static_assert`). Keys or pairs past `MaxKeys` / `MaxEntries` are consumed but not stored. Use `.size()` for the number stored.
+- `cfgData` cannot be walked past a key with an unknown size code, so such a response is rejected instead of being returned partly decoded.
+- No heap allocation. All storage is inline in the value type.
+- `message_view` is non-owning. Its payload must stay valid while `decode()` runs.
+- Thread-safety: none. Instances are plain values and are not thread-safe.
