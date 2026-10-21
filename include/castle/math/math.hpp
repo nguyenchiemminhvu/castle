@@ -52,6 +52,7 @@
 #include "castle/math/mod.hpp"
 #include "castle/math/near_equal.hpp"
 #include "castle/math/powi.hpp"
+#include "castle/math/round.hpp"
 #include "castle/math/saturating.hpp"
 #include "castle/math/sign.hpp"
 #include "castle/math/sqrt_real.hpp"

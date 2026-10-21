@@ -56,6 +56,8 @@ All names live in `castle::protocols::ubx::messages`.
 | `bool rxm_rtcm::crc_failed() const` | `FLAGS_CRC_FAILED` set; `ref_station` / `msg_type` may then be corrupt. |
 | `rxm_rtcm_msg_used rxm_rtcm::msg_used() const` | `(flags & FLAGS_MSG_USED) >> 1` as the enum. |
 
+The complete RTCM input flow (port configuration, the RTCM frames, and this status message) is described in [RTCM 3.3 correction input to a u-blox receiver](../rtcm/rtcm_input.md).
+
 ## Usage Example
 
 ```cpp

@@ -3,9 +3,9 @@
 
 /**
  * @file crc_common.hpp
- * @brief Width-generic, table-free streaming CRC engine shared by CRC-8/16/32/64.
+ * @brief Width-generic, table-free streaming CRC engine shared by CRC-8/16/24/32/64.
  *
- * Concrete algorithms (crc8, crc16, crc32, crc64) are aliases of
+ * Concrete algorithms (crc8, crc16, crc24q, crc32, crc64) are aliases of
  * `detail::basic_crc` with the Rocksoft-model parameters filled in.
  */
 #ifndef CASTLE_EXT_CHECKSUMS_CRC_COMMON_HPP
@@ -32,18 +32,33 @@ namespace detail
  * @tparam FinalXor     Value XOR-ed into the result when finalizing.
  * @tparam ReflectInput True to process each input byte LSB first.
  * @tparam ReflectOutput True to reflect the register before the final XOR.
+ * @tparam Width        CRC width in bits (8 .. bit width of `UInt`). Defaults to the
+ *                      full width of `UInt`; narrower widths (e.g. 24 in a
+ *                      `uint32_t`) keep the register masked to `Width` bits.
  */
 template <typename UInt,
           UInt Polynomial,
           UInt Initial,
           UInt FinalXor,
           bool ReflectInput,
-          bool ReflectOutput>
+          bool ReflectOutput,
+          size_type Width = sizeof(UInt) * 8U>
 class basic_crc
 {
     static_assert(sizeof(UInt) >= sizeof(uint8_t), "CRC state must be at least one byte");
+    static_assert((Width >= 8U) && (Width <= sizeof(UInt) * 8U),
+                  "CRC width must be between 8 bits and the bit width of the register type");
 
-    static CASTLE_CONST size_type width = sizeof(UInt) * 8U;
+    static CASTLE_CONST size_type width = Width;
+
+    /** @brief All-ones mask covering the low `Width` bits of the register. */
+    static CASTLE_CONSTEXPR UInt mask =
+        static_cast<UInt>(static_cast<UInt>(~static_cast<UInt>(0)) >> (sizeof(UInt) * 8U - Width));
+
+    static_assert((static_cast<UInt>(Polynomial & mask) == Polynomial)
+                  && (static_cast<UInt>(Initial & mask) == Initial)
+                  && (static_cast<UInt>(FinalXor & mask) == FinalXor),
+                  "CRC polynomial, initial value and final XOR must fit in Width bits");
 
     /** @brief Reverses the bit order of `value` across the full CRC width. */
     static CASTLE_CONSTEXPR UInt reflect(UInt value) CASTLE_NOEXCEPT
@@ -94,11 +109,11 @@ class basic_crc
             {
                 if ((crc & (static_cast<UInt>(1U) << (width - 1U))) != static_cast<UInt>(0))
                 {
-                    crc = static_cast<UInt>((crc << 1U) ^ Polynomial);
+                    crc = static_cast<UInt>(((crc << 1U) ^ Polynomial) & mask);
                 }
                 else
                 {
-                    crc = static_cast<UInt>(crc << 1U);
+                    crc = static_cast<UInt>((crc << 1U) & mask);
                 }
             }
         }
