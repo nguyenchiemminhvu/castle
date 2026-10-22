@@ -75,6 +75,26 @@ int main()
     CASTLE_SAMPLE_CHECK(manager.get_fd_count() == 0U);
     manager.clear();
 
+    // wait_fd() waits on one descriptor without a manager: ok = ready, time_out = nothing happened.
+    // The pipe is empty here (both bytes were consumed above), so it is writable but not readable.
+    short revents = 0;
+    CASTLE_SAMPLE_CHECK(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_read, 0, revents)
+                        == castle::status::time_out);
+    CASTLE_SAMPLE_CHECK(revents == 0);
+    CASTLE_SAMPLE_CHECK(castle::io::fd::wait_fd(descriptors[1], castle::io::fd::poll_write, 0, revents)
+                        == castle::status::ok);
+    CASTLE_SAMPLE_CHECK((revents & castle::io::fd::poll_write) != 0);
+
+    const char third_byte = 'c';
+    CASTLE_SAMPLE_CHECK(::write(descriptors[1], &third_byte, 1U) == 1);
+    int wait_error = -1;
+    CASTLE_SAMPLE_CHECK(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_read, 1000, revents, &wait_error)
+                        == castle::status::ok);
+    CASTLE_SAMPLE_CHECK((revents & castle::io::fd::poll_read) != 0);
+    CASTLE_SAMPLE_CHECK(wait_error == 0);
+    CASTLE_SAMPLE_CHECK(castle::io::fd::wait_fd(-1, castle::io::fd::poll_read, 0, revents)
+                        == castle::status::invalid_argument);
+
     CASTLE_SAMPLE_CHECK(castle::io::fd::close_fd(descriptors[0]) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(castle::io::fd::close_fd(descriptors[1]) == castle::status::ok);
 #else

@@ -49,6 +49,7 @@ enum class status : uint8_t
     already_exists,       /**< Creation or insertion failed because the target already exists. */
     system_call_error,    /**< A wrapped platform or compiler primitive reported failure. */
     data_loss,            /**< Completing the request would lose information. */
+    time_out,              /**< The operation timed out before completion. */
     unknown_error         /**< Fallback status for an unclassified failure. */
 };
 

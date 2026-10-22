@@ -1,7 +1,7 @@
 # I/O Umbrella
 
 ## Overview
-The I/O umbrella header collects CASTLE's POSIX descriptor owner and the file, UART, SPI and I2C components. Applications can include a single header for the supported Linux I/O building blocks, or include only the transport they need.
+The I/O umbrella header collects CASTLE's POSIX descriptor owner and the file, UART, SPI, I2C and CAN components. Applications can include a single header for the supported Linux I/O building blocks, or include only the transport they need.
 
 ## Header
 `#include "castle_ext/io/io.hpp"`

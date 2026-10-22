@@ -1,8 +1,12 @@
 #include <gtest/gtest.h>
 
 #include "castle_ext/io/fd/poll.hpp"
+#include "castle/chrono/clocks.hpp"
+#include "castle/chrono/duration.hpp"
 
 #if CASTLE_USING_POSIX_APIS
+    #include <signal.h>
+    #include <sys/time.h>
     #include <unistd.h>
 #endif
 
@@ -81,7 +85,7 @@ TEST(FdPoll, WaitTimeoutAndNoEnabledDescriptors)
         [](int, short, void* context) { ++*static_cast<int*>(context); }, &calls), castle::status::ok);
 
     castle::size_type ready = 99U;
-    EXPECT_EQ(manager.wait(0, ready), castle::status::ok);
+    EXPECT_EQ(manager.wait(0, ready), castle::status::time_out);
     EXPECT_EQ(ready, 0U);
     EXPECT_EQ(manager.pending_event_count(), 0U);
 
@@ -246,6 +250,172 @@ TEST(FdPoll, ReportsInvalidDescriptorFromPoll)
     EXPECT_NE(received_events & castle::io::fd::poll_invalid, 0);
 
     manager.clear();
+    (void)::close(descriptors[1]);
+}
+
+TEST(FdWaitFd, RejectsNegativeDescriptorAndClearsOutputs)
+{
+    short revents = 0x55;
+    int system_error = 77;
+    EXPECT_EQ(castle::io::fd::wait_fd(-1, castle::io::fd::poll_read, 0, revents, &system_error),
+              castle::status::invalid_argument);
+    EXPECT_EQ(revents, 0);
+    EXPECT_EQ(system_error, 0);
+
+    revents = 0x55;
+    EXPECT_EQ(castle::io::fd::wait_fd(-5, castle::io::fd::poll_write, -1, revents), castle::status::invalid_argument);
+    EXPECT_EQ(revents, 0);
+}
+
+TEST(FdWaitFd, ReportsTimeoutWhenNothingIsReady)
+{
+    int descriptors[2] = {-1, -1};
+    ASSERT_EQ(::pipe(descriptors), 0);
+
+    short revents = 0x55;
+    int system_error = 77;
+    EXPECT_EQ(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_read, 0, revents, &system_error),
+              castle::status::time_out);
+    EXPECT_EQ(revents, 0);
+    EXPECT_EQ(system_error, 0);
+
+    revents = 0x55;
+    system_error = 77;
+    const castle::chrono::steady_clock::time_point start = castle::chrono::steady_clock::now();
+    EXPECT_EQ(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_read, 10, revents, &system_error),
+              castle::status::time_out);
+    const castle::chrono::milliseconds elapsed =
+        castle::chrono::duration_cast<castle::chrono::milliseconds>(castle::chrono::steady_clock::now() - start);
+    EXPECT_GE(elapsed.count(), 9);
+    EXPECT_LT(elapsed.count(), 2000);
+    EXPECT_EQ(revents, 0);
+    EXPECT_EQ(system_error, 0);
+
+    (void)::close(descriptors[0]);
+    (void)::close(descriptors[1]);
+}
+
+TEST(FdWaitFd, ReportsReadableAfterWrite)
+{
+    int descriptors[2] = {-1, -1};
+    ASSERT_EQ(::pipe(descriptors), 0);
+    const char byte = 'x';
+    ASSERT_EQ(::write(descriptors[1], &byte, 1U), 1);
+
+    short revents = 0;
+    int system_error = 77;
+    EXPECT_EQ(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_read, 0, revents, &system_error),
+              castle::status::ok);
+    EXPECT_NE(revents & castle::io::fd::poll_read, 0);
+    EXPECT_EQ(revents & castle::io::fd::poll_invalid, 0);
+    EXPECT_EQ(system_error, 0);
+
+    // A negative timeout waits indefinitely, but returns at once because data is already present.
+    revents = 0;
+    const castle::chrono::steady_clock::time_point start = castle::chrono::steady_clock::now();
+    EXPECT_EQ(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_read, -1, revents), castle::status::ok);
+    const castle::chrono::milliseconds elapsed =
+        castle::chrono::duration_cast<castle::chrono::milliseconds>(castle::chrono::steady_clock::now() - start);
+    EXPECT_LT(elapsed.count(), 1000);
+    EXPECT_NE(revents & castle::io::fd::poll_read, 0);
+
+    // The data is still there: wait_fd does not consume it.
+    char received = 0;
+    EXPECT_EQ(::read(descriptors[0], &received, 1U), 1);
+    EXPECT_EQ(received, 'x');
+    revents = 0x55;
+    EXPECT_EQ(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_read, 0, revents),
+              castle::status::time_out);
+    EXPECT_EQ(revents, 0);
+
+    (void)::close(descriptors[0]);
+    (void)::close(descriptors[1]);
+}
+
+TEST(FdWaitFd, ReportsWritableAndRequestedEventsOnly)
+{
+    int descriptors[2] = {-1, -1};
+    ASSERT_EQ(::pipe(descriptors), 0);
+
+    short revents = 0;
+    EXPECT_EQ(castle::io::fd::wait_fd(descriptors[1], castle::io::fd::poll_write, 0, revents), castle::status::ok);
+    EXPECT_NE(revents & castle::io::fd::poll_write, 0);
+    EXPECT_EQ(revents & castle::io::fd::poll_read, 0);
+
+    // Only the requested direction is reported: the read end of a pipe is never writable.
+    revents = 0x55;
+    EXPECT_EQ(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_write, 0, revents),
+              castle::status::time_out);
+    EXPECT_EQ(revents, 0);
+
+    (void)::close(descriptors[0]);
+    (void)::close(descriptors[1]);
+}
+
+TEST(FdWaitFd, ReportsHangUpWhenWriteEndIsClosed)
+{
+    int descriptors[2] = {-1, -1};
+    ASSERT_EQ(::pipe(descriptors), 0);
+    ASSERT_EQ(::close(descriptors[1]), 0);
+
+    short revents = 0;
+    int system_error = 77;
+    EXPECT_EQ(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_read, 100, revents, &system_error),
+              castle::status::ok);
+    EXPECT_NE(revents & castle::io::fd::poll_hangup, 0);
+    EXPECT_EQ(system_error, 0);
+
+    (void)::close(descriptors[0]);
+}
+
+TEST(FdWaitFd, ReportsClosedDescriptorNumberAsInvalid)
+{
+    int descriptors[2] = {-1, -1};
+    ASSERT_EQ(::pipe(descriptors), 0);
+    ASSERT_EQ(::close(descriptors[0]), 0);
+
+    short revents = 0;
+    int system_error = 77;
+    EXPECT_EQ(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_read, 0, revents, &system_error),
+              castle::status::ok);
+    EXPECT_NE(revents & castle::io::fd::poll_invalid, 0);
+    EXPECT_EQ(system_error, 0);
+
+    (void)::close(descriptors[1]);
+}
+
+void ignore_signal(int)
+{
+}
+
+TEST(FdWaitFd, ReportsInterruptedWaitAsSystemCallError)
+{
+    int descriptors[2] = {-1, -1};
+    ASSERT_EQ(::pipe(descriptors), 0);
+
+    // A handler without SA_RESTART makes poll() fail with EINTR when the timer signal arrives.
+    struct sigaction action;
+    struct sigaction previous;
+    ::sigemptyset(&action.sa_mask);
+    action.sa_handler = ignore_signal;
+    action.sa_flags = 0;
+    ASSERT_EQ(::sigaction(SIGALRM, &action, &previous), 0);
+    struct itimerval timer;
+    timer.it_interval.tv_sec = 0;
+    timer.it_interval.tv_usec = 0;
+    timer.it_value.tv_sec = 0;
+    timer.it_value.tv_usec = 10000;
+    ASSERT_EQ(::setitimer(ITIMER_REAL, &timer, nullptr), 0);
+
+    short revents = 0x55;
+    int system_error = 0;
+    EXPECT_EQ(castle::io::fd::wait_fd(descriptors[0], castle::io::fd::poll_read, 5000, revents, &system_error),
+              castle::status::system_call_error);
+    EXPECT_EQ(system_error, EINTR);
+    EXPECT_EQ(revents, 0);
+
+    ASSERT_EQ(::sigaction(SIGALRM, &previous, nullptr), 0);
+    (void)::close(descriptors[0]);
     (void)::close(descriptors[1]);
 }
 

@@ -183,7 +183,7 @@ CASTLE_INLINE castle::status get_descriptor_flags(int fd, int& flags, int* syste
     {
         return castle::status::invalid_argument;
     }
-#if CASTLE_USING_POSIX_APIS
+#if CASTLE_FD_CONTROL_HAS_DESCRIPTOR_FLAGS
     CASTLE_CONST int result = ::fcntl(fd, F_GETFD);
     if (result < 0)
     {
@@ -212,7 +212,7 @@ CASTLE_INLINE castle::status set_descriptor_flags(int fd, int flags, int* system
     {
         return castle::status::invalid_argument;
     }
-#if CASTLE_USING_POSIX_APIS
+#if CASTLE_FD_CONTROL_HAS_DESCRIPTOR_FLAGS
     if (::fcntl(fd, F_SETFD, flags) < 0)
     {
         detail::capture_system_error(system_error);
@@ -235,7 +235,7 @@ CASTLE_INLINE castle::status set_descriptor_flags(int fd, int flags, int* system
  */
 CASTLE_INLINE castle::status set_close_on_exec(int fd, bool enabled = true, int* system_error = nullptr) CASTLE_NOEXCEPT
 {
-#if CASTLE_USING_POSIX_APIS
+#if CASTLE_FD_CONTROL_HAS_DESCRIPTOR_FLAGS
     int flags = 0;
     castle::status result = get_descriptor_flags(fd, flags, system_error);
     if (!castle::succeeded(result))
@@ -258,12 +258,12 @@ CASTLE_INLINE castle::status set_close_on_exec(int fd, bool enabled = true, int*
 /**
  * @brief Tests whether a descriptor currently refers to an open file description.
  * @param fd Descriptor to test.
- * @return True when `F_GETFD` succeeds; false for invalid descriptors or non-POSIX targets.
+ * @return True when `F_GETFL` succeeds; false for invalid descriptors or non-POSIX targets.
  */
 CASTLE_INLINE bool is_valid_fd(int fd) CASTLE_NOEXCEPT
 {
     int flags = 0;
-    return castle::succeeded(get_descriptor_flags(fd, flags));
+    return castle::succeeded(get_status_flags(fd, flags));
 }
 
 /**

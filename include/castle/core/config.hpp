@@ -150,6 +150,13 @@
     #endif
 #endif // !defined(CASTLE_USING_POSIX_APIS)
 
+// Zephyr's fcntl.h provides only F_GETFL/F_SETFL; descriptor flags are unsupported.
+#if CASTLE_USING_POSIX_APIS && defined(__linux__)
+    #define CASTLE_FD_CONTROL_HAS_DESCRIPTOR_FLAGS 1
+#else
+    #define CASTLE_FD_CONTROL_HAS_DESCRIPTOR_FLAGS 0
+#endif
+
 #if CASTLE_USING_POSIX_APIS && defined(__linux__)
     #if !defined(CASTLE_USING_IO_I2C_VIA_I2CDEV)
         #if defined(__has_include)
@@ -180,6 +187,38 @@
     #endif
 #else
     #define CASTLE_USING_IO_SPI_VIA_SPIDEV 0
+#endif
+
+#if CASTLE_USING_POSIX_APIS && defined(__linux__) && !defined(__ZEPHYR__)
+    #if !defined(CASTLE_USING_IO_CAN_VIA_SOCKET_CAN)
+        #if defined(__has_include)
+            #if __has_include(<linux/can.h>) && __has_include(<linux/can/raw.h>)
+                #define CASTLE_USING_IO_CAN_VIA_SOCKET_CAN 1
+            #else
+                #define CASTLE_USING_IO_CAN_VIA_SOCKET_CAN 0
+            #endif
+        #else
+            #define CASTLE_USING_IO_CAN_VIA_SOCKET_CAN 0
+        #endif
+    #endif
+#else
+    #define CASTLE_USING_IO_CAN_VIA_SOCKET_CAN 0
+#endif
+
+#if defined(__ZEPHYR__)
+    #if !defined(CASTLE_USING_IO_CAN_VIA_ZEPHYR)
+        #if defined(__has_include)
+            #if __has_include(<zephyr/drivers/can.h>)
+                #define CASTLE_USING_IO_CAN_VIA_ZEPHYR 1
+            #else
+                #define CASTLE_USING_IO_CAN_VIA_ZEPHYR 0
+            #endif
+        #else
+            #define CASTLE_USING_IO_CAN_VIA_ZEPHYR 0
+        #endif
+    #endif
+#elif !defined(CASTLE_USING_IO_CAN_VIA_ZEPHYR)
+    #define CASTLE_USING_IO_CAN_VIA_ZEPHYR 0
 #endif
 
 /// @def CASTLE_USING_TIMEX

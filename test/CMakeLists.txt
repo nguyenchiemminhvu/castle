@@ -44,6 +44,17 @@ file(GLOB_RECURSE CASTLE_TEST_SOURCES
 
 
 # ---------------------------------------------------------------------------
+# Zephyr CAN backend: compile its test against the host-side fake SDK
+# (castle_ext/comm/can/fake_zephyr) instead of the real Zephyr headers.
+# ---------------------------------------------------------------------------
+set_source_files_properties(
+    "${CMAKE_CURRENT_SOURCE_DIR}/castle_ext/comm/can/backends/zephyr.cpp"
+    PROPERTIES
+        INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/castle_ext/comm/can/fake_zephyr"
+)
+
+
+# ---------------------------------------------------------------------------
 # Single test executable
 # ---------------------------------------------------------------------------
 add_executable(

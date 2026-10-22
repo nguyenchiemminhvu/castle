@@ -3,11 +3,12 @@
 
 /**
  * @file io.hpp
- * @brief Umbrella header for CASTLE's POSIX file, UART, SPI and I2C extensions.
+ * @brief Umbrella header for CASTLE's POSIX file, UART, SPI, I2C and CAN extensions.
  *
  * Include the individual transport headers when minimizing compile-time
  * dependencies is important. Linux-specific UART/SPI/I2C support is guarded by
- * `CASTLE_USING_POSIX_APIS` and the relevant platform UAPI availability checks.
+ * `CASTLE_USING_POSIX_APIS` and the relevant platform UAPI availability checks;
+ * CAN selects SocketCAN, Zephyr or the host mock at compile time.
  */
 #ifndef CASTLE_EXT_IO_IO_HPP
 #define CASTLE_EXT_IO_IO_HPP

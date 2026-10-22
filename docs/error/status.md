@@ -29,6 +29,7 @@ Status values:
 - `already_exists`: creation or insertion failed because the target already exists.
 - `system_call_error`: a wrapped platform or compiler primitive reported failure.
 - `data_loss`: the requested conversion/view would lose information.
+- `time_out`: the operation is time out before completion.
 - `unknown_error`: fallback code for an unclassified failure.
 
 ## Usage Example

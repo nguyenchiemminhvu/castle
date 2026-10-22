@@ -103,6 +103,51 @@ static CASTLE_CONSTEXPR short poll_read_hangup = POLLRDHUP;
 #endif
 
 /**
+ * @brief Waits for a single descriptor to report one of the requested events.
+ * @param fd Non-negative descriptor to wait on.
+ * @param events `poll()` interest mask, e.g. `poll_read` or `poll_write`.
+ * @param timeout_ms Wait time in milliseconds: zero checks without blocking, a
+ *        negative value waits indefinitely.
+ * @param revents Receives the events reported by `poll()`; zero on timeout or error.
+ * @param system_error Optional output receiving `errno` when `poll()` fails.
+ * @return `ok` when the descriptor is ready (inspect `revents` for `poll_error`/
+ *         `poll_hangup`), `time_out` when the timeout expired, `invalid_argument`
+ *         or `system_call_error`.
+ * @note Interrupted waits (`EINTR`) are reported as `system_call_error` and are
+ *       not retried, which keeps the caller in control of the remaining timeout.
+ */
+CASTLE_INLINE castle::status wait_fd(int fd,
+                                     short events,
+                                     int timeout_ms,
+                                     short& revents,
+                                     int* system_error = nullptr) CASTLE_NOEXCEPT
+{
+    revents = 0;
+    detail::clear_system_error(system_error);
+    if (fd < 0)
+    {
+        return castle::status::invalid_argument;
+    }
+
+    struct pollfd descriptor;
+    descriptor.fd = fd;
+    descriptor.events = events;
+    descriptor.revents = 0;
+    CASTLE_CONST int result = ::poll(&descriptor, 1U, timeout_ms);
+    if (result < 0)
+    {
+        detail::capture_system_error(system_error);
+        return castle::status::system_call_error;
+    }
+    if (result == 0)
+    {
+        return castle::status::time_out;
+    }
+    revents = descriptor.revents;
+    return castle::status::ok;
+}
+
+/**
  * @brief Compile-time-capacity file descriptor event manager.
  * @tparam Capacity Maximum number of simultaneous descriptor registrations.
  * @tparam CallbackStorageSize Inline bytes reserved for each stored callback.
@@ -424,7 +469,7 @@ public:
         // LCOV_EXCL_STOP
         if (poll_result == 0)
         {
-            return castle::status::ok;
+            return castle::status::time_out;
         }
 
         {
