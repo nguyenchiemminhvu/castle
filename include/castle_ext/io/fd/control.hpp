@@ -68,6 +68,12 @@ CASTLE_INLINE void capture_system_error(int* system_error) CASTLE_NOEXCEPT
         *system_error = errno;
     }
 }
+
+/** @brief True when `error` reports a non-blocking operation that cannot proceed yet. */
+CASTLE_INLINE bool would_block(int error) CASTLE_NOEXCEPT
+{
+    return error == EAGAIN || error == EWOULDBLOCK;
+}
 #endif
 
 } // namespace detail

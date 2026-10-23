@@ -221,6 +221,34 @@
     #define CASTLE_USING_IO_CAN_VIA_ZEPHYR 0
 #endif
 
+#if CASTLE_USING_POSIX_APIS && defined(__linux__)
+    #if !defined(CASTLE_USING_LINUX_BSD_SOCKET)
+        #if defined(__has_include)
+            #if __has_include(<sys/socket.h>)
+                #define CASTLE_USING_LINUX_BSD_SOCKET 1
+            #else
+                #define CASTLE_USING_LINUX_BSD_SOCKET 0
+            #endif
+        #else
+            #define CASTLE_USING_LINUX_BSD_SOCKET 0
+        #endif
+    #endif
+#endif
+
+#if CASTLE_USING_POSIX_APIS && defined(__ZEPHYR__)
+    #if !defined(CASTLE_USING_ZEPHYR_BSD_SOCKET)
+        #if defined(__has_include)
+            #if __has_include(<zephyr/net/socket.h>)
+                #define CASTLE_USING_ZEPHYR_BSD_SOCKET 1
+            #else
+                #define CASTLE_USING_ZEPHYR_BSD_SOCKET 0
+            #endif
+        #else
+            #define CASTLE_USING_ZEPHYR_BSD_SOCKET 0
+        #endif
+    #endif
+#endif
+
 /// @def CASTLE_USING_TIMEX
 /// @brief Reports whether the <sys/time.h> header is available for time-related functions.
 #if !defined(CASTLE_USING_TIMEX)

@@ -932,8 +932,8 @@ TEST(CanSocketCan, ReceiveWaitsForAFrameThatArrivesLater)
     const uint8_t bytes[2] = {0xC0U, 0xDEU};
     frame out;
     {
-        delayed late(30, [&socket, &bytes]() { (void)socket.write_peer(make_raw(0x2A5U, bytes, 2U)); });
         const castle::chrono::steady_clock::time_point start = castle::chrono::steady_clock::now();
+        delayed late(30, [&socket, &bytes]() { (void)socket.write_peer(make_raw(0x2A5U, bytes, 2U)); });
         ASSERT_EQ(socket.backend.receive(out, castle::chrono::milliseconds(5000), nullptr), castle::status::ok);
         const long long waited = elapsed_ms(start);
         EXPECT_GE(waited, 20);
@@ -1161,9 +1161,9 @@ TEST(CanSocketCan, SendWithTimeoutSucceedsOnceThePeerFreesSpace)
     castle::status result = castle::status::unknown_error;
     int elapsed = 0;
     {
+        const castle::chrono::steady_clock::time_point start = castle::chrono::steady_clock::now();
         draining_peer controller(socket, 30);
         // The timeout is larger than INT_MAX milliseconds, which also covers the clamp to poll()'s range.
-        const castle::chrono::steady_clock::time_point start = castle::chrono::steady_clock::now();
         result = socket.backend.send(frame(0x321U), castle::chrono::milliseconds(3000000000LL), &system_error);
         elapsed = elapsed_ms(start);
         controller.finish();

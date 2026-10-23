@@ -109,7 +109,7 @@ CASTLE_INLINE castle::status read_fd(int descriptor,
     if (result < 0)
     {
         detail::capture_system_error(system_error);
-        if (errno == EAGAIN || errno == EWOULDBLOCK)
+        if (detail::would_block(errno))
         {
             return castle::status::empty;
         }
@@ -160,7 +160,7 @@ CASTLE_INLINE castle::status write_fd(int descriptor,
     if (result < 0)
     {
         detail::capture_system_error(system_error);
-        if (errno == EAGAIN || errno == EWOULDBLOCK) // LCOV_EXCL_BR_LINE
+        if (detail::would_block(errno)) // LCOV_EXCL_BR_LINE
         {
             return castle::status::full;
         }
