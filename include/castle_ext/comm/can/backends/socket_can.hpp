@@ -272,7 +272,7 @@ public:
             return result;
         }
 
-        descriptor_ = castle::move(next);
+        descriptor_ = CASTLE_MOVE(next);
         start_session();
         return castle::status::ok;
 #else
@@ -307,7 +307,7 @@ public:
         {
             return result;
         }
-        descriptor_ = castle::move(next);
+        descriptor_ = CASTLE_MOVE(next);
         start_session();
         return castle::status::ok;
     }

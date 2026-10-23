@@ -82,7 +82,7 @@ public:
      * @param other Source flag set.
      */
     CASTLE_CONSTEXPR flags(flags&& other) CASTLE_NOEXCEPT
-        : data_(castle::move(other.data_))
+        : data_(CASTLE_MOVE(other.data_))
     {
     }
 

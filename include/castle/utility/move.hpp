@@ -10,7 +10,7 @@
  * never allocates, never throws, and does not move any data by itself.
  *
  * @code
- * packet next = castle::move(current);
+ * packet next = CASTLE_MOVE(current);
  * @endcode
  */
 #ifndef CASTLE_UTILITY_MOVE_HPP

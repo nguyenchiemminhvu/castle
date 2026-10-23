@@ -239,7 +239,7 @@ public:
         registration& slot = registrations_[free_slot];
         slot.fd = fd;
         slot.events = events;
-        slot.callback = castle::move(callback);
+        slot.callback = CASTLE_MOVE(callback);
         slot.user_data = user_data;
         slot.name = name;
         slot.enabled = true;
@@ -523,7 +523,7 @@ public:
             local_count = pending_count_;
             for (size_type i = 0U; i < local_count; ++i)
             {
-                local_events[i] = castle::move(pending_[i]);
+                local_events[i] = CASTLE_MOVE(pending_[i]);
                 pending_[i].fd = -1;
                 pending_[i].revents = 0;
                 pending_[i].user_data = nullptr;

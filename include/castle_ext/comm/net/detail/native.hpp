@@ -204,7 +204,7 @@ CASTLE_INLINE castle::status open_socket(address_family family,
     }
     // LCOV_EXCL_STOP
 
-    out = castle::move(descriptor);
+    out = CASTLE_MOVE(descriptor);
     return castle::status::ok;
 }
 
@@ -330,7 +330,7 @@ CASTLE_INLINE castle::status accept_socket(int listener,
     {
         return result;
     }
-    out = castle::move(descriptor);
+    out = CASTLE_MOVE(descriptor);
     return castle::status::ok;
 }
 

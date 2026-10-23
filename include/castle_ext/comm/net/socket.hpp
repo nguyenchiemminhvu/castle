@@ -81,7 +81,7 @@ public:
 
     /** @brief Transfers descriptor ownership and socket state. */
     basic_socket(basic_socket&& other) CASTLE_NOEXCEPT
-        : descriptor_(castle::move(other.descriptor_))
+        : descriptor_(CASTLE_MOVE(other.descriptor_))
         , family_(other.family_)
         , nonblocking_(other.nonblocking_)
     {
@@ -93,7 +93,7 @@ public:
     {
         if (this != &other) // LCOV_EXCL_BR_LINE
         {
-            descriptor_ = castle::move(other.descriptor_);
+            descriptor_ = CASTLE_MOVE(other.descriptor_);
             family_ = other.family_;
             nonblocking_ = other.nonblocking_;
             other.nonblocking_ = false;

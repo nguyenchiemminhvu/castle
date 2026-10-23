@@ -83,7 +83,7 @@ public:
     basic_i2c(basic_i2c CASTLE_CONST&) CASTLE_DELETE;
     basic_i2c& operator=(basic_i2c CASTLE_CONST&) CASTLE_DELETE;
     basic_i2c(basic_i2c&& other) CASTLE_NOEXCEPT
-        : descriptor_(castle::move(other.descriptor_))
+        : descriptor_(CASTLE_MOVE(other.descriptor_))
         , config_(other.config_)
         , configured_(other.configured_)
     {
@@ -94,7 +94,7 @@ public:
     {
         if (this != &other)
         {
-            descriptor_ = castle::move(other.descriptor_);
+            descriptor_ = CASTLE_MOVE(other.descriptor_);
             config_ = other.config_;
             configured_ = other.configured_;
             other.configured_ = false;
@@ -148,7 +148,7 @@ public:
         {
             return result;
         }
-        descriptor_ = castle::move(next);
+        descriptor_ = CASTLE_MOVE(next);
         config_ = config;
         configured_ = true;
         return castle::status::ok;

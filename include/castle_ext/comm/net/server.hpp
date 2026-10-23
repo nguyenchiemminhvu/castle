@@ -222,7 +222,7 @@ public:
         {
             return castle::status::invalid_callback;
         }
-        default_callback_ = castle::move(next);
+        default_callback_ = CASTLE_MOVE(next);
         return castle::status::ok;
     }
 
@@ -292,7 +292,7 @@ public:
         {
             return castle::status::invalid_callback;
         }
-        dispatcher_.replace(target->callback, castle::move(next));
+        dispatcher_.replace(target->callback, CASTLE_MOVE(next));
         return castle::status::ok;
     }
 

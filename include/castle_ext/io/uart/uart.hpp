@@ -311,7 +311,7 @@ public:
     basic_uart(basic_uart const&) CASTLE_DELETE;
     basic_uart& operator=(basic_uart const&) CASTLE_DELETE;
     basic_uart(basic_uart&& other) CASTLE_NOEXCEPT
-        : descriptor_(castle::move(other.descriptor_))
+        : descriptor_(CASTLE_MOVE(other.descriptor_))
         , config_(other.config_)
         , configured_(other.configured_)
     {
@@ -322,7 +322,7 @@ public:
     {
         if (this != &other) // LCOV_EXCL_BR_LINE
         {
-            descriptor_ = castle::move(other.descriptor_);
+            descriptor_ = CASTLE_MOVE(other.descriptor_);
             config_ = other.config_;
             configured_ = other.configured_;
             other.configured_ = false;
@@ -393,7 +393,7 @@ public:
         {
             return result;
         }
-        descriptor_ = castle::move(next);
+        descriptor_ = CASTLE_MOVE(next);
         config_ = config;
         configured_ = true;
         return castle::status::ok;

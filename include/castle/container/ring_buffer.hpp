@@ -192,7 +192,7 @@ public:
         {
             return false;
         }
-        data_[tail_] = castle::move(value);
+        data_[tail_] = CASTLE_MOVE(value);
         tail_ = advance(tail_);
         ++size_;
         return true;
@@ -232,7 +232,7 @@ public:
             head_ = advance(head_);
             --size_;
         }
-        data_[tail_] = castle::move(value);
+        data_[tail_] = CASTLE_MOVE(value);
         tail_ = advance(tail_);
         ++size_;
         return evicted;

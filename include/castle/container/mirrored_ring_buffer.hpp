@@ -294,7 +294,7 @@ public:
         {
             return status::full;
         }
-        *physical_data(write_index) = castle::move(value);
+        *physical_data(write_index) = CASTLE_MOVE(value);
         commit_write(write_index, 1U);
         return status::ok;
     }

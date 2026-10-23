@@ -51,12 +51,12 @@ public:
     {
         if (is_running(target))
         {
-            pending_ = castle::move(next);
+            pending_ = CASTLE_MOVE(next);
             action_ = deferred::replace;
         }
         else
         {
-            target = castle::move(next);
+            target = CASTLE_MOVE(next);
         }
     }
 
@@ -85,7 +85,7 @@ public:
 
         if (action_ == deferred::replace)
         {
-            target = castle::move(pending_);
+            target = CASTLE_MOVE(pending_);
         }
         else if (action_ == deferred::clear)
         {

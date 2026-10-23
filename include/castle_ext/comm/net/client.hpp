@@ -68,8 +68,8 @@ public:
 
     /** @brief Transfers socket ownership, peer and callback state. */
     basic_client(basic_client&& other) CASTLE_NOEXCEPT
-        : socket_(castle::move(other.socket_))
-        , receive_callback_(castle::move(other.receive_callback_))
+        : socket_(CASTLE_MOVE(other.socket_))
+        , receive_callback_(CASTLE_MOVE(other.receive_callback_))
         , peer_(other.peer_)
     {
         other.peer_ = endpoint();
@@ -80,8 +80,8 @@ public:
     {
         if (this != &other) // LCOV_EXCL_BR_LINE
         {
-            socket_ = castle::move(other.socket_);
-            receive_callback_ = castle::move(other.receive_callback_);
+            socket_ = CASTLE_MOVE(other.socket_);
+            receive_callback_ = CASTLE_MOVE(other.receive_callback_);
             peer_ = other.peer_;
             other.peer_ = endpoint();
         }
@@ -219,7 +219,7 @@ public:
         {
             return castle::status::invalid_callback;
         }
-        dispatcher_.replace(receive_callback_, castle::move(next));
+        dispatcher_.replace(receive_callback_, CASTLE_MOVE(next));
         return castle::status::ok;
     }
 
