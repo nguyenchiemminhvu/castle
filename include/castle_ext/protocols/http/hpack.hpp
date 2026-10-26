@@ -1,5 +1,26 @@
 // MIT License
 // Copyright (c) 2026 nguyenchiemminhvu@gmail.com
+
+/**
+ * @file hpack.hpp
+ * @brief Bounded HPACK (RFC 7541) decoder and encoder for HTTP/2 header blocks.
+ *
+ * The decoder supports the complete static table and Huffman alphabet. Its dynamic table is sized by
+ * template parameters and may be disabled entirely (`MaxDynamicTableBytes == 0`). The encoder emits
+ * static-table indexes or plain literals and never touches a dynamic table.
+ *
+ * @code
+ * using namespace castle::protocols::http;
+ *
+ * uint8_t block[64U];
+ * castle::size_type used = 0U;
+ * hpack_encoder::encode_field(":method", "GET", block, sizeof(block), used);
+ *
+ * basic_headers<4U> fields;
+ * hpack_decoder<> decoder;                      // static table only
+ * decoder.decode_block(block, used, fields);    // fields.get(":method") == "GET"
+ * @endcode
+ */
 #ifndef CASTLE_EXT_PROTOCOLS_HTTP_HPACK_HPP
 #define CASTLE_EXT_PROTOCOLS_HTTP_HPACK_HPP
 
@@ -19,7 +40,14 @@ namespace http
 
 namespace detail
 {
-struct hpack_static_field { char const* name; char const* value; };
+/** @brief One entry of the RFC 7541 static table. */
+struct hpack_static_field
+{
+    char const* name;
+    char const* value;
+};
+
+/** @brief RFC 7541 Appendix A; index 1 is element 0. */
 inline CASTLE_CONSTEXPR hpack_static_field hpack_static_table[61] =
 {
     {":authority", ""}, {":method", "GET"}, {":method", "POST"}, {":path", "/"},
@@ -40,6 +68,7 @@ inline CASTLE_CONSTEXPR hpack_static_field hpack_static_table[61] =
     {"transfer-encoding", ""}, {"user-agent", ""}, {"vary", ""}, {"via", ""}, {"www-authenticate", ""}
 };
 
+/** @brief RFC 7541 Appendix B codes, right-aligned in 32 bits; symbol 256 is EOS. */
 inline CASTLE_CONSTEXPR uint32_t hpack_huffman_codes[257] =
 {
     0x00001FF8u,
@@ -300,63 +329,122 @@ inline CASTLE_CONSTEXPR uint32_t hpack_huffman_codes[257] =
     0x03FFFFEEu,
     0x3FFFFFFFu
 };
+
+/** @brief Bit length of each Huffman code. */
 inline CASTLE_CONSTEXPR uint8_t hpack_huffman_lengths[257] =
 {
     13U, 23U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 24U, 30U, 28U, 28U, 30U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 30U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 6U, 10U, 10U, 12U, 13U, 6U, 8U, 11U, 10U, 10U, 8U, 11U, 8U, 6U, 6U, 6U, 5U, 5U, 5U, 6U, 6U, 6U, 6U, 6U, 6U, 6U, 7U, 8U, 15U, 6U, 12U, 10U, 13U, 6U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 8U, 7U, 8U, 13U, 19U, 13U, 14U, 6U, 15U, 5U, 6U, 5U, 6U, 5U, 6U, 6U, 6U, 5U, 7U, 7U, 6U, 6U, 6U, 5U, 6U, 7U, 6U, 5U, 5U, 6U, 7U, 7U, 7U, 7U, 7U, 15U, 11U, 14U, 13U, 28U, 20U, 22U, 20U, 20U, 22U, 22U, 22U, 23U, 22U, 23U, 23U, 23U, 23U, 23U, 24U, 23U, 24U, 24U, 22U, 23U, 24U, 23U, 23U, 23U, 23U, 21U, 22U, 23U, 22U, 23U, 23U, 24U, 22U, 21U, 20U, 22U, 22U, 23U, 23U, 21U, 23U, 22U, 22U, 24U, 21U, 22U, 23U, 23U, 21U, 21U, 22U, 21U, 23U, 22U, 23U, 23U, 20U, 22U, 22U, 22U, 23U, 22U, 22U, 23U, 26U, 26U, 20U, 19U, 22U, 23U, 22U, 25U, 26U, 26U, 26U, 27U, 27U, 26U, 24U, 25U, 19U, 21U, 26U, 27U, 27U, 26U, 27U, 24U, 21U, 21U, 26U, 26U, 28U, 27U, 27U, 27U, 20U, 24U, 20U, 21U, 22U, 21U, 21U, 23U, 22U, 22U, 25U, 25U, 24U, 24U, 26U, 23U, 26U, 27U, 26U, 26U, 27U, 27U, 27U, 27U, 27U, 28U, 27U, 27U, 27U, 27U, 27U, 26U, 30U
 };
 
+/**
+ * @brief Decodes an RFC 7541 section 5.1 prefixed integer.
+ *
+ * @return `ok`, `data_loss` for truncated input, or `out_of_range` on overflow.
+ */
 CASTLE_INLINE castle::status hpack_read_integer(uint8_t const* input, size_type size, size_type& offset,
                                                 uint8_t prefix, uint64_t& value) CASTLE_NOEXCEPT
 {
-    if (input == nullptr || offset >= size || prefix == 0U || prefix > 8U) { return castle::status::data_loss; }
+    // Callers always pass a valid offset and a constant prefix.
+    if (input == nullptr || offset >= size || prefix == 0U || prefix > 8U) // LCOV_EXCL_BR_LINE
+    {
+        return castle::status::data_loss;
+    }
     uint8_t mask = static_cast<uint8_t>((1U << prefix) - 1U);
     value = input[offset] & mask;
     ++offset;
-    if (value < mask) { return castle::status::ok; }
+    if (value < mask)
+    {
+        return castle::status::ok;
+    }
 
     uint32_t shift = 0U;
     for (uint8_t count = 0U; count < 10U; ++count)
     {
-        if (offset >= size) { return castle::status::data_loss; }
+        if (offset >= size)
+        {
+            return castle::status::data_loss;
+        }
         uint8_t byte = input[offset++];
         uint64_t part = static_cast<uint64_t>(byte & 0x7FU);
-        if (shift >= 64U || part > (static_cast<uint64_t>(-1) >> shift)) { return castle::status::out_of_range; }
+        if (part > (static_cast<uint64_t>(-1) >> shift))
+        {
+            return castle::status::out_of_range;
+        }
         uint64_t addend = part << shift;
-        if (value > static_cast<uint64_t>(-1) - addend) { return castle::status::out_of_range; }
+        if (value > static_cast<uint64_t>(-1) - addend)
+        {
+            return castle::status::out_of_range;
+        }
         value += addend;
-        if ((byte & 0x80U) == 0U) { return castle::status::ok; }
+        if ((byte & 0x80U) == 0U)
+        {
+            return castle::status::ok;
+        }
         shift += 7U;
     }
     return castle::status::out_of_range;
 }
 
+/**
+ * @brief Encodes a prefixed integer at `offset`.
+ *
+ * @return The new offset, or `size_type(-1)` when `capacity` is exhausted.
+ */
 CASTLE_INLINE size_type hpack_write_integer(uint8_t* output, size_type capacity, size_type offset,
                                              uint8_t prefix, uint8_t high_bits, uint32_t value) CASTLE_NOEXCEPT
 {
     uint8_t mask = static_cast<uint8_t>((1U << prefix) - 1U);
-    if (offset >= capacity) { return static_cast<size_type>(-1); }
-    if (value < mask) { output[offset++] = static_cast<uint8_t>(high_bits | value); return offset; }
+    if (offset >= capacity)
+    {
+        return static_cast<size_type>(-1);
+    }
+    if (value < mask)
+    {
+        output[offset++] = static_cast<uint8_t>(high_bits | value);
+        return offset;
+    }
     output[offset++] = static_cast<uint8_t>(high_bits | mask);
     value -= mask;
     while (value >= 128U)
     {
-        if (offset >= capacity) { return static_cast<size_type>(-1); }
+        if (offset >= capacity)
+        {
+            return static_cast<size_type>(-1);
+        }
         output[offset++] = static_cast<uint8_t>((value & 0x7FU) | 0x80U);
         value >>= 7U;
     }
-    if (offset >= capacity) { return static_cast<size_type>(-1); }
+    if (offset >= capacity)
+    {
+        return static_cast<size_type>(-1);
+    }
     output[offset++] = static_cast<uint8_t>(value);
     return offset;
 }
 
-struct huffman_node { int16_t child[2]; int16_t symbol; };
-struct huffman_tree { huffman_node nodes[1024]; uint16_t count; };
+/** @brief Node of the Huffman decoding trie; negative links mean none. */
+struct huffman_node
+{
+    int16_t child[2];
+    int16_t symbol;
+};
 
+// A complete prefix code over 257 symbols (256 octets + EOS) has 2 * 257 - 1 nodes.
+inline CASTLE_CONSTEXPR size_type hpack_huffman_node_capacity = 2U * 257U;
+
+/** @brief Fixed-size Huffman decoding trie. */
+struct huffman_tree
+{
+    huffman_node nodes[hpack_huffman_node_capacity];
+    uint16_t count;
+};
+
+/** @brief Builds the Huffman decoding trie at compile time. */
 CASTLE_CONSTEXPR huffman_tree build_huffman_tree() CASTLE_NOEXCEPT
 {
     huffman_tree tree{};
     tree.count = 1U;
-    for (size_type i = 0U; i < 1024U; ++i)
+    for (size_type i = 0U; i < hpack_huffman_node_capacity; ++i)
     {
         tree.nodes[i].child[0] = -1;
         tree.nodes[i].child[1] = -1;
@@ -382,9 +470,40 @@ CASTLE_CONSTEXPR huffman_tree build_huffman_tree() CASTLE_NOEXCEPT
     }
     return tree;
 }
-inline CASTLE_CONSTEXPR huffman_tree hpack_huffman_tree = build_huffman_tree();
-static_assert(hpack_huffman_tree.count <= 1024U, "HPACK Huffman tree capacity is insufficient");
 
+/** @brief Shared decoding trie. */
+inline CASTLE_CONSTEXPR huffman_tree hpack_huffman_tree = build_huffman_tree();
+static_assert(hpack_huffman_tree.count <= hpack_huffman_node_capacity, "HPACK Huffman tree capacity is insufficient");
+
+/** @brief Finds the first static-table index for `name`; `exact` reports whether the value matched as well. */
+CASTLE_INLINE size_type hpack_find_static(string_view name, string_view value, bool& exact) CASTLE_NOEXCEPT
+{
+    size_type name_index = 0U;
+    exact = false;
+    for (size_type i = 0U; i < 61U; ++i)
+    {
+        if (string_view(hpack_static_table[i].name) != name)
+        {
+            continue;
+        }
+        if (name_index == 0U)
+        {
+            name_index = i + 1U;
+        }
+        if (string_view(hpack_static_table[i].value) == value)
+        {
+            exact = true;
+            return i + 1U;
+        }
+    }
+    return name_index;
+}
+
+/**
+ * @brief Decodes a Huffman string, enforcing EOS and padding rules.
+ *
+ * @return `ok`, `invalid_argument` for malformed input, or `out_of_range` when the output is too small.
+ */
 CASTLE_INLINE castle::status hpack_decode_huffman(uint8_t const* input, size_type input_size,
                                                   char* output, size_type output_capacity,
                                                   size_type& output_size) CASTLE_NOEXCEPT
@@ -401,12 +520,24 @@ CASTLE_INLINE castle::status hpack_decode_huffman(uint8_t const* input, size_typ
             tail_bits = static_cast<uint8_t>(tail_bits + 1U);
             tail_ones = tail_ones && (direction == 1U);
             int16_t next = hpack_huffman_tree.nodes[node].child[direction];
-            if (next < 0) { return castle::status::invalid_argument; }
+            // The RFC 7541 code is complete, so every internal node has both children.
+            if (next < 0) // LCOV_EXCL_BR_LINE
+            {
+                return castle::status::invalid_argument;
+            }
             node = static_cast<uint16_t>(next);
             int16_t symbol = hpack_huffman_tree.nodes[node].symbol;
             if (symbol >= 0)
             {
-                if (symbol == 256 || output_size >= output_capacity) { return castle::status::out_of_range; }
+                // EOS inside a string is a decoding error (RFC 7541 5.2).
+                if (symbol == 256)
+                {
+                    return castle::status::invalid_argument;
+                }
+                if (output_size >= output_capacity)
+                {
+                    return castle::status::out_of_range;
+                }
                 output[output_size++] = static_cast<char>(symbol);
                 node = 0U;
                 tail_bits = 0U;
@@ -414,7 +545,11 @@ CASTLE_INLINE castle::status hpack_decode_huffman(uint8_t const* input, size_typ
             }
         }
     }
-    if (node != 0U && (tail_bits > 7U || !tail_ones)) { return castle::status::invalid_argument; }
+    // Padding must be a strict prefix of EOS: fewer than 8 bits, all ones.
+    if (node != 0U && (tail_bits > 7U || !tail_ones))
+    {
+        return castle::status::invalid_argument;
+    }
     return castle::status::ok;
 }
 } // namespace detail
@@ -427,6 +562,8 @@ class hpack_decoder
 {
     static_assert(MaxStringSize > 0U, "HPACK string capacity must be non-zero");
     static_assert(MaxDynamicEntries > 0U, "HPACK dynamic entry capacity must be non-zero");
+
+    /** @brief One dynamic-table entry with its RFC 7541 size (name + value + 32). */
     struct dynamic_entry
     {
         char name[MaxStringSize + 1U]{};
@@ -436,12 +573,22 @@ class hpack_decoder
         size_type bytes = 0U;
     };
 public:
+    /** @brief Constructs a decoder with an empty dynamic table. */
     hpack_decoder() CASTLE_DEFAULT;
 
+    /**
+     * @brief Decodes one complete header block into `output`.
+     *
+     * @tparam Headers Collection providing `add(string_view, string_view)`.
+     * @return `ok`, `invalid_argument` for malformed data, `data_loss` for truncation, or the failure reported by `output`.
+     */
     template <typename Headers>
     castle::status decode_block(uint8_t const* input, size_type size, Headers& output) CASTLE_NOEXCEPT
     {
-        if (input == nullptr && size != 0U) { return castle::status::invalid_argument; }
+        if (input == nullptr && size != 0U)
+        {
+            return castle::status::invalid_argument;
+        }
         size_type offset = 0U;
         bool saw_field = false;
         char name[MaxStringSize + 1U]{};
@@ -453,20 +600,35 @@ public:
             {
                 uint64_t index = 0U;
                 castle::status result = detail::hpack_read_integer(input, size, offset, 7U, index);
-                if (!castle::succeeded(result) || index == 0U) { return castle::status::invalid_argument; }
+                if (!castle::succeeded(result) || index == 0U)
+                {
+                    return castle::status::invalid_argument;
+                }
                 string_view n, v;
-                if (!lookup(static_cast<size_type>(index), n, v)) { return castle::status::invalid_argument; }
+                if (!lookup(index, n, v))
+                {
+                    return castle::status::invalid_argument;
+                }
                 result = output.add(n, v);
-                if (!castle::succeeded(result)) { return result; }
+                if (!castle::succeeded(result))
+                {
+                    return result;
+                }
                 saw_field = true;
                 continue;
             }
             if ((first & 0xE0U) == 0x20U)
             {
-                if (saw_field) { return castle::status::invalid_argument; }
+                if (saw_field)
+                {
+                    return castle::status::invalid_argument;
+                }
                 uint64_t table_size = 0U;
                 castle::status result = detail::hpack_read_integer(input, size, offset, 5U, table_size);
-                if (!castle::succeeded(result) || table_size > MaxDynamicTableBytes) { return castle::status::invalid_argument; }
+                if (!castle::succeeded(result) || table_size > MaxDynamicTableBytes)
+                {
+                    return castle::status::invalid_argument;
+                }
                 allowed_table_bytes_ = static_cast<size_type>(table_size);
                 evict_to_limit();
                 continue;
@@ -477,65 +639,88 @@ public:
             uint8_t prefix = incremental ? 6U : (never_indexed ? 4U : 4U);
             uint64_t name_index = 0U;
             castle::status result = detail::hpack_read_integer(input, size, offset, prefix, name_index);
-            if (!castle::succeeded(result)) { return result; }
+            if (!castle::succeeded(result))
+            {
+                return result;
+            }
             string_view n;
             string_view v;
             size_type name_size = 0U;
             if (name_index != 0U)
             {
                 string_view ignored;
-                if (name_index > static_cast<uint64_t>(static_cast<size_type>(-1)) ||
-                    !lookup(static_cast<size_type>(name_index), n, ignored))
+                if (!lookup(name_index, n, ignored))
                 {
                     return castle::status::invalid_argument;
                 }
-                if (n.size() > MaxStringSize) { return castle::status::out_of_range; }
+                if (n.size() > MaxStringSize)
+                {
+                    return castle::status::out_of_range;
+                }
                 copy_to(name, n);
                 name_size = n.size();
             }
             else
             {
                 result = read_string(input, size, offset, name, name_size);
-                if (!castle::succeeded(result)) { return result; }
+                if (!castle::succeeded(result))
+                {
+                    return result;
+                }
             }
             size_type value_size = 0U;
             result = read_string(input, size, offset, value, value_size);
-            if (!castle::succeeded(result)) { return result; }
-            if (name_size == 0U) { return castle::status::invalid_argument; }
+            if (!castle::succeeded(result))
+            {
+                return result;
+            }
+            if (name_size == 0U)
+            {
+                return castle::status::invalid_argument;
+            }
             result = output.add(string_view(name, name_size), string_view(value, value_size));
-            if (!castle::succeeded(result)) { return result; }
+            if (!castle::succeeded(result))
+            {
+                return result;
+            }
             if (incremental)
             {
-                result = insert(string_view(name, name_size), string_view(value, value_size));
-                if (!castle::succeeded(result)) { return result; }
+                insert(string_view(name, name_size), string_view(value, value_size));
             }
             saw_field = true;
         }
         return castle::status::ok;
     }
 
+    /** @brief Returns the current dynamic-table size in RFC 7541 bytes. */
     size_type dynamic_table_size() CASTLE_CONST CASTLE_NOEXCEPT { return table_bytes_; }
+
+    /** @brief Returns the number of dynamic-table entries. */
     size_type dynamic_entry_count() CASTLE_CONST CASTLE_NOEXCEPT { return entry_count_; }
+
+    /** @brief Returns the size limit currently in force (changed by dynamic table size updates). */
     size_type maximum_table_size() CASTLE_CONST CASTLE_NOEXCEPT { return allowed_table_bytes_; }
+
+    /** @brief Drops every entry and restores the configured size limit. */
     void clear_dynamic_table() CASTLE_NOEXCEPT
     {
-        entry_count_ = 0U;
-        table_bytes_ = 0U;
+        evict_all();
         allowed_table_bytes_ = MaxDynamicTableBytes;
     }
 
 private:
-    static size_type string_length(char const* text) CASTLE_NOEXCEPT
-    {
-        size_type i = 0U; while (text[i] != '\0') { ++i; } return i;
-    }
+    /** @brief Copies `input` into `out` and appends a NUL. */
     static void copy_to(char* out, string_view input) CASTLE_NOEXCEPT
     {
-        for (size_type i = 0U; i < input.size(); ++i) { out[i] = input[i]; }
+        for (size_type i = 0U; i < input.size(); ++i)
+        {
+            out[i] = input[i];
+        }
         out[input.size()] = '\0';
     }
 
-    bool lookup(size_type index, string_view& name, string_view& value) CASTLE_CONST CASTLE_NOEXCEPT
+    /** @brief Resolves a static or dynamic table index (1-based); false when out of range. */
+    bool lookup(uint64_t index, string_view& name, string_view& value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         if (index <= 61U)
         {
@@ -543,22 +728,32 @@ private:
             value = string_view(detail::hpack_static_table[index - 1U].value);
             return true;
         }
-        size_type dynamic_index = index - 62U;
-        if (dynamic_index >= entry_count_) { return false; }
-        dynamic_entry const& entry = entries_[dynamic_index];
+        uint64_t dynamic_index = index - 62U;
+        if (dynamic_index >= entry_count_)
+        {
+            return false;
+        }
+        dynamic_entry const& entry = entries_[static_cast<size_type>(dynamic_index)];
         name = string_view(entry.name, entry.name_size);
         value = string_view(entry.value, entry.value_size);
         return true;
     }
 
+    /** @brief Reads a length-prefixed, optionally Huffman-coded string into `output`. */
     castle::status read_string(uint8_t const* input, size_type size, size_type& offset,
                                char* output, size_type& output_size) CASTLE_NOEXCEPT
     {
-        if (offset >= size) { return castle::status::data_loss; }
+        if (offset >= size)
+        {
+            return castle::status::data_loss;
+        }
         bool huffman = (input[offset] & 0x80U) != 0U;
         uint64_t encoded_size = 0U;
         castle::status result = detail::hpack_read_integer(input, size, offset, 7U, encoded_size);
-        if (!castle::succeeded(result) || encoded_size > static_cast<uint64_t>(size - offset)) { return castle::status::data_loss; }
+        if (!castle::succeeded(result) || encoded_size > static_cast<uint64_t>(size - offset))
+        {
+            return castle::status::data_loss;
+        }
         if (huffman)
         {
             result = detail::hpack_decode_huffman(input + offset, static_cast<size_type>(encoded_size),
@@ -566,9 +761,15 @@ private:
         }
         else
         {
-            if (encoded_size > MaxStringSize) { return castle::status::out_of_range; }
+            if (encoded_size > MaxStringSize)
+            {
+                return castle::status::out_of_range;
+            }
             output_size = static_cast<size_type>(encoded_size);
-            for (size_type i = 0U; i < output_size; ++i) { output[i] = static_cast<char>(input[offset + i]); }
+            for (size_type i = 0U; i < output_size; ++i)
+            {
+                output[i] = static_cast<char>(input[offset + i]);
+            }
             result = castle::status::ok;
         }
         offset += static_cast<size_type>(encoded_size);
@@ -576,27 +777,24 @@ private:
         return result;
     }
 
-    castle::status insert(string_view name, string_view value) CASTLE_NOEXCEPT
+    /** @brief Adds an entry, evicting the oldest ones to make room; an oversized entry empties the table. */
+    void insert(string_view name, string_view value) CASTLE_NOEXCEPT
     {
-        if (name.size() > static_cast<size_type>(-1) - 32U ||
-            value.size() > static_cast<size_type>(-1) - 32U - name.size())
-        {
-            return castle::status::out_of_range;
-        }
         size_type bytes = 32U + name.size() + value.size();
-        if (bytes > allowed_table_bytes_ || MaxDynamicTableBytes == 0U)
+        if (bytes > allowed_table_bytes_)
         {
-            clear_dynamic_table();
-            return castle::status::ok;
+            evict_all(); // RFC 7541 4.4: an oversized entry empties the table but keeps the negotiated size.
+            return;
         }
-        if (name.size() > MaxStringSize || value.size() > MaxStringSize) { return castle::status::out_of_range; }
         while (entry_count_ != 0U && (table_bytes_ > allowed_table_bytes_ - bytes || entry_count_ == MaxDynamicEntries))
         {
             table_bytes_ -= entries_[entry_count_ - 1U].bytes;
             --entry_count_;
         }
-        if (entry_count_ >= MaxDynamicEntries) { return castle::status::full; }
-        for (size_type i = entry_count_; i > 0U; --i) { entries_[i] = entries_[i - 1U]; }
+        for (size_type i = entry_count_; i > 0U; --i)
+        {
+            entries_[i] = entries_[i - 1U];
+        }
         dynamic_entry& entry = entries_[0U];
         copy_to(entry.name, name);
         copy_to(entry.value, value);
@@ -605,9 +803,16 @@ private:
         entry.bytes = bytes;
         ++entry_count_;
         table_bytes_ += bytes;
-        return castle::status::ok;
     }
 
+    /** @brief Empties the dynamic table without changing its size limit. */
+    void evict_all() CASTLE_NOEXCEPT
+    {
+        entry_count_ = 0U;
+        table_bytes_ = 0U;
+    }
+
+    /** @brief Evicts the oldest entries until the table fits the current size limit. */
     void evict_to_limit() CASTLE_NOEXCEPT
     {
         while (entry_count_ != 0U && table_bytes_ > allowed_table_bytes_)
@@ -623,27 +828,74 @@ private:
     size_type allowed_table_bytes_ = MaxDynamicTableBytes;
 };
 
-/** @brief Bounded HPACK literal encoder; it emits valid non-Huffman, non-indexed fields. */
+/** @brief Bounded HPACK encoder; it uses static-table indexes and otherwise emits non-Huffman, non-indexed literals. */
 class hpack_encoder
 {
 public:
+    /** @brief Always emits a literal field with a literal name. */
     static castle::status encode_literal(string_view name, string_view value,
                                          uint8_t* output, size_type capacity, size_type& used) CASTLE_NOEXCEPT
     {
+        return encode_with_name_index(0U, name, value, output, capacity, used);
+    }
+
+    /** @brief Emits an indexed field for an exact static-table match, else a literal with the best name index. */
+    static castle::status encode_field(string_view name, string_view value,
+                                       uint8_t* output, size_type capacity, size_type& used) CASTLE_NOEXCEPT
+    {
         used = 0U;
-        if (output == nullptr || name.empty()) { return castle::status::invalid_argument; }
-        if (name.size() > 0xFFFFFFFFULL || value.size() > 0xFFFFFFFFULL) { return castle::status::out_of_range; }
-        size_type offset = detail::hpack_write_integer(output, capacity, 0U, 4U, 0x00U, 0U);
-        if (offset == static_cast<size_type>(-1)) { return castle::status::full; }
-        offset = encode_string(name, output, capacity, offset);
-        if (offset == static_cast<size_type>(-1)) { return castle::status::full; }
-        offset = encode_string(value, output, capacity, offset);
-        if (offset == static_cast<size_type>(-1)) { return castle::status::full; }
+        if (output == nullptr || name.empty())
+        {
+            return castle::status::invalid_argument;
+        }
+        bool exact = false;
+        size_type index = detail::hpack_find_static(name, value, exact);
+        if (!exact)
+        {
+            return encode_with_name_index(index, name, value, output, capacity, used);
+        }
+        size_type offset = detail::hpack_write_integer(output, capacity, 0U, 7U, 0x80U, static_cast<uint32_t>(index));
+        if (offset == static_cast<size_type>(-1))
+        {
+            return castle::status::full;
+        }
         used = offset;
         return castle::status::ok;
     }
 
 private:
+    /** @brief Emits a literal field without indexing; `name_index == 0` writes the name as a literal. */
+    static castle::status encode_with_name_index(size_type name_index, string_view name, string_view value,
+                                                 uint8_t* output, size_type capacity, size_type& used) CASTLE_NOEXCEPT
+    {
+        used = 0U;
+        if (output == nullptr || name.empty())
+        {
+            return castle::status::invalid_argument;
+        }
+        // Strings of 4 GiB or more need 64-bit lengths, which the 32-bit length prefix cannot carry.
+        if (name.size() > 0xFFFFFFFFULL || value.size() > 0xFFFFFFFFULL) // LCOV_EXCL_BR_LINE
+        {
+            return castle::status::out_of_range;
+        }
+        size_type offset = detail::hpack_write_integer(output, capacity, 0U, 4U, 0x00U, static_cast<uint32_t>(name_index));
+        if (offset != static_cast<size_type>(-1) && name_index == 0U)
+        {
+            offset = encode_string(name, output, capacity, offset);
+        }
+        if (offset != static_cast<size_type>(-1))
+        {
+            offset = encode_string(value, output, capacity, offset);
+        }
+        if (offset == static_cast<size_type>(-1))
+        {
+            return castle::status::full;
+        }
+        used = offset;
+        return castle::status::ok;
+    }
+
+    /** @brief Writes a non-Huffman string literal; returns the new offset or `size_type(-1)` when full. */
     static size_type encode_string(string_view value, uint8_t* output,
                                    size_type capacity, size_type offset) CASTLE_NOEXCEPT
     {
@@ -653,7 +905,10 @@ private:
         {
             return static_cast<size_type>(-1);
         }
-        for (size_type i = 0U; i < value.size(); ++i) { output[next++] = static_cast<uint8_t>(value[i]); }
+        for (size_type i = 0U; i < value.size(); ++i)
+        {
+            output[next++] = static_cast<uint8_t>(value[i]);
+        }
         return next;
     }
 };

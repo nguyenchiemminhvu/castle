@@ -19,5 +19,9 @@ int main()
     CASTLE_SAMPLE_CHECK(decoder.decode_block(encoded, used, round_trip) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(ascii_iequal(round_trip.get("x-mode"), string_view("compact")));
     CASTLE_SAMPLE_CHECK(decoder.decode_block(nullptr, 0U, round_trip) == castle::status::ok);
+
+    // An exact static-table match costs a single indexed byte.
+    CASTLE_SAMPLE_CHECK(hpack_encoder::encode_field(":method", "GET", encoded, sizeof(encoded), used) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(used == 1U && encoded[0U] == 0x82U);
     return 0;
 }

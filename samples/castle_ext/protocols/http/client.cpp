@@ -1,4 +1,5 @@
 #include "sample_support.hpp"
+#include "castle_ext/net/client.hpp"
 #include "castle_ext/protocols/http/client.hpp"
 
 #include <stdint.h>
@@ -96,5 +97,24 @@ int main()
     CASTLE_SAMPLE_CHECK(stream_id == 1U);
     CASTLE_SAMPLE_CHECK(http2_transport.sent_contains("PRI * HTTP/2.0"));
     CASTLE_SAMPLE_CHECK(http2.close() == castle::status::ok);
+
+    // Requires py_http_server/start.py to be running on 127.0.0.1:8080.
+    net::tcp_client<> loopback_socket;
+    http::http1_client<net::tcp_client<>> loopback(loopback_socket);
+    size_type loopback_completed = 0U;
+    CASTLE_SAMPLE_CHECK(loopback.set_response_callback([&loopback_completed](castle::status result, http::response_view const& response)
+    {
+        if (result == castle::status::ok && response.status_code == 200U && response.body == http::string_view("hello from python")) { ++loopback_completed; }
+    }) == castle::status::ok);
+    const net::endpoint local_server = net::endpoint::loopback_ipv4(8080U);
+    castle::status connecting = loopback.connect(local_server, 1000);
+    CASTLE_SAMPLE_CHECK(connecting == castle::status::ok || connecting == castle::status::time_out);
+    for (size_type i = 0U; i < 100U && !loopback.connected(); ++i) { (void)loopback.poll(10); }
+    http::http1_client<net::tcp_client<>>::headers_type loopback_headers;
+    CASTLE_SAMPLE_CHECK(loopback.request(http::method::get, "/", loopback_headers) == castle::status::ok);
+    for (size_type i = 0U; i < 1000U && loopback.busy(); ++i) { (void)loopback.poll(10); }
+    CASTLE_SAMPLE_CHECK(loopback_completed == 1U);
+    // The HTTP/1.0 server closes after each response, so the transport may already be closed.
+    (void)loopback.close();
     return 0;
 }

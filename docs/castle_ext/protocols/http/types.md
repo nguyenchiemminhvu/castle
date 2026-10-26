@@ -20,6 +20,7 @@ Defines the shared HTTP method, version, error, header-view, and response-view t
 - `response_view`: status code, protocol version, fixed header-view range, body view, stream ID, keep-alive flag, and body-streaming indicator.
 - `method_token(method)`: returns the standard wire token; custom methods are supplied separately.
 - `ascii_iequal`, `ascii_lowercase`: ASCII-only case helpers.
+- `detail::is_token`, `detail::is_visible_text`, `detail::parse_decimal`: validation and parsing helpers shared by the HTTP headers.
 - `to_status(error_code)`: maps protocol errors to `castle::status`.
 
 ## Usage Example

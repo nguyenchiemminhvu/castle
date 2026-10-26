@@ -15,7 +15,7 @@ Contains a fixed-buffer HTTP/1.x request serializer and a byte-at-a-time/increme
 - [CASTLE status](../../../../include/castle/error/status.hpp)
 
 ## Public API
-- `http1_request<Capacity, MaxHeaders, MaxNameSize, MaxValueSize>::build(...)`: serializes a request, adding Host, Content-Length when required, and Connection when absent.
+- `http1_request<Capacity, MaxHeaders, MaxNameSize, MaxValueSize>::build(...)`: serializes a request, adding Host, Content-Length when required, and Connection when absent; invalid method/target/authority text and caller-supplied `Transfer-Encoding` are rejected.
 - `data()`, `size()`: inspect the serialized request bytes.
 - `http1_response_parser<MaxBodySize, ..., EnableChunked>::feed(data, size, peer_closed, consumed)`: incrementally parses one response and reports bytes consumed.
 - `set_body_callback(callback)`: receives body slices as they are consumed; when retained body storage fills, it permits continued streaming.

@@ -22,8 +22,9 @@ Provides template-based, caller-polled HTTP/1.1 and HTTP/2 client adapters over 
 - `http2_client<Transport, ...>`: starts a prior-knowledge HTTP/2 session, opens concurrent streams, and pumps session output/input through the transport.
 - `set_response_callback(callback)`: callback signature is `void(castle::status, response_view const&)`.
 - `set_body_callback(callback)`: receives body chunks while parsing.
-- `connect(endpoint, ...)`, `request(...)` / `open_stream(...)`, `poll(timeout_ms)`, `close()`: client lifecycle.
-- `http1_policy`, `http2_policy`, `protocol_policy_traits`, `client_type`, `basic_http_client`: compile-time policy selection; no virtual functions.
+- `connect(endpoint, timeout_ms)` / `connect(endpoint, authority, timeout_ms)`: the first uses the numeric `address:port` as Host / `:authority`, the second a caller-supplied text; an HTTP/1.1 client may reconnect after `close()` or a failure.
+- `request(...)` / `open_stream(...)`, `poll(timeout_ms)`, `close()`: client lifecycle.
+- `http1_policy`, `http2_policy`, `protocol_policy_traits`, `basic_http_client`: compile-time policy selection (`protocol_policy_traits<Policy>::client<Transport>`); no virtual functions.
 
 ## Usage Example
 ```cpp
@@ -60,4 +61,4 @@ int main()
 ```
 
 ## Constraints & Notes
-`Transport` is passed by reference and must outlive the client. The adapter expects the CASTLE TCP client's nonblocking `connect`, `send_some`, `receive_some`, `close`, `socket().finish_connect`, and `socket().wait_readable` interface. The adapter is intentionally not tied to OS descriptor headers, allowing protocol-only mock testing; include the platform's CASTLE FD backend when instantiating `net::tcp_client`. HTTP/1.1 is strictly one in-flight request per connection; HTTP/2 supports compile-time-bounded streams. The HTTP/2 request-body view must outlive transmission. Call `poll` repeatedly to advance operations; returned timeout/backpressure statuses are not hidden. No TLS/HTTPS.
+`Transport` is passed by reference and must outlive the client. The adapter expects the CASTLE TCP client's nonblocking `connect`, `send_some`, `receive_some`, `close`, `socket().finish_connect`, and `socket().wait_readable` interface. The adapter is intentionally not tied to OS descriptor headers, allowing protocol-only mock testing; include the platform's CASTLE FD backend when instantiating `net::tcp_client`. HTTP/1.1 is strictly one in-flight request per connection; HTTP/2 supports compile-time-bounded streams. The HTTP/2 request-body view must outlive transmission. An HTTP/1.1 connection is closed instead of reused when the peer closes, the response asks for it, or bytes follow the response. Call `poll` repeatedly to advance operations; returned timeout/backpressure statuses are not hidden. No TLS/HTTPS.

@@ -1,5 +1,21 @@
 // MIT License
 // Copyright (c) 2026 nguyenchiemminhvu@gmail.com
+
+/**
+ * @file headers.hpp
+ * @brief Fixed-capacity, owning collection of HTTP header fields.
+ *
+ * Capacities are template parameters, so a collection never allocates. Names are matched
+ * case-insensitively and every field is validated against RFC 9110 syntax when it is stored.
+ *
+ * @code
+ * castle::protocols::http::basic_headers<8U, 32U, 128U> headers;
+ *
+ * headers.add("Accept", "text/plain");
+ * headers.set("accept", "application/json");   // replaces the existing field
+ * castle::container::string_view accept = headers.get("ACCEPT");
+ * @endcode
+ */
 #ifndef CASTLE_EXT_PROTOCOLS_HTTP_HEADERS_HPP
 #define CASTLE_EXT_PROTOCOLS_HTTP_HEADERS_HPP
 
@@ -25,6 +41,7 @@ public:
     using size_type = castle::size_type;
 
 private:
+    /** @brief Fixed storage for one NUL-terminated field. */
     struct field
     {
         char name[MaxNameSize + 1U]{};
@@ -38,27 +55,60 @@ private:
     static_assert(MaxValueSize > 0U, "HTTP header-value capacity must be non-zero");
 
 public:
+    /** @brief Constructs an empty collection. */
     basic_headers() CASTLE_DEFAULT;
 
+    /** @brief Removes every field. */
     void clear() CASTLE_NOEXCEPT { size_ = 0U; }
+
+    /** @brief Returns the number of stored fields. */
     size_type size() CASTLE_CONST CASTLE_NOEXCEPT { return size_; }
+
+    /** @brief Returns true when no field is stored. */
     bool empty() CASTLE_CONST CASTLE_NOEXCEPT { return size_ == 0U; }
+
+    /** @brief Returns true when every slot is used. */
     bool full() CASTLE_CONST CASTLE_NOEXCEPT { return size_ == MaxHeaders; }
 
+    /**
+     * @brief Appends a field without replacing an existing one.
+     *
+     * @return `ok`, `invalid_argument` for invalid syntax, `full` when no slot is left, or `out_of_range` when a text exceeds its capacity.
+     */
     castle::status add(string_view name, string_view value) CASTLE_NOEXCEPT
     {
-        if (!valid_name(name) || !valid_value(value)) { return castle::status::invalid_argument; }
-        if (size_ == MaxHeaders) { return castle::status::full; }
-        if (name.size() > MaxNameSize || value.size() > MaxValueSize) { return castle::status::out_of_range; }
+        if (!valid_name(name) || !valid_value(value))
+        {
+            return castle::status::invalid_argument;
+        }
+        if (size_ == MaxHeaders)
+        {
+            return castle::status::full;
+        }
+        if (name.size() > MaxNameSize || value.size() > MaxValueSize)
+        {
+            return castle::status::out_of_range;
+        }
         copy(fields_[size_], name, value);
         ++size_;
         return castle::status::ok;
     }
 
+    /**
+     * @brief Replaces the first field named `name` (case-insensitive), or appends it when absent.
+     *
+     * @return Same results as `add()`.
+     */
     castle::status set(string_view name, string_view value) CASTLE_NOEXCEPT
     {
-        if (!valid_name(name) || !valid_value(value)) { return castle::status::invalid_argument; }
-        if (name.size() > MaxNameSize || value.size() > MaxValueSize) { return castle::status::out_of_range; }
+        if (!valid_name(name) || !valid_value(value))
+        {
+            return castle::status::invalid_argument;
+        }
+        if (name.size() > MaxNameSize || value.size() > MaxValueSize)
+        {
+            return castle::status::out_of_range;
+        }
         for (size_type i = 0U; i < size_; ++i)
         {
             if (ascii_iequal(view_name(fields_[i]), name))
@@ -70,13 +120,17 @@ public:
         return add(name, value);
     }
 
+    /** @brief Removes the first field named `name`; returns true when one was removed. */
     bool remove(string_view name) CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i < size_; ++i)
         {
             if (ascii_iequal(view_name(fields_[i]), name))
             {
-                for (size_type j = i + 1U; j < size_; ++j) { fields_[j - 1U] = fields_[j]; }
+                for (size_type j = i + 1U; j < size_; ++j)
+                {
+                    fields_[j - 1U] = fields_[j];
+                }
                 --size_;
                 return true;
             }
@@ -84,81 +138,107 @@ public:
         return false;
     }
 
+    /** @brief Returns the field at `index`, or an empty field when out of range. */
     header_view operator[](size_type index) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        if (index >= size_) { return header_view{}; }
+        if (index >= size_)
+        {
+            return header_view{};
+        }
         return header_view{view_name(fields_[index]), view_value(fields_[index])};
     }
 
+    /** @brief Returns the value of the first field named `name`, or an empty view when absent. */
     string_view get(string_view name) CASTLE_CONST CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i < size_; ++i)
         {
-            if (ascii_iequal(view_name(fields_[i]), name)) { return view_value(fields_[i]); }
+            if (ascii_iequal(view_name(fields_[i]), name))
+            {
+                return view_value(fields_[i]);
+            }
         }
         return string_view();
     }
 
+    /** @brief Returns true when a field named `name` exists. */
     bool contains(string_view name) CASTLE_CONST CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i < size_; ++i)
         {
-            if (ascii_iequal(view_name(fields_[i]), name)) { return true; }
+            if (ascii_iequal(view_name(fields_[i]), name))
+            {
+                return true;
+            }
         }
         return false;
     }
 
 private:
-    static bool token_char(char c) CASTLE_NOEXCEPT
-    {
-        return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') ||
-               (c >= 'a' && c <= 'z') || c == '!' || c == '#' || c == '$' ||
-               c == '%' || c == '&' || c == '\'' || c == '*' || c == '+' ||
-               c == '-' || c == '.' || c == '^' || c == '_' || c == '`' ||
-               c == '|' || c == '~';
-    }
-
+    /** @brief Accepts an RFC 9110 token, optionally prefixed by `:` for an HTTP/2 pseudo-header. */
     static bool valid_name(string_view name) CASTLE_NOEXCEPT
     {
-        if (name.empty()) { return false; }
+        if (name.empty())
+        {
+            return false;
+        }
         size_type first = 0U;
         if (name[0U] == ':')
         {
-            if (name.size() == 1U) { return false; }
+            if (name.size() == 1U)
+            {
+                return false;
+            }
             first = 1U; // HTTP/2 pseudo-header field.
         }
         for (size_type i = first; i < name.size(); ++i)
         {
-            if (!token_char(name[i])) { return false; }
+            if (!detail::token_char(name[i]))
+            {
+                return false;
+            }
         }
         return true;
     }
 
+    /** @brief Rejects NUL, CR, LF and other control characters; horizontal tab is allowed. */
     static bool valid_value(string_view value) CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i < value.size(); ++i)
         {
             unsigned char c = static_cast<unsigned char>(value[i]);
-            if (c == 0U || c == '\r' || c == '\n' || (c < 32U && c != '\t') || c == 127U) { return false; }
+            if (c == 0U || c == '\r' || c == '\n' || (c < 32U && c != '\t') || c == 127U)
+            {
+                return false;
+            }
         }
         return true;
     }
 
+    /** @brief Stores `name` and `value` NUL-terminated; the caller has already checked capacity. */
     static void copy(field& out, string_view name, string_view value) CASTLE_NOEXCEPT
     {
-        for (size_type i = 0U; i < name.size(); ++i) { out.name[i] = name[i]; }
+        for (size_type i = 0U; i < name.size(); ++i)
+        {
+            out.name[i] = name[i];
+        }
         out.name[name.size()] = '\0';
-        for (size_type i = 0U; i < value.size(); ++i) { out.value[i] = value[i]; }
+        for (size_type i = 0U; i < value.size(); ++i)
+        {
+            out.value[i] = value[i];
+        }
         out.value[value.size()] = '\0';
         out.name_size = name.size();
         out.value_size = value.size();
     }
 
+    /** @brief Returns the stored name of `value`. */
     static string_view view_name(field const& value) CASTLE_NOEXCEPT
     {
         return string_view(value.name, value.name_size);
     }
 
+    /** @brief Returns the stored value of `value`. */
     static string_view view_value(field const& value) CASTLE_NOEXCEPT
     {
         return string_view(value.value, value.value_size);
@@ -168,7 +248,9 @@ private:
     size_type size_ = 0U;
 };
 
-template <size_type MaxHeaders, size_type MaxNameSize, size_type MaxValueSize>
+template <size_type MaxHeaders = 16U,
+          size_type MaxNameSize = 64U,
+          size_type MaxValueSize = 256U>
 using headers = basic_headers<MaxHeaders, MaxNameSize, MaxValueSize>;
 
 } // namespace http
