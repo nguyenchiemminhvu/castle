@@ -140,7 +140,7 @@ public:
      * @return `ok`, `invalid_argument` for invalid input, or `full` when the buffer is too small.
      */
     castle::status build(method verb, string_view path, string_view authority,
-                         headers_type const& headers,
+                         headers_type CASTLE_CONST& headers,
                          string_view body = string_view(), string_view custom_method = string_view(),
                          bool keep_alive = true) CASTLE_NOEXCEPT
     {
@@ -233,7 +233,7 @@ private:
     }
 
     /** @brief Appends a NUL-terminated string; false when the buffer would overflow. */
-    bool append(char const* value) CASTLE_NOEXCEPT { return append(string_view(value)); }
+    bool append(char CASTLE_CONST* value) CASTLE_NOEXCEPT { return append(string_view(value)); }
 
     /** @brief Appends `value` in decimal; false when the buffer would overflow. */
     bool append_decimal(size_type value) CASTLE_NOEXCEPT
@@ -337,7 +337,7 @@ public:
      * @param consumed Receives the number of bytes used; the rest belongs to the next response.
      * @return `ok`, or the failure whose cause is `last_error()`.
      */
-    castle::status feed(void const* data, size_type size, bool peer_closed = false,
+    castle::status feed(void CASTLE_CONST* data, size_type size, bool peer_closed = false,
                         size_type* consumed = nullptr) CASTLE_NOEXCEPT
     {
         size_type offset = 0U;
@@ -378,7 +378,7 @@ private:
     };
 
     /** @brief Parses `size` bytes from `data`, advancing `offset` past every byte it uses. */
-    castle::status feed_bytes(void const* data, size_type size, bool peer_closed, size_type& offset) CASTLE_NOEXCEPT
+    castle::status feed_bytes(void CASTLE_CONST* data, size_type size, bool peer_closed, size_type& offset) CASTLE_NOEXCEPT
     {
         if (state_ == state::failed)
         {
@@ -392,7 +392,7 @@ private:
         {
             return castle::status::invalid_argument;
         }
-        char const* bytes = static_cast<char const*>(data);
+        char CASTLE_CONST* bytes = static_cast<char CASTLE_CONST*>(data);
         while (offset < size && state_ != state::complete)
         {
             if (state_ == state::status_line || state_ == state::header_line ||
@@ -704,7 +704,7 @@ private:
     }
 
     /** @brief Retains body bytes up to `MaxBodySize` and forwards all of them to the body callback. */
-    castle::status append_body(char const* data, size_type size) CASTLE_NOEXCEPT
+    castle::status append_body(char CASTLE_CONST* data, size_type size) CASTLE_NOEXCEPT
     {
         if (body_callback_)
         {

@@ -64,13 +64,13 @@ struct http2_frame_view
     http2_frame_type type = http2_frame_type::data;
     uint8_t flags = 0U;
     uint32_t stream_id = 0U;
-    uint8_t const* payload = nullptr;
+    uint8_t CASTLE_CONST* payload = nullptr;
 };
 
 namespace detail
 {
 /** @brief Reads a big-endian 32-bit value. */
-CASTLE_INLINE uint32_t read_u32(uint8_t const* p) CASTLE_NOEXCEPT
+CASTLE_INLINE uint32_t read_u32(uint8_t CASTLE_CONST* p) CASTLE_NOEXCEPT
 {
     return (static_cast<uint32_t>(p[0U]) << 24U) |
            (static_cast<uint32_t>(p[1U]) << 16U) |
@@ -118,7 +118,7 @@ public:
      * @return `ok`, or the callback/validation failure; see `last_error()`.
      */
     template <typename Callback>
-    castle::status feed(uint8_t const* data, size_type size, Callback&& callback,
+    castle::status feed(uint8_t CASTLE_CONST* data, size_type size, Callback&& callback,
                         size_type* consumed = nullptr) CASTLE_NOEXCEPT
     {
         if (consumed != nullptr)
@@ -362,7 +362,7 @@ class http2_session
 
 public:
     using headers_type = basic_headers<MaxHeaders, MaxHeaderNameSize, MaxHeaderValueSize>;
-    using response_callback = castle::callbacks::function<void(castle::status, response_view const&), CallbackStorageSize>;
+    using response_callback = castle::callbacks::function<void(castle::status, response_view CASTLE_CONST&), CallbackStorageSize>;
     using body_callback = castle::callbacks::function<void(uint32_t, string_view), CallbackStorageSize>;
     using frame_parser_type = http2_frame_parser<MaxFrameSize>;
 
@@ -417,9 +417,9 @@ public:
     castle::status start() CASTLE_NOEXCEPT
     {
         reset();
-        static char const client_preface[] = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
+        static char CASTLE_CONST client_preface[] = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
         // reset() empties the queue, and MaxOutputSize >= 64 fits the preface.
-        enqueue_bytes(reinterpret_cast<uint8_t const*>(client_preface), 24U);
+        enqueue_bytes(reinterpret_cast<uint8_t CASTLE_CONST*>(client_preface), 24U);
         uint8_t settings[18U] = {
             0x00U, 0x01U, 0x00U, 0x00U, 0x00U, 0x00U, // SETTINGS_HEADER_TABLE_SIZE
             0x00U, 0x02U, 0x00U, 0x00U, 0x00U, 0x00U, // SETTINGS_ENABLE_PUSH = 0
@@ -470,7 +470,7 @@ public:
      */
     template <typename Headers>
     castle::status open_stream(method verb, string_view path, string_view authority,
-                               Headers const& headers, string_view body, uint32_t& stream_id,
+                               Headers CASTLE_CONST& headers, string_view body, uint32_t& stream_id,
                                string_view custom_method = string_view()) CASTLE_NOEXCEPT
     {
         stream_id = 0U;
@@ -587,7 +587,7 @@ public:
             }
             http2_frame_type frame_type = frame_index == 0U ? http2_frame_type::headers : http2_frame_type::continuation;
             // Output space for every fragment was reserved above.
-            if (!enqueue_frame(frame_type, flags, stream_id, reinterpret_cast<uint8_t const*>(header_block_ + offset), fragment_size)) // LCOV_EXCL_BR_LINE
+            if (!enqueue_frame(frame_type, flags, stream_id, reinterpret_cast<uint8_t CASTLE_CONST*>(header_block_ + offset), fragment_size)) // LCOV_EXCL_BR_LINE
             {
                 stream->clear();
                 return fail_connection(error_code::output_full);
@@ -603,7 +603,7 @@ public:
      * @param peer_closed True when the transport reached end of stream.
      * @return `ok`, or the connection failure; see `last_error()`.
      */
-    castle::status feed(uint8_t const* data, size_type size, bool peer_closed = false) CASTLE_NOEXCEPT
+    castle::status feed(uint8_t CASTLE_CONST* data, size_type size, bool peer_closed = false) CASTLE_NOEXCEPT
     {
         if (!started_)
         {
@@ -613,7 +613,7 @@ public:
         {
             return to_status(error_);
         }
-        castle::status result = frame_parser_.feed(data, size, [this](http2_frame_view const& frame)
+        castle::status result = frame_parser_.feed(data, size, [this](http2_frame_view CASTLE_CONST& frame)
         {
             return handle_frame(frame);
         });
@@ -634,7 +634,7 @@ public:
     }
 
     /** @brief Returns the next contiguous portion of queued bytes for the TCP sender. */
-    uint8_t const* pending_output() CASTLE_CONST CASTLE_NOEXCEPT
+    uint8_t CASTLE_CONST* pending_output() CASTLE_CONST CASTLE_NOEXCEPT
     {
         return output_size_ == 0U ? nullptr : output_ + output_head_;
     }
@@ -692,7 +692,7 @@ public:
     /** @brief Returns the response of `stream_id`; empty when unknown. Valid until `release_stream()`. */
     response_view response(uint32_t stream_id) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        stream_record const* stream = find_stream_const(stream_id);
+        stream_record CASTLE_CONST* stream = find_stream_const(stream_id);
         if (stream == nullptr)
         {
             return response_view{};
@@ -804,10 +804,10 @@ private:
     size_type output_free() CASTLE_CONST CASTLE_NOEXCEPT { return MaxOutputSize - output_size_; }
 
     /** @brief Appends raw bytes to the circular output queue; the caller guarantees the free space. */
-    void enqueue_bytes(uint8_t const* data, size_type size) CASTLE_NOEXCEPT
+    void enqueue_bytes(uint8_t CASTLE_CONST* data, size_type size) CASTLE_NOEXCEPT
     {
-        size_type const tail = (output_head_ + output_size_) % MaxOutputSize;
-        size_type const first = castle::min(size, static_cast<size_type>(MaxOutputSize - tail));
+        size_type CASTLE_CONST tail = (output_head_ + output_size_) % MaxOutputSize;
+        size_type CASTLE_CONST first = castle::min(size, static_cast<size_type>(MaxOutputSize - tail));
         for (size_type i = 0U; i < first; ++i)
         {
             output_[tail + i] = data[i];
@@ -821,7 +821,7 @@ private:
 
     /** @brief Appends a frame header and payload atomically; false when they do not fit. */
     bool enqueue_frame(http2_frame_type type, uint8_t flags, uint32_t stream_id,
-                       uint8_t const* payload, size_type length) CASTLE_NOEXCEPT
+                       uint8_t CASTLE_CONST* payload, size_type length) CASTLE_NOEXCEPT
     {
         if (output_free() < length + 9U)
         {
@@ -881,7 +881,7 @@ private:
     }
 
     /** @brief Const overload of `find_stream()`. */
-    stream_record const* find_stream_const(uint32_t id) CASTLE_CONST CASTLE_NOEXCEPT
+    stream_record CASTLE_CONST* find_stream_const(uint32_t id) CASTLE_CONST CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i < MaxConcurrentStreams; ++i)
         {
@@ -894,7 +894,7 @@ private:
     }
 
     /** @brief Builds the public view of a stream. */
-    response_view make_response(stream_record const& stream) CASTLE_CONST CASTLE_NOEXCEPT
+    response_view make_response(stream_record CASTLE_CONST& stream) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return response_view{stream.status_code, version::http_2, stream.header_views,
             stream.response_header_count, string_view(stream.body, stream.body_size),
@@ -935,7 +935,7 @@ private:
                     return castle::status::ok;
                 }
                 bool last = stream.request_body_sent_bytes + allowed == stream.request_body.size();
-                uint8_t const* body = reinterpret_cast<uint8_t const*>(stream.request_body.data()) + stream.request_body_sent_bytes;
+                uint8_t CASTLE_CONST* body = reinterpret_cast<uint8_t CASTLE_CONST*>(stream.request_body.data()) + stream.request_body_sent_bytes;
                 // The chunk was sized to the free space checked above.
                 if (!enqueue_frame(http2_frame_type::data, last ? 0x01U : 0U, stream.id, body, allowed)) // LCOV_EXCL_BR_LINE
                 {
@@ -1013,7 +1013,7 @@ private:
     }
 
     /** @brief Dispatches one frame to its handler. */
-    castle::status handle_frame(http2_frame_view const& frame) CASTLE_NOEXCEPT
+    castle::status handle_frame(http2_frame_view CASTLE_CONST& frame) CASTLE_NOEXCEPT
     {
         if (continuation_stream_id_ != 0U && frame.type != http2_frame_type::continuation)
         {
@@ -1036,7 +1036,7 @@ private:
     }
 
     /** @brief Applies peer settings and acknowledges them. */
-    castle::status handle_settings(http2_frame_view const& frame) CASTLE_NOEXCEPT
+    castle::status handle_settings(http2_frame_view CASTLE_CONST& frame) CASTLE_NOEXCEPT
     {
         if ((frame.flags & 0x01U) != 0U)
         {
@@ -1097,7 +1097,7 @@ private:
     }
 
     /** @brief Echoes a PING that is not an acknowledgement. */
-    castle::status handle_ping(http2_frame_view const& frame) CASTLE_NOEXCEPT
+    castle::status handle_ping(http2_frame_view CASTLE_CONST& frame) CASTLE_NOEXCEPT
     {
         if ((frame.flags & 0x01U) == 0U &&
             !enqueue_frame(http2_frame_type::ping, 0x01U, 0U, frame.payload, 8U))
@@ -1108,7 +1108,7 @@ private:
     }
 
     /** @brief Records GOAWAY and fails streams the server never processed. */
-    castle::status handle_goaway(http2_frame_view const& frame) CASTLE_NOEXCEPT
+    castle::status handle_goaway(http2_frame_view CASTLE_CONST& frame) CASTLE_NOEXCEPT
     {
         goaway_received_ = true;
         error_ = error_code::goaway_received;
@@ -1126,7 +1126,7 @@ private:
     }
 
     /** @brief Adds send credit to the connection or a stream. */
-    castle::status handle_window_update(http2_frame_view const& frame) CASTLE_NOEXCEPT
+    castle::status handle_window_update(http2_frame_view CASTLE_CONST& frame) CASTLE_NOEXCEPT
     {
         uint32_t increment = detail::read_u32(frame.payload) & 0x7FFFFFFFU;
         if (increment == 0U)
@@ -1158,7 +1158,7 @@ private:
     }
 
     /** @brief Marks a stream as reset by the peer. */
-    castle::status handle_rst_stream(http2_frame_view const& frame) CASTLE_NOEXCEPT
+    castle::status handle_rst_stream(http2_frame_view CASTLE_CONST& frame) CASTLE_NOEXCEPT
     {
         stream_record* stream = find_stream(frame.stream_id);
         if (stream == nullptr || stream->response_complete || stream->reset)
@@ -1172,7 +1172,7 @@ private:
     }
 
     /** @brief Starts a header block (response headers or trailers). */
-    castle::status handle_headers(http2_frame_view const& frame) CASTLE_NOEXCEPT
+    castle::status handle_headers(http2_frame_view CASTLE_CONST& frame) CASTLE_NOEXCEPT
     {
         stream_record* stream = find_stream(frame.stream_id);
         // A reset stream still needs its header blocks decoded to keep the shared HPACK context in sync.
@@ -1223,7 +1223,7 @@ private:
     }
 
     /** @brief Extends the header block in progress. */
-    castle::status handle_continuation(http2_frame_view const& frame) CASTLE_NOEXCEPT
+    castle::status handle_continuation(http2_frame_view CASTLE_CONST& frame) CASTLE_NOEXCEPT
     {
         if (continuation_stream_id_ == 0U || frame.stream_id != continuation_stream_id_)
         {
@@ -1249,7 +1249,7 @@ private:
     }
 
     /** @brief Buffers an encoded header-block fragment; exceeding `MaxHeaderBlockSize` is a connection error. */
-    castle::status append_header_fragment(stream_record& stream, uint8_t const* data, size_type size) CASTLE_NOEXCEPT
+    castle::status append_header_fragment(stream_record& stream, uint8_t CASTLE_CONST* data, size_type size) CASTLE_NOEXCEPT
     {
         if (size > MaxHeaderBlockSize - stream.header_block_size)
         {
@@ -1268,13 +1268,13 @@ private:
     /** @brief Decodes a complete block and validates pseudo-headers, trailers and content length. */
     castle::status finish_header_block(stream_record& stream) CASTLE_NOEXCEPT
     {
-        bool const trailer_block = stream.headers_received;
+        bool CASTLE_CONST trailer_block = stream.headers_received;
         if (trailer_block && !stream.end_stream_after_headers)
         {
             return fail_connection(error_code::protocol_error);
         }
-        size_type const first_field = stream.headers.size();
-        castle::status decoded = hpack_.decode_block(reinterpret_cast<uint8_t const*>(stream.header_block),
+        size_type CASTLE_CONST first_field = stream.headers.size();
+        castle::status decoded = hpack_.decode_block(reinterpret_cast<uint8_t CASTLE_CONST*>(stream.header_block),
                                                        stream.header_block_size, stream.headers);
         stream.header_block_size = 0U;
         if (!castle::succeeded(decoded))
@@ -1396,7 +1396,7 @@ private:
     }
 
     /** @brief Accounts flow control, delivers the body and completes the stream on END_STREAM. */
-    castle::status handle_data(http2_frame_view const& frame) CASTLE_NOEXCEPT
+    castle::status handle_data(http2_frame_view CASTLE_CONST& frame) CASTLE_NOEXCEPT
     {
         stream_record* stream = find_stream(frame.stream_id);
         if (stream == nullptr && !is_issued_stream(frame.stream_id))
@@ -1404,7 +1404,7 @@ private:
             return fail_connection(error_code::protocol_error);
         }
         // Frames for streams that were reset or released still consume flow-control credit.
-        bool const discard = stream == nullptr || stream->reset;
+        bool CASTLE_CONST discard = stream == nullptr || stream->reset;
         if (!discard && (!stream->headers_received || stream->response_complete))
         {
             return fail_connection(error_code::protocol_error);
@@ -1446,7 +1446,7 @@ private:
             return fail_connection(error_code::invalid_frame);
         }
         size_type data_size = end - offset;
-        bool const no_body_semantics = stream->request_head || stream->status_code == 204U || stream->status_code == 304U;
+        bool CASTLE_CONST no_body_semantics = stream->request_head || stream->status_code == 204U || stream->status_code == 304U;
         if (no_body_semantics && data_size != 0U)
         {
             return fail_connection(error_code::protocol_error);
@@ -1458,7 +1458,7 @@ private:
         }
         if (data_size != 0U)
         {
-            string_view chunk(reinterpret_cast<char const*>(frame.payload + offset), data_size);
+            string_view chunk(reinterpret_cast<char CASTLE_CONST*>(frame.payload + offset), data_size);
             if (body_callback_)
             {
                 body_callback_(stream->id, chunk);
@@ -1489,7 +1489,7 @@ private:
     /** @brief Verifies the body length and reports the completed response. */
     castle::status finish_response(stream_record& stream) CASTLE_NOEXCEPT
     {
-        bool const no_body_semantics = stream.request_head || stream.status_code == 204U || stream.status_code == 304U;
+        bool CASTLE_CONST no_body_semantics = stream.request_head || stream.status_code == 204U || stream.status_code == 304U;
         if (stream.content_length_seen && !no_body_semantics && stream.body_received != stream.expected_body_length)
         {
             return fail_connection(error_code::protocol_error);

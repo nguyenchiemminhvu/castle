@@ -233,13 +233,13 @@ private:
     }
 
     /** @brief Returns the stored name of `value`. */
-    static string_view view_name(field const& value) CASTLE_NOEXCEPT
+    static string_view view_name(field CASTLE_CONST& value) CASTLE_NOEXCEPT
     {
         return string_view(value.name, value.name_size);
     }
 
     /** @brief Returns the stored value of `value`. */
-    static string_view view_value(field const& value) CASTLE_NOEXCEPT
+    static string_view view_value(field CASTLE_CONST& value) CASTLE_NOEXCEPT
     {
         return string_view(value.value, value.value_size);
     }

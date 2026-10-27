@@ -97,7 +97,7 @@ struct response_view
 {
     uint16_t status_code = 0U;
     version protocol = version::http_1_1;
-    header_view const* headers = nullptr;
+    header_view CASTLE_CONST* headers = nullptr;
     size_type header_count = 0U;
     string_view body;
     uint32_t stream_id = 0U;

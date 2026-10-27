@@ -55,10 +55,10 @@ class authority_buffer
 {
 public:
     /** @brief Formats `remote` as `a.b.c.d:port` or `[x:x:...]:port`; the result always fits. */
-    void assign(net::endpoint const& remote) CASTLE_NOEXCEPT
+    void assign(net::endpoint CASTLE_CONST& remote) CASTLE_NOEXCEPT
     {
         size_ = 0U;
-        uint8_t const* address = remote.address_bytes();
+        uint8_t CASTLE_CONST* address = remote.address_bytes();
         if (remote.family() == net::address_family::ipv4)
         {
             for (size_type i = 0U; i < 4U; ++i)
@@ -142,7 +142,7 @@ private:
     /** @brief Appends `value` as lowercase hexadecimal without padding; the caller guarantees capacity. */
     void append_hex(uint16_t value) CASTLE_NOEXCEPT
     {
-        static char const digits[] = "0123456789abcdef";
+        static char CASTLE_CONST digits[] = "0123456789abcdef";
         char reverse[4U];
         size_type count = 0U;
         do
@@ -192,7 +192,7 @@ public:
     using parser_type = http1_response_parser<MaxBodySize, MaxHeaders, MaxHeaderNameSize,
                                                MaxHeaderValueSize, MaxLineSize, EnableChunked, CallbackStorageSize>;
     using request_type = http1_request<MaxRequestSize, MaxHeaders, MaxHeaderNameSize, MaxHeaderValueSize>;
-    using response_callback = castle::callbacks::function<void(castle::status, response_view const&), CallbackStorageSize>;
+    using response_callback = castle::callbacks::function<void(castle::status, response_view CASTLE_CONST&), CallbackStorageSize>;
     using body_callback = typename parser_type::body_callback;
 
     /** @brief Binds the client to a transport that must outlive it. */
@@ -233,7 +233,7 @@ public:
     void clear_body_callback() CASTLE_NOEXCEPT { parser_.clear_body_callback(); }
 
     /** @brief Connects using the numeric `address:port` of `remote` as the Host header. */
-    castle::status connect(net::endpoint const& remote, int timeout_ms = 0, int* system_error = nullptr) CASTLE_NOEXCEPT
+    castle::status connect(net::endpoint CASTLE_CONST& remote, int timeout_ms = 0, int* system_error = nullptr) CASTLE_NOEXCEPT
     {
         if (!can_connect())
         {
@@ -244,7 +244,7 @@ public:
     }
 
     /** @brief Connects using `authority` (for example `api.test:80`) as the Host header. */
-    castle::status connect(net::endpoint const& remote, string_view authority,
+    castle::status connect(net::endpoint CASTLE_CONST& remote, string_view authority,
                            int timeout_ms = 0, int* system_error = nullptr) CASTLE_NOEXCEPT
     {
         if (!can_connect())
@@ -261,7 +261,7 @@ public:
      * @param keep_alive Sent as the Connection header unless `headers` already has one.
      * @return `ok`, `not_configured` when not connected or busy, or the `http1_request::build()` failure.
      */
-    castle::status request(method verb, string_view path, headers_type const& headers,
+    castle::status request(method verb, string_view path, headers_type CASTLE_CONST& headers,
                            string_view body = string_view(), string_view custom_method = string_view(),
                            bool keep_alive = true) CASTLE_NOEXCEPT
     {
@@ -401,7 +401,7 @@ private:
     }
 
     /** @brief Connects the transport and records the resulting state. */
-    castle::status connect_transport(net::endpoint const& remote, int timeout_ms, int* system_error) CASTLE_NOEXCEPT
+    castle::status connect_transport(net::endpoint CASTLE_CONST& remote, int timeout_ms, int* system_error) CASTLE_NOEXCEPT
     {
         castle::status result = transport_.connect(remote, timeout_ms, true, system_error);
         connected_ = castle::succeeded(result);
@@ -504,7 +504,7 @@ public:
     void clear_body_callback() CASTLE_NOEXCEPT { session_.clear_body_callback(); }
 
     /** @brief Connects using the numeric `address:port` of `remote` as the default `:authority`. */
-    castle::status connect(net::endpoint const& remote, int timeout_ms = 0,
+    castle::status connect(net::endpoint CASTLE_CONST& remote, int timeout_ms = 0,
                            int* system_error = nullptr) CASTLE_NOEXCEPT
     {
         authority_.assign(remote);
@@ -512,7 +512,7 @@ public:
     }
 
     /** @brief Connects using `authority` (for example `h2.test:80`) as the default `:authority`. */
-    castle::status connect(net::endpoint const& remote, string_view authority, int timeout_ms = 0,
+    castle::status connect(net::endpoint CASTLE_CONST& remote, string_view authority, int timeout_ms = 0,
                            int* system_error = nullptr) CASTLE_NOEXCEPT
     {
         castle::status named = authority_.assign(authority);
@@ -521,7 +521,7 @@ public:
 
 private:
     /** @brief Connects the transport and starts the session once it is established. */
-    castle::status connect_transport(net::endpoint const& remote, int timeout_ms,
+    castle::status connect_transport(net::endpoint CASTLE_CONST& remote, int timeout_ms,
                                      int* system_error) CASTLE_NOEXCEPT
     {
         castle::status result = transport_.connect(remote, timeout_ms, true, system_error);
@@ -543,7 +543,7 @@ public:
      *
      * @return See `http2_session::open_stream()`.
      */
-    castle::status open_stream(method verb, string_view path, headers_type const& headers,
+    castle::status open_stream(method verb, string_view path, headers_type CASTLE_CONST& headers,
                                string_view body, uint32_t& stream_id,
                                string_view custom_method = string_view()) CASTLE_NOEXCEPT
     {
@@ -552,7 +552,7 @@ public:
 
     /** @brief Opens a stream with an explicit `:authority`; an empty one selects the default. */
     castle::status open_stream(method verb, string_view path, string_view authority,
-                               headers_type const& headers, string_view body,
+                               headers_type CASTLE_CONST& headers, string_view body,
                                uint32_t& stream_id, string_view custom_method = string_view()) CASTLE_NOEXCEPT
     {
         if (!connected_)
@@ -587,7 +587,7 @@ public:
             return castle::status::not_configured;
         }
         castle::status sent = flush_output(system_error);
-        bool const write_blocked = sent == castle::status::full || sent == castle::status::empty;
+        bool CASTLE_CONST write_blocked = sent == castle::status::full || sent == castle::status::empty;
         if (!castle::succeeded(sent) && !write_blocked)
         {
             return sent;
@@ -636,7 +636,7 @@ public:
     session_type& session() CASTLE_NOEXCEPT { return session_; }
 
     /** @brief Returns the protocol session. */
-    session_type const& session() CASTLE_CONST CASTLE_NOEXCEPT { return session_; }
+    session_type CASTLE_CONST& session() CASTLE_CONST CASTLE_NOEXCEPT { return session_; }
 
     /** @brief Returns the response of `stream_id`. */
     response_view response(uint32_t stream_id) CASTLE_CONST CASTLE_NOEXCEPT { return session_.response(stream_id); }
@@ -650,7 +650,7 @@ private:
     {
         while (session_.output_size() != 0U)
         {
-            uint8_t const* data = session_.pending_output();
+            uint8_t CASTLE_CONST* data = session_.pending_output();
             size_type size = session_.pending_output_size();
             size_type sent = 0U;
             castle::status result = transport_.send_some(data, size, sent, system_error);

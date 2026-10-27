@@ -43,12 +43,12 @@ namespace detail
 /** @brief One entry of the RFC 7541 static table. */
 struct hpack_static_field
 {
-    char const* name;
-    char const* value;
+    char CASTLE_CONST* name;
+    char CASTLE_CONST* value;
 };
 
 /** @brief RFC 7541 Appendix A; index 1 is element 0. */
-inline CASTLE_CONSTEXPR hpack_static_field hpack_static_table[61] =
+CASTLE_INLINE CASTLE_CONSTEXPR hpack_static_field hpack_static_table[61] =
 {
     {":authority", ""}, {":method", "GET"}, {":method", "POST"}, {":path", "/"},
     {":path", "/index.html"}, {":scheme", "http"}, {":scheme", "https"},
@@ -69,7 +69,7 @@ inline CASTLE_CONSTEXPR hpack_static_field hpack_static_table[61] =
 };
 
 /** @brief RFC 7541 Appendix B codes, right-aligned in 32 bits; symbol 256 is EOS. */
-inline CASTLE_CONSTEXPR uint32_t hpack_huffman_codes[257] =
+CASTLE_INLINE CASTLE_CONSTEXPR uint32_t hpack_huffman_codes[257] =
 {
     0x00001FF8u,
     0x007FFFD8u,
@@ -331,7 +331,7 @@ inline CASTLE_CONSTEXPR uint32_t hpack_huffman_codes[257] =
 };
 
 /** @brief Bit length of each Huffman code. */
-inline CASTLE_CONSTEXPR uint8_t hpack_huffman_lengths[257] =
+CASTLE_INLINE CASTLE_CONSTEXPR uint8_t hpack_huffman_lengths[257] =
 {
     13U, 23U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 24U, 30U, 28U, 28U, 30U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 30U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 28U, 6U, 10U, 10U, 12U, 13U, 6U, 8U, 11U, 10U, 10U, 8U, 11U, 8U, 6U, 6U, 6U, 5U, 5U, 5U, 6U, 6U, 6U, 6U, 6U, 6U, 6U, 7U, 8U, 15U, 6U, 12U, 10U, 13U, 6U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 7U, 8U, 7U, 8U, 13U, 19U, 13U, 14U, 6U, 15U, 5U, 6U, 5U, 6U, 5U, 6U, 6U, 6U, 5U, 7U, 7U, 6U, 6U, 6U, 5U, 6U, 7U, 6U, 5U, 5U, 6U, 7U, 7U, 7U, 7U, 7U, 15U, 11U, 14U, 13U, 28U, 20U, 22U, 20U, 20U, 22U, 22U, 22U, 23U, 22U, 23U, 23U, 23U, 23U, 23U, 24U, 23U, 24U, 24U, 22U, 23U, 24U, 23U, 23U, 23U, 23U, 21U, 22U, 23U, 22U, 23U, 23U, 24U, 22U, 21U, 20U, 22U, 22U, 23U, 23U, 21U, 23U, 22U, 22U, 24U, 21U, 22U, 23U, 23U, 21U, 21U, 22U, 21U, 23U, 22U, 23U, 23U, 20U, 22U, 22U, 22U, 23U, 22U, 22U, 23U, 26U, 26U, 20U, 19U, 22U, 23U, 22U, 25U, 26U, 26U, 26U, 27U, 27U, 26U, 24U, 25U, 19U, 21U, 26U, 27U, 27U, 26U, 27U, 24U, 21U, 21U, 26U, 26U, 28U, 27U, 27U, 27U, 20U, 24U, 20U, 21U, 22U, 21U, 21U, 23U, 22U, 22U, 25U, 25U, 24U, 24U, 26U, 23U, 26U, 27U, 26U, 26U, 27U, 27U, 27U, 27U, 27U, 28U, 27U, 27U, 27U, 27U, 27U, 26U, 30U
 };
@@ -341,7 +341,7 @@ inline CASTLE_CONSTEXPR uint8_t hpack_huffman_lengths[257] =
  *
  * @return `ok`, `data_loss` for truncated input, or `out_of_range` on overflow.
  */
-CASTLE_INLINE castle::status hpack_read_integer(uint8_t const* input, size_type size, size_type& offset,
+CASTLE_INLINE castle::status hpack_read_integer(uint8_t CASTLE_CONST* input, size_type size, size_type& offset,
                                                 uint8_t prefix, uint64_t& value) CASTLE_NOEXCEPT
 {
     // Callers always pass a valid offset and a constant prefix.
@@ -430,7 +430,7 @@ struct huffman_node
 };
 
 // A complete prefix code over 257 symbols (256 octets + EOS) has 2 * 257 - 1 nodes.
-inline CASTLE_CONSTEXPR size_type hpack_huffman_node_capacity = 2U * 257U;
+CASTLE_INLINE CASTLE_CONSTEXPR size_type hpack_huffman_node_capacity = 2U * 257U;
 
 /** @brief Fixed-size Huffman decoding trie. */
 struct huffman_tree
@@ -472,7 +472,7 @@ CASTLE_CONSTEXPR huffman_tree build_huffman_tree() CASTLE_NOEXCEPT
 }
 
 /** @brief Shared decoding trie. */
-inline CASTLE_CONSTEXPR huffman_tree hpack_huffman_tree = build_huffman_tree();
+CASTLE_INLINE CASTLE_CONSTEXPR huffman_tree hpack_huffman_tree = build_huffman_tree();
 static_assert(hpack_huffman_tree.count <= hpack_huffman_node_capacity, "HPACK Huffman tree capacity is insufficient");
 
 /** @brief Finds the first static-table index for `name`; `exact` reports whether the value matched as well. */
@@ -504,7 +504,7 @@ CASTLE_INLINE size_type hpack_find_static(string_view name, string_view value, b
  *
  * @return `ok`, `invalid_argument` for malformed input, or `out_of_range` when the output is too small.
  */
-CASTLE_INLINE castle::status hpack_decode_huffman(uint8_t const* input, size_type input_size,
+CASTLE_INLINE castle::status hpack_decode_huffman(uint8_t CASTLE_CONST* input, size_type input_size,
                                                   char* output, size_type output_capacity,
                                                   size_type& output_size) CASTLE_NOEXCEPT
 {
@@ -583,7 +583,7 @@ public:
      * @return `ok`, `invalid_argument` for malformed data, `data_loss` for truncation, or the failure reported by `output`.
      */
     template <typename Headers>
-    castle::status decode_block(uint8_t const* input, size_type size, Headers& output) CASTLE_NOEXCEPT
+    castle::status decode_block(uint8_t CASTLE_CONST* input, size_type size, Headers& output) CASTLE_NOEXCEPT
     {
         if (input == nullptr && size != 0U)
         {
@@ -733,14 +733,14 @@ private:
         {
             return false;
         }
-        dynamic_entry const& entry = entries_[static_cast<size_type>(dynamic_index)];
+        dynamic_entry CASTLE_CONST& entry = entries_[static_cast<size_type>(dynamic_index)];
         name = string_view(entry.name, entry.name_size);
         value = string_view(entry.value, entry.value_size);
         return true;
     }
 
     /** @brief Reads a length-prefixed, optionally Huffman-coded string into `output`. */
-    castle::status read_string(uint8_t const* input, size_type size, size_type& offset,
+    castle::status read_string(uint8_t CASTLE_CONST* input, size_type size, size_type& offset,
                                char* output, size_type& output_size) CASTLE_NOEXCEPT
     {
         if (offset >= size)
