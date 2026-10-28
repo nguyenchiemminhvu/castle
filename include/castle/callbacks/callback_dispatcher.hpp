@@ -10,8 +10,8 @@
  * records which callback is running and defers any `replace()` or `clear()` aimed at it until it returns.
  * An owner needs one dispatcher however many callbacks it stores, because only one runs at a time.
  */
-#ifndef CASTLE_EXT_NET_DETAIL_CALLBACK_DISPATCHER_HPP
-#define CASTLE_EXT_NET_DETAIL_CALLBACK_DISPATCHER_HPP
+#ifndef CASTLE_CALLBACKS_CALLBACK_DISPATCHER_HPP
+#define CASTLE_CALLBACKS_CALLBACK_DISPATCHER_HPP
 
 #include "castle/core/compiler.hpp"
 #include "castle/utility/forward.hpp"
@@ -21,9 +21,7 @@
 
 namespace castle
 {
-namespace net
-{
-namespace detail
+namespace callbacks
 {
 
 /** @tparam Callback A `castle::callbacks::function` specialization. */
@@ -105,8 +103,7 @@ private:
     deferred action_ = deferred::none;
 };
 
-} // namespace detail
-} // namespace net
+} // namespace callbacks
 } // namespace castle
 
-#endif // CASTLE_EXT_NET_DETAIL_CALLBACK_DISPATCHER_HPP
+#endif // CASTLE_CALLBACKS_CALLBACK_DISPATCHER_HPP

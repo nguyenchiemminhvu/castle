@@ -14,6 +14,7 @@
 #ifndef CASTLE_EXT_NET_SERVER_HPP
 #define CASTLE_EXT_NET_SERVER_HPP
 
+#include "castle/callbacks/callback_dispatcher.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/config.hpp"
@@ -21,7 +22,6 @@
 #include "castle/error/status.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/move.hpp"
-#include "castle_ext/net/detail/callback_dispatcher.hpp"
 #include "castle_ext/net/socket.hpp"
 
 #include <stdint.h>
@@ -605,7 +605,7 @@ private:
     socket_type listener_;
     slot slots_[MaxClients];
     callback_type default_callback_;
-    detail::callback_dispatcher<callback_type> dispatcher_;
+    callbacks::callback_dispatcher<callback_type> dispatcher_;
     size_type client_count_ = 0U;
     uint8_t buffer_[ReceiveBufferSize]{};
 };

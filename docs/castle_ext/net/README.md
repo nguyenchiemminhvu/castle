@@ -36,8 +36,11 @@ package "castle_ext/net" {
   [endpoint.hpp\nendpoint, address_family] as Endpoint
   package "detail" {
     [native.hpp\nBSD calls -> castle::status] as Native
-    [callback_dispatcher.hpp\nin-place invoke, deferred replace/clear] as Dispatcher
   }
+}
+
+package "castle/callbacks" {
+  [callback_dispatcher.hpp\nin-place invoke, deferred replace/clear] as Dispatcher
 }
 
 package "castle_ext/io/fd" {
@@ -425,7 +428,8 @@ App -> V : process_client(handle) / process_datagram()
 | `server.hpp` | `basic_server`, `tcp_server`, `udp_server`, `client_handle` |
 | `net.hpp` | Umbrella include |
 | `detail/native.hpp` | BSD calls as `castle::status` (internal) |
-| `detail/callback_dispatcher.hpp` | In-place callback invocation with deferred self-modification (internal) |
+
+The callback dispatcher is a core utility: see [`castle/callbacks/callback_dispatcher.hpp`](../../callbacks/callback_dispatcher.md).
 
 Samples are in `samples/castle_ext/net/`, tests in `test/castle_ext/net/`.
 

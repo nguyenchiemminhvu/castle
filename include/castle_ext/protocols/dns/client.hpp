@@ -8,6 +8,7 @@
 #ifndef CASTLE_EXT_PROTOCOLS_DNS_CLIENT_HPP
 #define CASTLE_EXT_PROTOCOLS_DNS_CLIENT_HPP
 
+#include "castle/callbacks/callback_dispatcher.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
@@ -16,7 +17,6 @@
 #include "castle/utility/move.hpp"
 #include "castle/container/string_view.hpp"
 #include "castle_ext/net/client.hpp"
-#include "castle_ext/net/detail/callback_dispatcher.hpp"
 #include "castle_ext/protocols/dns/message.hpp"
 #include "castle_ext/protocols/dns/types.hpp"
 
@@ -723,7 +723,7 @@ private:
     response_type response_{};
     castle::status last_status_ = castle::status::not_configured;
     callback_type callback_{};
-    net::detail::callback_dispatcher<callback_type> dispatcher_{};
+    callbacks::callback_dispatcher<callback_type> dispatcher_{};
 };
 
 /** @brief Default resolver over CASTLE's 512-byte UDP and 2048-byte TCP clients. */

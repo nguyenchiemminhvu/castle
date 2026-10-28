@@ -15,7 +15,7 @@
 - [`castle/utility/forward.hpp`](../../../include/castle/utility/forward.hpp)
 - [`castle/utility/move.hpp`](../../../include/castle/utility/move.hpp)
 - [`socket.hpp`](socket.md)
-- [`detail/callback_dispatcher.hpp`](detail/callback_dispatcher.md)
+- [`castle/callbacks/callback_dispatcher.hpp`](../../../callbacks/callback_dispatcher.md)
 
 ## Public API
 All names are in `castle::net`.

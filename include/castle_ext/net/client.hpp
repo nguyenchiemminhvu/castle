@@ -13,6 +13,7 @@
 #ifndef CASTLE_EXT_NET_CLIENT_HPP
 #define CASTLE_EXT_NET_CLIENT_HPP
 
+#include "castle/callbacks/callback_dispatcher.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/config.hpp"
@@ -20,7 +21,6 @@
 #include "castle/error/status.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/move.hpp"
-#include "castle_ext/net/detail/callback_dispatcher.hpp"
 #include "castle_ext/net/socket.hpp"
 
 #include <stdint.h>
@@ -280,7 +280,7 @@ public:
 private:
     socket_type socket_;
     callback_type receive_callback_;
-    detail::callback_dispatcher<callback_type> dispatcher_;
+    callbacks::callback_dispatcher<callback_type> dispatcher_;
     endpoint peer_;
     uint8_t buffer_[ReceiveBufferSize]{};
 };
