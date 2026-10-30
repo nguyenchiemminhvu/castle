@@ -8,6 +8,7 @@ A polling CoAP-over-UDP client using CASTLE's existing UDP client. It retains bo
 
 ## Dependencies
 - [Callbacks Function](../../../../include/castle/callbacks/function.hpp)
+- [Callback Dispatcher](../../../../include/castle/callbacks/callback_dispatcher.hpp)
 - [Core compiler macros](../../../../include/castle/core/compiler.hpp)
 - [Core types](../../../../include/castle/core/types.hpp)
 - [Status](../../../../include/castle/error/status.hpp)
@@ -21,7 +22,7 @@ A polling CoAP-over-UDP client using CASTLE's existing UDP client. It retains bo
 | `basic_client<...>` / `client` | Client with compile-time receive buffer, exchange, option, payload, duplicate-cache, and callback capacities. |
 | `open(family)`, `close()`, `is_open()` | Opens/closes the UDP socket and clears active exchanges. |
 | `send_request(peer, request, handle, now_ms)` | Sends a CON or NON GET/POST/PUT/DELETE request and reserves an exchange slot. |
-| `set_response_callback(callback)` | Registers `void(handle, status, message const*, endpoint const&)` callback. Nulls are used for timeouts or RST completion. |
+| `set_response_callback(callback)` | Registers `void(handle, status, message const*, endpoint const&)` callback. Nulls are used for timeouts or RST completion. Replacing or clearing it from inside the callback takes effect when the callback returns (via `callback_dispatcher`). |
 | `cancel(handle)` | Cancels one outstanding exchange/Observe registration. |
 | `process_once(now_ms, wait_ms)`, `tick(now_ms)` | Receives one datagram and/or advances timers. |
 | `set_retransmission(timeout_ms, max_retransmissions)` | Configures deterministic retransmission bounds. |
@@ -53,4 +54,4 @@ int main()
 ```
 
 ## Constraints & Notes
-The client is single-threaded and polling-based; call `process_once()` frequently with a monotonic millisecond clock. Retransmission intervals start at 2 seconds and double, with four retries by default; no random factor is injected, so this policy is deterministic rather than the RFC's randomized initial timeout. An empty ACK stops request retransmission while retaining the exchange for a separate response until the configured exchange lifetime. Observe notifications are matched by the retained token when the request includes Observe=0; full Observe registration lifecycle/serial arithmetic is not implemented. Callback storage must fit `CallbackStorageSize` and is inline.
+The client is single-threaded and polling-based; call `process_once()` frequently with a monotonic millisecond clock. A response callback may replace or clear itself; the change takes effect when it returns. Retransmission intervals start at 2 seconds and double, with four retries by default; no random factor is injected, so this policy is deterministic rather than the RFC's randomized initial timeout. An empty ACK stops request retransmission while retaining the exchange for a separate response until the configured exchange lifetime. Observe notifications are matched by the retained token when the request includes Observe=0; full Observe registration lifecycle/serial arithmetic is not implemented. Callback storage must fit `CallbackStorageSize` and is inline.

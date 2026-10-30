@@ -1111,6 +1111,55 @@ TEST(MqttClient, IncomingQosFlowsDeliverOnceAndAcknowledge)
     EXPECT_EQ(client.disconnect(reason_code::administrative_action), castle::status::ok);
 }
 
+TEST(MqttClient, MessageCallbackCanReplaceAndClearItselfDuringDelivery)
+{
+    scripted_peer peer;
+    ASSERT_TRUE(peer.open());
+    client_type client;
+    options_type options;
+    options.client_id = "callback-self-update";
+    options.protocol_version = version::v5_0;
+    options.keep_alive_seconds = 0U;
+    ASSERT_EQ(connect_to(client, peer, options, kConnackV5Ok, sizeof(kConnackV5Ok)), castle::status::ok);
+
+    size_type first_calls = 0U;
+    size_type second_calls = 0U;
+    size_type third_calls = 0U;
+    ASSERT_EQ(client.set_message_callback([&](message_view const&)
+    {
+        ++first_calls;
+        EXPECT_EQ(client.set_message_callback([&second_calls](message_view const&) { ++second_calls; }), castle::status::ok);
+    }), castle::status::ok);
+    uint32_t now = 0U;
+
+    const uint8_t qos0[] = {0x30U, 0x08U, 0x00U, 0x03U, 'a', '/', 'b', 0x00U, 'h', 'i'};
+    peer.inject(qos0, sizeof(qos0));
+    drain(client, now);
+    EXPECT_EQ(first_calls, 1U);
+    EXPECT_EQ(second_calls, 0U);
+
+    peer.inject(qos0, sizeof(qos0));
+    drain(client, now);
+    EXPECT_EQ(first_calls, 1U);
+    EXPECT_EQ(second_calls, 1U);
+
+    ASSERT_EQ(client.set_message_callback([&](message_view const&)
+    {
+        ++third_calls;
+        client.clear_message_callback();
+    }), castle::status::ok);
+    peer.inject(qos0, sizeof(qos0));
+    drain(client, now);
+    EXPECT_EQ(third_calls, 1U);
+
+    peer.inject(qos0, sizeof(qos0));
+    drain(client, now);
+    EXPECT_EQ(third_calls, 1U);
+    EXPECT_EQ(second_calls, 1U);
+    EXPECT_TRUE(client.is_open());
+    EXPECT_EQ(client.disconnect(reason_code::administrative_action), castle::status::ok);
+}
+
 TEST(MqttClient, BuffersPartialPacketsAcrossReceiveChunks)
 {
     scripted_peer peer;

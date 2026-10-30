@@ -8,6 +8,7 @@
 #ifndef CASTLE_EXT_PROTOCOLS_COAP_SERVER_HPP
 #define CASTLE_EXT_PROTOCOLS_COAP_SERVER_HPP
 
+#include "castle/callbacks/callback_dispatcher.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
@@ -159,7 +160,7 @@ public:
         }
         entry.path_length = length;
         entry.methods = methods;
-        entry.callback = CASTLE_MOVE(next);
+        dispatcher_.replace(entry.callback, CASTLE_MOVE(next));
         entry.used = true;
         return castle::status::ok;
     }
@@ -184,7 +185,7 @@ public:
             return castle::status::not_found;
         }
         resources_[slot].used = false;
-        resources_[slot].callback = nullptr;
+        dispatcher_.clear(resources_[slot].callback);
         if (resource_count_ > 0U)
         {
             --resource_count_;
@@ -738,7 +739,7 @@ private:
         }
         else
         {
-            resources_[resource_index].callback(request, response);
+            dispatcher_.invoke(resources_[resource_index].callback, request, response);
             if (response.code_value == static_cast<uint8_t>(code::empty))
             {
                 response.code_value = static_cast<uint8_t>(code::internal_server_error);
@@ -774,6 +775,7 @@ private:
 
     transport_type transport_;
     resource resources_[MaxResources]{};
+    castle::callbacks::callback_dispatcher<resource_callback> dispatcher_{};
     recent_entry recent_[MaxRecentMessages]{};
     pending_exchange pending_[MaxServerExchanges]{};
     rate_state rate_states_[MaxClients]{};

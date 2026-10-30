@@ -827,7 +827,7 @@ See [`mqtt_broker_online.cpp`](../../../../samples/castle_ext/protocols/mqtt/mqt
 
 - Neither `basic_client` nor `basic_broker` is internally synchronized; serialize **all** calls (including `poll()`) on one thread or behind your own lock.
 - Both are non-copyable; their receive trampolines capture `this`, so do not move them after construction.
-- Message callbacks run inside `poll()`; they must not call `poll()` and should return quickly. `message_view::topic` and `payload` are valid only for the duration of the callback.
+- Message callbacks run inside `poll()`; they must not call `poll()` and should return quickly. A message callback may replace or clear itself; the change takes effect when it returns (via `callback_dispatcher`). `message_view::topic` and `payload` are valid only for the duration of the callback.
 - Borrowed inputs (`connect_options::client_id`, `will.payload`, credentials) must stay valid until `connect()` returns; they are copied into the client's bounded storage.
 - The broker uses shared scratch buffers (`tx_`, `frame_`) for building packets, so it is not re-entrant.
 

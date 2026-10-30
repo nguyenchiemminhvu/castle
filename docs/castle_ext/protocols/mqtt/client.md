@@ -8,6 +8,7 @@ A polling-based MQTT client over `castle::net::tcp_client`. It builds CONNECT, P
 
 ## Dependencies
 - [`castle/callbacks/function.hpp`](../../../../include/castle/callbacks/function.hpp)
+- [`castle/callbacks/callback_dispatcher.hpp`](../../../../include/castle/callbacks/callback_dispatcher.hpp)
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp)
 - [`castle/container/string_view.hpp`](../../../../include/castle/container/string_view.hpp)
@@ -21,7 +22,7 @@ A polling-based MQTT client over `castle::net::tcp_client`. It builds CONNECT, P
 | API | Description |
 |---|---|
 | `basic_client<ReceiveBufferSize, MaxPacketSize, MaxOutstanding, MaxTopicLength, MaxPayloadSize, MaxProperties, ...>` | Configures all receive, packet, QoS, topic, payload, and property capacities at compile time. |
-| `set_message_callback(callback)` / `clear_message_callback()` | Installs or clears the synchronous message-arrived callback using inline `castle::callbacks::function` storage. |
+| `set_message_callback(callback)` / `clear_message_callback()` | Installs or clears the synchronous message-arrived callback using inline `castle::callbacks::function` storage. Replacing or clearing the callback from inside itself takes effect when it returns (via `callback_dispatcher`). |
 | `connect(endpoint, connect_options, timeout_ms)` | Opens TCP, sends CONNECT, and waits for CONNACK. The socket is numeric IPv4/IPv6; MQTT convention is port 1883. |
 | `publish(topic, payload, size, qos, retain)` | Sends PUBLISH; QoS 1/2 reserve a bounded packet-ID state entry. |
 | `subscribe(filter, qos, packet_id)` / array overload | Sends one or more Topic Filters in SUBSCRIBE. |
@@ -50,4 +51,4 @@ int main()
 ```
 
 ## Constraints & Notes
-No heap allocation, exceptions, RTTI, or virtual functions are used by the MQTT layer. Every packet, reassembly buffer, QoS table, topic, and retained payload has compile-time capacity. Client callbacks execute synchronously while `poll()` processes a network receive and must not re-enter `poll()`. Message views are valid only during the callback. `poll()` needs a monotonically increasing millisecond value from the application; no hidden clock is read. The implementation supports MQTT 3.1.0, 3.1.1, and a bounded MQTT 5.0 core (CONNECT/CONNACK, core reason/property parsing, PUBLISH acknowledgements, and DISCONNECT). MQTT 5 AUTH exchanges and the full advanced property/flow-control set are not implemented. Reconnection retains the client-side QoS table only when the broker reports Session Present; persistent broker-side pending delivery queues are not yet implemented.
+No heap allocation, exceptions, RTTI, or virtual functions are used by the MQTT layer. Every packet, reassembly buffer, QoS table, topic, and retained payload has compile-time capacity. Client callbacks execute synchronously while `poll()` processes a network receive and must not re-enter `poll()`. A message callback may replace or clear itself; the change takes effect when it returns. Message views are valid only during the callback. `poll()` needs a monotonically increasing millisecond value from the application; no hidden clock is read. The implementation supports MQTT 3.1.0, 3.1.1, and a bounded MQTT 5.0 core (CONNECT/CONNACK, core reason/property parsing, PUBLISH acknowledgements, and DISCONNECT). MQTT 5 AUTH exchanges and the full advanced property/flow-control set are not implemented. Reconnection retains the client-side QoS table only when the broker reports Session Present; persistent broker-side pending delivery queues are not yet implemented.

@@ -8,6 +8,7 @@
 #ifndef CASTLE_EXT_PROTOCOLS_COAP_CLIENT_HPP
 #define CASTLE_EXT_PROTOCOLS_COAP_CLIENT_HPP
 
+#include "castle/callbacks/callback_dispatcher.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
@@ -89,11 +90,11 @@ public:
         {
             return castle::status::invalid_callback;
         }
-        callback_ = CASTLE_MOVE(next);
+        dispatcher_.replace(callback_, CASTLE_MOVE(next));
         return castle::status::ok;
     }
 
-    void clear_response_callback() CASTLE_NOEXCEPT { callback_ = nullptr; }
+    void clear_response_callback() CASTLE_NOEXCEPT { dispatcher_.clear(callback_); }
 
     /** @brief Sets the first value returned by `allocate_message_id()` (zero is valid). */
     void set_next_message_id(uint16_t value) CASTLE_NOEXCEPT { next_message_id_ = value; }
@@ -284,7 +285,7 @@ public:
         CASTLE_CONST exchange_handle handle{index, entry.generation};
         if (callback_)
         {
-            callback_(handle, castle::status::ok, &incoming, source);
+            dispatcher_.invoke(callback_, handle, castle::status::ok, &incoming, source);
         }
         if (!keep_observe)
         {
@@ -419,7 +420,7 @@ private:
                 CASTLE_CONST exchange_handle handle{i, entry.generation};
                 if (callback_)
                 {
-                    callback_(handle, castle::status::time_out, nullptr, entry.remote);
+                    dispatcher_.invoke(callback_, handle, castle::status::time_out, nullptr, entry.remote);
                 }
                 entry.active = false;
                 entry.wire_size = 0U;
@@ -467,7 +468,7 @@ private:
         CASTLE_CONST exchange_handle handle{index, entry.generation};
         if (callback_)
         {
-            callback_(handle, result, value, peer);
+            dispatcher_.invoke(callback_, handle, result, value, peer);
         }
         entry.active = false;
         entry.wire_size = 0U;
@@ -522,6 +523,7 @@ private:
     recent_message recent_[MaxRecentMessages]{};
     size_type recent_cursor_ = 0U;
     response_callback callback_;
+    castle::callbacks::callback_dispatcher<response_callback> dispatcher_{};
     uint16_t next_message_id_ = 1U;
     uint32_t ack_timeout_ms_ = 2000U;
     uint8_t max_retransmissions_ = 4U;

@@ -8,6 +8,7 @@
 #ifndef CASTLE_EXT_PROTOCOLS_MQTT_CLIENT_HPP
 #define CASTLE_EXT_PROTOCOLS_MQTT_CLIENT_HPP
 
+#include "castle/callbacks/callback_dispatcher.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
@@ -79,12 +80,12 @@ public:
         {
             return castle::status::invalid_callback;
         }
-        message_callback_ = CASTLE_MOVE(next);
+        dispatcher_.replace(message_callback_, CASTLE_MOVE(next));
         return castle::status::ok;
     }
 
     /** @brief Clears the message-arrived callback. */
-    void clear_message_callback() CASTLE_NOEXCEPT { message_callback_ = nullptr; }
+    void clear_message_callback() CASTLE_NOEXCEPT { dispatcher_.clear(message_callback_); }
 
     /**
      * @brief Opens TCP, sends CONNECT and waits for CONNACK.
@@ -1033,7 +1034,7 @@ private:
         }
         if (message_callback_)
         {
-            message_callback_(message);
+            dispatcher_.invoke(message_callback_, message);
         }
         if (quality == qos::at_least_once)
         {
@@ -1075,7 +1076,7 @@ private:
             message.packet_identifier = identifier;
             if (message_callback_)
             {
-                message_callback_(message);
+                dispatcher_.invoke(message_callback_, message);
             }
             entry->used = false;
         }
@@ -1217,6 +1218,7 @@ private:
 
     transport_type transport_{};
     message_callback message_callback_{};
+    castle::callbacks::callback_dispatcher<message_callback> dispatcher_{};
     connect_options<MaxProperties, PropertyStringCapacity, PropertyBinaryCapacity> options_{};
     outgoing_entry outgoing_[MaxOutstanding]{};
     incoming_entry incoming_[MaxOutstanding]{};

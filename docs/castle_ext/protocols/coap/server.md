@@ -8,6 +8,7 @@ A bounded, polling CoAP-over-UDP resource server built on CASTLE's UDP server pe
 
 ## Dependencies
 - [Callbacks Function](../../../../include/castle/callbacks/function.hpp)
+- [Callback Dispatcher](../../../../include/castle/callbacks/callback_dispatcher.hpp)
 - [Core compiler macros](../../../../include/castle/core/compiler.hpp)
 - [Core types](../../../../include/castle/core/types.hpp)
 - [Status](../../../../include/castle/error/status.hpp)
@@ -20,7 +21,7 @@ A bounded, polling CoAP-over-UDP resource server built on CASTLE's UDP server pe
 |---|---|
 | `basic_server<...>` / `server` | Server with compile-time peer/resource/recent-ID/retransmit/path/buffer capacities. |
 | `open(endpoint)`, `close()`, `is_open()` | Binds/closes the UDP server socket. |
-| `register_resource(path, methods, callback)` | Registers an exact URI path and allowed method bitmask; handler receives request and mutable response. |
+| `register_resource(path, methods, callback)` | Registers an exact URI path and allowed method bitmask; handler receives request and mutable response. A handler may re-register or unregister its own path; the callable change takes effect when the handler returns (via `callback_dispatcher`). |
 | `unregister_resource(path)` | Removes a registered resource. |
 | `set_resource_max_age(path, seconds)` | Sets the default Max-Age option added to that resource's responses unless the handler supplies one. |
 | `configure_rate_limit(maximum_requests, window_ms)`, `clear_rate_limit()` | Enables/disables a per-source fixed-window limiter; rejected requests receive 5.03 with Max-Age indicating the retry delay. |
@@ -51,4 +52,4 @@ int main()
 ```
 
 ## Constraints & Notes
-Resource callbacks execute synchronously in the UDP receive callback; the server is not internally synchronized and must not recursively call `process_once()`. Peer slots are bounded by the underlying UDP server and are not aged out automatically. Duplicate detection keys on source endpoint and Message ID; cached replies occupy `MaxRecentMessages * ReceiveBufferSize` bytes. The optional limiter stores one fixed-window counter per configured client slot and is disabled by default. Resource responses carry a default Max-Age of 60 seconds (RFC default) unless the handler or resource configuration supplies another value. Separate CON response retransmission is implemented, but server-side automatic Observe subscriptions/notifications, Block-Wise assembly, Max-Age representation caching, rate limiting, and dynamic discovery are not. Unknown critical options in a CON request produce 4.02 Bad Option; malformed CON datagrams are reset where a usable Message ID is available.
+Resource callbacks execute synchronously in the UDP receive callback; the server is not internally synchronized and must not recursively call `process_once()`. A resource callback may replace or clear its own registration; the change takes effect after it returns. Peer slots are bounded by the underlying UDP server and are not aged out automatically. Duplicate detection keys on source endpoint and Message ID; cached replies occupy `MaxRecentMessages * ReceiveBufferSize` bytes. The optional limiter stores one fixed-window counter per configured client slot and is disabled by default. Resource responses carry a default Max-Age of 60 seconds (RFC default) unless the handler or resource configuration supplies another value. Separate CON response retransmission is implemented, but server-side automatic Observe subscriptions/notifications, Block-Wise assembly, Max-Age representation caching, rate limiting, and dynamic discovery are not. Unknown critical options in a CON request produce 4.02 Bad Option; malformed CON datagrams are reset where a usable Message ID is available.
