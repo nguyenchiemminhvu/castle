@@ -1,95 +1,140 @@
-// Online integration sample: start a compatible external server first, e.g.:
-//   coap-server -p 5683
-// Keep that server running until this sample exits; stop it with Ctrl-C.
-// Then run this sample. The same server can be exercised with libcoap tools:
-//   coap-client -m get coap://127.0.0.1:5683/.well-known/core
-//   coap-client -m post -e hello coap://127.0.0.1:5683/test
-//   coap-client -m put -e hello coap://127.0.0.1:5683/test
-//   coap-client -m delete coap://127.0.0.1:5683/test
-// CASTLE uses endpoint::loopback_ipv4() because this repository's endpoint class
-// does not provide the string/port aggregate constructor used by some APIs.
+// Online CoAP client sample. Start a CoAP server on 127.0.0.1:5683 first, for example:
+//   coap-server-notls -v 9 -d 10
+// Then run this sample. It sends PUT /temperature with "30.0", then GET /temperature and
+// checks that the stored value is returned.
 #include "sample_support.hpp"
 #include "castle/chrono/chrono.hpp"
 #include "castle_ext/protocols/coap/client.hpp"
 
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+namespace
+{
+using client_type = castle::protocols::coap::client;
+
+static CASTLE_CONSTEXPR castle::size_type payload_capacity = 64U;
+
+struct exchange_result
+{
+    bool completed = false;
+    bool received = false;
+    uint8_t code_value = 0U;
+    uint8_t payload[payload_capacity]{};
+    castle::size_type payload_size = 0U;
+};
+
+uint32_t elapsed_ms(castle::chrono::steady_clock::time_point start)
+{
+    return static_cast<uint32_t>(castle::chrono::duration_cast<castle::chrono::milliseconds>(
+        castle::chrono::steady_clock::now() - start).count());
+}
+
+bool send_and_wait(client_type& client, castle::net::endpoint const& peer,
+                   client_type::message_type_t const& request, exchange_result& result,
+                   castle::chrono::steady_clock::time_point start)
+{
+    result = exchange_result{};
+    client_type::exchange_handle exchange;
+    if (client.send_request(peer, request, exchange, elapsed_ms(start)) != castle::status::ok)
+    {
+        return false;
+    }
+    const castle::chrono::steady_clock::time_point deadline = castle::chrono::steady_clock::now() + castle::chrono::seconds(5);
+    while (!result.completed && castle::chrono::steady_clock::now() < deadline)
+    {
+        const castle::status status = client.process_once(elapsed_ms(start), 50);
+        if (status != castle::status::ok && status != castle::status::empty && status != castle::status::not_found)
+        {
+            return false;
+        }
+    }
+    return result.completed && result.received;
+}
+
+void print_code(const char* label, uint8_t code_value)
+{
+    printf("%s -> CoAP code %u.%02u\n", label, static_cast<unsigned>(code_value >> 5U),
+        static_cast<unsigned>(code_value & 0x1FU));
+}
+}
 
 int main()
 {
     using namespace castle::protocols::coap;
-    using client_type = basic_client<1152U, 4U, 16U, 64U, 1024U, 8U, 64U>;
+
     client_type client;
     const castle::net::endpoint peer = castle::net::endpoint::loopback_ipv4(default_port);
-    bool all_valid = true;
-    size_t responses = 0U;
-    uint16_t expected_ids[4U]{};
-    uint8_t expected_tokens[4U]{};
+    const castle::chrono::steady_clock::time_point start = castle::chrono::steady_clock::now();
+    exchange_result result;
 
     CASTLE_SAMPLE_CHECK(client.set_retransmission(500U, 2U) == castle::status::ok);
-    CASTLE_SAMPLE_CHECK(client.set_response_callback([&](client_type::exchange_handle handle, castle::status result,
+    CASTLE_SAMPLE_CHECK(client.set_response_callback([&result](client_type::exchange_handle, castle::status status,
         client_type::message_type_t const* response, castle::net::endpoint const& source) {
-        if (result != castle::status::ok || response == nullptr || handle.index >= 4U)
-        { all_valid = false; return; }
-        if (response->token_length != 1U || response->token[0U] != expected_tokens[handle.index]) { all_valid = false; }
-        if (!is_response_code(response->code_value) || source.port() != default_port) { all_valid = false; }
-        if (response->type == message_type::acknowledgement && response->message_id != expected_ids[handle.index])
-        { all_valid = false; }
-        if (handle.index == 0U)
+        result.completed = true;
+        if (status != castle::status::ok || response == nullptr || source.port() != default_port)
         {
-            const auto* content_format = response->find_option(static_cast<uint16_t>(option_number::content_format));
-            uint32_t parsed_format = 0U;
-            if (response->code_value != static_cast<uint8_t>(code::content) || content_format == nullptr ||
-                decode_uint_option(content_format->value, content_format->length, parsed_format) != castle::status::ok)
-            { all_valid = false; }
+            return;
         }
-        for (castle::size_type i = 0U; i < response->option_count; ++i)
+        result.received = true;
+        result.code_value = response->code_value;
+        result.payload_size = response->payload_size < payload_capacity ? response->payload_size : payload_capacity;
+        for (castle::size_type i = 0U; i < result.payload_size; ++i)
         {
-            if (response->options[i].number == static_cast<uint16_t>(option_number::content_format))
-            {
-                uint32_t format = 0U;
-                if (decode_uint_option(response->options[i].value, response->options[i].length, format) != castle::status::ok)
-                { all_valid = false; }
-            }
+            result.payload[i] = response->payload[i];
         }
-        ++responses;
     }) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(client.open(peer.family()) == castle::status::ok);
 
-    const uint8_t methods[4U] = {
-        static_cast<uint8_t>(code::get), static_cast<uint8_t>(code::post),
-        static_cast<uint8_t>(code::put), static_cast<uint8_t>(code::delete_)
-    };
-    for (castle::size_type i = 0U; i < 4U; ++i)
+    const uint8_t token[1U] = {0x31U};
+    const char value[] = "30.0";
+    client_type::message_type_t put;
+    put.type = message_type::confirmable;
+    put.code_value = static_cast<uint8_t>(code::put);
+    put.message_id = 0x7101U;
+    CASTLE_SAMPLE_CHECK(put.set_token(token, sizeof(token)) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(append_uri_path(put, "temperature") == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(put.append_uint_option(static_cast<uint16_t>(option_number::content_format), 0U) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(put.set_payload(reinterpret_cast<uint8_t const*>(value), sizeof(value) - 1U) == castle::status::ok);
+
+    if (!send_and_wait(client, peer, put, result, start))
     {
-        client_type::message_type_t request;
-        request.type = (i == 0U || i == 1U) ? message_type::confirmable : message_type::non_confirmable;
-        request.code_value = methods[i];
-        request.message_id = static_cast<uint16_t>(0x5100U + i);
-        expected_ids[i] = request.message_id;
-        expected_tokens[i] = static_cast<uint8_t>(0xA0U + i);
-        (void)request.set_token(&expected_tokens[i], 1U);
-        (void)append_uri_path(request, ".well-known/core");
-        if (i == 1U || i == 2U)
-        {
-            const char body[] = "castle online probe";
-            (void)request.set_payload(reinterpret_cast<uint8_t const*>(body), sizeof(body) - 1U);
-            (void)request.append_uint_option(static_cast<uint16_t>(option_number::content_format), 0U);
-        }
-        client_type::exchange_handle exchange;
-        CASTLE_SAMPLE_CHECK(client.send_request(peer, request, exchange, 0U) == castle::status::ok);
-        CASTLE_SAMPLE_CHECK(exchange.index == i);
+        fprintf(stderr, "No response to PUT /temperature from 127.0.0.1:%u. Start the CoAP server first.\n",
+            static_cast<unsigned>(default_port));
+        (void)client.close();
+        return 1;
+    }
+    print_code("PUT /temperature \"30.0\"", result.code_value);
+    const bool put_ok = result.code_value == static_cast<uint8_t>(code::created) ||
+                        result.code_value == static_cast<uint8_t>(code::changed);
+
+    const uint8_t get_token[1U] = {0x32U};
+    client_type::message_type_t get;
+    get.type = message_type::confirmable;
+    get.code_value = static_cast<uint8_t>(code::get);
+    get.message_id = 0x7102U;
+    CASTLE_SAMPLE_CHECK(get.set_token(get_token, sizeof(get_token)) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(append_uri_path(get, "temperature") == castle::status::ok);
+
+    if (!send_and_wait(client, peer, get, result, start))
+    {
+        fprintf(stderr, "No response to GET /temperature from 127.0.0.1:%u.\n", static_cast<unsigned>(default_port));
+        (void)client.close();
+        return 1;
+    }
+    print_code("GET /temperature", result.code_value);
+    const bool get_ok = result.code_value == static_cast<uint8_t>(code::content) &&
+                        result.payload_size == sizeof(value) - 1U &&
+                        memcmp(result.payload, value, sizeof(value) - 1U) == 0;
+    if (get_ok)
+    {
+        printf("GET /temperature payload: %.*s\n", static_cast<int>(result.payload_size),
+            reinterpret_cast<const char*>(result.payload));
     }
 
-    const castle::chrono::steady_clock::time_point client_start = castle::chrono::steady_clock::now();
-    const castle::chrono::steady_clock::time_point deadline = client_start + castle::chrono::seconds(8);
-    while (responses < 4U && castle::chrono::steady_clock::now() < deadline)
-    {
-        const uint32_t now_ms = static_cast<uint32_t>(castle::chrono::duration_cast<castle::chrono::milliseconds>(
-            castle::chrono::steady_clock::now() - client_start).count());
-        const castle::status result = client.process_once(now_ms, 50);
-        if (result != castle::status::ok && result != castle::status::empty && result != castle::status::not_found)
-        { all_valid = false; break; }
-    }
     (void)client.close();
-    return all_valid && responses == 4U ? 0 : 2;
+    const bool all_ok = put_ok && get_ok;
+    printf("%s\n", all_ok ? "Online CoAP client sample succeeded." : "Online CoAP client sample failed.");
+    return all_ok ? 0 : 1;
 }
