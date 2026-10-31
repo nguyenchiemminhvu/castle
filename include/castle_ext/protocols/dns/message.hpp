@@ -12,6 +12,7 @@
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
 #include "castle/container/string_view.hpp"
+#include "castle/utility/bytes.hpp"
 #include "castle_ext/protocols/dns/types.hpp"
 
 #include <stdint.h>
@@ -59,8 +60,7 @@ public:
             return castle::status::invalid_argument;
         }
 
-        output[0U] = static_cast<uint8_t>(id >> 8U);
-        output[1U] = static_cast<uint8_t>(id & 0xFFU);
+        write_be16(output, id);
         output[2U] = 0x01U; // RD=1, QR=0, opcode=0
         output[3U] = 0x00U;
         output[4U] = 0x00U;
@@ -145,8 +145,8 @@ public:
             output[at++] = 0U;
         }
 
-        write_u16(output + at, static_cast<uint16_t>(type)); at += 2U;
-        write_u16(output + at, static_cast<uint16_t>(record_class::internet)); at += 2U;
+        write_be16(output + at, static_cast<uint16_t>(type)); at += 2U;
+        write_be16(output + at, static_cast<uint16_t>(record_class::internet)); at += 2U;
         written = at;
         return castle::status::ok;
     }
@@ -154,7 +154,7 @@ public:
     /** @brief Checks the DNS TC bit without requiring a complete DNS response. */
     static bool is_truncated_packet(CASTLE_CONST uint8_t* data, size_type size) CASTLE_NOEXCEPT
     {
-        return data != nullptr && size >= 4U && (read_u16(data + 2U) & 0x0200U) != 0U;
+        return data != nullptr && size >= 4U && (read_be16(data + 2U) & 0x0200U) != 0U;
     }
 
     /**
@@ -176,13 +176,13 @@ public:
         {
             return castle::status::invalid_argument;
         }
-        output.transaction_id = read_u16(data);
+        output.transaction_id = read_be16(data);
         if (output.transaction_id != expected_id)
         {
             return castle::status::invalid_argument;
         }
 
-        output.flags = read_u16(data + 2U);
+        output.flags = read_be16(data + 2U);
         if ((output.flags & 0x8000U) == 0U || (output.flags & 0x7800U) != 0U ||
             (output.flags & 0x0070U) != 0U)
         {
@@ -194,10 +194,10 @@ public:
         output.recursion_available = (output.flags & 0x0080U) != 0U;
         output.rcode = static_cast<response_code>(output.flags & 0x000FU);
 
-        output.question_count = read_u16(data + 4U);
-        output.answer_count = read_u16(data + 6U);
-        output.authority_count = read_u16(data + 8U);
-        output.additional_count = read_u16(data + 10U);
+        output.question_count = read_be16(data + 4U);
+        output.answer_count = read_be16(data + 6U);
+        output.authority_count = read_be16(data + 8U);
+        output.additional_count = read_be16(data + 10U);
         if (output.question_count != 1U)
         {
             return castle::status::invalid_argument;
@@ -216,8 +216,8 @@ public:
         {
             return castle::status::invalid_argument;
         }
-        uint16_t question_type_value = read_u16(data + at); at += 2U;
-        uint16_t question_class_value = read_u16(data + at); at += 2U;
+        uint16_t question_type_value = read_be16(data + at); at += 2U;
+        uint16_t question_class_value = read_be16(data + at); at += 2U;
         output.question_type = static_cast<record_type>(question_type_value);
         output.question_class = static_cast<record_class>(question_class_value);
 
@@ -247,10 +247,10 @@ public:
             {
                 return castle::status::invalid_argument;
             }
-            uint16_t type_value = read_u16(data + at); at += 2U;
-            uint16_t class_value = read_u16(data + at); at += 2U;
-            uint32_t ttl = read_u32(data + at); at += 4U;
-            uint16_t rdlength = read_u16(data + at); at += 2U;
+            uint16_t type_value = read_be16(data + at); at += 2U;
+            uint16_t class_value = read_be16(data + at); at += 2U;
+            uint32_t ttl = read_be32(data + at); at += 4U;
+            uint16_t rdlength = read_be16(data + at); at += 2U;
             if (at > size || static_cast<size_type>(rdlength) > size - at) // LCOV_EXCL_BR_LINE
             {
                 return castle::status::invalid_argument;
@@ -311,7 +311,7 @@ public:
                 {
                     return castle::status::invalid_argument;
                 }
-                record.preference = read_u16(data + rdata);
+                record.preference = read_be16(data + rdata);
                 result = decode_name(data, size, rdata + 2U, record.target,
                                      sizeof(record.target), consumed);
                 if (!castle::succeeded(result) || consumed + 2U != rdlength)
@@ -467,25 +467,6 @@ private:
         }
         destination[i] = '\0';
         return true;
-    }
-
-    static uint16_t read_u16(CASTLE_CONST uint8_t* data) CASTLE_NOEXCEPT
-    {
-        return static_cast<uint16_t>((static_cast<uint16_t>(data[0U]) << 8U) | data[1U]);
-    }
-
-    static uint32_t read_u32(CASTLE_CONST uint8_t* data) CASTLE_NOEXCEPT
-    {
-        return (static_cast<uint32_t>(data[0U]) << 24U) |
-               (static_cast<uint32_t>(data[1U]) << 16U) |
-               (static_cast<uint32_t>(data[2U]) << 8U) |
-               static_cast<uint32_t>(data[3U]);
-    }
-
-    static void write_u16(uint8_t* data, uint16_t value) CASTLE_NOEXCEPT
-    {
-        data[0U] = static_cast<uint8_t>(value >> 8U);
-        data[1U] = static_cast<uint8_t>(value & 0xFFU);
     }
 };
 

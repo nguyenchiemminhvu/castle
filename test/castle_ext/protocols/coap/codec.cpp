@@ -18,7 +18,7 @@ TEST(CoapCodec, RoundTripsHeaderTokenOptionsAndPayload)
     uint8_t wire[128U]{}; castle::size_type used = 0U;
     ASSERT_EQ(encode_message(request, wire, sizeof(wire), used), castle::status::ok);
     EXPECT_EQ((wire[0U] >> 6U) & 3U, 1U);
-    EXPECT_EQ(read_u16(wire + 2U), 0xBEEFU);
+    EXPECT_EQ(castle::read_be16(wire + 2U), 0xBEEFU);
     message<8U, 32U, 64U> decoded;
     ASSERT_EQ(decode_message(wire, used, decoded), castle::status::ok);
     EXPECT_EQ(decoded.type, message_type::confirmable);

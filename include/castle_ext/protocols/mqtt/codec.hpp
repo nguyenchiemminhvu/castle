@@ -12,6 +12,7 @@
 #include "castle/core/types.hpp"
 #include "castle/container/string_view.hpp"
 #include "castle/error/status.hpp"
+#include "castle/utility/bytes.hpp"
 #include "castle_ext/protocols/mqtt/types.hpp"
 
 #include <stdint.h>
@@ -35,37 +36,6 @@ struct packet_view
     size_type packet_size = 0U;
     uint8_t CASTLE_CONST* body = nullptr;
 };
-
-/** @brief Writes an unsigned 16-bit integer in network byte order. */
-CASTLE_INLINE void write_u16(uint8_t* output, uint16_t value) CASTLE_NOEXCEPT
-{
-    output[0U] = static_cast<uint8_t>(value >> 8U);
-    output[1U] = static_cast<uint8_t>(value);
-}
-
-/** @brief Reads an unsigned 16-bit integer in network byte order. */
-CASTLE_INLINE uint16_t read_u16(uint8_t CASTLE_CONST* input) CASTLE_NOEXCEPT
-{
-    return static_cast<uint16_t>((static_cast<uint16_t>(input[0U]) << 8U) | input[1U]);
-}
-
-/** @brief Writes an unsigned 32-bit integer in network byte order. */
-CASTLE_INLINE void write_u32(uint8_t* output, uint32_t value) CASTLE_NOEXCEPT
-{
-    output[0U] = static_cast<uint8_t>(value >> 24U);
-    output[1U] = static_cast<uint8_t>(value >> 16U);
-    output[2U] = static_cast<uint8_t>(value >> 8U);
-    output[3U] = static_cast<uint8_t>(value);
-}
-
-/** @brief Reads an unsigned 32-bit integer in network byte order. */
-CASTLE_INLINE uint32_t read_u32(uint8_t CASTLE_CONST* input) CASTLE_NOEXCEPT
-{
-    return (static_cast<uint32_t>(input[0U]) << 24U) |
-           (static_cast<uint32_t>(input[1U]) << 16U) |
-           (static_cast<uint32_t>(input[2U]) << 8U) |
-           static_cast<uint32_t>(input[3U]);
-}
 
 /**
  * @brief Encodes MQTT Remaining Length into its one-to-four-byte base-128 form.
@@ -238,7 +208,7 @@ public:
         {
             return result_ = castle::status::full;
         }
-        write_u16(output_ + size_, value); size_ += 2U; return result_;
+        write_be16(output_ + size_, value); size_ += 2U; return result_;
     }
     castle::status put_u32(uint32_t value) CASTLE_NOEXCEPT
     {
@@ -246,7 +216,7 @@ public:
         {
             return result_ = castle::status::full;
         }
-        write_u32(output_ + size_, value); size_ += 4U; return result_;
+        write_be32(output_ + size_, value); size_ += 4U; return result_;
     }
     castle::status put_bytes(uint8_t CASTLE_CONST* bytes, size_type count) CASTLE_NOEXCEPT
     {
@@ -329,7 +299,7 @@ public:
         {
             return result_ = castle::status::invalid_argument;
         }
-        value = read_u16(input_ + position_); position_ += 2U; return result_;
+        value = read_be16(input_ + position_); position_ += 2U; return result_;
     }
     castle::status get_u32(uint32_t& value) CASTLE_NOEXCEPT
     {
@@ -337,7 +307,7 @@ public:
         {
             return result_ = castle::status::invalid_argument;
         }
-        value = read_u32(input_ + position_); position_ += 4U; return result_;
+        value = read_be32(input_ + position_); position_ += 4U; return result_;
     }
     castle::status get_utf8(char* output, size_type capacity, size_type& length) CASTLE_NOEXCEPT
     {

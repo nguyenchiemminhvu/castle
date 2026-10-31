@@ -13,6 +13,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
+#include "castle/utility/bytes.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/move.hpp"
 #include "castle_ext/net/client.hpp"
@@ -228,7 +229,7 @@ public:
         {
             if (received >= 4U && ((buffer[0U] >> 4U) & 0x03U) == static_cast<uint8_t>(message_type::confirmable))
             {
-                (void)send_reset(source, read_u16(buffer + 2U));
+                (void)send_reset(source, read_be16(buffer + 2U));
             }
             return result;
         }

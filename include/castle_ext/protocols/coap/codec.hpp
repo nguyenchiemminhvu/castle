@@ -11,6 +11,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
+#include "castle/utility/bytes.hpp"
 #include "castle_ext/protocols/coap/types.hpp"
 
 #include <stdint.h>
@@ -32,17 +33,6 @@ enum class decode_error : uint8_t
     unknown_critical_option,
     capacity_exceeded
 };
-
-CASTLE_INLINE uint16_t read_u16(uint8_t CASTLE_CONST* p) CASTLE_NOEXCEPT
-{
-    return static_cast<uint16_t>((static_cast<uint16_t>(p[0U]) << 8U) | p[1U]);
-}
-
-CASTLE_INLINE void write_u16(uint8_t* p, uint16_t value) CASTLE_NOEXCEPT
-{
-    p[0U] = static_cast<uint8_t>(value >> 8U);
-    p[1U] = static_cast<uint8_t>(value);
-}
 
 namespace detail
 {
@@ -75,7 +65,7 @@ CASTLE_INLINE castle::status write_extended(uint8_t* output, size_type capacity,
             return castle::status::full;
         }
         CASTLE_CONST uint16_t extended = static_cast<uint16_t>(value - 269U);
-        write_u16(output + used, extended);
+        write_be16(output + used, extended);
         used += 2U;
         return castle::status::ok;
     }
@@ -105,7 +95,7 @@ CASTLE_INLINE castle::status decode_nibble(uint8_t nibble, uint8_t CASTLE_CONST*
         {
             return castle::status::invalid_argument;
         }
-        value = 269U + read_u16(input + used);
+        value = 269U + read_be16(input + used);
         used += 2U;
         return castle::status::ok;
     }
@@ -172,7 +162,7 @@ castle::status encode_message(Message CASTLE_CONST& input, uint8_t* output, size
     output[written++] = static_cast<uint8_t>((protocol_version << 6U) |
         (static_cast<uint8_t>(input.type) << 4U) | static_cast<uint8_t>(input.token_length));
     output[written++] = input.code_value;
-    write_u16(output + written, input.message_id);
+    write_be16(output + written, input.message_id);
     written += 2U;
     for (size_type i = 0U; i < input.token_length; ++i)
     {
@@ -276,7 +266,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
     output.version = version;
     output.type = static_cast<message_type>((first >> 4U) & 0x03U);
     output.code_value = input[1U];
-    output.message_id = read_u16(input + 2U);
+    output.message_id = read_be16(input + 2U);
     output.token_length = token_length;
     for (size_type i = 0U; i < token_length; ++i)
     {

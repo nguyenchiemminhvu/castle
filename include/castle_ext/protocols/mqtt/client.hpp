@@ -14,6 +14,7 @@
 #include "castle/core/types.hpp"
 #include "castle/container/string_view.hpp"
 #include "castle/error/status.hpp"
+#include "castle/utility/bytes.hpp"
 #include "castle_ext/net/client.hpp"
 #include "castle_ext/protocols/mqtt/codec.hpp"
 #include "castle_ext/protocols/mqtt/topic.hpp"
@@ -793,7 +794,7 @@ private:
             if (entry.state == outgoing_state::await_pubcomp)
             {
                 uint8_t body[2U]{};
-                write_u16(body, entry.identifier);
+                write_be16(body, entry.identifier);
                 if (options_.protocol_version == version::v5_0)
                 {
                     uint8_t extended[3U] = {body[0U], body[1U], 0U};

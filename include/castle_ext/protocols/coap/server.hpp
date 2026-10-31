@@ -13,6 +13,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
+#include "castle/utility/bytes.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/move.hpp"
 #include "castle_ext/net/server.hpp"
@@ -664,7 +665,7 @@ private:
             {
                 message_type_t reset;
                 reset.type = message_type::reset;
-                reset.message_id = read_u16(bytes + 2U);
+                reset.message_id = read_be16(bytes + 2U);
                 (void)send_to(source, reset, nullptr, 0U);
             }
             return;

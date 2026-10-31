@@ -11,13 +11,13 @@ Provides checked MQTT fixed-header handling, canonical Remaining Length encoding
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp)
 - [`castle/container/string_view.hpp`](../../../../include/castle/container/string_view.hpp)
 - [`castle/error/status.hpp`](../../../../include/castle/error/status.hpp)
+- [`castle/utility/bytes.hpp`](../../../../include/castle/utility/bytes.hpp) (network-byte-order integer load/store)
 - [`castle_ext/protocols/mqtt/types.hpp`](types.md)
 
 ## Public API
 | Symbol | Description |
 |---|---|
 | `packet_view` | View of a complete packet in an input TCP stream. |
-| `write_u16`, `read_u16`, `write_u32`, `read_u32` | Network-byte-order integer helpers. |
 | `encode_remaining_length(value, out, written)` | Encodes MQTT Remaining Length in its minimal one-to-four-byte representation. |
 | `decode_remaining_length(input, size, value, consumed)` | Decodes Remaining Length; returns `empty` for incomplete input and rejects malformed/noncanonical encodings. |
 | `valid_fixed_header(type, flags)` | Checks packet-type-specific fixed flags, including PUBLISH QoS and DUP restrictions. |

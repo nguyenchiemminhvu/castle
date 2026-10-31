@@ -10,6 +10,7 @@ Encodes and decodes complete CoAP datagrams using the RFC 7252 four-byte base he
 - [Core compiler macros](../../../../include/castle/core/compiler.hpp)
 - [Core types](../../../../include/castle/core/types.hpp)
 - [Status](../../../../include/castle/error/status.hpp)
+- [Byte helpers](../../../../include/castle/utility/bytes.hpp) (network-byte-order integer load/store)
 - [CoAP Types](types.md)
 
 ## Public API
@@ -19,7 +20,6 @@ Encodes and decodes complete CoAP datagrams using the RFC 7252 four-byte base he
 | `encode_message(message, output, capacity, written)` | Encodes a complete message; returns `full` when the output buffer is too small. |
 | `decode_message(input, size, message, decode_error*)` | Parses one datagram; skips unknown elective options and reports unknown critical options. |
 | `decode_uint_option(value, length, output)` | Decodes an unsigned integer option (zero to four bytes). |
-| `read_u16`, `write_u16` | Network-byte-order 16-bit helpers. |
 | `valid_option_length`, `is_repeatable_option` | Basic RFC option length and repetition checks for implemented options. |
 | `decode_error` | Distinguishes malformed headers/options, unsupported version, unknown critical option, and capacity exhaustion. |
 
