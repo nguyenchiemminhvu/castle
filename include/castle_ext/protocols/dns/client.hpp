@@ -8,6 +8,10 @@
 #ifndef CASTLE_EXT_PROTOCOLS_DNS_CLIENT_HPP
 #define CASTLE_EXT_PROTOCOLS_DNS_CLIENT_HPP
 
+#include "castle/core/config.hpp"
+
+#if CASTLE_USING_BSD_SOCKET_BASED_DNS_PROTOCOL
+
 #include "castle/callbacks/callback_dispatcher.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
@@ -732,5 +736,7 @@ using client = basic_client<>;
 } // namespace dns
 } // namespace protocols
 } // namespace castle
+
+#endif // CASTLE_USING_BSD_SOCKET_BASED_DNS_PROTOCOL
 
 #endif // CASTLE_EXT_PROTOCOLS_DNS_CLIENT_HPP

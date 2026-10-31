@@ -8,6 +8,10 @@
 #ifndef CASTLE_EXT_PROTOCOLS_MQTT_BROKER_HPP
 #define CASTLE_EXT_PROTOCOLS_MQTT_BROKER_HPP
 
+#include "castle/core/config.hpp"
+
+#if CASTLE_USING_BSD_SOCKET_BASED_MQTT_PROTOCOL
+
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/container/string_view.hpp"
@@ -1262,5 +1266,7 @@ using broker = basic_broker<>;
 } // namespace mqtt
 } // namespace protocols
 } // namespace castle
+
+#endif // CASTLE_USING_BSD_SOCKET_BASED_MQTT_PROTOCOL
 
 #endif // CASTLE_EXT_PROTOCOLS_MQTT_BROKER_HPP

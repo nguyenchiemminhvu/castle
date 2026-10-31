@@ -18,6 +18,7 @@ This header exposes Castle's compile-time view of the language level, target end
 | `CASTLE_ENDIAN_LITTLE`, `CASTLE_ENDIAN_BIG`, `CASTLE_ENDIAN_NATIVE`, `CASTLE_IS_LITTLE_ENDIAN`, `CASTLE_IS_BIG_ENDIAN`, `CASTLE_HAS_CONSTEXPR_ENDIANNESS` | Encode Castle's native-endianness detection and compile-time flags. |
 | `CASTLE_PLATFORM_16BIT`, `CASTLE_PLATFORM_32BIT`, `CASTLE_PLATFORM_64BIT` | Report the pointer-width class of the active target. |
 | `CASTLE_USING_STD_NEW`, `CASTLE_USING_STD_INITIALIZER_LIST`, `CASTLE_USING_PTHREAD` | Indicate whether optional platform facilities appear to be available. |
+| `CASTLE_USING_BSD_SOCKET_BASED_HTTP_PROTOCOL`, `CASTLE_USING_BSD_SOCKET_BASED_DNS_PROTOCOL`, `CASTLE_USING_BSD_SOCKET_BASED_MQTT_PROTOCOL`, `CASTLE_USING_BSD_SOCKET_BASED_COAP_PROTOCOL` | Enable (`1`) or disable (`0`) the BSD-socket based client and server code of the HTTP, DNS, MQTT and CoAP protocols. Defaults to `1` when POSIX sockets are available. Predefine them to override. |
 | `castle::endian` | Enum describing little-endian, big-endian, and native byte order. |
 | `castle::native_endian`, `castle::is_little_endian`, `castle::is_big_endian` | `constexpr` mirrors of the detected endianness. |
 | `castle::platform_16bit`, `castle::platform_32bit`, `castle::platform_64bit` | `constexpr` platform-width flags. |

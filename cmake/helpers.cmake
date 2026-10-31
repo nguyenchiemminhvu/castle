@@ -43,6 +43,58 @@ function(castle_disable_features target feature)
 endfunction()
 
 
+set(CASTLE_BSD_SOCKET_PROTOCOLS http dns mqtt coap)
+
+# Defines CASTLE_USING_BSD_SOCKET_BASED_<PROTOCOL>_PROTOCOL on the target as 1 or 0
+# according to the matching CASTLE_USING_BSD_SOCKET_BASED_<PROTOCOL>_PROTOCOL option.
+function(castle_add_bsd_socket_protocol_definitions target)
+    foreach(protocol IN LISTS CASTLE_BSD_SOCKET_PROTOCOLS)
+        string(TOUPPER "${protocol}" upper)
+
+        if(CASTLE_USING_BSD_SOCKET_BASED_${upper}_PROTOCOL)
+            set(value 1)
+        else()
+            set(value 0)
+        endif()
+
+        target_compile_definitions(
+            ${target}
+            PRIVATE
+                CASTLE_USING_BSD_SOCKET_BASED_${upper}_PROTOCOL=${value}
+        )
+    endforeach()
+endfunction()
+
+
+# Removes sources that include the socket-based headers of a disabled protocol.
+function(castle_exclude_bsd_socket_sources sources_var)
+    set(sources ${${sources_var}})
+
+    foreach(protocol IN LISTS CASTLE_BSD_SOCKET_PROTOCOLS)
+        string(TOUPPER "${protocol}" upper)
+
+        if(CASTLE_USING_BSD_SOCKET_BASED_${upper}_PROTOCOL)
+            continue()
+        endif()
+
+        set(kept_sources)
+        foreach(source IN LISTS sources)
+            file(
+                STRINGS "${source}" socket_includes
+                REGEX "#include \"castle_ext/protocols/${protocol}/(client|server|broker|${protocol})\\.hpp\""
+            )
+            if(NOT socket_includes)
+                list(APPEND kept_sources "${source}")
+            endif()
+        endforeach()
+
+        set(sources ${kept_sources})
+    endforeach()
+
+    set(${sources_var} ${sources} PARENT_SCOPE)
+endfunction()
+
+
 function(castle_add_gtest target)
     cmake_parse_arguments(
         CASTLE

@@ -45,13 +45,6 @@ enum class shutdown_mode : uint8_t
     both = 2U
 };
 
-/** @brief True when the BSD socket API is enabled for this target. */
-#if CASTLE_USING_LINUX_BSD_SOCKET || CASTLE_USING_ZEPHYR_BSD_SOCKET
-static CASTLE_INLINE CASTLE_CONSTEXPR bool sockets_available = true;
-#else
-static CASTLE_INLINE CASTLE_CONSTEXPR bool sockets_available = false;
-#endif
-
 /**
  * @brief Owning BSD socket whose TCP/UDP protocol is fixed at compile time.
  * @tparam Protocol `socket_protocol::tcp` for a stream socket or `socket_protocol::udp`

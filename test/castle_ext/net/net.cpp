@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "castle/core/config.hpp"
 #include "castle/core/traits.hpp"
 #include "castle_ext/net/net.hpp"
 
@@ -30,7 +31,7 @@ TEST(NetUmbrella, ExposesAllNetworkingPublicTypes)
     EXPECT_FALSE(udp_app.is_open());
     EXPECT_FALSE(tcp_service.is_open());
     EXPECT_FALSE(udp_service.is_open());
-    EXPECT_EQ(sockets_available, (CASTLE_USING_POSIX_APIS != 0));
+    EXPECT_EQ(castle::sockets_available, (CASTLE_USING_POSIX_APIS != 0));
 }
 
 } // namespace

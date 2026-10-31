@@ -42,6 +42,8 @@ file(GLOB_RECURSE CASTLE_TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*/*.cpp"
 )
 
+castle_exclude_bsd_socket_sources(CASTLE_TEST_SOURCES)
+
 
 # ---------------------------------------------------------------------------
 # Zephyr CAN backend: compile its test against the host-side fake SDK
@@ -80,6 +82,8 @@ target_compile_options(
         -fno-rtti
         -DCASTLE_USING_PTHREAD=0
 )
+
+castle_add_bsd_socket_protocol_definitions(castle_tests)
 
 if(CASTLE_ENABLE_COVERAGE)
     target_compile_options(

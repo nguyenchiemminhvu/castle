@@ -19,7 +19,7 @@ int main()
     const endpoint endpoint_v6 = endpoint::loopback_ipv6(8080U);
     CASTLE_SAMPLE_CHECK(endpoint_v4.family() == address_family::ipv4);
     CASTLE_SAMPLE_CHECK(endpoint_v6.family() == address_family::ipv6);
-    CASTLE_SAMPLE_CHECK(castle::net::sockets_available == (CASTLE_USING_POSIX_APIS != 0));
+    CASTLE_SAMPLE_CHECK(castle::sockets_available == (CASTLE_USING_POSIX_APIS != 0));
 
     tcp_client<> tcp;
     udp_client<> udp;

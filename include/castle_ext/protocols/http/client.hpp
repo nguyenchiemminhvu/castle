@@ -31,6 +31,10 @@
 #ifndef CASTLE_EXT_PROTOCOLS_HTTP_CLIENT_HPP
 #define CASTLE_EXT_PROTOCOLS_HTTP_CLIENT_HPP
 
+#include "castle/core/config.hpp"
+
+#if CASTLE_USING_BSD_SOCKET_BASED_HTTP_PROTOCOL
+
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
@@ -721,5 +725,7 @@ using basic_http_client = typename protocol_policy_traits<Policy>::template clie
 } // namespace http
 } // namespace protocols
 } // namespace castle
+
+#endif // CASTLE_USING_BSD_SOCKET_BASED_HTTP_PROTOCOL
 
 #endif // CASTLE_EXT_PROTOCOLS_HTTP_CLIENT_HPP

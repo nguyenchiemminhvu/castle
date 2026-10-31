@@ -53,6 +53,30 @@ option(
     OFF
 )
 
+option(
+    CASTLE_USING_BSD_SOCKET_BASED_HTTP_PROTOCOL
+    "Build the BSD-socket based HTTP client code"
+    ON
+)
+
+option(
+    CASTLE_USING_BSD_SOCKET_BASED_DNS_PROTOCOL
+    "Build the BSD-socket based DNS client code"
+    ON
+)
+
+option(
+    CASTLE_USING_BSD_SOCKET_BASED_MQTT_PROTOCOL
+    "Build the BSD-socket based MQTT client and broker code"
+    ON
+)
+
+option(
+    CASTLE_USING_BSD_SOCKET_BASED_COAP_PROTOCOL
+    "Build the BSD-socket based CoAP client and server code"
+    ON
+)
+
 
 # ---------------------------------------------------------------------------
 # Samples
