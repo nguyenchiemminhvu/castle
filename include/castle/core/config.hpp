@@ -221,7 +221,7 @@
     #define CASTLE_USING_IO_CAN_VIA_ZEPHYR 0
 #endif
 
-#if CASTLE_USING_POSIX_APIS && defined(__linux__)
+#if CASTLE_USING_POSIX_APIS
     #if !defined(CASTLE_USING_LINUX_BSD_SOCKET)
         #if defined(__has_include)
             #if __has_include(<sys/socket.h>)
@@ -235,22 +235,8 @@
     #endif
 #endif
 
-#if CASTLE_USING_POSIX_APIS && defined(__ZEPHYR__)
-    #if !defined(CASTLE_USING_ZEPHYR_BSD_SOCKET)
-        #if defined(__has_include)
-            #if __has_include(<zephyr/net/socket.h>)
-                #define CASTLE_USING_ZEPHYR_BSD_SOCKET 1
-            #else
-                #define CASTLE_USING_ZEPHYR_BSD_SOCKET 0
-            #endif
-        #else
-            #define CASTLE_USING_ZEPHYR_BSD_SOCKET 0
-        #endif
-    #endif
-#endif
-
 #if !defined(CASTLE_USING_BSD_SOCKET_BASED_HTTP_PROTOCOL)
-    #if CASTLE_USING_POSIX_APIS && (CASTLE_USING_LINUX_BSD_SOCKET || CASTLE_USING_ZEPHYR_BSD_SOCKET)
+    #if CASTLE_USING_POSIX_APIS && CASTLE_USING_LINUX_BSD_SOCKET
         #define CASTLE_USING_BSD_SOCKET_BASED_HTTP_PROTOCOL 1
     #else
         #define CASTLE_USING_BSD_SOCKET_BASED_HTTP_PROTOCOL 0
@@ -258,7 +244,7 @@
 #endif
 
 #if !defined(CASTLE_USING_BSD_SOCKET_BASED_DNS_PROTOCOL)
-    #if CASTLE_USING_POSIX_APIS && (CASTLE_USING_LINUX_BSD_SOCKET || CASTLE_USING_ZEPHYR_BSD_SOCKET)
+    #if CASTLE_USING_POSIX_APIS && CASTLE_USING_LINUX_BSD_SOCKET
         #define CASTLE_USING_BSD_SOCKET_BASED_DNS_PROTOCOL 1
     #else
         #define CASTLE_USING_BSD_SOCKET_BASED_DNS_PROTOCOL 0
@@ -266,7 +252,7 @@
 #endif
 
 #if !defined(CASTLE_USING_BSD_SOCKET_BASED_MQTT_PROTOCOL)
-    #if CASTLE_USING_POSIX_APIS && (CASTLE_USING_LINUX_BSD_SOCKET || CASTLE_USING_ZEPHYR_BSD_SOCKET)
+    #if CASTLE_USING_POSIX_APIS && CASTLE_USING_LINUX_BSD_SOCKET
         #define CASTLE_USING_BSD_SOCKET_BASED_MQTT_PROTOCOL 1
     #else
         #define CASTLE_USING_BSD_SOCKET_BASED_MQTT_PROTOCOL 0
@@ -274,7 +260,7 @@
 #endif
 
 #if !defined(CASTLE_USING_BSD_SOCKET_BASED_COAP_PROTOCOL)
-    #if CASTLE_USING_POSIX_APIS && (CASTLE_USING_LINUX_BSD_SOCKET || CASTLE_USING_ZEPHYR_BSD_SOCKET)
+    #if CASTLE_USING_POSIX_APIS && CASTLE_USING_LINUX_BSD_SOCKET
         #define CASTLE_USING_BSD_SOCKET_BASED_COAP_PROTOCOL 1
     #else
         #define CASTLE_USING_BSD_SOCKET_BASED_COAP_PROTOCOL 0
@@ -354,7 +340,7 @@ static CASTLE_INLINE CASTLE_CONSTEXPR size_type inplace_storage_reserved = inpla
 static CASTLE_INLINE CASTLE_CONSTEXPR size_type inplace_alignment_default = CASTLE_INPLACE_ALIGNMENT_DEFAULT;
 
 /// @brief True when the BSD socket API is enabled for this target.
-#if CASTLE_USING_LINUX_BSD_SOCKET || CASTLE_USING_ZEPHYR_BSD_SOCKET
+#if CASTLE_USING_LINUX_BSD_SOCKET
 static CASTLE_INLINE CASTLE_CONSTEXPR bool sockets_available = true;
 #else
 static CASTLE_INLINE CASTLE_CONSTEXPR bool sockets_available = false;

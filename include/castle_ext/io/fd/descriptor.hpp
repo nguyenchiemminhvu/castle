@@ -16,6 +16,7 @@
 #include "castle/core/config.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
+#include "castle/core/type_ranges.hpp"
 #include "castle/error/status.hpp"
 #include "castle_ext/io/fd/control.hpp"
 
@@ -35,7 +36,6 @@ namespace fd
 
 /** @brief True when descriptor open/read/write operations are available. */
 static CASTLE_CONSTEXPR bool descriptor_available = (CASTLE_USING_POSIX_APIS != 0);
-
 
 /**
  * @brief Opens a path and returns its descriptor through `out_fd`.
@@ -101,7 +101,7 @@ CASTLE_INLINE castle::status read_fd(int descriptor,
         return castle::status::ok;
     }
 #if CASTLE_USING_POSIX_APIS
-    if (capacity > static_cast<size_type>(SSIZE_MAX))
+    if (capacity > SIZE_TYPE_MAX)
     {
         return castle::status::out_of_range;
     }
@@ -152,7 +152,7 @@ CASTLE_INLINE castle::status write_fd(int descriptor,
         return castle::status::ok;
     }
 #if CASTLE_USING_POSIX_APIS
-    if (size > static_cast<size_type>(SSIZE_MAX))
+    if (size > SIZE_TYPE_MAX)
     {
         return castle::status::out_of_range;
     }

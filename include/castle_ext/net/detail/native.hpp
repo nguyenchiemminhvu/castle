@@ -7,8 +7,8 @@
  *
  * Callers clear `system_error` first; a failing call reports its `errno` through it. Linux and Zephyr share one
  * body written against the POSIX socket names (Zephyr needs `CONFIG_POSIX_API`); only headers and a few optional
- * macros differ. Without `CASTLE_USING_LINUX_BSD_SOCKET` or `CASTLE_USING_ZEPHYR_BSD_SOCKET` every function still
- * exists and returns `not_configured`, so the socket, client and server classes need no preprocessor branches.
+ * macros differ. Without `CASTLE_USING_LINUX_BSD_SOCKET` every function still exists and returns `not_configured`
+ * so the socket, client and server classes need no preprocessor branches.
  */
 #ifndef CASTLE_EXT_NET_DETAIL_NATIVE_HPP
 #define CASTLE_EXT_NET_DETAIL_NATIVE_HPP
@@ -25,14 +25,10 @@
 
 #if CASTLE_USING_LINUX_BSD_SOCKET
     #include <errno.h>
+    #include <string.h>
     #include <netinet/in.h>
     #include <netinet/tcp.h>
-    #include <string.h>
     #include <sys/socket.h>
-#elif CASTLE_USING_ZEPHYR_BSD_SOCKET
-    #include <errno.h>
-    #include <string.h>
-    #include <zephyr/net/socket.h>
 #else
     // Unsupported platform
 #endif
@@ -53,7 +49,7 @@ CASTLE_INLINE castle::status unsupported(int* system_error) CASTLE_NOEXCEPT
     return castle::status::not_configured;
 }
 
-#if CASTLE_USING_LINUX_BSD_SOCKET || CASTLE_USING_ZEPHYR_BSD_SOCKET
+#if CASTLE_USING_LINUX_BSD_SOCKET
 
 using castle::io::fd::detail::capture_system_error;
 using castle::io::fd::detail::would_block;

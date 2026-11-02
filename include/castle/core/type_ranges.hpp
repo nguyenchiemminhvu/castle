@@ -121,6 +121,12 @@
 
 #endif
 
+#ifndef SIZE_TYPE_MAX
+
+#define SIZE_TYPE_MAX (static_cast<size_type>(-1) >> 1U)
+
+#endif
+
 namespace castle
 {
 
