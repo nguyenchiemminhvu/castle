@@ -99,6 +99,9 @@ public:
      */
     function() CASTLE_DEFAULT;
 
+    /** @brief Constructs an empty wrapper from nullptr. */
+    function(decltype(nullptr)) CASTLE_NOEXCEPT {}
+
     /**
      * @brief Constructs the wrapper from a callable object stored inside the local buffer.
      * @tparam Callable Source callable type.

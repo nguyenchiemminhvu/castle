@@ -1,7 +1,7 @@
-# HTTP Client Umbrella Header
+# HTTP Umbrella Header
 
 ## Overview
-Includes the complete bounded HTTP client API: shared types, fixed-capacity headers, HPACK, HTTP/1.1 codecs, HTTP/2 framing/session, and the polled TCP client adapters.
+Includes the complete bounded HTTP API: shared types, fixed-capacity headers, HPACK, HTTP/1.1 codecs, HTTP/2 framing/session, polled TCP client adapters, and the synchronous fixed-capacity HTTP/1.1 server.
 
 ## Header
 `#include "castle_ext/protocols/http/http.hpp"`
@@ -13,9 +13,10 @@ Includes the complete bounded HTTP client API: shared types, fixed-capacity head
 - [HTTP/1.1 codec](http1.md)
 - [HTTP/2 session](http2.md)
 - [HTTP client adapters](client.md)
+- [HTTP/1.1 server](server.md)
 
 ## Public API
-The umbrella header re-exports the declarations from all components listed above. Prefer including an individual component header when only one layer is required; include this header for application code that uses the complete client stack.
+The umbrella header re-exports the declarations from all components listed above. Prefer including an individual component header when only one layer is required; include this header for application code that uses the complete client and server stack.
 
 ## Usage Example
 ```cpp
@@ -29,4 +30,4 @@ int main()
 ```
 
 ## Constraints & Notes
-The umbrella itself defines no additional storage. All allocation, execution, and protocol constraints are those of the included component and selected template parameters. Including it makes HPACK and both protocol implementations visible to the translation unit.
+The umbrella itself defines no additional storage. All allocation, execution, and protocol constraints are those of the included component and selected template parameters. The HTTP/1.1 server is single-thread-owned, synchronously polled, and does not implement HTTP/2 server framing; see [server.md](server.md).

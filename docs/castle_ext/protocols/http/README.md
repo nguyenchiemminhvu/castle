@@ -1,8 +1,8 @@
 # castle_ext/protocols/http — Architecture and Protocol Guide
 
-Allocation-free HTTP/1.1 and HTTP/2 **client** stack for CASTLE. It targets embedded devices that talk to a local gateway, a cloud REST endpoint behind a plain-TCP proxy, or a test server, using a caller-driven `poll()` loop. It follows CASTLE's constraints: no heap, no exceptions, no RTTI, no virtual functions, no STL, and compile-time-bounded memory.
+Allocation-free HTTP/1.1 and HTTP/2 **client** stack plus a fixed-capacity HTTP/1.1 **server** for CASTLE. It targets embedded devices that talk to gateways and cloud REST endpoints, and expose local REST resources over plain TCP. Client and server I/O are caller-driven through `poll()` loops. It follows CASTLE's constraints: no heap, no exceptions, no RTTI, no virtual functions, no STL, and compile-time-bounded memory.
 
-Per-header API reference is in this directory ([types](types.md), [headers](headers.md), [hpack](hpack.md), [http1](http1.md), [http2](http2.md), [client](client.md), [umbrella](http.md)). This document explains the protocols, how the implementation maps onto them, and how the pieces fit together.
+Per-header API reference is in this directory ([types](types.md), [headers](headers.md), [hpack](hpack.md), [http1](http1.md), [http2](http2.md), [client](client.md), [server](server.md), [umbrella](http.md)). This document explains the protocols, how the implementation maps onto them, and how the pieces fit together.
 
 ## 1. Goals and constraints
 
@@ -27,7 +27,8 @@ Per-header API reference is in this directory ([types](types.md), [headers](head
 | Flow control | TCP only | Per-stream and per-connection windows (default 65,535 bytes) |
 | Connection reuse | `Connection: keep-alive` / `close` | Connection is long-lived; ended by `GOAWAY` or close |
 | Host identification | `Host` header | `:authority` pseudo-header |
-| This client | `http1_client` | `http2_client` (h2c, prior knowledge) |
+| Client implementation | `http1_client` | `http2_client` (h2c, prior knowledge) |
+| Server implementation | `basic_http_server` (HTTP/1.0 and HTTP/1.1 only) | Not implemented |
 
 ### 2.1 HTTP/1.1 message format
 
@@ -695,7 +696,37 @@ client.session().release_stream(first);
 client.session().release_stream(second);
 ```
 
-## 14. Design rules for contributors
+## HTTP/1.1 server adapter
+
+`server.hpp` adds a standalone, fixed-capacity server over `castle::net::tcp_server`. Unlike the client protocol layers, it owns the TCP listener and accepted-peer table. Configure capacities in `basic_http_server<...>`, register all routes before `start()`, then call `poll()` repeatedly from one owner thread. The default `HttpServer` has four concurrent connections and sixteen requests per connection.
+
+```cpp
+#include "castle_ext/protocols/http/server.hpp"
+
+using namespace castle::protocols::http;
+
+int main()
+{
+    HttpServer server;
+    server.register_handler(HttpMethod::GET, "/devices/{id}/state",
+        [](HttpRequest const& request, HttpResponse& response)
+        {
+            response.set_body(request.path_param("id"));
+        });
+    if (server.start(castle::net::endpoint::loopback_ipv4(8080U)) != castle::status::ok)
+    {
+        return 1;
+    }
+    while (true)
+    {
+        (void)server.poll(10);
+    }
+}
+```
+
+The server supports HTTP/1.0 and HTTP/1.1, `Content-Length`, chunked request bodies, keep-alive, sequential pipelining, exact/prefix/parameter routes, and bounded response bodies. It does not currently implement HTTP/2 server framing/HPACK, idle-timeout scheduling, deferred handlers, TLS, middleware chains, or filesystem access. A complete API description and tested localhost examples are in [server.md](server.md) and `samples/castle_ext/protocols/http/`.
+
+## Design rules for contributors
 
 - Keep protocol layers free of OS headers; reach the network only through the `Transport` template parameter (needs `connect`, `send_some`, `receive_some`, `close`, `socket().finish_connect`, `socket().wait_readable`).
 - Every new buffer or limit must be a template parameter with a documented failure status; never grow dynamically.
@@ -713,5 +744,6 @@ client.session().release_stream(second);
 | [http1.md](http1.md) | HTTP/1.1 request builder and response parser |
 | [http2.md](http2.md) | HTTP/2 frame parser and session |
 | [client.md](client.md) | Polled client adapters and policy selection |
-| [http.md](http.md) | Umbrella header |
+| [server.md](server.md) | Fixed-capacity HTTP/1.1 server and router |
+| [http.md](http.md) | Client/server umbrella header |
 | [../../net/README.md](../../net/README.md) | TCP transport architecture |

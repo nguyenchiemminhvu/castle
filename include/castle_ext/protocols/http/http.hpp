@@ -3,9 +3,10 @@
 
 /**
  * @file http.hpp
- * @brief Umbrella header of CASTLE's allocation-free HTTP/1.1 and HTTP/2 client.
+ * @brief Umbrella header for CASTLE's allocation-free HTTP client and HTTP/1.1 server.
  *
- * Includes the shared types, header collection, HPACK codec, both protocol layers and the polled clients.
+ * Includes shared types, fixed-capacity headers, HPACK, HTTP/1.1 and HTTP/2 client protocol layers,
+ * polled HTTP client adapters, and the bounded synchronous HTTP/1.1 server.
  *
  * @code
  * #include "castle_ext/protocols/http/http.hpp"
@@ -25,5 +26,6 @@
 #include "castle_ext/protocols/http/http1.hpp"
 #include "castle_ext/protocols/http/http2.hpp"
 #include "castle_ext/protocols/http/client.hpp"
+#include "castle_ext/protocols/http/server.hpp"
 
 #endif // CASTLE_EXT_PROTOCOLS_HTTP_HTTP_HPP
