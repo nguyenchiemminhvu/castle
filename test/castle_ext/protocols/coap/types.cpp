@@ -61,3 +61,78 @@ TEST(CoapTypes, CapacityErrorsAndClear)
     EXPECT_EQ(value.payload_size, 0U);
     EXPECT_EQ(value.code_value, 0U);
 }
+
+TEST(CoapTypes, NullArgumentsAndOptionBoundaries)
+{
+    message<4U, 8U, 16U> value;
+    EXPECT_EQ(value.set_token(nullptr, 0U), castle::status::ok);
+    EXPECT_EQ(value.set_token(nullptr, 1U), castle::status::invalid_argument);
+    EXPECT_EQ(value.set_payload(nullptr, 0U), castle::status::ok);
+    EXPECT_EQ(value.set_payload(nullptr, 1U), castle::status::invalid_argument);
+    EXPECT_EQ(value.append_option(0U, nullptr, 0U), castle::status::invalid_argument);
+    EXPECT_EQ(value.append_option(5U, nullptr, 1U), castle::status::invalid_argument);
+    EXPECT_EQ(value.append_option(5U, nullptr, 0U), castle::status::ok);
+    const uint8_t nine[9] = {};
+    EXPECT_EQ(value.append_option(11U, nine, sizeof(nine)), castle::status::out_of_range);
+    EXPECT_EQ(value.append_string_option(11U, nullptr), castle::status::invalid_argument);
+    EXPECT_EQ(value.append_uint_option(12U, 0U), castle::status::ok);
+    EXPECT_EQ(value.append_uint_option(14U, 0x01020304U), castle::status::ok);
+    ASSERT_EQ(value.option_count, 3U);
+    EXPECT_EQ(value.options[1U].length, 0U);
+    EXPECT_EQ(value.options[2U].length, 4U);
+}
+
+TEST(CoapTypes, UriHelpersRejectNullAndFullMessages)
+{
+    message<1U, 16U, 8U> path_target;
+    EXPECT_EQ(append_uri_path(path_target, nullptr), castle::status::invalid_argument);
+    EXPECT_EQ(append_uri_path(path_target, "a/b"), castle::status::full);
+    EXPECT_EQ(path_target.option_count, 1U);
+
+    message<1U, 16U, 8U> query_target;
+    EXPECT_EQ(append_uri_query(query_target, nullptr), castle::status::invalid_argument);
+    EXPECT_EQ(append_uri_query(query_target, "&a&"), castle::status::ok);
+    EXPECT_EQ(query_target.option_count, 1U);
+    EXPECT_EQ(append_uri_query(query_target, "b=1&c=2"), castle::status::full);
+
+    message<4U, 8U, 8U> long_segment;
+    EXPECT_EQ(append_uri_path(long_segment, "ABCDEFGHI"), castle::status::out_of_range);
+    EXPECT_EQ(append_uri_query(long_segment, "ABCDEFGHI"), castle::status::out_of_range);
+}
+
+TEST(CoapTypes, UriPathMatchingRejectsMismatches)
+{
+    message<4U, 8U, 8U> request;
+    EXPECT_FALSE(uri_path_matches(request, nullptr));
+    EXPECT_FALSE(uri_path_matches(request, ""));
+    ASSERT_EQ(append_uri_path(request, "abc"), castle::status::ok);
+    EXPECT_FALSE(uri_path_matches(request, "xyz"));
+    EXPECT_FALSE(uri_path_matches(request, "/"));
+    EXPECT_TRUE(uri_path_matches(request, "abc"));
+
+    message<4U, 8U, 8U> bare;
+    EXPECT_FALSE(uri_path_matches(bare, ""));
+}
+
+TEST(CoapTypes, CodeClassPredicatesAtBoundaries)
+{
+    EXPECT_FALSE(is_request_code(static_cast<uint8_t>(0x00U)));
+    EXPECT_TRUE(is_request_code(static_cast<uint8_t>(0x01U)));
+    EXPECT_FALSE(is_response_code(0x00U));
+    EXPECT_FALSE(is_response_code(0x20U));
+    EXPECT_TRUE(is_response_code(0x80U));
+    EXPECT_TRUE(is_response_code(0xA0U));
+}
+
+TEST(CoapTypes, FindOptionHandlesMissingAndConstAccess)
+{
+    message<4U, 8U, 8U> value;
+    const uint8_t byte = 1U;
+    ASSERT_EQ(value.append_option(11U, &byte, 1U), castle::status::ok);
+    ASSERT_EQ(value.append_option(15U, &byte, 1U), castle::status::ok);
+    message<4U, 8U, 8U> const& view = value;
+    EXPECT_EQ(view.find_option(13U), nullptr);
+    EXPECT_NE(view.find_option(15U), nullptr);
+    EXPECT_EQ(value.find_option(9U), nullptr);
+    EXPECT_NE(value.find_option(11U), nullptr);
+}
