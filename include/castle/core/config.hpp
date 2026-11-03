@@ -221,6 +221,18 @@
     #define CASTLE_USING_IO_CAN_VIA_ZEPHYR 0
 #endif
 
+#if !defined(CASTLE_RPMSG_ENABLE_OPENAMP)
+    #if defined(__has_include)
+        #if __has_include(<openamp/open_amp.h>)
+            #define CASTLE_RPMSG_ENABLE_OPENAMP 1
+        #else
+            #define CASTLE_RPMSG_ENABLE_OPENAMP 0
+        #endif
+    #else
+        #define CASTLE_RPMSG_ENABLE_OPENAMP 0
+    #endif
+#endif
+
 #if CASTLE_USING_POSIX_APIS
     #if !defined(CASTLE_USING_LINUX_BSD_SOCKET)
         #if defined(__has_include)

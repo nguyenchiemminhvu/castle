@@ -1545,6 +1545,11 @@ TEST(MqttBroker, QosOneIdentifiersWrapAroundSkippingInUseValues)
         uint32_t expected = round <= 65534U ? round + 1U : round - 65533U;
         ASSERT_TRUE(peer.send(inbound)) << round;
         ASSERT_EQ(h.timing.tick(), castle::status::ok) << round;
+        // Loopback bytes may become visible to the broker after send(); retry ticks until the reply arrives.
+        for (int attempt = 0; attempt < 100 && peer.silent(); ++attempt)
+        {
+            ASSERT_EQ(h.timing.tick(), castle::status::ok) << round;
+        }
         bytes delivered;
         bytes acknowledged;
         ASSERT_TRUE(peer.read_packet(delivered)) << round;

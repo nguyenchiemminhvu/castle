@@ -1,7 +1,7 @@
 # I/O Umbrella
 
 ## Overview
-The I/O umbrella header collects CASTLE's POSIX descriptor owner and the file, UART, SPI, I2C and CAN components. Applications can include a single header for the supported Linux I/O building blocks, or include only the transport they need.
+The I/O umbrella header collects CASTLE's POSIX descriptor owner and the file, UART, SPI, I2C, RPMsg and CAN components. Applications can include a single header for the supported Linux I/O building blocks, or include only the transport they need.
 
 ## Header
 `#include "castle_ext/io/io.hpp"`
@@ -14,6 +14,7 @@ The I/O umbrella header collects CASTLE's POSIX descriptor owner and the file, U
 - [`uart/uart.md`](uart/uart.md)
 - [`spi/spi.md`](spi/spi.md)
 - [`i2c/i2c.md`](i2c/i2c.md)
+- [`rpmsg/rpmsg.md`](rpmsg/rpmsg.md)
 
 ## Public API
 This is an umbrella header and adds no runtime types or functions. It exposes:
@@ -22,6 +23,7 @@ This is an umbrella header and adds no runtime types or functions. It exposes:
 - `castle::io::uart` — `basic_uart` / `uart` for termios-configured serial ports.
 - `castle::io::spi` — `basic_spi` / `spi` for Linux spidev.
 - `castle::io::i2c` — `basic_i2c` / `i2c` for Linux i2c-dev.
+- `castle::io::rpmsg` — RPMsg device, endpoint, message, name service and backend contract. The OpenAMP backend is opt-in via `CASTLE_RPMSG_ENABLE_OPENAMP`; the mock backend is for host tests and samples.
 
 ## Usage Example
 ```cpp
