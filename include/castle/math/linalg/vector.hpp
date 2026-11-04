@@ -31,7 +31,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/math/abs.hpp"
-#include "castle/math/lerp.hpp"
+#include "castle/math/interpolation/lerp.hpp"
 #include "castle/math/near_equal.hpp"
 #include "castle/math/sqrt_real.hpp"
 

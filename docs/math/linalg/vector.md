@@ -12,7 +12,7 @@
 - [../../core/traits.hpp](../../core/traits.md)
 - [../../core/types.hpp](../../core/types.md)
 - [../abs.hpp](../abs.md)
-- [../lerp.hpp](../lerp.md)
+- [../interpolation/lerp.hpp](../interpolation/lerp.md)
 - [../near_equal.hpp](../near_equal.md)
 - [../sqrt_real.hpp](../sqrt_real.md)
 

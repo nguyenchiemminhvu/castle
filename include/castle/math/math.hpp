@@ -48,7 +48,7 @@
 #include "castle/math/factorial.hpp"
 #include "castle/math/is_power_of_two.hpp"
 #include "castle/math/isqrt.hpp"
-#include "castle/math/lerp.hpp"
+#include "castle/math/interpolation/lerp.hpp"
 #include "castle/math/mod.hpp"
 #include "castle/math/near_equal.hpp"
 #include "castle/math/powi.hpp"
@@ -59,6 +59,10 @@
 #include "castle/math/square.hpp"
 #include "castle/math/geometry.hpp"
 #include "castle/math/linalg.hpp"
+#include "castle/math/exponential.hpp"
+#include "castle/math/complex.hpp"
+#include "castle/math/interpolation.hpp"
+#include "castle/math/numeric.hpp"
 
 #include <math.h>
 

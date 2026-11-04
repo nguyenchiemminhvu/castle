@@ -25,6 +25,36 @@ TEST(MathUmbrella, AggregateApiExposed)
     SUCCEED();
 }
 
+TEST(MathUmbrella, ComplexInterpolationAndNumericExposed)
+{
+    // complex / exponential
+    const castle::math::complex<double> i_unit(0.0, 1.0);
+    const castle::math::complex<double> squared = i_unit * i_unit;
+    EXPECT_NEAR(squared.real(), -1.0, 1.0e-12);
+    EXPECT_NEAR(squared.imag(), 0.0, 1.0e-12);
+    EXPECT_NEAR(castle::math::exp(0.0), 1.0, 1.0e-12);
+
+    // interpolation
+    const double xs[3] = {0.0, 1.0, 2.0};
+    const double ys[3] = {0.0, 10.0, 20.0};
+    const castle::math::linear_table<double> table(xs, ys, 3U);
+    EXPECT_TRUE(table.valid());
+    EXPECT_NEAR(table(0.5), 5.0, 1.0e-12);
+    EXPECT_NEAR(castle::math::lerp(0.0, 10.0, 0.25), 2.5, 1.0e-12);
+
+    // numeric
+    const auto square = [](double x) { return x * x; };
+    EXPECT_NEAR(castle::math::integrate_simpson(square, 0.0, 3.0, 100U), 9.0, 1.0e-9);
+
+    const auto shifted = [](double x) { return (x * x) - 2.0; };
+    const auto root = castle::math::find_root_bisection(shifted, 0.0, 2.0, 1.0e-12);
+    EXPECT_TRUE(root.ok());
+    EXPECT_NEAR(root.value, 1.4142135623730951, 1.0e-9);
+
+    const auto decay = [](double, double y) { return -y; };
+    EXPECT_NEAR(castle::math::rk4_step(decay, 0.0, 1.0, 0.1), 0.9048375, 1.0e-7);
+}
+
 // ---------------------------------------------------------------------------
 // is_equal - floating point equality within epsilon
 // ---------------------------------------------------------------------------
