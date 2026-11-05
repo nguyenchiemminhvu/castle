@@ -83,6 +83,16 @@
 /// @brief Evaluates to true when pointers are 64 bits wide.
 #define CASTLE_PLATFORM_64BIT (sizeof(void*) == 8)
 
+/// @def CASTLE_TYPE_INFO_NAMES
+/// @brief Set to 0 before inclusion to drop type-name strings from the image; `name()` then returns "".
+#if !defined(CASTLE_TYPE_INFO_NAMES)
+    #if defined(__clang__) || defined(__GNUC__)
+        #define CASTLE_TYPE_INFO_NAMES 1
+    #else
+        #define CASTLE_TYPE_INFO_NAMES 0
+    #endif
+#endif
+
 /// @def CASTLE_HAS_BUILTIN_BIT_CAST
 /// @brief Evaluates to true when the active compiler provides `__builtin_bit_cast`.
 #if !defined(CASTLE_HAS_BUILTIN_BIT_CAST)

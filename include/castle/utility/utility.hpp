@@ -25,6 +25,9 @@
 #include "castle/utility/pair.hpp"
 #include "castle/utility/variant.hpp"
 #include "castle/utility/optional.hpp"
+#include "castle/utility/any.hpp"
+#include "castle/utility/type_info.hpp"
+#include "castle/utility/type_index.hpp"
 #include "castle/utility/bitset.hpp"
 #include "castle/utility/hash.hpp"
 

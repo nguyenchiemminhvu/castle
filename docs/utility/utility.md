@@ -7,7 +7,7 @@ This is the umbrella header for Castle's utility layer. It exists for translatio
 `#include "castle/utility/utility.hpp"`
 
 ## Dependencies
-[macros.md](macros.md), [forward.md](forward.md), [move.md](move.md), [swap.md](swap.md), [bytes.md](bytes.md), [bit_cast.md](bit_cast.md), [tuple.md](tuple.md), [pair.md](pair.md), [variant.md](variant.md), [optional.md](optional.md), [bitset.md](bitset.md), [hash.md](hash.md)
+[macros.md](macros.md), [forward.md](forward.md), [move.md](move.md), [swap.md](swap.md), [bytes.md](bytes.md), [bit_cast.md](bit_cast.md), [tuple.md](tuple.md), [pair.md](pair.md), [variant.md](variant.md), [optional.md](optional.md), [any.md](any.md), [type_info.md](type_info.md), [type_index.md](type_index.md), [bitset.md](bitset.md), [hash.md](hash.md)
 
 ## Public API
 This header adds no direct runtime API of its own. It re-exports:
@@ -21,6 +21,9 @@ This header adds no direct runtime API of its own. It re-exports:
 - `pair.hpp`
 - `variant.hpp`
 - `optional.hpp`
+- `any.hpp`
+- `type_info.hpp`
+- `type_index.hpp`
 - `bitset.hpp`
 - `hash.hpp`
 
