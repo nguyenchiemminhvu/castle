@@ -21,6 +21,7 @@
 #define CASTLE_CONTAINER_CONTAINERS_HPP
 
 #include "castle/container/array.hpp"
+#include "castle/container/grid.hpp"
 #include "castle/container/vector.hpp"
 #include "castle/container/ring_buffer.hpp"
 #include "castle/container/stack.hpp"

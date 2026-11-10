@@ -33,5 +33,17 @@ int main()
     CASTLE_SAMPLE_CHECK(castle::math::near_equal(hadamard_value(1U, 0U), 3.0F, epsilon));
     CASTLE_SAMPLE_CHECK(castle::math::near_equal(hadamard_value(1U, 1U), 8.0F, epsilon));
 
+    // Data assembled with container APIs can be promoted to a matrix, and the
+    // matrix exposes its storage back as a grid without copying.
+    castle::container::grid<float, 2U, 2U> cells;
+    cells.fill(1.0F);
+    cells(1U, 1U) = 3.0F;
+    castle::math::matrix<float, 2U, 2U> from_cells(cells);
+    CASTLE_SAMPLE_CHECK(castle::math::near_equal(castle::math::determinant(from_cells), 2.0F, epsilon));
+
+    from_cells.as_grid().row(0U)[1U] = 0.0F;
+    CASTLE_SAMPLE_CHECK(castle::math::near_equal(from_cells(0U, 1U), 0.0F, epsilon));
+    CASTLE_SAMPLE_CHECK(from_cells.data() == from_cells.as_grid().data());
+
     return 0;
 }

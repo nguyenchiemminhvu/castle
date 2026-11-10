@@ -9,8 +9,10 @@
  * algebra utilities for deterministic embedded code. Use it when matrix
  * dimensions are known at compile time and you need inline storage, no heap
  * allocation, no exceptions, no RTTI, no virtual dispatch, and no STL
- * dependency. Elements are stored contiguously in row-major order, while
- * multiplication follows the conventional `matrix * column_vector` model.
+ * dependency. Elements are stored contiguously in row-major order inside a
+ * `castle::container::grid`, which owns the storage while this header adds the
+ * linear algebra. Multiplication follows the conventional
+ * `matrix * column_vector` model.
  * Determinants are computed recursively for small fixed matrices, and
  * floating-point inversion uses Gauss-Jordan elimination with partial
  * pivoting and an explicit singularity tolerance.
@@ -26,10 +28,12 @@
 #ifndef CASTLE_MATH_MATRIX_HPP
 #define CASTLE_MATH_MATRIX_HPP
 
+#include "castle/container/grid.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/error_handler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
+#include "castle/utility/forward.hpp"
 #include "castle/math/abs.hpp"
 #include "castle/math/near_equal.hpp"
 #include "castle/math/linalg/vector.hpp"
@@ -44,8 +48,9 @@ namespace math
  * @tparam T Arithmetic element type stored in the matrix.
  * @tparam Rows Compile-time number of rows.
  * @tparam Columns Compile-time number of columns.
- * @note Storage order is row-major: element `(r, c)` resides at
- * `data_[r * Columns + c]`.
+ * @note Storage is a `castle::container::grid<T, Rows, Columns>`, so element
+ * `(r, c)` resides at `data()[r * Columns + c]` and `sizeof(matrix)` equals the
+ * size of the element storage.
  * @warning `operator()` does not perform bounds checking; use `at()` when the
  * caller cannot guarantee valid indices.
  */
@@ -66,6 +71,7 @@ public:
     using const_pointer = CASTLE_CONST T*;
     using iterator = T*;
     using const_iterator = CASTLE_CONST T*;
+    using grid_type = container::grid<T, Rows, Columns>;
 
     /** @brief Compile-time row count exposed as a constant. */
     static CASTLE_CONSTEXPR size_type static_rows = Rows;
@@ -77,7 +83,7 @@ public:
      * @return Matrix whose elements are value-initialized.
      * @note All storage lives inside the object with no allocation.
      */
-    CASTLE_CONSTEXPR matrix() CASTLE_NOEXCEPT : data_{}
+    CASTLE_CONSTEXPR matrix() CASTLE_NOEXCEPT : storage_{}
     {
     }
 
@@ -93,7 +99,19 @@ public:
               meta::enable_if_t<(sizeof...(Args) == Rows * Columns) &&
                                 meta::conjunction<meta::is_constructible<T, Args&&>...>::value, int> = 0>
     CASTLE_CONSTEXPR explicit matrix(Args&&... args)
-        : data_{static_cast<T>(args)...}
+        : storage_(CASTLE_FORWARD<Args>(args)...)
+    {
+    }
+
+    /**
+     * @brief Constructs a matrix that copies the cells of a grid.
+     * @param cells Row-major grid whose elements become the matrix elements.
+     * @return Matrix holding a copy of `cells`.
+     * @note Use this to promote data assembled with container APIs into a
+     * matrix for linear algebra.
+     */
+    CASTLE_CONSTEXPR explicit matrix(CASTLE_CONST grid_type& cells) CASTLE_NOEXCEPT
+        : storage_(cells)
     {
     }
 
@@ -123,42 +141,42 @@ public:
      * @return Pointer to the first stored element.
      * @note Iteration follows row-major storage order.
      */
-    CASTLE_CONSTEXPR iterator begin() CASTLE_NOEXCEPT { return data_; }
+    CASTLE_CONSTEXPR iterator begin() CASTLE_NOEXCEPT { return storage_.begin(); }
 
     /**
      * @brief Returns a const iterator to the first element.
      * @return Const pointer to the first stored element.
      * @note Iteration follows row-major storage order.
      */
-    CASTLE_CONSTEXPR const_iterator begin() CASTLE_CONST CASTLE_NOEXCEPT { return data_; }
+    CASTLE_CONSTEXPR const_iterator begin() CASTLE_CONST CASTLE_NOEXCEPT { return storage_.begin(); }
 
     /**
      * @brief Returns a const iterator to the first element.
      * @return Const pointer to the first stored element.
      * @note Equivalent to `begin()` on a const matrix.
      */
-    CASTLE_CONSTEXPR const_iterator cbegin() CASTLE_CONST CASTLE_NOEXCEPT { return data_; }
+    CASTLE_CONSTEXPR const_iterator cbegin() CASTLE_CONST CASTLE_NOEXCEPT { return storage_.cbegin(); }
 
     /**
      * @brief Returns an iterator one past the final stored element.
      * @return Pointer one past the row-major storage range.
      * @note Iteration follows row-major storage order.
      */
-    CASTLE_CONSTEXPR iterator end() CASTLE_NOEXCEPT { return data_ + Rows * Columns; }
+    CASTLE_CONSTEXPR iterator end() CASTLE_NOEXCEPT { return storage_.end(); }
 
     /**
      * @brief Returns a const iterator one past the final stored element.
      * @return Const pointer one past the row-major storage range.
      * @note Iteration follows row-major storage order.
      */
-    CASTLE_CONSTEXPR const_iterator end() CASTLE_CONST CASTLE_NOEXCEPT { return data_ + Rows * Columns; }
+    CASTLE_CONSTEXPR const_iterator end() CASTLE_CONST CASTLE_NOEXCEPT { return storage_.end(); }
 
     /**
      * @brief Returns a const iterator one past the final stored element.
      * @return Const pointer one past the row-major storage range.
      * @note Equivalent to `end()` on a const matrix.
      */
-    CASTLE_CONSTEXPR const_iterator cend() CASTLE_CONST CASTLE_NOEXCEPT { return data_ + Rows * Columns; }
+    CASTLE_CONSTEXPR const_iterator cend() CASTLE_CONST CASTLE_NOEXCEPT { return storage_.cend(); }
 
     /**
      * @brief Returns the element at `(row, column)` without bounds checking.
@@ -169,7 +187,7 @@ public:
      */
     CASTLE_CONSTEXPR reference operator()(size_type row, size_type column) CASTLE_NOEXCEPT
     {
-        return data_[row * Columns + column];
+        return storage_(row, column);
     }
 
     /**
@@ -181,7 +199,7 @@ public:
      */
     CASTLE_CONSTEXPR const_reference operator()(size_type row, size_type column) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        return data_[row * Columns + column];
+        return storage_(row, column);
     }
 
     /**
@@ -195,7 +213,7 @@ public:
     {
         CASTLE_ASSERT(row < Rows && column < Columns, // LCOV_EXCL_BR_LINE
                       CASTLE_ERROR_GENERIC("castle::math::matrix::at: index out of range"));
-        return data_[row * Columns + column];
+        return storage_(row, column);
     }
 
     /**
@@ -209,7 +227,7 @@ public:
     {
         CASTLE_ASSERT(row < Rows && column < Columns, // LCOV_EXCL_BR_LINE
                       CASTLE_ERROR_GENERIC("castle::math::matrix::at: index out of range"));
-        return data_[row * Columns + column];
+        return storage_(row, column);
     }
 
     /**
@@ -217,14 +235,29 @@ public:
      * @return Pointer to the first stored element.
      * @note The returned pointer remains valid for the lifetime of the matrix.
      */
-    CASTLE_CONSTEXPR pointer data() CASTLE_NOEXCEPT { return data_; }
+    CASTLE_CONSTEXPR pointer data() CASTLE_NOEXCEPT { return storage_.data(); }
 
     /**
      * @brief Returns the row-major storage pointer.
      * @return Const pointer to the first stored element.
      * @note The returned pointer remains valid for the lifetime of the matrix.
      */
-    CASTLE_CONSTEXPR const_pointer data() CASTLE_CONST CASTLE_NOEXCEPT { return data_; }
+    CASTLE_CONSTEXPR const_pointer data() CASTLE_CONST CASTLE_NOEXCEPT { return storage_.data(); }
+
+    /**
+     * @brief Returns the underlying grid storage.
+     * @return Mutable reference to the owned `grid_type`.
+     * @note Lets container-level code (row views, `fill()`, iteration) operate
+     * on the matrix cells without copying.
+     */
+    CASTLE_CONSTEXPR grid_type& as_grid() CASTLE_NOEXCEPT { return storage_; }
+
+    /**
+     * @brief Returns the underlying grid storage.
+     * @return Const reference to the owned `grid_type`.
+     * @note The reference remains valid for the lifetime of the matrix.
+     */
+    CASTLE_CONSTEXPR CASTLE_CONST grid_type& as_grid() CASTLE_CONST CASTLE_NOEXCEPT { return storage_; }
 
     /**
      * @brief Returns an unchanged copy of the matrix.
@@ -238,7 +271,7 @@ public:
 
     /**
      * @brief Returns the element-wise negation of the matrix.
-     * @return Matrix whose elements are `-data_[i]`.
+     * @return Matrix whose elements are `-data()[i]`.
      * @note Elements are negated in row-major storage order.
      */
     CASTLE_CONSTEXPR matrix operator-() CASTLE_CONST CASTLE_NOEXCEPT
@@ -246,7 +279,7 @@ public:
         matrix result;
         for (size_type i = 0U; i < Rows * Columns; ++i)
         {
-            result.data_[i] = static_cast<T>(-data_[i]);
+            result.data()[i] = static_cast<T>(-data()[i]);
         }
         return result;
     }
@@ -262,7 +295,7 @@ public:
         matrix result;
         for (size_type i = 0U; i < Rows * Columns; ++i)
         {
-            result.data_[i] = static_cast<T>(data_[i] + other.data_[i]);
+            result.data()[i] = static_cast<T>(data()[i] + other.data()[i]);
         }
         return result;
     }
@@ -278,7 +311,7 @@ public:
         matrix result;
         for (size_type i = 0U; i < Rows * Columns; ++i)
         {
-            result.data_[i] = static_cast<T>(data_[i] - other.data_[i]);
+            result.data()[i] = static_cast<T>(data()[i] - other.data()[i]);
         }
         return result;
     }
@@ -293,7 +326,7 @@ public:
     {
         for (size_type i = 0U; i < Rows * Columns; ++i)
         {
-            data_[i] = static_cast<T>(data_[i] + other.data_[i]);
+            data()[i] = static_cast<T>(data()[i] + other.data()[i]);
         }
         return *this;
     }
@@ -308,7 +341,7 @@ public:
     {
         for (size_type i = 0U; i < Rows * Columns; ++i)
         {
-            data_[i] = static_cast<T>(data_[i] - other.data_[i]);
+            data()[i] = static_cast<T>(data()[i] - other.data()[i]);
         }
         return *this;
     }
@@ -324,7 +357,7 @@ public:
         matrix result;
         for (size_type i = 0U; i < Rows * Columns; ++i)
         {
-            result.data_[i] = static_cast<T>(data_[i] * scalar);
+            result.data()[i] = static_cast<T>(data()[i] * scalar);
         }
         return result;
     }
@@ -343,7 +376,7 @@ public:
         matrix result;
         for (size_type i = 0U; i < Rows * Columns; ++i)
         {
-            result.data_[i] = static_cast<T>(data_[i] / scalar);
+            result.data()[i] = static_cast<T>(data()[i] / scalar);
         }
         return result;
     }
@@ -358,7 +391,7 @@ public:
     {
         for (size_type i = 0U; i < Rows * Columns; ++i)
         {
-            data_[i] = static_cast<T>(data_[i] * scalar);
+            data()[i] = static_cast<T>(data()[i] * scalar);
         }
         return *this;
     }
@@ -376,7 +409,7 @@ public:
 
         for (size_type i = 0U; i < Rows * Columns; ++i)
         {
-            data_[i] = static_cast<T>(data_[i] / scalar);
+            data()[i] = static_cast<T>(data()[i] / scalar);
         }
         return *this;
     }
@@ -389,16 +422,7 @@ public:
      */
     CASTLE_CONSTEXPR bool operator==(CASTLE_CONST matrix& other) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        for (size_type i = 0U; i < Rows * Columns; ++i)
-        {
-            // LCOV_EXCL_START
-            if (data_[i] != other.data_[i])
-            {
-                return false;
-            }
-            // LCOV_EXCL_STOP
-        }
-        return true;
+        return storage_ == other.storage_;
     }
 
     /**
@@ -425,7 +449,7 @@ public:
         vector<T, Columns> result;
         for (size_type i = 0U; i < Columns; ++i)
         {
-            result[i] = data_[index * Columns + i];
+            result[i] = storage_(index, i);
         }
         return result;
     }
@@ -443,7 +467,7 @@ public:
         vector<T, Rows> result;
         for (size_type i = 0U; i < Rows; ++i)
         {
-            result[i] = data_[i * Columns + index];
+            result[i] = storage_(i, index);
         }
         return result;
     }
@@ -460,7 +484,7 @@ public:
         {
             for (size_type column = 0U; column < Columns; ++column)
             {
-                result(column, row) = data_[row * Columns + column];
+                result(column, row) = storage_(row, column);
             }
         }
         return result;
@@ -477,13 +501,13 @@ public:
         T result{};
         for (size_type i = 0U; i < Rows; ++i)
         {
-            result = static_cast<T>(result + data_[i * Columns + i]);
+            result = static_cast<T>(result + storage_(i, i));
         }
         return result;
     }
 
 private:
-    T data_[Rows * Columns];
+    grid_type storage_;
 };
 
 /**

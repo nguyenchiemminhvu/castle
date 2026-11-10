@@ -8,6 +8,7 @@ Umbrella header that pulls the Castle container family into one include. Use it 
 
 ## Dependencies
 - [array](array.md)
+- [grid](grid.md)
 - [vector](vector.md)
 - [ring_buffer](ring_buffer.md)
 - [stack](stack.md)

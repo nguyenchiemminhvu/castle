@@ -1,16 +1,18 @@
 # Matrix
 
 ## Overview
-`castle::math::matrix<T, Rows, Columns>` is a fixed-size row-major matrix for deterministic embedded linear algebra. Use it when matrix dimensions are known at compile time and you need contiguous inline storage, matrix/vector products, determinants, inversion, and transform-friendly homogeneous math without heap allocation or STL containers.
+`castle::math::matrix<T, Rows, Columns>` is a fixed-size row-major matrix for deterministic embedded linear algebra. Use it when matrix dimensions are known at compile time and you need contiguous inline storage, matrix/vector products, determinants, inversion, and transform-friendly homogeneous math without heap allocation or STL containers. Element storage is a [`castle::container::grid`](../../container/grid.md); the matrix adds the arithmetic and linear algebra on top of it.
 
 ## Header
 `#include "castle/math/linalg/matrix.hpp"`
 
 ## Dependencies
+- [../../container/grid.hpp](../../container/grid.md)
 - [../../core/compiler.hpp](../../core/compiler.md)
 - [../../core/error_handler.hpp](../../core/error_handler.md)
 - [../../core/traits.hpp](../../core/traits.md)
 - [../../core/types.hpp](../../core/types.md)
+- [../../utility/forward.hpp](../../utility/forward.md)
 - [../abs.hpp](../abs.md)
 - [../near_equal.hpp](../near_equal.md)
 - [vector.hpp](vector.md)
@@ -20,6 +22,9 @@
 | --- | --- |
 | `template <typename T, size_type Rows, size_type Columns> class matrix` | Fixed-size row-major matrix with contiguous inline storage. |
 | `matrix()` / `explicit matrix(Args&&... args)` | Zero-initialize or construct from exactly `Rows * Columns` values in row-major order. |
+| `grid_type` | Alias for the storage type, `castle::container::grid<T, Rows, Columns>`. |
+| `explicit matrix(const grid_type& cells)` | Construct a matrix from a copy of a grid's cells. |
+| `as_grid()` | Reference (mutable or const) to the underlying grid, for container-level access such as `row()` views and `fill()`. |
 | `rows()`, `columns()`, `size()`, `begin()`, `end()`, `data()` | Query dimensions and access contiguous storage. |
 | `operator()(row, column)`, `at(row, column)` | Unchecked and checked element access; `at()` asserts on invalid indices. |
 | Unary/binary arithmetic operators | Element-wise add, subtract, negate, and scale by a scalar. |
@@ -57,7 +62,8 @@ int main()
 See `samples/sample_matrix.cpp`.
 
 ## Constraints & Notes
-- Storage is contiguous and row-major: element `(r, c)` resides at offset `r * Columns + c`.
+- Storage is a `container::grid` with contiguous row-major layout: element `(r, c)` resides at offset `r * Columns + c`, and `sizeof(matrix<T, R, C>) == sizeof(T) * R * C`.
+- `matrix` wraps the grid rather than inheriting from it, so grid-level equality and `fill()` are reached through `as_grid()` and are not mixed into the matrix arithmetic interface.
 - Matrix multiplication still follows the conventional algebraic `matrix * column_vector` model, so homogeneous translations occupy the final column.
 - `determinant()` uses recursive cofactor expansion and is best suited to small fixed matrices.
 - `try_inverse()` and `inverse()` are available only for floating-point element types and use an explicit `epsilon` pivot tolerance.

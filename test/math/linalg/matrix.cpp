@@ -159,3 +159,22 @@ TEST(Matrix, NearEqualAndAliases)
     EXPECT_EQ(matrix3(2U, 2U), 1);
     EXPECT_EQ(matrix4(3U, 3U), 1);
 }
+
+TEST(Matrix, WrapsGridStorage)
+{
+    static_assert(sizeof(castle::math::matrix<float, 3U, 3U>) == sizeof(float) * 9U,
+                  "matrix adds no storage overhead over its grid");
+
+    const castle::container::grid<int, 2U, 2U> cells(1, 2, 3, 4);
+    castle::math::matrix<int, 2U, 2U> value(cells);
+    EXPECT_EQ(value.as_grid(), cells);
+    EXPECT_EQ(value.data(), value.as_grid().data());
+
+    value.as_grid().row(1U)[0U] = 30;
+    EXPECT_EQ(value(1U, 0U), 30);
+
+    value.as_grid().fill(1);
+    const castle::math::matrix<int, 2U, 2U> doubled = value * 2;
+    const castle::math::matrix<int, 2U, 2U> doubled_expected(2, 2, 2, 2);
+    EXPECT_EQ(doubled, doubled_expected);
+}
