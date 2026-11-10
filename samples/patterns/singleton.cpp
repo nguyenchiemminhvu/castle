@@ -1,6 +1,6 @@
 #include "sample_support.hpp"
 
-#include "castle/design_patterns/singleton.hpp"
+#include "castle/patterns/singleton.hpp"
 
 #include <stdint.h>
 
@@ -12,7 +12,7 @@ struct telemetry_hub
     uint32_t sequence;
 };
 
-using telemetry_hub_singleton = castle::design_patterns::singleton<telemetry_hub>;
+using telemetry_hub_singleton = castle::patterns::singleton<telemetry_hub>;
 
 int main()
 {

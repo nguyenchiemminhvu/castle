@@ -1,8 +1,8 @@
 #include "sample_support.hpp"
 
-#include "castle/design_patterns/fsm.hpp"
+#include "castle/patterns/fsm.hpp"
 
-namespace fsm = castle::design_patterns::fsm;
+namespace fsm = castle::patterns::fsm;
 
 struct locked
 {

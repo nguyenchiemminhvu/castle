@@ -1,6 +1,6 @@
 #include "castle_ext/data/data_pool.hpp"
 
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 
 #include <gtest/gtest.h>
 

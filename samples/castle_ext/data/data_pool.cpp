@@ -2,7 +2,7 @@
 
 #include "castle_ext/data/data_pool.hpp"
 
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 #include "castle/sync/semaphore.hpp"
 
 #include <stdint.h>
@@ -145,7 +145,7 @@ private:
     castle::semaphore<1> wake_{0U};
     sensor_pool pool_;
     sensor_pool::inbox_type inbox_;
-    castle::design_patterns::observable<sensor_pool::observer_type, 4U> apps_;
+    castle::patterns::observable<sensor_pool::observer_type, 4U> apps_;
 };
 } // namespace
 

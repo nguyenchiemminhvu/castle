@@ -15,7 +15,7 @@
  *
  * Typical flow: HAL publishes; an `update_inbox` registered as observer collects the changed
  * types and wakes the service thread; the service forwards the update set to the application
- * inboxes (`castle::design_patterns::observable`); each application reads only the types that
+ * inboxes (`castle::patterns::observable`); each application reads only the types that
  * changed. Large structures are copied once, by the producer, never per consumer. When a
  * consumer must react in the publisher's context instead, register an `update_dispatcher`,
  * which calls one callback per changed type.
@@ -46,7 +46,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 #include "castle/error/status.hpp"
 #include "castle/utility/tuple.hpp"
 #include "castle_ext/data/data_slot.hpp"
@@ -106,7 +106,7 @@ public:
     /** @brief Notification payload: the set of changed types. */
     using update_set_type = update_set<detail::pool_value_t<Entries>...>;
     /** @brief Observer interface notified by `publish()`. */
-    using observer_type = castle::design_patterns::observer<update_set_type>;
+    using observer_type = castle::patterns::observer<update_set_type>;
     /** @brief Ready-made thread-safe observer that collects updates for one consumer thread. */
     using inbox_type = update_inbox<detail::pool_value_t<Entries>...>;
     /** @brief Ready-made observer that calls one callback per changed type, in the publisher's context. */
@@ -185,7 +185,7 @@ private:
     }
 
     castle::tuple<detail::pool_slot_t<Entries>...> slots_{};
-    castle::design_patterns::observable<observer_type, MaxObservers> observers_{};
+    castle::patterns::observable<observer_type, MaxObservers> observers_{};
 };
 
 } // namespace data

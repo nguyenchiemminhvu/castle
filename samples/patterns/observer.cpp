@@ -1,10 +1,10 @@
 #include "sample_support.hpp"
 
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 
 #include <stdint.h>
 
-struct sensor_observer : castle::design_patterns::observer<uint16_t, void>
+struct sensor_observer : castle::patterns::observer<uint16_t, void>
 {
     void notify(uint16_t const& value) override
     {
@@ -27,7 +27,7 @@ int main()
     sensor_observer first;
     sensor_observer second;
     sensor_observer third;
-    castle::design_patterns::observable<sensor_observer, 2U> bus;
+    castle::patterns::observable<sensor_observer, 2U> bus;
 
     CASTLE_SAMPLE_CHECK(!bus.add_observer(nullptr));
     CASTLE_SAMPLE_CHECK(bus.add_observer(&first));

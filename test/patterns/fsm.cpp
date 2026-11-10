@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "castle/design_patterns/fsm.hpp"
+#include "castle/patterns/fsm.hpp"
 
 namespace
 {
-namespace fsm = castle::design_patterns::fsm;
+namespace fsm = castle::patterns::fsm;
 
 struct idle
 {

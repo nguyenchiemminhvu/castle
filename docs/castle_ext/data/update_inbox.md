@@ -2,7 +2,7 @@
 
 ## Overview
 
-`castle_ext::data::update_inbox<Ts...>` is the receiving end of data-layer notifications for one consumer thread, such as a service or an application adapter. It implements `castle::design_patterns::observer<update_set<Ts...>>`, so it can be attached to a [`data_pool`](data_pool.md) or to any `castle::design_patterns::observable` that forwards update sets.
+`castle_ext::data::update_inbox<Ts...>` is the receiving end of data-layer notifications for one consumer thread, such as a service or an application adapter. It implements `castle::patterns::observer<update_set<Ts...>>`, so it can be attached to a [`data_pool`](data_pool.md) or to any `castle::patterns::observable` that forwards update sets.
 
 `notify()` can be called from producer threads. It merges the set into atomic words and, when the inbox goes from idle to pending, calls an optional wake hook such as a semaphore release. The consumer drains all pending types at once with `take()` and then reads only those types from the pool.
 
@@ -15,7 +15,7 @@
 - [`castle/core/compiler.hpp`](../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp)
 - [`castle/callbacks/function.hpp`](../../callbacks/function.md)
-- [`castle/design_patterns/observer.hpp`](../../design_patterns/observer.md)
+- [`castle/patterns/observer.hpp`](../../patterns/observer.md)
 - [`castle/sync/atomic.hpp`](../../sync/atomic.md)
 - [`castle_ext/data/update_set.hpp`](update_set.md)
 

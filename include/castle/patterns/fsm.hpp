@@ -14,17 +14,17 @@
  * virtual functions, or STL dependencies are required.
  *
  * @code
- * #include "castle/design_patterns/fsm.hpp"
+ * #include "castle/patterns/fsm.hpp"
  *
  * struct locked {};
  * struct unlocked {};
  * struct key_turned {};
  * struct door_closed {};
  *
- * using door_fsm = castle::design_patterns::fsm::state_machine<
+ * using door_fsm = castle::patterns::fsm::state_machine<
  *     locked,
- *     castle::design_patterns::fsm::transition<locked, key_turned, unlocked>,
- *     castle::design_patterns::fsm::transition<unlocked, door_closed, locked>
+ *     castle::patterns::fsm::transition<locked, key_turned, unlocked>,
+ *     castle::patterns::fsm::transition<unlocked, door_closed, locked>
  * >;
  *
  * int main()
@@ -35,8 +35,8 @@
  * }
  * @endcode
  */
-#ifndef CASTLE_DESIGN_PATTERNS_FSM_HPP
-#define CASTLE_DESIGN_PATTERNS_FSM_HPP
+#ifndef CASTLE_PATTERNS_FSM_HPP
+#define CASTLE_PATTERNS_FSM_HPP
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
@@ -46,7 +46,7 @@
 
 namespace castle
 {
-namespace design_patterns
+namespace patterns
 {
 namespace fsm
 {
@@ -467,7 +467,7 @@ private:
 };
 
 } // namespace fsm
-} // namespace design_patterns
+} // namespace patterns
 } // namespace castle
 
-#endif // CASTLE_DESIGN_PATTERNS_FSM_HPP
+#endif // CASTLE_PATTERNS_FSM_HPP

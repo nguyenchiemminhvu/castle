@@ -6,8 +6,8 @@
  * @brief Thread-safe accumulator of update notifications for one consumer thread.
  *
  * An inbox is the receiving end of data-layer notifications. It is a
- * `castle::design_patterns::observer` of `update_set<Ts...>`, so it can be attached to a
- * `data_pool` or to any `castle::design_patterns::observable` that forwards update sets.
+ * `castle::patterns::observer` of `update_set<Ts...>`, so it can be attached to a
+ * `data_pool` or to any `castle::patterns::observable` that forwards update sets.
  * `notify()` may run in a producer's context (HAL thread, ISR-deferred task); it only merges the
  * set into atomic words and, when the inbox goes from idle to pending, calls an optional wake
  * hook such as a semaphore release. The consumer thread drains everything with `take()`.
@@ -36,7 +36,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/callbacks/function.hpp"
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 #include "castle/sync/atomic.hpp"
 #include "castle_ext/data/update_set.hpp"
 
@@ -58,7 +58,7 @@ namespace data
  *       for the single consumer thread that owns the inbox.
  */
 template <typename... Ts>
-class update_inbox CASTLE_FINAL : public castle::design_patterns::observer<update_set<Ts...>>
+class update_inbox CASTLE_FINAL : public castle::patterns::observer<update_set<Ts...>>
 {
 public:
     using set_type = update_set<Ts...>;

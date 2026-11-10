@@ -4,7 +4,7 @@
 Variadic visitor and visitable base helpers for classic visitor-style dispatch. Use it when concrete node types need a shared visitor interface with compile-time-checked overload sets.
 
 ## Header
-`#include "castle/design_patterns/visitor.hpp"`
+`#include "castle/patterns/visitor.hpp"`
 
 ## Dependencies
 - `castle/core/traits.hpp`
@@ -19,12 +19,12 @@ Variadic visitor and visitable base helpers for classic visitor-style dispatch. 
 
 ## Usage Example
 ```cpp
-// See: samples/sample_visitor.cpp
-#include "castle/design_patterns/visitor.hpp"
+// See: samples/patterns/visitor.cpp
+#include "castle/patterns/visitor.hpp"
 
 struct start_command;
 struct stop_command;
-using command_visitor = castle::design_patterns::visitor<start_command&, stop_command&>;
+using command_visitor = castle::patterns::visitor<start_command&, stop_command&>;
 ```
 
 ## Constraints & Notes

@@ -2,7 +2,7 @@
 
 #include "castle_ext/data/data_pool.hpp"
 
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 
 #include <gtest/gtest.h>
 
@@ -133,7 +133,7 @@ TEST(UpdateDispatcherTest, ReceivesNotificationsAsObserver)
         ++calls;
     });
 
-    castle::design_patterns::observable<castle::design_patterns::observer<set_type>, 1U> source;
+    castle::patterns::observable<castle::patterns::observer<set_type>, 1U> source;
     ASSERT_TRUE(source.add_observer(&dispatcher));
     source.notify_observers(set_type::of<gnss>());
     EXPECT_EQ(calls, 1U);

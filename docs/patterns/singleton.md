@@ -4,7 +4,7 @@
 An explicitly controlled singleton wrapper that constructs one instance in aligned static storage with no heap allocation. Use it when a process-wide object must be created and destroyed deterministically by the caller.
 
 ## Header
-`#include "castle/design_patterns/singleton.hpp"`
+`#include "castle/patterns/singleton.hpp"`
 
 ## Dependencies
 - [`../memory/alignment.md`](../memory/alignment.md)
@@ -23,8 +23,8 @@ An explicitly controlled singleton wrapper that constructs one instance in align
 
 ## Usage Example
 ```cpp
-// See: samples/sample_singleton.cpp
-#include "castle/design_patterns/singleton.hpp"
+// See: samples/patterns/singleton.cpp
+#include "castle/patterns/singleton.hpp"
 
 struct service
 {
@@ -32,7 +32,7 @@ struct service
     uint32_t value;
 };
 
-using global_service = castle::design_patterns::singleton<service>;
+using global_service = castle::patterns::singleton<service>;
 ```
 
 ## Constraints & Notes

@@ -192,7 +192,7 @@ rectangle "Data pool: one copy, bit-set notifications" {
 | [`update_inbox.hpp`](update_inbox.md) | `update_inbox<Ts...>` | Thread-safe `observer<update_set>` that accumulates pending types for one consumer thread and wakes it. |
 | [`update_dispatcher.hpp`](update_dispatcher.md) | `update_dispatcher<Ts...>` | `observer<update_set>` that calls one bound callback per changed type, directly in the publisher's context. No pending state, no coalescing. |
 
-Propagation uses the core [`castle::design_patterns::observer` / `observable`](../../design_patterns/observer.md); the module adds no second publish/subscribe mechanism.
+Propagation uses the core [`castle::patterns::observer` / `observable`](../../patterns/observer.md); the module adds no second publish/subscribe mechanism.
 
 Properties shared by all of them: no heap, no exceptions, no RTTI, no STL. The type set is fixed at compile time, so a slot is selected by the compiler rather than looked up at runtime, and using an unknown type does not compile.
 
@@ -276,7 +276,7 @@ Responsibilities:
 skinparam shadowing false
 hide empty members
 
-namespace castle.design_patterns {
+namespace castle.patterns {
   abstract class "observer<update_set>" as Observer {
     + {abstract} notify(const update_set&)
   }
@@ -990,7 +990,7 @@ The service owns every component and their lifetimes, implements `register_data_
 #include "platform/wake_event.hpp"
 #include "vehicle_data.hpp"
 
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 #include "castle/sync/atomic.hpp"
 
 // ---- Service: owns pool, HAL and application adapters; propagates updated types ----
@@ -1064,7 +1064,7 @@ private:
 
     wake_event wake_;
     vehicle_pool::inbox_type inbox_;
-    castle::design_patterns::observable<vehicle_pool::observer_type, 4U> apps_;
+    castle::patterns::observable<vehicle_pool::observer_type, 4U> apps_;
 
     imu_driver imu_;
     gnss_driver gnss_;

@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
-#include "castle/design_patterns/visitor.hpp"
+#include "castle/patterns/visitor.hpp"
 
 namespace
 {
 struct A;
 struct B;
 
-using V=castle::design_patterns::visitor<A&,B&>;
+using V=castle::patterns::visitor<A&,B&>;
 
-struct A: castle::design_patterns::visitable<V>
+struct A: castle::patterns::visitable<V>
 {
     int n=0;
     void accept(V& v) override
@@ -17,7 +17,7 @@ struct A: castle::design_patterns::visitable<V>
     }
 };
 
-struct B: castle::design_patterns::visitable<V>
+struct B: castle::patterns::visitable<V>
 {
     int n=0;
     void accept(V& v) override

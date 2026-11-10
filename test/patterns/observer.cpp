@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 
 namespace
 {
-struct IntObs: castle::design_patterns::observer<int>
+struct IntObs: castle::patterns::observer<int>
 {
     int sum=0;
     void notify(const int&v) override
@@ -12,7 +12,7 @@ struct IntObs: castle::design_patterns::observer<int>
     }
 };
 
-struct VoidObs: castle::design_patterns::observer<void>
+struct VoidObs: castle::patterns::observer<void>
 {
     int calls=0;
     void notify() override
@@ -23,7 +23,7 @@ struct VoidObs: castle::design_patterns::observer<void>
 
 TEST(ObserverTest, AddRemoveNotifyCapacityAndReuse)
 {
-    castle::design_patterns::observable<IntObs,2> o;
+    castle::patterns::observable<IntObs,2> o;
     IntObs a,b;
     EXPECT_FALSE(o.add_observer(nullptr));
     EXPECT_TRUE(o.add_observer(&a));
@@ -44,7 +44,7 @@ TEST(ObserverTest, AddRemoveNotifyCapacityAndReuse)
 
 TEST(ObserverTest, VoidSpecializationAndTypedInheritance)
 {
-    castle::design_patterns::observable<VoidObs,1> o;
+    castle::patterns::observable<VoidObs,1> o;
     VoidObs v;
     EXPECT_TRUE(o.add_observer(&v));
     o.notify_observers();

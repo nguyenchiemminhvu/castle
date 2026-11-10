@@ -1,12 +1,12 @@
 #include "sample_support.hpp"
 
-#include "castle/design_patterns/visitor.hpp"
+#include "castle/patterns/visitor.hpp"
 
 struct start_command;
 struct stop_command;
-using command_visitor = castle::design_patterns::visitor<start_command&, stop_command&>;
+using command_visitor = castle::patterns::visitor<start_command&, stop_command&>;
 
-struct start_command : castle::design_patterns::visitable<command_visitor>
+struct start_command : castle::patterns::visitable<command_visitor>
 {
     explicit start_command(int value) : argument(value) {}
 
@@ -18,7 +18,7 @@ struct start_command : castle::design_patterns::visitable<command_visitor>
     int argument;
 };
 
-struct stop_command : castle::design_patterns::visitable<command_visitor>
+struct stop_command : castle::patterns::visitable<command_visitor>
 {
     void accept(command_visitor& visitor) override
     {

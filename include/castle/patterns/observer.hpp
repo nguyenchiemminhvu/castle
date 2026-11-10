@@ -10,17 +10,17 @@
  * require RTTI or STL containers.
  *
  * @code
- * #include "castle/design_patterns/observer.hpp"
+ * #include "castle/patterns/observer.hpp"
  *
- * struct temperature_observer : castle::design_patterns::observer<unsigned>
+ * struct temperature_observer : castle::patterns::observer<unsigned>
  * {
  *     void notify(unsigned const& value) override { last = value; }
  *     unsigned last = 0U;
  * };
  * @endcode
  */
-#ifndef CASTLE_DESIGN_PATTERNS_OBSERVER_HPP
-#define CASTLE_DESIGN_PATTERNS_OBSERVER_HPP
+#ifndef CASTLE_PATTERNS_OBSERVER_HPP
+#define CASTLE_PATTERNS_OBSERVER_HPP
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
@@ -31,7 +31,7 @@
 
 namespace castle
 {
-namespace design_patterns
+namespace patterns
 {
 
 template <typename... Types>
@@ -201,7 +201,7 @@ private:
     size_type observer_count_ = 0U;
 };
 
-} // namespace design_patterns
+} // namespace patterns
 } // namespace castle
 
-#endif // CASTLE_DESIGN_PATTERNS_OBSERVER_HPP
+#endif // CASTLE_PATTERNS_OBSERVER_HPP

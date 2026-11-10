@@ -2,7 +2,7 @@
 
 #include "castle_ext/data/update_inbox.hpp"
 
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 #include "castle/sync/semaphore.hpp"
 
 #include <stdint.h>
@@ -35,7 +35,7 @@ int main()
     }};
 
     // Producers usually reach the inbox through an observable (a data_pool or a service).
-    castle::design_patterns::observable<castle::design_patterns::observer<updates>, 2U> service;
+    castle::patterns::observable<castle::patterns::observer<updates>, 2U> service;
     CASTLE_SAMPLE_CHECK(service.add_observer(&app_inbox));
     CASTLE_SAMPLE_CHECK(!app_inbox.has_pending());
 

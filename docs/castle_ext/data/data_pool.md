@@ -20,7 +20,7 @@ sequenceDiagram
     App->>Pool: get_snapshot<imu>()
 ```
 
-The service owns the pool, hands it to the HAL (as `data_pool&`) and to the applications (as `const data_pool&`, read-only), and registers its own inbox as a pool observer. Application inboxes are attached to a `castle::design_patterns::observable<pool_type::observer_type, N>` owned by the service.
+The service owns the pool, hands it to the HAL (as `data_pool&`) and to the applications (as `const data_pool&`, read-only), and registers its own inbox as a pool observer. Application inboxes are attached to a `castle::patterns::observable<pool_type::observer_type, N>` owned by the service.
 
 ## Header
 
@@ -31,7 +31,7 @@ The service owns the pool, hands it to the HAL (as `data_pool&`) and to the appl
 - [`castle/core/compiler.hpp`](../../../include/castle/core/compiler.hpp)
 - [`castle/core/traits.hpp`](../../../include/castle/core/traits.hpp)
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp)
-- [`castle/design_patterns/observer.hpp`](../../design_patterns/observer.md)
+- [`castle/patterns/observer.hpp`](../../patterns/observer.md)
 - [`castle/error/status.hpp`](../../../include/castle/error/status.hpp)
 - [`castle/utility/tuple.hpp`](../../utility/tuple.md)
 - [`castle_ext/data/data_slot.hpp`](data_slot.md)
@@ -45,7 +45,7 @@ The service owns the pool, hands it to the HAL (as `data_pool&`) and to the appl
 |---|---|
 | `data_pool<MaxObservers, Entries...>` | Each entry is either `T` (stored as `data_slot<T>`, one held old snapshot) or `data_slot<T, MaxReaders>` (snapshot buffers sized per type). Value types must be unique. |
 | `update_set_type` | `update_set<T...>` over the value types, in declaration order. |
-| `observer_type` | `castle::design_patterns::observer<update_set_type>`. |
+| `observer_type` | `castle::patterns::observer<update_set_type>`. |
 | `inbox_type` | `update_inbox<T...>`: a ready-made, thread-safe observer for one consumer thread. |
 | `dispatcher_type` | `update_dispatcher<T...>`: observer that calls one bound callback per changed type, in the publisher's context. |
 | `data_pool()` | Every slot holds a default-constructed value with generation 0. |
@@ -88,9 +88,9 @@ if (app_inbox.take().contains<imu_sample>())
 
 ## Constraints & Notes
 
-- **Storage:** fully static, a `castle::tuple` of `data_slot`s plus a `castle::design_patterns::observable` with `MaxObservers` pointers. No heap, no RTTI, and no runtime type lookup: the slot for each type is selected at compile time.
+- **Storage:** fully static, a `castle::tuple` of `data_slot`s plus a `castle::patterns::observable` with `MaxObservers` pointers. No heap, no RTTI, and no runtime type lookup: the slot for each type is selected at compile time.
 - **Threads:** each type has one writer at a time; an overlapping `publish()` of the same type returns `status::data_loss`. Different types can be published concurrently from different threads. Any number of threads can call `get_snapshot()`.
-- **Observers:** `publish()` notifies observers synchronously in the publisher's context, through the virtual call of `castle::design_patterns::observer`. Observers must be short and thread-safe; `inbox_type` only performs an atomic OR and an optional wake hook, while `dispatcher_type` runs its bound callbacks, which inherit the same requirement. Register and unregister observers before producers start publishing, because the observer list is not synchronized.
+- **Observers:** `publish()` notifies observers synchronously in the publisher's context, through the virtual call of `castle::patterns::observer`. Observers must be short and thread-safe; `inbox_type` only performs an atomic OR and an optional wake hook, while `dispatcher_type` runs its bound callbacks, which inherit the same requirement. Register and unregister observers before producers start publishing, because the observer list is not synchronized.
 - **Coalescing:** consumers see the latest value of each changed type; intermediate values published between two reads are skipped by design. Use a queue for data where every sample matters.
 - **Back-pressure:** `status::full` means readers hold more old snapshots of that type than its `MaxReaders`. Increase `MaxReaders` for that entry, or release snapshots sooner.
 - **Initial state:** `get_snapshot<T>().generation() == 0` means nothing has been published for `T` yet.

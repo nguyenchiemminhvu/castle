@@ -1,6 +1,6 @@
 #include "castle_ext/data/update_inbox.hpp"
 
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 #include "castle/utility/integral_sequence.hpp"
 
 #include <gtest/gtest.h>
@@ -142,7 +142,7 @@ TEST(UpdateInboxTest, ReceivesNotificationsAsObserver)
 {
     inbox_type first;
     inbox_type second;
-    castle::design_patterns::observable<castle::design_patterns::observer<set_type>, 2U> source;
+    castle::patterns::observable<castle::patterns::observer<set_type>, 2U> source;
     ASSERT_TRUE(source.add_observer(&first));
     ASSERT_TRUE(source.add_observer(&second));
 

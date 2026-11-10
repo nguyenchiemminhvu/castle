@@ -4,7 +4,7 @@
 A compile-time described finite state machine for embedded applications. States and events are C++ types, and a transition table maps an exact `(source state, event type)` pair to a target state. Optional guard and action functors provide decision and side-effect behavior without virtual dispatch or callback type erasure.
 
 ## Header
-`#include "castle/design_patterns/fsm.hpp"`
+`#include "castle/patterns/fsm.hpp"`
 
 ## Dependencies
 - `castle/core/compiler.hpp`
@@ -36,12 +36,12 @@ No dynamic container, clock, event dispatcher, callback wrapper, or STL header i
 ### Transition declaration
 
 ```cpp
-using machine = castle::design_patterns::fsm::state_machine<
+using machine = castle::patterns::fsm::state_machine<
     idle,
-    castle::design_patterns::fsm::transition<
+    castle::patterns::fsm::transition<
         idle, start_event, running, start_guard, start_action
     >,
-    castle::design_patterns::fsm::transition<running, stop_event, idle>
+    castle::patterns::fsm::transition<running, stop_event, idle>
 >;
 ```
 
@@ -50,10 +50,10 @@ Template parameter order is `SourceState, Event, TargetState, Guard, Action`. A 
 ## Usage Example
 
 ```cpp
-#include "castle/design_patterns/fsm.hpp"
+#include "castle/patterns/fsm.hpp"
 #include <cassert>
 
-namespace fsm = castle::design_patterns::fsm;
+namespace fsm = castle::patterns::fsm;
 
 struct idle {};
 struct running {};
@@ -98,7 +98,7 @@ int main()
 }
 ```
 
-See `samples/design_patterns/fsm.cpp` for a complete standalone example covering guards, actions, multiple source states for one event type, the empty-context overload, reset, and state metadata.
+See `samples/patterns/fsm.cpp` for a complete standalone example covering guards, actions, multiple source states for one event type, the empty-context overload, reset, and state metadata.
 
 ## Constraints & Notes
 

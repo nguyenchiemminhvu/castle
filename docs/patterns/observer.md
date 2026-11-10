@@ -4,7 +4,7 @@
 Fixed-capacity observer interfaces and an observable registry for embedded event fan-out. Use it when a subject must notify a bounded set of listeners without dynamic allocation.
 
 ## Header
-`#include "castle/design_patterns/observer.hpp"`
+`#include "castle/patterns/observer.hpp"`
 
 ## Dependencies
 - [`../container/array.md`](../container/array.md)
@@ -24,10 +24,10 @@ Fixed-capacity observer interfaces and an observable registry for embedded event
 
 ## Usage Example
 ```cpp
-// See: samples/sample_observer.cpp
-#include "castle/design_patterns/observer.hpp"
+// See: samples/patterns/observer.cpp
+#include "castle/patterns/observer.hpp"
 
-struct temperature_observer : castle::design_patterns::observer<uint16_t>
+struct temperature_observer : castle::patterns::observer<uint16_t>
 {
     void notify(uint16_t const& value) override { last = value; }
     uint16_t last = 0U;

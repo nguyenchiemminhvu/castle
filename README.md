@@ -91,7 +91,7 @@ standards it follows (MISRA C++, AUTOSAR C++14, CERT C++, ISO 26262).
 - [`chrono/`](docs/chrono/chrono.md) — Durations, time points, clocks, and literals.
 - [`container/`](docs/container/containers.md) — Fixed-capacity sequences, associative containers, buffers, and strings.
 - [`core/`](docs/core/compiler.md) — Compiler abstraction, configuration, traits, type ranges, and error handling.
-- [`design_patterns/`](docs/design_patterns/observer.md) — Observer, singleton, and visitor helpers.
+- [`patterns/`](docs/patterns/observer.md) — Observer, singleton, and visitor helpers.
 - [`error/`](docs/error/status.md) — Common status/error values.
 - [`events/`](docs/events/delegate_dispatcher.md) — Event dispatch, signal/slot, IPC, timers, and thread-pool helpers.
 - [`iterator/`](docs/iterator/iterator.md) — Iterator tags, traits, operations, and bounded iterators.

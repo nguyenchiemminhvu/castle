@@ -10,22 +10,22 @@
  * `visit()` and `accept()` dispatch.
  *
  * @code
- * #include "castle/design_patterns/visitor.hpp"
+ * #include "castle/patterns/visitor.hpp"
  *
  * struct start_command;
  * struct stop_command;
- * using command_visitor = castle::design_patterns::visitor<start_command&, stop_command&>;
+ * using command_visitor = castle::patterns::visitor<start_command&, stop_command&>;
  * @endcode
  */
-#ifndef CASTLE_DESIGN_PATTERNS_VISITOR_HPP
-#define CASTLE_DESIGN_PATTERNS_VISITOR_HPP
+#ifndef CASTLE_PATTERNS_VISITOR_HPP
+#define CASTLE_PATTERNS_VISITOR_HPP
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 
 namespace castle
 {
-namespace design_patterns
+namespace patterns
 {
 
 /**
@@ -112,7 +112,7 @@ public:
     virtual void accept(T1& visitor) = 0;
 };
 
-} // namespace design_patterns
+} // namespace patterns
 } // namespace castle
 
-#endif // CASTLE_DESIGN_PATTERNS_VISITOR_HPP
+#endif // CASTLE_PATTERNS_VISITOR_HPP

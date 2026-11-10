@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/design_patterns/singleton.hpp"
+#include "castle/patterns/singleton.hpp"
 
 namespace
 {
@@ -21,7 +21,7 @@ namespace
 
     TEST(SingletonTest, LifecycleAndState)
     {
-        using SS=castle::design_patterns::singleton<S>;
+        using SS=castle::patterns::singleton<S>;
         static_assert(noexcept(SS::instance()),"instance noexcept");
         EXPECT_FALSE(SS::is_valid());
         SS::create(42);

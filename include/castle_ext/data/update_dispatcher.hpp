@@ -6,8 +6,8 @@
  * @brief Observer that invokes one callback per updated type, directly in the notifier's context.
  *
  * A dispatcher is the push-style counterpart of `update_inbox`. It is a
- * `castle::design_patterns::observer` of `update_set<Ts...>`, so it can be attached to a
- * `data_pool` or to any `castle::design_patterns::observable` that forwards update sets. It
+ * `castle::patterns::observer` of `update_set<Ts...>`, so it can be attached to a
+ * `data_pool` or to any `castle::patterns::observable` that forwards update sets. It
  * records nothing: `notify()` calls, for every type of the incoming set, the callback bound to
  * that type. The callback knows its type from the binding and reads the latest value from the
  * pool itself, e.g. with `pool.get_snapshot<T>()`. Types without a callback are ignored.
@@ -33,7 +33,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/callbacks/function.hpp"
-#include "castle/design_patterns/observer.hpp"
+#include "castle/patterns/observer.hpp"
 #include "castle/utility/move.hpp"
 #include "castle/utility/tuple.hpp"
 #include "castle_ext/data/update_set.hpp"
@@ -58,7 +58,7 @@ namespace data
  * @note `bind()` is not synchronized: bind every callback before the dispatcher is attached.
  */
 template <typename... Ts>
-class update_dispatcher CASTLE_FINAL : public castle::design_patterns::observer<update_set<Ts...>>
+class update_dispatcher CASTLE_FINAL : public castle::patterns::observer<update_set<Ts...>>
 {
 public:
     using set_type = update_set<Ts...>;

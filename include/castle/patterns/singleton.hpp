@@ -10,7 +10,7 @@
  * caller owns all synchronization.
  *
  * @code
- * #include "castle/design_patterns/singleton.hpp"
+ * #include "castle/patterns/singleton.hpp"
  *
  * struct service
  * {
@@ -18,11 +18,11 @@
  *     int value;
  * };
  *
- * using global_service = castle::design_patterns::singleton<service>;
+ * using global_service = castle::patterns::singleton<service>;
  * @endcode
  */
-#ifndef CASTLE_DESIGN_PATTERNS_SINGLETON_HPP
-#define CASTLE_DESIGN_PATTERNS_SINGLETON_HPP
+#ifndef CASTLE_PATTERNS_SINGLETON_HPP
+#define CASTLE_PATTERNS_SINGLETON_HPP
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/error_handler.hpp"
@@ -34,7 +34,7 @@
 
 namespace castle
 {
-namespace design_patterns
+namespace patterns
 {
 
 /**
@@ -125,7 +125,7 @@ typename singleton<T>::storage_type singleton<T>::s_storage{};
 template <typename T>
 bool singleton<T>::s_is_valid = false;
 
-} // namespace design_patterns
+} // namespace patterns
 } // namespace castle
 
-#endif // CASTLE_DESIGN_PATTERNS_SINGLETON_HPP
+#endif // CASTLE_PATTERNS_SINGLETON_HPP

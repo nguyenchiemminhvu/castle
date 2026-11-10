@@ -2,7 +2,7 @@
 
 ## Overview
 
-`castle_ext::data::update_dispatcher<Ts...>` is the push-style receiving end of data-layer notifications. Like [`update_inbox`](update_inbox.md), it implements `castle::design_patterns::observer<update_set<Ts...>>`, so it can be attached to a [`data_pool`](data_pool.md) (as `pool_type::dispatcher_type`) or to any `castle::design_patterns::observable` that forwards update sets.
+`castle_ext::data::update_dispatcher<Ts...>` is the push-style receiving end of data-layer notifications. Like [`update_inbox`](update_inbox.md), it implements `castle::patterns::observer<update_set<Ts...>>`, so it can be attached to a [`data_pool`](data_pool.md) (as `pool_type::dispatcher_type`) or to any `castle::patterns::observable` that forwards update sets.
 
 It records nothing. Each type has its own `castle::callbacks::function<void()>` slot. `notify()` calls the callback of every type in the incoming set, directly, in the notifier's context. The callback knows its type from the binding and reads the latest value from the pool itself with `get_snapshot<T>()`. Types without a callback are ignored.
 
@@ -37,7 +37,7 @@ sequenceDiagram
 - [`castle/core/traits.hpp`](../../../include/castle/core/traits.hpp)
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp)
 - [`castle/callbacks/function.hpp`](../../callbacks/function.md)
-- [`castle/design_patterns/observer.hpp`](../../design_patterns/observer.md)
+- [`castle/patterns/observer.hpp`](../../patterns/observer.md)
 - [`castle/utility/move.hpp`](../../../include/castle/utility/move.hpp)
 - [`castle/utility/tuple.hpp`](../../utility/tuple.md)
 - [`castle_ext/data/update_set.hpp`](update_set.md)
