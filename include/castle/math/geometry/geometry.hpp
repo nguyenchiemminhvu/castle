@@ -12,8 +12,10 @@
 #define CASTLE_MATH_GEOMETRY_GEOMETRY_HPP
 
 #include "castle/math/geometry/algorithms.hpp"
+#include "castle/math/geometry/azimuth.hpp"
 #include "castle/math/geometry/circle2d.hpp"
 #include "castle/math/geometry/circle3d.hpp"
+#include "castle/math/geometry/elevation.hpp"
 #include "castle/math/geometry/intersections.hpp"
 #include "castle/math/geometry/line2d.hpp"
 #include "castle/math/geometry/line3d.hpp"

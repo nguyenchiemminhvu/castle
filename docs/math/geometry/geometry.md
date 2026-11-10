@@ -8,8 +8,10 @@ Aggregate include for all Castle geometry building blocks. Use it when you want 
 
 ## Dependencies
 - [`algorithms.md`](algorithms.md)
+- [`azimuth.md`](azimuth.md)
 - [`circle2d.md`](circle2d.md)
 - [`circle3d.md`](circle3d.md)
+- [`elevation.md`](elevation.md)
 - [`intersections.md`](intersections.md)
 - [`line2d.md`](line2d.md)
 - [`line3d.md`](line3d.md)
