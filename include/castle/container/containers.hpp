@@ -36,5 +36,6 @@
 #include "castle/container/hash_map.hpp"
 #include "castle/container/hash_set.hpp"
 #include "castle/container/forward_list.hpp"
+#include "castle/container/list.hpp"
 
 #endif

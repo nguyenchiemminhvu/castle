@@ -25,5 +25,12 @@ int main()
     CASTLE_SAMPLE_CHECK(label.size() == 2U);
     CASTLE_SAMPLE_CHECK(label.back() == 'K');
 
+    castle::container::list<uint8_t, 2U> recency;
+    CASTLE_SAMPLE_CHECK(recency.push_back(1U) == castle::status::ok);
+    CASTLE_SAMPLE_CHECK(recency.push_back(2U) == castle::status::ok);
+    recency.move_to_front(--recency.end());
+    CASTLE_SAMPLE_CHECK(recency.front() == 2U);
+    CASTLE_SAMPLE_CHECK(recency.back() == 1U);
+
     return 0;
 }
