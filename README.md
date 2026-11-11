@@ -87,6 +87,7 @@ standards it follows (MISRA C++, AUTOSAR C++14, CERT C++, ISO 26262).
 
 - [`algorithm/`](docs/algorithm/algorithm.md) — Range algorithms and iterator-based utilities.
 - [`bit/`](docs/bit/bit.md) — Bit operations, masks, rotations, and flags.
+- [`cache/`](docs/cache/cache.md) — Fixed-capacity key/value caches with FIFO, LIFO, LRU, MRU, and LFU eviction.
 - [`callbacks/`](docs/callbacks/delegate.md) — Fixed-storage delegates, functions, registries, and execution policies.
 - [`chrono/`](docs/chrono/chrono.md) — Durations, time points, clocks, and literals.
 - [`container/`](docs/container/containers.md) — Fixed-capacity sequences, associative containers, buffers, and strings.
