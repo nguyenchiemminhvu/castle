@@ -25,6 +25,7 @@ Umbrella header that pulls the Castle container family into one include. Use it 
 - [forward_list](forward_list.md)
 - [list](list.md)
 - [disjoint_set](disjoint_set.md)
+- [graph](graph.md)
 
 ## Public API
 | API | Description |

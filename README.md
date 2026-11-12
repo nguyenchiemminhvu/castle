@@ -89,7 +89,7 @@ standards it follows (MISRA C++, AUTOSAR C++14, CERT C++, ISO 26262).
 - [`cache/`](docs/cache/cache.md) — Fixed-capacity key/value caches with FIFO, LIFO, LRU, MRU, and LFU eviction.
 - [`callbacks/`](docs/callbacks/delegate.md) — Fixed-storage delegates, functions, registries, and execution policies.
 - [`chrono/`](docs/chrono/chrono.md) — Durations, time points, clocks, and literals.
-- [`dsa/`](docs/dsa/containers.md) — Fixed-capacity sequences, associative containers, buffers, strings, and range algorithms ([`algorithm.hpp`](docs/dsa/algorithm.md)).
+- [`dsa/`](docs/dsa/containers.md) — Fixed-capacity sequences, associative containers, buffers, strings, graphs with graph algorithms ([`graph.hpp`](docs/dsa/graph.md)), and range algorithms ([`algorithm.hpp`](docs/dsa/algorithm.md)).
 - [`core/`](docs/core/compiler.md) — Compiler abstraction, configuration, traits, type ranges, and error handling.
 - [`patterns/`](docs/patterns/observer.md) — Observer, singleton, and visitor helpers.
 - [`error/`](docs/error/status.md) — Common status/error values.

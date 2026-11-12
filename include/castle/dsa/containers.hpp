@@ -38,5 +38,6 @@
 #include "castle/dsa/forward_list.hpp"
 #include "castle/dsa/list.hpp"
 #include "castle/dsa/disjoint_set.hpp"
+#include "castle/dsa/graph.hpp"
 
 #endif
