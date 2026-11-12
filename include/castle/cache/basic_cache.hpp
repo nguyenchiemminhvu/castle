@@ -55,15 +55,6 @@ namespace detail
 {
 
 /**
- * @brief Smallest unsigned type able to hold every slot index `0..N-1` plus the `N` sentinel.
- * @tparam N Cache capacity.
- */
-template <size_type N>
-using cache_index_t = meta::conditional_t<(N <= 0xFFU), uint8_t,
-                      meta::conditional_t<(N <= 0xFFFFU), uint16_t,
-                      meta::conditional_t<(N <= 0xFFFFFFFFUL), uint32_t, size_type>>>;
-
-/**
  * @brief Eviction callback that ignores the evicted entry.
  */
 struct ignore_eviction
@@ -89,7 +80,7 @@ struct ignore_eviction
 template <size_type N, bool ReorderOnAccess, bool EvictNewest>
 class linked_order
 {
-    using index_type = cache_index_t<N>;
+    using index_type = meta::smallest_uint_t<N>;
     static CASTLE_CONSTEXPR index_type npos = static_cast<index_type>(N);
 
 public:
@@ -234,7 +225,7 @@ class basic_cache
 {
     static_assert(N > 0U, "basic_cache requires a positive capacity");
 
-    using index_type = detail::cache_index_t<N>;
+    using index_type = meta::smallest_uint_t<N>;
     using policy_state = typename Policy::template state<N>;
     static CASTLE_CONSTEXPR index_type npos = static_cast<index_type>(N);
 

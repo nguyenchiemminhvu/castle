@@ -812,6 +812,19 @@ struct is_power_of_two
     static CASTLE_CONSTEXPR bool value = ((N > 0) && (N & (N - 1)) == 0);
 };
 
+/// @brief Selects the smallest unsigned integer type able to represent every value in `[0, Max]`.
+/// @tparam Max Largest value the selected type must hold.
+/// @note Yields `uint8_t`, `uint16_t`, `uint32_t`, or `size_t`, in that order of preference.
+template <size_t Max>
+struct smallest_uint
+{
+    using type = conditional_t<(Max <= 0xFFU), uint8_t,
+                 conditional_t<(Max <= 0xFFFFU), uint16_t,
+                 conditional_t<(Max <= 0xFFFFFFFFUL), uint32_t, size_t>>>;
+};
+
+template <size_t Max> using smallest_uint_t = typename smallest_uint<Max>::type;
+
 /// @brief Reports whether a type is a non-bool integral type whose size is a power of two.
 /// @tparam T Type to test.
 template <typename T>
@@ -1036,6 +1049,8 @@ using is_invocable_r = meta::is_invocable_r<R, F, Args...>;
 
 template <size_t N>       using is_power_of_two  = meta::is_power_of_two<N>;
 template <typename T>     using is_valid_integer = meta::is_valid_integer<T>;
+template <size_t Max>     using smallest_uint    = meta::smallest_uint<Max>;
+template <size_t Max>     using smallest_uint_t  = meta::smallest_uint_t<Max>;
 template <typename... Ts> using has_unique_types = meta::has_unique_types<Ts...>;
 template <typename T, template <typename...> class Template>
 using is_specialization_of = meta::is_specialization_of<T, Template>;

@@ -448,6 +448,18 @@ TEST(CoreTraitsTest, PowerOfTwoAndValidInteger)
     static_assert(cm::is_valid_integer<int>::is_size_power_of_2, "int size pow2 flag");
 }
 
+TEST(CoreTraitsTest, SmallestUintSelectsNarrowestFittingType)
+{
+    static_assert(cm::is_same<cm::smallest_uint_t<0U>, uint8_t>::value, "0");
+    static_assert(cm::is_same<cm::smallest_uint_t<255U>, uint8_t>::value, "255");
+    static_assert(cm::is_same<cm::smallest_uint_t<256U>, uint16_t>::value, "256");
+    static_assert(cm::is_same<cm::smallest_uint_t<65535U>, uint16_t>::value, "65535");
+    static_assert(cm::is_same<cm::smallest_uint_t<65536U>, uint32_t>::value, "65536");
+    static_assert(cm::is_same<cm::smallest_uint_t<0xFFFFFFFFUL>, uint32_t>::value, "uint32 max");
+    static_assert(cm::is_same<castle::smallest_uint<100U>::type, uint8_t>::value, "castle alias");
+    EXPECT_EQ(sizeof(castle::smallest_uint_t<1000U>), 2U);
+}
+
 TEST(CoreTraitsTest, PackContainsUniqueTypesSpecialization)
 {
     static_assert(cm::pack_contains<int, char, int, double>::value, "contains");

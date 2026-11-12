@@ -60,7 +60,7 @@ class frequency_order
     static_assert(meta::is_integral<Count>::value && meta::is_unsigned<Count>::value,
                   "lfu_policy requires an unsigned integral counter type");
 
-    using index_type = cache_index_t<N>;
+    using index_type = meta::smallest_uint_t<N>;
     static CASTLE_CONSTEXPR index_type npos = static_cast<index_type>(N);
     static CASTLE_CONSTEXPR Count max_count = numeric_limits<Count>::max();
 

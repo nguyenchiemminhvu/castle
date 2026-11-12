@@ -87,16 +87,6 @@ std::vector<int> drain(Cache& cache)
 
 using V = std::vector<int>;
 
-TEST(CacheBasicTest, IndexTypeIsSmallestFittingUnsigned)
-{
-    static_assert(sizeof(castle::cache::detail::cache_index_t<1U>) == 1U, "1");
-    static_assert(sizeof(castle::cache::detail::cache_index_t<255U>) == 1U, "255");
-    static_assert(sizeof(castle::cache::detail::cache_index_t<256U>) == 2U, "256");
-    static_assert(sizeof(castle::cache::detail::cache_index_t<65535U>) == 2U, "65535");
-    static_assert(sizeof(castle::cache::detail::cache_index_t<65536U>) == 4U, "65536");
-    EXPECT_EQ(sizeof(castle::cache::detail::cache_index_t<100U>), 1U);
-}
-
 TEST(CacheBasicTest, EmptyState)
 {
     castle::cache::lru<int, int, 3U> cache;
