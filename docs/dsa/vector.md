@@ -34,6 +34,7 @@
 | `pop_back()` | O(1) remove-last; returns `status::ok` or `status::empty`. |
 | `clear()` | O(size) destroy all live elements. |
 | `static_capacity` | Compile-time capacity constant equal to `N`. |
+| `index_type` | Smallest unsigned type holding `N` (`uint8_t` up to 255, `uint16_t` up to 65535, ...). Used for the internal element count. |
 
 ## Usage Example
 See [`samples/sample_vector.cpp`](../../samples/sample_vector.cpp).

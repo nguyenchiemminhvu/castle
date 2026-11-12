@@ -35,6 +35,7 @@
 | `replace_top(T&)`, `replace_top(const T&)` | O(log N) replace the root and re-sift; return `status::empty` if the heap is empty. |
 | `begin()/end()` | Iterators over the internal heap-array order, not sorted order. |
 | `clear()` | O(size) destroy all stored elements. |
+| `index_type` | Smallest unsigned type holding `N` (`uint8_t` up to 255, `uint16_t` up to 65535, ...). Used for the internal element count. |
 
 ## Usage Example
 See [`samples/sample_heap.cpp`](../../samples/sample_heap.cpp).

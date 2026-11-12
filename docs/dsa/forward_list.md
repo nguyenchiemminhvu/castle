@@ -25,6 +25,7 @@
 | API | Description |
 |---|---|
 | `forward_list<T, N>` | Singly linked list with room for at most `N` live nodes. |
+| `index_type` | Smallest unsigned type holding `N` (`uint8_t` up to 255 nodes, `uint16_t` up to 65535, ...). Used for the internal element count. |
 | Constructors | Default and `initializer_list` constructors; list-order is preserved. |
 | `capacity()`, `max_size()`, `size()`, `available()`, `empty()`, `full()` | O(1) capacity/state queries. |
 | `begin()/end()`, `cbegin()/cend()`, `before_begin()` | Forward iterators plus a pre-head sentinel iterator. |

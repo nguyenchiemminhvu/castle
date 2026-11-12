@@ -23,6 +23,7 @@
 | API | Description |
 | --- | --- |
 | `function_registry<Max, void(Args...), StorageSize, StorageAlignment>` | Fixed-capacity registry that owns one `function<>` per active slot. |
+| `index_type` | Smallest unsigned type holding `Max`. Used for the internal active callback count. |
 | `subscribe(function&&, out_error)` | Moves a ready-made `function` into the first free slot. Complexity: O(capacity). |
 | `subscribe(callable, out_error)` | Wraps any compatible callable in `function<>` and stores it. Complexity: O(capacity). |
 | `unsubscribe_slot(index, generation)` | Type-erased removal entry used by `subscription`. |

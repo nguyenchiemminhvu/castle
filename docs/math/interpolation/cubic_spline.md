@@ -24,6 +24,7 @@
 | --- | --- |
 | `enum class spline_kind : uint8_t { natural, clamped, monotone }` | Tangent rule. `natural`: C2, zero second derivative at both ends. `clamped`: C2, end slopes supplied by the caller. `monotone`: C1 PCHIP (Fritsch-Carlson/Butland) shape-preserving interpolant. |
 | `using value_type = T; using size_type = castle::size_type;` | Member type aliases. |
+| `using index_type = meta::smallest_uint_t<Capacity>` | Compact storage type for the knot count. |
 | `cubic_spline()` | Constructs an empty spline; `valid()` is `false`. |
 | `static size_type capacity()` | Returns `Capacity`, the maximum number of knots. |
 | `status build(const T* xs, const T* ys, size_type count, spline_kind kind = spline_kind::natural, T start_slope = 0, T end_slope = 0)` | Copies the knots and computes the tangents. `count` is in `[2, Capacity]`; `xs` strictly increasing. `start_slope` / `end_slope` are used by `spline_kind::clamped` only. Returns `status::ok`; `status::invalid_argument` for null pointers, `count < 2`, or non-increasing/NaN abscissas; `status::full` when `count > Capacity`. On any failure the spline is left empty (`valid() == false`), even if it previously held a fit. `O(count)`. |

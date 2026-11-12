@@ -22,6 +22,8 @@
 | `bool signal_connection::connected() const` / `explicit operator bool() const` | Reports whether the handle still refers to a live connection. |
 | `using signal::callback_type` | Inline callback wrapper stored in each slot. |
 | `using signal::connection_type` | Alias for the returned connection handle type. |
+| `using signal::index_type` | Smallest unsigned type holding `MaxSlot`. Used for the internal active slot count. |
+| `using signal_connection::index_type` | Smallest unsigned type holding `MaxSlot`. Used for the stored slot index. |
 | `signal::connect(callback_type&&, signal_error* = nullptr)` | Connects a pre-built callback into the first inactive slot. |
 | `signal::connect(Callable&&, signal_error* = nullptr)` | Wraps and connects any supported callable. |
 | `signal::connect(object, member, signal_error* = nullptr)` | Connects a non-const member function; the object lifetime remains external. |

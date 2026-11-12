@@ -29,6 +29,7 @@ Fixed-capacity LIFO buffer with inline storage. Use it for deterministic stack-l
 | `top()` | Returns the newest element. O(1); stack must be non-empty. |
 | `push_bulk(src, max)` | Pushes up to `max` values. Returns count written. O(min(max, available())). |
 | `pop_bulk(dst, max)` | Pops up to `max` values in LIFO order. Returns count read. O(min(max, size())). |
+| `index_type` | Smallest unsigned type holding `N` (`uint8_t` up to 255, `uint16_t` up to 65535, ...). Used for the internal head and element count. |
 
 ## Usage Example
 See `samples/sample_stack.cpp`.

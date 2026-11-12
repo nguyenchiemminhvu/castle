@@ -29,6 +29,7 @@
 | `resize(count, value)` | Grow or shrink the string; returns `status::full` when `count > capacity()`. |
 | `find()` / `compare()` / `view()` | Search, lexicographic compare, and non-owning view helpers. |
 | Comparison operators | Equality and ordering against other `basic_string` instances and `basic_string_view`. |
+| `index_type` | Smallest unsigned type holding `N` (`uint8_t` up to 255, `uint16_t` up to 65535, ...). Used for the internal logical length. |
 
 ## Usage Example
 See [`samples/sample_string.cpp`](../../samples/sample_string.cpp).

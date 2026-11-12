@@ -18,6 +18,7 @@
 #define CASTLE_DSA_STRING_HPP
 
 #include "castle/core/compiler.hpp"
+#include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
 #include "castle/dsa/string_view.hpp"
@@ -50,6 +51,8 @@ public:
     using iterator = CharT*;
     using const_iterator = CASTLE_CONST CharT*;
     using view_type = basic_string_view<CharT>;
+    /** @brief Compact storage type for the logical length. */
+    using index_type = meta::smallest_uint_t<N>;
 
     /** @brief Compile-time maximum logical length. */
     static CASTLE_CONSTEXPR size_type static_capacity = N;
@@ -294,7 +297,7 @@ public:
             }
         }
         copy_chars(data_, text, length);
-        size_ = length;
+        size_ = static_cast<index_type>(length);
         data_[size_] = CharT();
         return status::ok;
     }
@@ -312,7 +315,7 @@ public:
             return status::full;
         }
         copy_chars(data_, view.data(), view.size());
-        size_ = view.size();
+        size_ = static_cast<index_type>(view.size());
         data_[size_] = CharT();
         return status::ok;
     }
@@ -374,7 +377,7 @@ public:
             }
         }
         copy_chars(data_ + old_size, text, length);
-        size_ = old_size + length;
+        size_ = static_cast<index_type>(old_size + length);
         data_[size_] = CharT();
         return status::ok;
     }
@@ -393,7 +396,7 @@ public:
             return status::full;
         }
         copy_chars(data_ + size_, view.data(), view.size());
-        size_ += view.size();
+        size_ = static_cast<index_type>(size_ + view.size());
         data_[size_] = CharT();
         return status::ok;
     }
@@ -436,7 +439,7 @@ public:
         {
             data_[position + i] = view[i];
         }
-        size_ += view.size();
+        size_ = static_cast<index_type>(size_ + view.size());
         data_[size_] = CharT();
         return status::ok;
     }
@@ -462,7 +465,7 @@ public:
         {
             data_[i] = data_[i + count];
         }
-        size_ -= count;
+        size_ = static_cast<index_type>(size_ - count);
         data_[size_] = CharT();
         return status::ok;
     }
@@ -487,7 +490,7 @@ public:
                 data_[i] = value;
             }
         }
-        size_ = count;
+        size_ = static_cast<index_type>(count);
         data_[size_] = CharT();
         return status::ok;
     }
@@ -551,7 +554,7 @@ private:
     }
 
     CharT data_[N + 1U];
-    size_type size_;
+    index_type size_;
 };
 
 /**

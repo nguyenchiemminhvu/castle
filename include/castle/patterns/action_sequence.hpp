@@ -125,6 +125,8 @@ public:
     using duration_type = Duration;
     using callback_type = callbacks::function<void(), CallbackStorageSize, CallbackStorageAlignment>;
     using state_type = action_sequence_state;
+    /** @brief Compact storage type for the step count and the next-step cursor. */
+    using index_type = meta::smallest_uint_t<MaxActions>;
 
     action_sequence() CASTLE_DEFAULT;
 
@@ -383,7 +385,7 @@ private:
     // Only one delay can be in progress, so one counter tracks it; rewinding is O(1).
     void enter(size_type index) CASTLE_NOEXCEPT
     {
-        next_index_ = index;
+        next_index_ = static_cast<index_type>(index);
         remaining_ = (index < size_ && !steps_[index].callback) ? steps_[index].delay : static_cast<rep>(0);
     }
 
@@ -477,8 +479,8 @@ private:
     }
 
     dsa::array<step, MaxActions> steps_{};
-    size_type size_ = 0U;
-    size_type next_index_ = 0U;
+    index_type size_ = 0U;
+    index_type next_index_ = 0U;
     rep remaining_ = static_cast<rep>(0);
     state_type state_ = state_type::idle;
     bool updating_ = false;

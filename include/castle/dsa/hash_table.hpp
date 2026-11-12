@@ -21,6 +21,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
+#include "castle/core/traits.hpp"
 #include "castle/core/error_handler.hpp"
 #include "castle/dsa/initializer_list.hpp"
 #include "castle/iterator/tags.hpp"
@@ -69,6 +70,8 @@ public:
     using difference_type = castle::difference_type;
     using reference = value_type&;
     using const_reference = CASTLE_CONST value_type&;
+    /** @brief Compact storage type for the entry count. */
+    using index_type = meta::smallest_uint_t<N>;
 
     class const_iterator;
 
@@ -701,7 +704,7 @@ private:
         return memory::object_from_address<CASTLE_CONST value_type>(slots_[index].address(0U));
     }
 
-    size_type size_;
+    index_type size_;
     Hash hash_;
     KeyEqual equal_;
     uint8_t states_[N];

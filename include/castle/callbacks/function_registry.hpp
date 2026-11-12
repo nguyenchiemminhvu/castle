@@ -107,6 +107,8 @@ public:
 
     using subscription = castle::callbacks::subscription;
     using error = castle::status;
+    /** @brief Compact storage type for the active callback count. */
+    using index_type = meta::smallest_uint_t<max_callback>;
 
     /**
      * @brief Constructs an empty registry.
@@ -336,7 +338,7 @@ private:
     };
 
     dsa::array<slot, max_callback> slots_{};
-    size_type active_count_ = 0;
+    index_type active_count_ = 0;
 };
 
 } // namespace callbacks

@@ -18,6 +18,7 @@ Fixed-capacity observer interfaces and an observable registry for embedded event
 | `observer<void>` | Abstract observer interface for parameterless notifications. |
 | `observer<T, Rest...>` | Multiple-inheritance helper that exposes all `notify()` overloads for unique payload types. |
 | `observable<TObserver, N>` | Stores up to `N` observer pointers in fixed-capacity inline storage. |
+| `observable::index_type` | Smallest unsigned type holding `N`. Used for the internal observer count. |
 | `add_observer` | Registers a non-null observer pointer; rejects duplicates and overflow. |
 | `remove_observer` | Unregisters a previously added observer pointer. |
 | `notify_observers` | Invokes `notify(data)` or `notify()` on every registered observer. |

@@ -100,6 +100,8 @@ template <
 class signal_connection
 {
 public:
+    /** @brief Compact storage type for the slot index. */
+    using index_type = meta::smallest_uint_t<MaxSlot>;
 
     /** @brief Construct an empty, disconnected handle. */
     signal_connection() noexcept CASTLE_DEFAULT;
@@ -243,7 +245,7 @@ private:
 
     signal_connection(Signal* owner, size_type index, uint32_t generation) noexcept
         : owner_(owner)
-        , index_(index)
+        , index_(static_cast<index_type>(index))
         , generation_(generation)
         , valid_(true)
     {
@@ -266,7 +268,7 @@ private:
     }
 
     Signal* owner_ = nullptr;
-    size_type index_ = 0U;
+    index_type index_ = 0U;
     uint32_t generation_ = 0U;
     bool valid_ = false;
 };
@@ -302,6 +304,9 @@ public:
 
     /** @brief Connection handle type returned by connect(). */
     using connection_type = signal_connection<signal, MaxSlot>;
+
+    /** @brief Compact storage type for the active slot count. */
+    using index_type = meta::smallest_uint_t<MaxSlot>;
 
     /** @brief Construct an empty signal with no active slots. */
     signal() CASTLE_DEFAULT;
@@ -686,7 +691,7 @@ private:
     }
 
     dsa::array<slot, MaxSlot> slots_{};
-    size_type active_count_ = 0U;
+    index_type active_count_ = 0U;
 };
 
 } // namespace sigslot

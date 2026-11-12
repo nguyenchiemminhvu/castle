@@ -47,8 +47,8 @@ namespace dsa
  * @brief Union-find structure over up to `N` nodes with union by rank and path compression.
  * @tparam N Maximum number of nodes. Must be greater than zero.
  * @note Nodes are the dense indices `0 .. size() - 1`. `size()` defaults to `N` and can be changed
- * with `assign()`. Parent links and set sizes are stored in the smallest unsigned type able to hold
- * `N`, ranks in `uint8_t`.
+ * with `assign()`. Parent links, set sizes, and the node and group counters are stored in the
+ * smallest unsigned type able to hold `N`, ranks in `uint8_t`.
  * @note The object is trivially copyable; copies are independent snapshots of the partition.
  * @warning Node arguments must be less than `size()`, not merely less than `N`. The check runs in
  * every build (it does not depend on `CASTLE_NO_CHECKS` or `NDEBUG`); a violating call returns a
@@ -231,8 +231,8 @@ public:
         index_type members_[N];
         index_type offsets_[N + 1U];
         index_type labels_[N];
-        size_type node_count_;
-        size_type count_;
+        index_type node_count_;
+        index_type count_;
     };
 
     /**
@@ -440,8 +440,8 @@ private:
      */
     void initialize(size_type nodes) CASTLE_NOEXCEPT
     {
-        node_count_ = nodes;
-        group_count_ = nodes;
+        node_count_ = static_cast<index_type>(nodes);
+        group_count_ = static_cast<index_type>(nodes);
         for (size_type i = 0U; i < nodes; ++i)
         {
             make_singleton(i);
@@ -483,8 +483,8 @@ private:
     index_type parent_[N];
     index_type set_size_[N];
     rank_type rank_[N];
-    size_type node_count_;
-    size_type group_count_;
+    index_type node_count_;
+    index_type group_count_;
 };
 
 } // namespace dsa

@@ -24,6 +24,7 @@
 | API | Description | Complexity |
 |---|---|---|
 | `list<T, N>` | Doubly linked list with room for at most `N` live nodes; `N > 0` is enforced by `static_assert`. | - |
+| `index_type` | Smallest unsigned type holding `N` (`uint8_t` up to 255 nodes, `uint16_t` up to 65535, ...). Used for the internal element count. | - |
 | `list()`, `list(initializer_list<T>)` | Default and brace-initializer constructors; source order is preserved, surplus elements are ignored. | O(N) |
 | `capacity()`, `max_size()`, `size()`, `available()`, `empty()`, `full()` | Capacity/state queries. | O(1) |
 | `begin()/end()`, `cbegin()/cend()` | Bidirectional iterators. `end()` is decrementable (`--end()` is the last element). | O(1) |

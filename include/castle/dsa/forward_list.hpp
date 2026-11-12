@@ -69,6 +69,8 @@ public:
     using difference_type = castle::difference_type;
     using reference = T&;
     using const_reference = CASTLE_CONST T&;
+    /** @brief Compact storage type for the element count. */
+    using index_type = meta::smallest_uint_t<N>;
     using pointer = T*;
     using const_pointer = CASTLE_CONST T*;
 
@@ -663,7 +665,7 @@ private:
 
     node nodes_[N];
     node_base* head_;
-    size_type size_;
+    index_type size_;
     node_base* free_head_;
     node_base before_;
 };

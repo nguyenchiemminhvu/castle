@@ -309,11 +309,14 @@ public:
     /** @brief Number of transition table rows. */
     static CASTLE_CONSTEXPR size_type transition_count = sizeof...(Transitions);
 
+    /** @brief Compact storage type for the current state index. */
+    using index_type = meta::smallest_uint_t<state_count>;
+
     /**
      * @brief Constructs a machine in its initial state.
      */
     state_machine() CASTLE_NOEXCEPT
-        : current_state_(detail::index_of<InitialState, state_list>::value)
+        : current_state_(static_cast<index_type>(detail::index_of<InitialState, state_list>::value))
     {
     }
 
@@ -357,7 +360,7 @@ public:
      */
     void reset() CASTLE_NOEXCEPT
     {
-        current_state_ = detail::index_of<InitialState, state_list>::value;
+        current_state_ = static_cast<index_type>(detail::index_of<InitialState, state_list>::value);
     }
 
     /**
@@ -454,7 +457,7 @@ private:
 
                     action_type action{};
                     action(context, event);
-                    current_state_ = detail::index_of<typename row::target_state, state_list>::value;
+                    current_state_ = static_cast<index_type>(detail::index_of<typename row::target_state, state_list>::value);
                     return event_result::transitioned;
                 }
             }
@@ -463,7 +466,7 @@ private:
         }
     }
 
-    size_type current_state_;
+    index_type current_state_;
 };
 
 } // namespace fsm

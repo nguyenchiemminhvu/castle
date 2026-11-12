@@ -15,6 +15,7 @@
 | `in_place_index_t<Index>`, `in_place_index<Index>` | Tag type and value for index-based in-place construction. |
 | `variant_npos` | Sentinel index used when no alternative is active. |
 | `variant<Ts...>` | Fixed-size variant storing exactly one of `Ts...`, or no value after `reset()`. |
+| `variant::index_type` | Smallest unsigned type holding `sizeof...(Ts)`. Stores the active index; `sizeof...(Ts)` internally marks the valueless state, while `index()` still returns `variant_npos`. |
 | `variant::index()`, `valueless_by_exception()` | Query the active alternative index or valueless state. |
 | `variant::reset()`, `emplace<Index>(...)`, `emplace<T>(...)`, `swap(...)` | Manage the active alternative. |
 | `variant::is_supported_type<T>()` | Checks whether `T` is one of the alternatives. |

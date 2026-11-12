@@ -53,6 +53,8 @@ class basic_heap
 public:
     using value_type = T;
     using size_type = castle::size_type;
+    /** @brief Compact storage type for the element count. */
+    using index_type = meta::smallest_uint_t<N>;
     using difference_type = castle::difference_type;
     using reference = T&;
     using const_reference = CASTLE_CONST T&;
@@ -468,7 +470,7 @@ private:
         *pointer_at(rhs) = CASTLE_MOVE(temp);
     }
 
-    size_type size_;
+    index_type size_;
     Compare compare_;
     memory::static_storage<T, N> storage_;
 };

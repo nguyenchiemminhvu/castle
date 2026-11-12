@@ -100,9 +100,14 @@ private:
 
     struct buffer_slot;
 
+    /** @brief Compact storage type for the committed element count of a slot. */
+    using slot_size_type = meta::smallest_uint_t<BUFFER_SIZE>;
+
 public:
     using value_type      = TBuffer;
     using size_type       = castle::size_type;
+    /** @brief Compact storage type for the producer/consumer buffer indices. */
+    using index_type      = meta::smallest_uint_t<N_BUFFERS>;
     using pointer         = value_type*;
     using const_pointer   = CASTLE_CONST value_type*;
     using buffer_view     = castle::dsa::array_view<value_type>;
@@ -358,7 +363,7 @@ public:
                 return status::out_of_range;
             }
 
-            item_->size = count;
+            item_->size = static_cast<slot_size_type>(count);
             spsc_buffer_desc::store_state(item_->state, buffer_state::ready);
             return status::ok;
         }
@@ -536,7 +541,7 @@ public:
         store_state(item.state, buffer_state::writing);
 
         out = buffer_handle(&item, item.generation, descriptor_mode::write);
-        write_index_ = next_index(write_index_);
+        write_index_ = static_cast<index_type>(next_index(write_index_));
         return status::ok;
     }
 
@@ -576,7 +581,7 @@ public:
 
         store_state(item.state, buffer_state::reading);
         out = buffer_handle(&item, item.generation, descriptor_mode::read);
-        read_index_ = next_index(read_index_);
+        read_index_ = static_cast<index_type>(next_index(read_index_));
         return status::ok;
     }
 
@@ -615,7 +620,7 @@ private:
     {
         pointer   pbuffer;
         TState    state;
-        size_type size;
+        slot_size_type size;
         uint32_t  generation;
     };
 
@@ -678,8 +683,8 @@ private:
 
     pointer buffers_;
     castle::dsa::array<buffer_slot, N_BUFFERS> descriptor_items_;
-    size_type write_index_;
-    size_type read_index_;
+    index_type write_index_;
+    index_type read_index_;
 };
 
 } // namespace dsa

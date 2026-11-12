@@ -192,6 +192,8 @@ public:
 
     template <size_type Index>
     using alternative_type = detail::variant_type_at_t<Index, Ts...>;
+    /** @brief Compact storage type for the active alternative index; `sizeof...(Ts)` marks valueless. */
+    using index_type = meta::smallest_uint_t<sizeof...(Ts)>;
     using storage_type = memory::aligned_storage_t<storage_size, storage_alignment>;
 
     
@@ -200,7 +202,7 @@ public:
     /** @brief Default-constructs the first alternative. */
     variant()
         CASTLE_NOEXCEPT(meta::is_nothrow_default_constructible<alternative_type<0U>>::value)
-        : index_(variant_npos)
+        : index_(valueless_index)
     {
         emplace<0U>();
     }
@@ -219,7 +221,7 @@ public:
                   int> = 0>
     explicit variant(in_place_index_t<Index>, Args&&... args)
         CASTLE_NOEXCEPT(meta::is_nothrow_constructible<alternative_type<Index>, Args&&...>::value)
-        : index_(variant_npos)
+        : index_(valueless_index)
     {
         emplace<Index>(CASTLE_FORWARD<Args>(args)...);
     }
@@ -238,7 +240,7 @@ public:
      */
     explicit variant(meta::in_place_type_t<T>, Args&&... args)
         CASTLE_NOEXCEPT(meta::is_nothrow_constructible<U, Args&&...>::value)
-        : index_(variant_npos)
+        : index_(valueless_index)
     {
         emplace<U>(CASTLE_FORWARD<Args>(args)...);
     }
@@ -253,7 +255,7 @@ public:
     /** @brief Constructs the variant from a value whose decayed type is one of the alternatives. */
     variant(T&& value)
         CASTLE_NOEXCEPT(meta::is_nothrow_constructible<U, T&&>::value)
-        : index_(variant_npos)
+        : index_(valueless_index)
     {
         emplace<U>(CASTLE_FORWARD<T>(value));
     }
@@ -261,7 +263,7 @@ public:
     /** @brief Copy-constructs the currently active alternative. */
     variant(CASTLE_CONST variant& other)
         CASTLE_NOEXCEPT(meta::conjunction<meta::is_nothrow_copy_constructible<Ts>...>::value)
-        : index_(variant_npos)
+        : index_(valueless_index)
     {
         copy_from(other);
     }
@@ -269,7 +271,7 @@ public:
     /** @brief Move-constructs the currently active alternative. */
     variant(variant&& other)
         CASTLE_NOEXCEPT(meta::conjunction<meta::is_nothrow_move_constructible<Ts>...>::value)
-        : index_(variant_npos)
+        : index_(valueless_index)
     {
         move_from<0U>(other);
     }
@@ -327,13 +329,13 @@ public:
     /** @brief Returns the index of the active alternative. */
     CASTLE_NODISCARD CASTLE_CONSTEXPR size_type index() CASTLE_CONST CASTLE_NOEXCEPT
     {
-        return index_;
+        return (index_ == valueless_index) ? variant_npos : static_cast<size_type>(index_);
     }
 
     /** @brief Returns whether the variant currently holds no active alternative. */
     CASTLE_NODISCARD CASTLE_CONSTEXPR bool valueless_by_exception() CASTLE_CONST CASTLE_NOEXCEPT
     {
-        return index_ == variant_npos;
+        return index_ == valueless_index;
     }
 
     
@@ -342,10 +344,10 @@ public:
     /** @brief Destroys the active alternative and leaves the variant empty. */
     void reset() CASTLE_NOEXCEPT
     {
-        if (index_ != variant_npos)
+        if (index_ != valueless_index)
         {
             destroy_active<0U>();
-            index_ = variant_npos;
+            index_ = valueless_index;
         }
     }
 
@@ -372,7 +374,7 @@ public:
             storage_.template get_address<alternative_type<Index>>(),
             CASTLE_FORWARD<Args>(args)...
         );
-        index_ = Index;
+        index_ = static_cast<index_type>(Index);
         return get_value<Index>();
     }
 
@@ -499,8 +501,10 @@ public:
         }
     }
 
+    static CASTLE_CONSTEXPR index_type valueless_index = static_cast<index_type>(sizeof...(Ts));
+
     storage_type storage_;
-    size_type index_;
+    index_type index_;
 
 private:
 
@@ -536,7 +540,7 @@ private:
 
     void copy_from(CASTLE_CONST variant& other)
     {
-        if (other.index_ != variant_npos) // LCOV_EXCL_BR_LINE
+        if (other.index_ != valueless_index) // LCOV_EXCL_BR_LINE
         {
             copy_from_impl<0U>(other);
         }

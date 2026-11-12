@@ -95,9 +95,12 @@ private:
     using milliseconds = castle::chrono::milliseconds;
     using nanoseconds = castle::chrono::nanoseconds;
 
+    /** @brief Compact storage type for event slot indices. */
+    using index_type = meta::smallest_uint_t<MaxEventCount>;
+
     struct event_node
     {
-        size_type slot = 0U;
+        index_type slot = 0U;
         time_point due;
         uint64_t sequence = 0U;
     };
@@ -137,7 +140,7 @@ private:
 
     using scheduled_queue_type =
         castle::dsa::min_heap<event_node, MaxEventCount, event_node_compare>;
-    using free_queue_type = castle::dsa::ring_buffer<size_type, MaxEventCount>;
+    using free_queue_type = castle::dsa::ring_buffer<index_type, MaxEventCount>;
 
     /**
      * @brief Wrapper for storing a callable and its bound arguments.
@@ -905,7 +908,7 @@ private:
     {
         for (size_type i = 0U; i < MaxEventCount; ++i)
         {
-            if (!free_queue_.push(i))
+            if (!free_queue_.push(static_cast<index_type>(i)))
             {
                 CASTLE_ASSERT_FAIL(
                     CASTLE_ERROR_GENERIC("event_handler failed to initialize free event queue"));
@@ -926,7 +929,7 @@ private:
             slots_[i].repeat_remaining = 0U;
             slots_[i].repeating = false;
             slots_[i].occupied = false;
-            free_queue_.push(i);
+            free_queue_.push(static_cast<index_type>(i));
         }
     }
 
@@ -958,7 +961,7 @@ private:
             return status_type::full;
         }
 
-        size_type slot = 0U;
+        index_type slot = 0U;
         if (!free_queue_.pop(slot))
         {
             pthread_mutex_unlock(&mutex_);
@@ -1062,7 +1065,7 @@ private:
             }
 
             scheduled_queue_.pop();
-            size_type slot = top.slot;
+            index_type slot = top.slot;
             event_slot& current = slots_[slot];
             task_type* task = &current.task;
             pthread_mutex_unlock(&mutex_);

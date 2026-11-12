@@ -40,6 +40,8 @@ public:
     using container_type = dsa::array<value_type, Capacity>;
     using iterator = typename container_type::iterator;
     using const_iterator = typename container_type::const_iterator;
+    /** @brief Compact storage type for the vertex count. */
+    using index_type = meta::smallest_uint_t<Capacity>;
 
     /** @brief Constructs an empty polygon. */
     CASTLE_CONSTEXPR polygon2d() CASTLE_NOEXCEPT : points_(), size_(0U) {}
@@ -232,7 +234,7 @@ public:
 
 private:
     container_type points_;
-    size_type size_;
+    index_type size_;
 };
 
 }

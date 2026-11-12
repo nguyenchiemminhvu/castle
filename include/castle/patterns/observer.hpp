@@ -100,6 +100,9 @@ template <typename TOberver, size_type N>
 class observable
 {
 public:
+    /** @brief Compact storage type for the observer count. */
+    using index_type = meta::smallest_uint_t<N>;
+
     /**
      * @brief Registers an observer pointer.
      *
@@ -198,7 +201,7 @@ public:
 
 private:
     dsa::array<TOberver*, N> observers_{};
-    size_type observer_count_ = 0U;
+    index_type observer_count_ = 0U;
 };
 
 } // namespace patterns

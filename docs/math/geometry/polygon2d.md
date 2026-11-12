@@ -20,6 +20,7 @@ A fixed-capacity container of 2D vertices stored directly inside the object. Use
 | API | Description |
 |---|---|
 | `polygon2d()` | Constructs an empty polygon. |
+| `index_type` | Smallest unsigned type holding `Capacity`. Used for the stored vertex count. |
 | `size()`, `capacity()`, `empty()`, `full()` | Inspect stored vertex count and fixed capacity. |
 | `signed_area2()` | Returns twice the signed polygon area using widened intermediates where applicable. |
 | `clockwise()` | Returns true when the stored vertex order has negative signed area. |

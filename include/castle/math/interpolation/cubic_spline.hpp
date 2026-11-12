@@ -80,6 +80,8 @@ public:
     using value_type = T;
     /** @brief Size type. */
     using size_type = castle::size_type;
+    /** @brief Compact storage type for the knot count. */
+    using index_type = meta::smallest_uint_t<Capacity>;
 
     /** @brief Constructs an empty spline; `valid()` is `false`. */
     CASTLE_CONSTEXPR cubic_spline() CASTLE_NOEXCEPT
@@ -138,7 +140,7 @@ public:
             xs_[i] = xs[i];
             ys_[i] = ys[i];
         }
-        count_ = count;
+        count_ = static_cast<index_type>(count);
 
         if (kind == spline_kind::monotone)
         {
@@ -387,7 +389,7 @@ private:
     T xs_[Capacity];
     T ys_[Capacity];
     T slopes_[Capacity];
-    size_type count_;
+    index_type count_;
 };
 
 } // namespace math

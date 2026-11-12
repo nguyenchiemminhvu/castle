@@ -94,7 +94,7 @@ public:
     {
         for (size_type i = 0U; i < PendingTaskCount; ++i)
         {
-            if (!free_queue_.push(i))
+            if (!free_queue_.push(static_cast<index_type>(i)))
             {
                 CASTLE_ASSERT_FAIL(CASTLE_ERROR_GENERIC("thread_pool failed to initialize free task queue"));
                 return;
@@ -174,7 +174,7 @@ public:
             return false;
         }
 
-        size_type task_index = 0U;
+        index_type task_index = 0U;
 
         if (!free_queue_.pop(task_index))
         {
@@ -471,7 +471,7 @@ private:
                 return;
             }
 
-            size_type task_index = 0U;
+            index_type task_index = 0U;
             pending_queue_.pop(task_index);
 
             task_type task = CASTLE_MOVE(tasks_[task_index]);
@@ -487,13 +487,19 @@ private:
         }
     }
 
+    /** @brief Compact storage type for task slot indices. */
+    using index_type = meta::smallest_uint_t<PendingTaskCount>;
+
+    /** @brief Compact storage type for the created worker thread count. */
+    using thread_count_type = meta::smallest_uint_t<ThreadCount>;
+
     pthread_t threads_[ThreadCount];
     task_type tasks_[PendingTaskCount];
-    castle::dsa::ring_buffer<size_type, PendingTaskCount> pending_queue_;
-    castle::dsa::ring_buffer<size_type, PendingTaskCount> free_queue_;
+    castle::dsa::ring_buffer<index_type, PendingTaskCount> pending_queue_;
+    castle::dsa::ring_buffer<index_type, PendingTaskCount> free_queue_;
     CASTLE_MUTABLE pthread_mutex_t queue_mutex_;
     pthread_cond_t queue_condition_;
-    size_type created_thread_count_;
+    thread_count_type created_thread_count_;
 
     bool running_;
     bool stop_requested_;

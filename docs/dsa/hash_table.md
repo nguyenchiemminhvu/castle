@@ -27,6 +27,7 @@
 | API | Description |
 |---|---|
 | `hash_table<Key, T, N, Hash, KeyEqual>` | Fixed-capacity associative table with exactly `N` probe slots. |
+| `index_type` | Smallest unsigned type holding `N` (`uint8_t` up to 255 entries, `uint16_t` up to 65535, ...). Used for the internal entry count. |
 | Constructors | Default, hash-functor, and `initializer_list` constructors. |
 | `capacity()`, `size()`, `available()`, `empty()`, `full()` | O(1) capacity/state queries. |
 | `begin()/end()`, `cbegin()/cend()` | Forward iterators over occupied slots only. |

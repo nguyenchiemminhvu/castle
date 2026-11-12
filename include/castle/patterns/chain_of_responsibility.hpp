@@ -400,6 +400,8 @@ class bounded_chain_of_responsibility<MaxHandlers, void(Args...), StorageSize, S
 public:
     /** @brief Type-erased storage of one handler. */
     using handler_type = callbacks::function<chain_result(Args...), StorageSize, StorageAlignment>;
+    /** @brief Compact storage type for the handler count. */
+    using index_type = meta::smallest_uint_t<MaxHandlers>;
 
     bounded_chain_of_responsibility() CASTLE_DEFAULT;
 
@@ -580,7 +582,7 @@ private:
     }
 
     dsa::array<handler_type, MaxHandlers> handlers_{};
-    size_type size_ = 0U;
+    index_type size_ = 0U;
     size_type depth_ = 0U;
 };
 

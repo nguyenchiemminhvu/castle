@@ -85,7 +85,7 @@ TEST(FsmTest, CompileTimeMetadataAndInitialState)
 {
     static_assert(tested_machine::state_count == 3U, "Unique states must be inferred from transition rows.");
     static_assert(tested_machine::transition_count == 5U, "All transition rows must be counted.");
-    static_assert(sizeof(tested_machine) == sizeof(castle::size_type),
+    static_assert(sizeof(tested_machine) == sizeof(tested_machine::index_type),
                   "An FSM instance should store only its current state index.");
     static_assert(tested_machine::has_transition<idle, start_event>(), "Declared transition must be found.");
     static_assert(tested_machine::has_transition<active, stop_event>(), "Declared transition must be found.");

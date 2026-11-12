@@ -25,6 +25,7 @@
 | API | Description |
 |---|---|
 | `avl_tree<Key, T, N, Compare>` | Fixed-capacity ordered key/value tree with room for at most `N` nodes. |
+| `index_type` | Smallest unsigned type holding `N` (`uint8_t` up to 255 nodes, `uint16_t` up to 65535, ...). Used for the internal node count. | 
 | Constructors | Default and comparator-taking constructors. |
 | `capacity()`, `size()`, `available()`, `empty()`, `full()` | O(1) capacity/state queries. |
 | `begin()/end()`, `cbegin()/cend()` | Bidirectional iterators over keys in sorted order. |

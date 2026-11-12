@@ -71,13 +71,13 @@ net.reset();     // six singletons again
 See `samples/dsa/disjoint_set.cpp` for Kruskal's MST, island detection, and node reset.
 
 ## Constraints & Notes
-- No allocation, exceptions, RTTI, or virtual dispatch. The object stores `2 * N` `index_type` values, `N` ranks, and two counters. For example, `disjoint_set<200>` takes 600 bytes plus the counters.
+- No allocation, exceptions, RTTI, or virtual dispatch. The object stores `2 * N` `index_type` values, `N` ranks, and two counters stored as `index_type`. For example, `disjoint_set<200>` takes 600 bytes plus the counters.
 - `find()` is iterative, so stack use is constant and there is no recursion.
 - `find()`, `unite()`, `same_set()`, `group_size()`, and `groups()` mutate internal links (path compression), so they are non-const. The visible partition does not change.
 - Group roots are implementation details: they can change after `unite()` or `reset(node)`. Compare groups with `same_set()`, or compare `find()` results taken at the same time.
 - `reset(node)` does not know which edges made up the group. The remaining members stay in one group even if `node` was their only link. To rebuild from a changed edge list, call `reset()` and re-`unite()`.
 - `reset(node)` costs O(size()) because a linear scan finds the nodes linked through `node`. When `node` is the root, its first child becomes the new root and inherits the rank, which keeps the rank bound valid.
-- `group_list` is a by-value snapshot of `3 * N + 1` indices plus two counters, about the same size as the set. `groups()` returns it through guaranteed copy elision. Views from `operator[]` alias the snapshot and must not outlive it.
+- `group_list` is a by-value snapshot of `3 * N + 1` indices plus two `index_type` counters, about the same size as the set. `groups()` returns it through guaranteed copy elision. Views from `operator[]` alias the snapshot and must not outlive it.
 - Only nodes `0 .. size() - 1` exist. The runtime node count set by the constructor or `assign()` is the limit, not the compile-time capacity `N`. Choose `N` as a generous upper bound and set the real count at runtime; reserved slots beyond `size()` never count as groups and are never touched.
 - Node arguments `>= size()` are rejected in every build, regardless of `CASTLE_NO_CHECKS` or `NDEBUG`. The call returns `npos`, `false`, `0`, or an empty view, or for `reset(node)` does nothing, and leaves the state unchanged. A `false` from `unite()` or `same_set()` can therefore also mean an invalid index. Check `node < size()` first when that distinction matters.
 - The type is trivially copyable, and copies are independent.

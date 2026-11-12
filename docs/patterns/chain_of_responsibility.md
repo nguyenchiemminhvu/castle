@@ -49,6 +49,7 @@ Two flavors share the same handler semantics, with no base class, no virtual fun
 | `chain.handler_at<I>()` | Compile-time indexed access to a handler. |
 | `chain_of_responsibility::capacity()` / `handler_count` | Compile-time number of handlers. |
 | `bounded_chain_of_responsibility<N, void(Args...), StorageSize, StorageAlignment>` | Runtime-registered chain with `N` slots. Each slot stores a whole `conditional_handler`, so handler semantics match the static chain. |
+| `bounded_chain_of_responsibility::index_type` | Smallest unsigned type holding `N`. Used for the internal handler count. |
 | `bounded.add_handler(predicate, action)` | Appends a handler that rejects (ends the chain) on a false predicate. Returns `status::ok`, `full`, `invalid_config` (while processing) or `invalid_callback` (null function pointer or empty `castle::callbacks::function`). |
 | `bounded.add_skip_handler(predicate, action)` | Appends a handler that is skipped on a false predicate. Same results as `add_handler()`. |
 | `bounded.add_default_handler(action)` | Appends a handler with the `always_true` predicate. |

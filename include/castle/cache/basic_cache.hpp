@@ -581,7 +581,7 @@ private:
         return memory::object_from_address<entry>(slots_.address(index));
     }
 
-    size_type size_;
+    index_type size_;
     index_type free_;
     Hash hash_;
     KeyEqual equal_;

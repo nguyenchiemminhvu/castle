@@ -25,6 +25,7 @@ No dynamic container, clock, event dispatcher, callback wrapper, or STL header i
 | `fsm::state_machine<Initial, Rows...>` | FSM type whose states are inferred from the initial state and all transition rows. |
 | `state_machine::state_count` | Number of unique state types in the machine. |
 | `state_machine::transition_count` | Number of transition rows. |
+| `state_machine::index_type` | Smallest unsigned type holding `state_count`. Used for the stored current state index; `current_state_id()` still returns `size_type`. |
 | `state_machine::state_id<State>()` | Compile-time state index; rejects state types not present in the machine. |
 | `state_machine::current_state_id()` | Runtime index for the current state. |
 | `state_machine::is_in_state<State>()` | Tests the current state using a compile-time state type. |

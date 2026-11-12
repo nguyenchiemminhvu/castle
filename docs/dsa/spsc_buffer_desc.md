@@ -33,6 +33,7 @@
 | `buffer_handle::commit(count)` | Publish a written buffer; returns `status::invalid_argument` or `status::out_of_range` on failure. |
 | `buffer_handle::release()` | Return a read buffer to the free pool; returns `status::invalid_argument` on failure. |
 | `buffer_handle::cancel()` | Return an acquired write buffer to the free pool without publishing it. |
+| `index_type` | Smallest unsigned type holding `N_BUFFERS` (`uint8_t` up to 255, `uint16_t` up to 65535, ...). Used for the internal producer/consumer slot indices; committed slot sizes use an equivalent compact type sized by `BUFFER_SIZE`. |
 
 ## Usage Example
 See [`samples/sample_spsc_buffer_desc.cpp`](../../samples/sample_spsc_buffer_desc.cpp).

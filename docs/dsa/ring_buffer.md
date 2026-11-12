@@ -29,6 +29,7 @@ Fixed-capacity FIFO circular buffer with inline storage. Use it for deterministi
 | `front()`, `back()` | Oldest/newest element access. O(1); buffer must be non-empty. |
 | `push_bulk(src, max)` | Appends up to `max` values. Returns count written. O(min(max, available())). |
 | `pop_bulk(dst, max)` | Removes up to `max` oldest values. Returns count read. O(min(max, size())). |
+| `index_type` | Smallest unsigned type holding `N` (`uint8_t` up to 255, `uint16_t` up to 65535, ...). Used for the internal head, tail, and element count. |
 
 ## Usage Example
 See `samples/sample_ring_buffer.cpp`.

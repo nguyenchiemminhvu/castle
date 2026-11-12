@@ -22,6 +22,7 @@
 | API | Description |
 | --- | --- |
 | `delegate_registry<Max, void(Args...)>` | Fixed-capacity registry of borrowed `delegate_base<void(Args...)>*` pointers. |
+| `index_type` | Smallest unsigned type holding `Max`. Used for the internal active callback count. |
 | `subscribe(callback, out_error)` | Returns a `subscription`; reports `status::ok`, `status::invalid_callback`, or `status::full`. Complexity: O(capacity). |
 | `unsubscribe_slot(index, generation)` | Type-erased removal entry used by `subscription`. |
 | `invoke(args...)` / `operator()(args...)` | Invokes active callbacks in increasing slot order. Complexity: O(capacity). |

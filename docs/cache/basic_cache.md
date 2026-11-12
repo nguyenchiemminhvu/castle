@@ -72,5 +72,5 @@ if (int16_t* t = temps.get(node_id{0U, 0x48U}))
 - The `value` passed to `put()` must not refer to a value already in the same cache, because that entry may be evicted before the copy is made. `on_evict` must not modify the cache.
 - Non-copyable and non-movable. Not thread-safe: guard a shared instance with `castle::mutex` and `castle::scoped_mutex` (see [`../sync/scoped_mutex.md`](../sync/scoped_mutex.md)).
 - `Key` must be copy-constructible and supported by `Hash` (the default `castle::hash<Key>` covers integral, enum, pointer, and string-view keys).
-- Slot indices use the smallest unsigned type that can hold `N` (`uint8_t` up to 255, `uint16_t` up to 65535, then `uint32_t`). Fixed overhead beyond the entries is `2·N` indices for the hash index, plus the policy state: `2·N + 2` indices for FIFO/LIFO/LRU/MRU, and `7·N + 2` indices plus `N` counters for LFU.
+- Slot indices use the smallest unsigned type that can hold `N` (`uint8_t` up to 255, `uint16_t` up to 65535, then `uint32_t`). Fixed overhead beyond the entries is `2·N` indices for the hash index, plus the policy state: `2·N + 2` indices for FIFO/LIFO/LRU/MRU, and `7·N + 2` indices plus `N` counters for LFU. The entry count uses the same type.
 - Hash buckets: `N`, selected as `hash(key) % N`.

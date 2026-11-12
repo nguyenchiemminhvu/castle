@@ -19,6 +19,7 @@ A fixed-capacity, self-contained sequence of one-shot calls and delays, modeled 
 | --- | --- |
 | `action_sequence_state` | `idle`, `running`, `completed`. |
 | `action_sequence<MaxActions, Duration, CallbackStorageSize, CallbackStorageAlignment>` | Owns up to `MaxActions` steps. `Duration` is a `castle::chrono::duration` with an integral rep (default `castle::chrono::milliseconds`); its period is the time resolution. |
+| `action_sequence::index_type` | Smallest unsigned type holding `MaxActions`. Used for the internal step count and next-step cursor. |
 | `add_call(callable)` | Appends a `void()` call step (`CallFunc`). Returns `status::ok`, `full`, `invalid_config`, or `invalid_callback` (null function pointer or empty `castle::callbacks::function`). |
 | `add_delay(duration)` | Appends a delay step (`DelayTime`). Accepts any duration whose unit is a whole multiple of the resolution. Zero is allowed. Returns `invalid_argument` for negative and `out_of_range` for unrepresentable delays. |
 | `append(other)` | Copies every step of another sequence with the same `Duration` and storage configuration (composition by flattening). `full` leaves this sequence unchanged. |

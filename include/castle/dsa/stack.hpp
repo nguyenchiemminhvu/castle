@@ -56,6 +56,8 @@ class stack_buffer
 public:
     using value_type      = T;
     using size_type       = castle::size_type;
+    /** @brief Compact storage type for head and element count. */
+    using index_type      = meta::smallest_uint_t<N>;
     using difference_type = castle::difference_type;
     using reference       = T&;
     using const_reference = CASTLE_CONST T&;
@@ -173,7 +175,7 @@ public:
             return false;
         }
         data_[head_] = value;
-        head_ = advance(head_);
+        head_ = static_cast<index_type>(advance(head_));
         ++size_;
         return true;
     }
@@ -191,7 +193,7 @@ public:
             return false;
         }
         data_[head_] = CASTLE_MOVE(value);
-        head_ = advance(head_);
+        head_ = static_cast<index_type>(advance(head_));
         ++size_;
         return true;
     }
@@ -207,14 +209,14 @@ public:
         CASTLE_CONST bool evicted = full();
         if (evicted)
         {
-            head_ = retreat(head_);
+            head_ = static_cast<index_type>(retreat(head_));
             data_[head_] = value;
-            head_ = advance(head_);
+            head_ = static_cast<index_type>(advance(head_));
         }
         else
         {
             data_[head_] = value;
-            head_ = advance(head_);
+            head_ = static_cast<index_type>(advance(head_));
             ++size_;
         }
         return evicted;
@@ -231,14 +233,14 @@ public:
         CASTLE_CONST bool evicted = full();
         if (evicted)
         {
-            head_ = retreat(head_);
+            head_ = static_cast<index_type>(retreat(head_));
             data_[head_] = CASTLE_MOVE(value);
-            head_ = advance(head_);
+            head_ = static_cast<index_type>(advance(head_));
         }
         else
         {
             data_[head_] = CASTLE_MOVE(value);
-            head_ = advance(head_);
+            head_ = static_cast<index_type>(advance(head_));
             ++size_;
         }
         return evicted;
@@ -256,7 +258,7 @@ public:
         {
             return false;
         }
-        head_ = retreat(head_);
+        head_ = static_cast<index_type>(retreat(head_));
         out = data_[head_];
         --size_;
         return true;
@@ -273,7 +275,7 @@ public:
         {
             return false;
         }
-        head_ = retreat(head_);
+        head_ = static_cast<index_type>(retreat(head_));
         --size_;
         return true;
     }
@@ -329,7 +331,7 @@ public:
         while ((written < max) && !full()) // LCOV_EXCL_BR_LINE
         {
             data_[head_] = src[written];
-            head_ = advance(head_);
+            head_ = static_cast<index_type>(advance(head_));
             ++size_;
             ++written;
         }
@@ -353,7 +355,7 @@ public:
         size_type read = 0U;
         while ((read < max) && !empty())
         {
-            head_ = retreat(head_);
+            head_ = static_cast<index_type>(retreat(head_));
             dst[read] = data_[head_];
             --size_;
             ++read;
@@ -395,8 +397,8 @@ private:
     }
 
     dsa::array<value_type, N> data_{};
-    size_type head_ = 0U;
-    size_type size_ = 0U;
+    index_type head_ = 0U;
+    index_type size_ = 0U;
 };
 
 }
