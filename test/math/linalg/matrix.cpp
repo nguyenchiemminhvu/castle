@@ -165,7 +165,7 @@ TEST(Matrix, WrapsGridStorage)
     static_assert(sizeof(castle::math::matrix<float, 3U, 3U>) == sizeof(float) * 9U,
                   "matrix adds no storage overhead over its grid");
 
-    const castle::container::grid<int, 2U, 2U> cells(1, 2, 3, 4);
+    const castle::dsa::grid<int, 2U, 2U> cells(1, 2, 3, 4);
     castle::math::matrix<int, 2U, 2U> value(cells);
     EXPECT_EQ(value.as_grid(), cells);
     EXPECT_EQ(value.data(), value.as_grid().data());

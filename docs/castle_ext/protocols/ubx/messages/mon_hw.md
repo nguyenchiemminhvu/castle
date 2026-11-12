@@ -15,7 +15,7 @@ Model of UBX-MON-HW (class `0x0A`, ID `0x09`), the 60-byte hardware status: PIO 
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
 - [detail/fixed_message.hpp](detail/fixed_message.md)
-- [castle/container/array.hpp](../../../../container/array.md)
+- [castle/dsa/array.hpp](../../../../dsa/array.md)
 - [mon_rf.hpp](mon_rf.md) (`mon_jamming_state`, `mon_antenna_status`, `mon_antenna_power`)
 
 ## Public API
@@ -56,7 +56,7 @@ Model of UBX-MON-HW (class `0x0A`, ID `0x09`), the 60-byte hardware status: PIO 
 | `flags` | `uint8_t` (X1) | 22 | See `FLAGS_*`. |
 | — | reserved | 23 | |
 | `used_mask` | `uint32_t` (X4) | 24 | Pins used by the virtual pin manager. |
-| `vp` | `castle::container::array<uint8_t, 17>` | 28 | Pin mapping per physical pin. |
+| `vp` | `castle::dsa::array<uint8_t, 17>` | 28 | Pin mapping per physical pin. |
 | `jam_ind` | `uint8_t` | 45 | CW jamming indicator (0 none .. 255 strong). |
 | — | reserved | 46..47 | |
 | `pin_irq` | `uint32_t` (X4) | 48 | Pins using the PIO IRQ. |

@@ -34,7 +34,7 @@ int main()
     castle::status gga_status =
         generate_gga(
             gga,
-            castle::container::string_view(TALKER_GP),
+            castle::dsa::string_view(TALKER_GP),
             gga_sentence,
             sizeof(gga_sentence),
             gga_written);
@@ -42,12 +42,12 @@ int main()
     CASTLE_SAMPLE_CHECK(castle::succeeded(gga_status));
 
     // Decode the generated sentence using the protocol-level decoder.
-    castle::container::string_view gga_fields[16U];
+    castle::dsa::string_view gga_fields[16U];
     message_view gga_view;
 
     bool gga_decoded =
         decode_sentence(
-            castle::container::string_view(gga_sentence, gga_written),
+            castle::dsa::string_view(gga_sentence, gga_written),
             gga_fields,
             16U,
             gga_view);
@@ -94,19 +94,19 @@ int main()
     castle::status rmc_status =
         generate_rmc(
             rmc,
-            castle::container::string_view(TALKER_GP),
+            castle::dsa::string_view(TALKER_GP),
             rmc_sentence,
             sizeof(rmc_sentence),
             rmc_written);
 
     CASTLE_SAMPLE_CHECK(castle::succeeded(rmc_status));
 
-    castle::container::string_view rmc_fields[16U];
+    castle::dsa::string_view rmc_fields[16U];
     message_view rmc_view;
 
     bool rmc_decoded =
         decode_sentence(
-            castle::container::string_view(rmc_sentence, rmc_written),
+            castle::dsa::string_view(rmc_sentence, rmc_written),
             rmc_fields,
             16U,
             rmc_view);
@@ -140,17 +140,17 @@ int main()
         castle::succeeded(
             generate_gsa(
                 gsa,
-                castle::container::string_view(TALKER_GP),
+                castle::dsa::string_view(TALKER_GP),
                 gsa_sentence,
                 sizeof(gsa_sentence),
                 gsa_written)));
 
-    castle::container::string_view gsa_fields[20U];
+    castle::dsa::string_view gsa_fields[20U];
     message_view gsa_view;
 
     CASTLE_SAMPLE_CHECK(
         decode_sentence(
-            castle::container::string_view(gsa_sentence, gsa_written),
+            castle::dsa::string_view(gsa_sentence, gsa_written),
             gsa_fields,
             20U,
             gsa_view));
@@ -177,7 +177,7 @@ int main()
         castle::succeeded(
             generate_vtg(
                 vtg,
-                castle::container::string_view(TALKER_GP),
+                castle::dsa::string_view(TALKER_GP),
                 vtg_sentence,
                 sizeof(vtg_sentence),
                 vtg_written)));
@@ -205,7 +205,7 @@ int main()
         castle::succeeded(
             generate_gll(
                 gll,
-                castle::container::string_view(TALKER_GP),
+                castle::dsa::string_view(TALKER_GP),
                 gll_sentence,
                 sizeof(gll_sentence),
                 gll_written)));
@@ -235,7 +235,7 @@ int main()
         castle::succeeded(
             generate_zda(
                 zda,
-                castle::container::string_view(TALKER_GP),
+                castle::dsa::string_view(TALKER_GP),
                 zda_sentence,
                 sizeof(zda_sentence),
                 zda_written)));
@@ -262,7 +262,7 @@ int main()
 
     gsv_input gsv;
     gsv.satellites =
-        castle::container::array_view<const gsv_satellite_record>(
+        castle::dsa::array_view<const gsv_satellite_record>(
             satellites,
             5U);
     gsv.valid = true;
@@ -279,7 +279,7 @@ int main()
         castle::status gsv_status =
             generate_gsv_message(
                 gsv,
-                castle::container::string_view(TALKER_GP),
+                castle::dsa::string_view(TALKER_GP),
                 message,
                 gsv_sentence,
                 sizeof(gsv_sentence),
@@ -287,12 +287,12 @@ int main()
 
         CASTLE_SAMPLE_CHECK(castle::succeeded(gsv_status));
 
-        castle::container::string_view fields[32U];
+        castle::dsa::string_view fields[32U];
         message_view view;
 
         CASTLE_SAMPLE_CHECK(
             decode_sentence(
-                castle::container::string_view(gsv_sentence, gsv_written),
+                castle::dsa::string_view(gsv_sentence, gsv_written),
                 fields,
                 32U,
                 view));
@@ -312,7 +312,7 @@ int main()
     CASTLE_SAMPLE_CHECK(
         generate_gga(
             invalid_gga,
-            castle::container::string_view(TALKER_GP),
+            castle::dsa::string_view(TALKER_GP),
             gga_sentence,
             sizeof(gga_sentence),
             rejected_written)

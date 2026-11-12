@@ -29,7 +29,7 @@ int main()
 {
     namespace rtcm = castle::protocols::rtcm;
     namespace ubx = castle::protocols::ubx;
-    using castle::container::array_view;
+    using castle::dsa::array_view;
     using ubx::config::config_entry;
     using ubx::config::config_value;
     using namespace rtcm_sample;

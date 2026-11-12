@@ -6,7 +6,7 @@ int main()
 {
     using namespace castle::geodetic;
 
-    using castle::container::string_view;
+    using castle::dsa::string_view;
     const geo_point<double> da_nang(16.066389083862305, 108.21378707885742);
 
     // Precision is a type parameter; encode() stores every form of the same cell.

@@ -8,7 +8,7 @@ A fixed-capacity, self-contained sequence of one-shot calls and delays, modeled 
 
 ## Dependencies
 - [`../callbacks/function.md`](../callbacks/function.md)
-- [`../container/array.md`](../container/array.md)
+- [`../dsa/array.md`](../dsa/array.md)
 - [`../chrono/duration.md`](../chrono/duration.md)
 - [`../error/status.md`](../error/status.md)
 - `castle/math/ratio.hpp`, `castle/utility/forward.hpp`

@@ -27,7 +27,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/type_ranges.hpp"
 #include "castle/core/types.hpp"
-#include "castle/algorithm/algorithm.hpp"
+#include "castle/dsa/algorithm.hpp"
 #include "castle/utility/move.hpp"
 
 #include "castle/callbacks/function.hpp"

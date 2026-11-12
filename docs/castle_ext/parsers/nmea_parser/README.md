@@ -660,7 +660,7 @@ castle::parsers::nmea_parser::nmea_parser<256U, 32U> parser;
 
 The defaults are `MaxSentenceLen = NMEA_SAFE_MAX_SENTENCE_LEN` (256 content bytes) and `MaxFields = NMEA_DEFAULT_MAX_FIELDS` (32 fields). The sentence-length capacity excludes `$`, `*HH`, and CR/LF. Both capacities are compile-time choices; sentence storage and the field-view table are embedded in the parser.
 
-`feed()` accepts one `char`, a `(const char*, size)` range, `castle::container::string_view`, a `(const uint8_t*, size)` range, or `castle::container::array_view<const uint8_t>`. Chunks may contain partial or multiple sentences. Bytes outside a sentence are ignored until `$` is found, so interleaved UBX bytes do not need to be removed by the caller.
+`feed()` accepts one `char`, a `(const char*, size)` range, `castle::dsa::string_view`, a `(const uint8_t*, size)` range, or `castle::dsa::array_view<const uint8_t>`. Chunks may contain partial or multiple sentences. Bytes outside a sentence are ignored until `$` is found, so interleaved UBX bytes do not need to be removed by the caller.
 
 The states are `wait_dollar`, `accumulate`, `wait_checksum_hi`, `wait_checksum_lo`, and `wait_lf`. The parser accepts sentences with a checksum and sentences without one; CR, LF, or CRLF can terminate a checksum-less sentence. If `$` arrives before the previous sentence ends, it reports `unexpected_start_in_sentence` and immediately starts the new sentence.
 
@@ -780,7 +780,7 @@ fix.valid = true;
 char sentence[128U];
 castle::size_type written = 0U;
 castle::status result = generate_gga(
-    fix, castle::container::string_view("GP"),
+    fix, castle::dsa::string_view("GP"),
     sentence, sizeof(sentence), written);
 
 if (castle::succeeded(result))

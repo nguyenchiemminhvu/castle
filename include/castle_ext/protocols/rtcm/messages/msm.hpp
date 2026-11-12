@@ -47,7 +47,7 @@
 #include "castle/bit/bit_count.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle/error/status.hpp"
 #include "castle/math/round.hpp"
 
@@ -156,8 +156,8 @@ struct msm_message
     uint64_t satellite_mask = 0U;       ///< DF394: bit for satellite ID n is `satellite_bit(n)`.
     uint32_t signal_mask = 0U;          ///< DF395: bit for signal ID n is `signal_bit(n)`.
     uint64_t cell_mask = 0U;            ///< DF396: `popcount(satellite_mask) * popcount(signal_mask)` bits, satellite-major.
-    castle::container::vector<msm_satellite, MaxSatellites> satellites{}; ///< One entry per set bit of `satellite_mask`, in ID order.
-    castle::container::vector<msm_signal, MaxCells> signals{};            ///< One entry per set bit of `cell_mask`, in cell order.
+    castle::dsa::vector<msm_satellite, MaxSatellites> satellites{}; ///< One entry per set bit of `satellite_mask`, in ID order.
+    castle::dsa::vector<msm_signal, MaxCells> signals{};            ///< One entry per set bit of `cell_mask`, in cell order.
 
     /** @brief Reports whether `type` is this message's number. */
     CASTLE_NODISCARD static CASTLE_CONSTEXPR bool accepts(uint16_t type) CASTLE_NOEXCEPT

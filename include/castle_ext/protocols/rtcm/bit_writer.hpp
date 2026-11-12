@@ -41,8 +41,8 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array_view.hpp"
-#include "castle/container/string.hpp"
+#include "castle/dsa/array_view.hpp"
+#include "castle/dsa/string.hpp"
 #include "castle/error/status.hpp"
 
 #include "castle_ext/protocols/rtcm/rtcm.hpp"
@@ -66,8 +66,8 @@ public:
      * @param payload Destination storage. A view with a null data pointer behaves
      * as zero capacity, so the first write latches `status::full`.
      */
-    explicit bit_writer(castle::container::array_view<uint8_t> payload) CASTLE_NOEXCEPT
-        : payload_((payload.data() != nullptr) ? payload : castle::container::array_view<uint8_t>())
+    explicit bit_writer(castle::dsa::array_view<uint8_t> payload) CASTLE_NOEXCEPT
+        : payload_((payload.data() != nullptr) ? payload : castle::dsa::array_view<uint8_t>())
     {
     }
 
@@ -218,7 +218,7 @@ public:
      * @note Matches DF029/DF030 (descriptor counter + descriptor) and their siblings.
      */
     template <castle::size_type N>
-    void text(CASTLE_CONST castle::container::string<N>& value) CASTLE_NOEXCEPT
+    void text(CASTLE_CONST castle::dsa::string<N>& value) CASTLE_NOEXCEPT
     {
         static_assert(N <= 255U, "an RTCM string is counted by an 8-bit field");
         field(static_cast<uint8_t>(value.size()), 8U);
@@ -229,7 +229,7 @@ public:
     }
 
 private:
-    castle::container::array_view<uint8_t> payload_;
+    castle::dsa::array_view<uint8_t> payload_;
     castle::size_type position_ = 0U;
     castle::status status_ = castle::status::ok;
 };
@@ -271,7 +271,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status encode_message(
         payload_capacity = RTCM_MAX_PAYLOAD_LEN;
     }
 
-    bit_writer writer(castle::container::array_view<uint8_t>(&output[RTCM_FRAME_INDEX_PAYLOAD], payload_capacity));
+    bit_writer writer(castle::dsa::array_view<uint8_t>(&output[RTCM_FRAME_INDEX_PAYLOAD], payload_capacity));
     message.encode(writer);
     if (!writer.ok())
     {

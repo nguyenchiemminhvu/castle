@@ -4,7 +4,7 @@
 
 `rxm_rawx<MaxMeas>` models UBX-RXM-RAWX (0x02 0x15), the periodic/polled multi-GNSS raw measurement output used to generate RINEX 3 observations: a 16-byte header followed by `numMeas` 32-byte measurement blocks (`16 + numMeas·32`). Each block is an `rxm_rawx_meas` carrying pseudorange, carrier phase, Doppler and signal-quality data, plus accessors for the standard-deviation indices and the tracking status bits.
 
-`rcvTow`, `prMes`, `cpMes` (R8) and `doMes` (R4) are IEEE-754 values on the wire and are stored as `double` / `float`. Blocks are stored in a fixed-capacity [`castle::container::vector`](../../../../container/vector.md).
+`rcvTow`, `prMes`, `cpMes` (R8) and `doMes` (R4) are IEEE-754 values on the wire and are stored as `double` / `float`. Blocks are stored in a fixed-capacity [`castle::dsa::vector`](../../../../dsa/vector.md).
 
 ## Header
 
@@ -15,7 +15,7 @@
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/constants.hpp`](../../../../core/constants.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
@@ -59,7 +59,7 @@ All names live in `castle::protocols::ubx::messages`.
 | `num_meas` | `uint8_t` | - | On-wire measurement count; may exceed `meas.size()`. |
 | `rec_stat` | `uint8_t` | - | Receiver tracking status, see `REC_STAT_*`. |
 | `version` | `uint8_t` | - | Message version (0x01 for this version). |
-| `meas` | `castle::container::vector<rxm_rawx_meas, MaxMeas>` | - | Stored measurement blocks; `meas.size()` is the stored count. |
+| `meas` | `castle::dsa::vector<rxm_rawx_meas, MaxMeas>` | - | Stored measurement blocks; `meas.size()` is the stored count. |
 
 Header bytes 14..15 are reserved and not modelled.
 

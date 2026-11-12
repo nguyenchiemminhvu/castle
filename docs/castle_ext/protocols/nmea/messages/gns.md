@@ -11,7 +11,7 @@ Represents an NMEA GNS GNSS-fix sentence. It decodes time, position, mode indica
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/string_view.hpp`](../../../../container/string_view.md)
+- [`castle/dsa/string_view.hpp`](../../../../dsa/string_view.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../nmea.md)
 - [`castle_ext/protocols/nmea/field_cursor.hpp`](../field_cursor.md)
 
@@ -28,8 +28,8 @@ Represents an NMEA GNS GNSS-fix sentence. It decodes time, position, mode indica
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | `valid` | `bool` | `false` | True when decoding completed successfully for the sentence. |
-| `talker` | `castle::container::string_view` | `—` | Non-owning NMEA talker identifier view. |
-| `mode_indicator` | `castle::container::string_view` | `—` | NMEA GNS mode-indicator field. |
+| `talker` | `castle::dsa::string_view` | `—` | Non-owning NMEA talker identifier view. |
+| `mode_indicator` | `castle::dsa::string_view` | `—` | NMEA GNS mode-indicator field. |
 | `utc_time` | `double` | `0.0` | UTC time field decoded from the sentence. |
 | `latitude` | `double` | `0.0` | Decoded latitude value. |
 | `longitude` | `double` | `0.0` | Decoded longitude value. |

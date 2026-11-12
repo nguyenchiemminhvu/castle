@@ -23,7 +23,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + 4U + (2U * 4U)));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(cfg_valdel<>::matches(raw));
     CASTLE_SAMPLE_CHECK(!cfg_valdel_transaction<>::matches(raw));
 
@@ -40,7 +40,7 @@ int main()
     tx.set_action(cfg_transaction_action::ongoing);
     CASTLE_SAMPLE_CHECK(castle::succeeded(tx.keys.push_back(KEY_RATE_MEAS)));
     CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(tx, frame, sizeof(frame), written)));
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(cfg_valdel_transaction<>::matches(raw));
 
     cfg_valdel_transaction<> decoded{};
@@ -52,7 +52,7 @@ int main()
     // A key list that is not a whole number of U4 values is rejected.
     message_view truncated = raw;
     truncated.header.payload_length = static_cast<uint16_t>(raw.payload_length() - 1U);
-    truncated.payload = castle::container::array_view<const uint8_t>(raw.payload.data(), truncated.header.payload_length);
+    truncated.payload = castle::dsa::array_view<const uint8_t>(raw.payload.data(), truncated.header.payload_length);
     CASTLE_SAMPLE_CHECK(!cfg_valdel_transaction<>::decode(truncated, decoded));
 
     return 0;

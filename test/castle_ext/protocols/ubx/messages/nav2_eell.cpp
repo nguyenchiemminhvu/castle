@@ -7,7 +7,7 @@ namespace
 {
 using namespace castle::protocols::ubx;
 using namespace castle::protocols::ubx::messages;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 using message = nav2_eell;
 CASTLE_CONSTEXPR uint8_t expected_class = UBX_CLASS_NAV2;

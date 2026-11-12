@@ -8,7 +8,7 @@
 
 ## Dependencies
 - [`function`](../callbacks/function.md)
-- [`array`](../container/array.md)
+- [`array`](../dsa/array.md)
 
 ## Public API
 | API | Description |

@@ -18,8 +18,8 @@ Unlike `nmea::encode_sentence()`, this generator can emit conditionally empty fi
 - ../../../core/compiler.md
 - ../../../core/types.md
 - ../../../error/status.md
-- ../../../container/array_view.md
-- ../../../container/string_view.md
+- ../../../dsa/array_view.md
+- ../../../dsa/string_view.md
 - ../../../utility/string_builder.md
 - ../nmea/nmea.md
 
@@ -174,7 +174,7 @@ castle::size_type written = 0U;
 
 generate_gga(
     input,
-    castle::container::string_view(castle::protocols::nmea::TALKER_GP),
+    castle::dsa::string_view(castle::protocols::nmea::TALKER_GP),
     sentence,
     sizeof(sentence),
     written);
@@ -209,7 +209,7 @@ castle::size_type written = 0U;
 
 generate_rmc(
     input,
-    castle::container::string_view(castle::protocols::nmea::TALKER_GP),
+    castle::dsa::string_view(castle::protocols::nmea::TALKER_GP),
     sentence,
     sizeof(sentence),
     written);
@@ -234,7 +234,7 @@ satellites[4U].sv_id = 12U;
 
 gsv_input input;
 input.satellites =
-    castle::container::array_view<const gsv_satellite_record>(satellites, 5U);
+    castle::dsa::array_view<const gsv_satellite_record>(satellites, 5U);
 input.valid = true;
 
 const castle::size_type count = gsv_message_count(input);
@@ -246,7 +246,7 @@ for (castle::size_type message = 1U; message <= count; ++message)
 
     generate_gsv_message(
         input,
-        castle::container::string_view(castle::protocols::nmea::TALKER_GP),
+        castle::dsa::string_view(castle::protocols::nmea::TALKER_GP),
         message,
         sentence,
         sizeof(sentence),

@@ -24,7 +24,7 @@
 #define CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_MGA_QZSS_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/typed_message.hpp"
 #include "castle_ext/protocols/ubx/messages/mga_gps.hpp"
@@ -56,7 +56,7 @@ struct mga_qzss_health
     static CASTLE_CONSTEXPR uint8_t HEALTH_CODE_MASK = 0x3FU;
 
     /** @brief `health_code[i]` is the health of QZSS SV `i + 1`. */
-    castle::container::array<uint8_t, NUM_SVS> health_code{};
+    castle::dsa::array<uint8_t, NUM_SVS> health_code{};
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT

@@ -15,7 +15,7 @@
 - [`../error/status.md`](../error/status.md)
 - [`../utility/move.md`](../utility/move.md)
 - [`../utility/forward.md`](../utility/forward.md)
-- [`../container/array.md`](../container/array.md)
+- [`../dsa/array.md`](../dsa/array.md)
 - [`function.md`](function.md)
 - [`subscription.md`](subscription.md)
 

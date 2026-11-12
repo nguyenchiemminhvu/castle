@@ -1,6 +1,6 @@
 # Castle 2.0 documentation
 
-The layout mirrors `include/castle`: for example, `include/castle/container/vector.h` is documented by `docs/container/vector.md`.
+The layout mirrors `include/castle`: for example, `include/castle/dsa/vector.h` is documented by `docs/dsa/vector.md`.
 
 ## Design focus
 

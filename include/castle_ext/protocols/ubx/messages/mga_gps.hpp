@@ -26,7 +26,7 @@
 #define CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_MGA_GPS_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/typed_message.hpp"
 
@@ -174,7 +174,7 @@ struct mga_gps_health
     static CASTLE_CONSTEXPR castle::size_type NUM_SVS = 32U;
 
     /** @brief `health_code[i]` is the 6-bit health of PRN `i + 1`. */
-    castle::container::array<uint8_t, NUM_SVS> health_code{};
+    castle::dsa::array<uint8_t, NUM_SVS> health_code{};
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT
@@ -222,8 +222,8 @@ struct mga_gps_utc
 struct mga_gps_iono
     : detail::typed_message<mga_gps_iono, UBX_CLASS_MGA, UBX_ID_MGA_GPS, MGA_GPS_TYPE_IONO, 16U>
 {
-    castle::container::array<int8_t, 4U> iono_alpha{}; ///< alpha0..3 [2^-30, -27, -24, -24].
-    castle::container::array<int8_t, 4U> iono_beta{};  ///< beta0..3 [2^11, 14, 16, 16].
+    castle::dsa::array<int8_t, 4U> iono_alpha{}; ///< alpha0..3 [2^-30, -27, -24, -24].
+    castle::dsa::array<int8_t, 4U> iono_beta{};  ///< beta0..3 [2^11, 14, 16, 16].
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT

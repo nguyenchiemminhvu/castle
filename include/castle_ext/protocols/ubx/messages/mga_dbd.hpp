@@ -25,7 +25,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -56,7 +56,7 @@ struct mga_dbd
     static CASTLE_CONSTEXPR castle::size_type header_length = 12U;
 
     /** @brief Firmware-specific entry bytes (at most `MaxData`; the rest is skipped). */
-    castle::container::vector<uint8_t, MaxData> data{};
+    castle::dsa::vector<uint8_t, MaxData> data{};
 
     /**
      * @brief Reports whether `raw` is a database entry: MGA-DBD with at least

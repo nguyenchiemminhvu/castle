@@ -27,9 +27,9 @@
 #include "castle/core/type_ranges.hpp"
 #include "castle/core/constants.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/string.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/string.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/utility/optional.hpp"
 #include "castle/utility/string_builder.hpp"
 
@@ -43,7 +43,7 @@ namespace serialization
 namespace json
 {
 
-using string_view = castle::container::string_view;
+using string_view = castle::dsa::string_view;
 
 /**
  * @brief JSON node kinds stored in a document.
@@ -185,7 +185,7 @@ CASTLE_INLINE bool is_number_delimiter(char c) CASTLE_NOEXCEPT
  * @note This function does not handle UTF-16 surrogate pairs and will return false for them.
  */
 template <castle::size_type N>
-CASTLE_INLINE bool append_utf8(uint16_t code_unit, castle::container::string<N>& output) CASTLE_NOEXCEPT
+CASTLE_INLINE bool append_utf8(uint16_t code_unit, castle::dsa::string<N>& output) CASTLE_NOEXCEPT
 {
     // LCOV_EXCL_START
     if (code_unit >= characters::utf16_surrogate_min && code_unit <= characters::utf16_surrogate_max)
@@ -218,7 +218,7 @@ CASTLE_INLINE bool append_utf8(uint16_t code_unit, castle::container::string<N>&
  */
 template <castle::size_type MaxScratch>
 result decode_string(string_view source, castle::size_type& position,
-                     castle::container::string<MaxScratch>& output)
+                     castle::dsa::string<MaxScratch>& output)
 {
     result r;
     output.clear();
@@ -550,7 +550,7 @@ parse_floating(string_view text, T& output) CASTLE_NOEXCEPT
  * @note The output string is cleared before writing the formatted integer.
  */
 template <typename T>
-castle::status format_integer(T value, castle::container::string<max_integer_str_len>& output) CASTLE_NOEXCEPT
+castle::status format_integer(T value, castle::dsa::string<max_integer_str_len>& output) CASTLE_NOEXCEPT
 {
     using U = meta::make_unsigned_t<T>;
     output.clear();
@@ -865,7 +865,7 @@ public:
     detail::enable_integer_t<T>
     set_integer(node_id& out, T value, node_id parent_id = npos, view_type key_name = view_type()) CASTLE_NOEXCEPT
     {
-        castle::container::string<max_integer_str_len> encoded;
+        castle::dsa::string<max_integer_str_len> encoded;
         CASTLE_CONST castle::status s = detail::format_integer(value, encoded);
         if (s != castle::status::ok)
         {
@@ -1289,7 +1289,7 @@ private:
                 --depth_;
                 return fail(error_code::unexpected_token);
             }
-            castle::container::string<Document::static_string_capacity> key;
+            castle::dsa::string<Document::static_string_capacity> key;
             result kr = decode_string(source_, position_, key);
             if (!kr.succeeded())
             {
@@ -1395,7 +1395,7 @@ private:
      */
     result parse_string_value(node_id& out, node_id parent, view_type key_name) CASTLE_NOEXCEPT
     {
-        castle::container::string<Document::static_string_capacity> value;
+        castle::dsa::string<Document::static_string_capacity> value;
         result r = decode_string(source_, position_, value);
         if (!r.succeeded())
         {
@@ -1651,7 +1651,7 @@ castle::status serialize_node(Document CASTLE_CONST& doc, typename Document::nod
  */
 template <castle::size_type MaxNodes, castle::size_type MaxStringBytes, castle::size_type MaxDepth, castle::size_type MaxOutput>
 result serialize(document<MaxNodes, MaxStringBytes, MaxDepth> CASTLE_CONST& doc,
-                 castle::container::string<MaxOutput>& output,
+                 castle::dsa::string<MaxOutput>& output,
                  bool pretty = false, castle::size_type indent_spaces = 2U) CASTLE_NOEXCEPT
 {
     result r;

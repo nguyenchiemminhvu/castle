@@ -8,8 +8,8 @@ namespace
 
 using namespace castle::protocols::ubx;
 using namespace castle::protocols::ubx::messages;
-using castle::container::array_view;
-using castle::container::vector;
+using castle::dsa::array_view;
+using castle::dsa::vector;
 
 static CASTLE_CONSTEXPR uint8_t TEST_ID = 0x7EU;
 

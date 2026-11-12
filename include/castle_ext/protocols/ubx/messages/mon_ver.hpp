@@ -15,8 +15,8 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/string.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -45,10 +45,10 @@ struct mon_ver
     static CASTLE_CONSTEXPR castle::size_type header_length = sw_version_len + hw_version_len;
     static CASTLE_CONSTEXPR castle::size_type block_length = extension_len;
 
-    castle::container::string<sw_version_len> sw_version{}; ///< Software version (NUL padding stripped).
-    castle::container::string<hw_version_len> hw_version{}; ///< Hardware version (NUL padding stripped).
+    castle::dsa::string<sw_version_len> sw_version{}; ///< Software version (NUL padding stripped).
+    castle::dsa::string<hw_version_len> hw_version{}; ///< Hardware version (NUL padding stripped).
     /** @brief Extension strings in wire order; extensions beyond `MaxExtensions` are skipped. */
-    castle::container::vector<castle::container::string<extension_len>, MaxExtensions> extensions{};
+    castle::dsa::vector<castle::dsa::string<extension_len>, MaxExtensions> extensions{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {
@@ -78,7 +78,7 @@ struct mon_ver
                 reader.reserved((count - index) * extension_len);
                 break;
             }
-            castle::container::string<extension_len> extension{};
+            castle::dsa::string<extension_len> extension{};
             reader.text(extension);
             static_cast<void>(out.extensions.push_back(extension));
         }
@@ -95,7 +95,7 @@ struct mon_ver
     {
         writer.text(sw_version);
         writer.text(hw_version);
-        for (CASTLE_CONST castle::container::string<extension_len>& extension : extensions)
+        for (CASTLE_CONST castle::dsa::string<extension_len>& extension : extensions)
         {
             writer.text(extension);
         }

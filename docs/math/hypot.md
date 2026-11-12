@@ -11,7 +11,7 @@ Computes two-dimensional and three-dimensional floating-point vector magnitudes 
 - [`castle/core/traits.hpp`](../core/traits.md)
 - [`castle/math/abs.hpp`](abs.md)
 - [`castle/math/sqrt_real.hpp`](sqrt_real.md)
-- [`castle/algorithm/algorithm.hpp`](../algorithm/algorithm.md)
+- [`castle/dsa/algorithm.hpp`](../dsa/algorithm.md)
 
 ## Public API
 | Signature | Description |

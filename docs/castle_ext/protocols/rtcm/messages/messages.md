@@ -11,7 +11,7 @@ Every model follows the same shape:
 - each model is one message number fixed at compile time: `static constexpr uint16_t MESSAGE_TYPE` is the number it writes, and `static constexpr bool accepts(uint16_t type)` is `type == MESSAGE_TYPE`. Families of related numbers are one class template with one alias per number (`gps_rtk_l1_obs` ... `gps_rtk_l1_l2_obs_ext`, `station_arp` / `station_arp_height`, `gps_msm4` ...), so a message number can never be wrong at run time;
 - `void encode(bit_writer&) const noexcept` writes the payload as an MSB-first bit stream and latches `invalid_argument`, `out_of_range` or `full` on the writer instead of returning a value;
 - `encode_message(model, output, capacity, written)` (see [`bit_writer`](../bit_writer.md)) writes the payload directly into the frame buffer and adds the preamble, length and CRC-24Q, with no scratch copy;
-- variable-length models keep their blocks in a fixed-capacity `castle::container::vector` whose capacity is a template parameter (`gps_rtk_observables<RTCM_TYPE_GPS_L1L2_OBS_EXT, 12U>` ...), so nothing allocates.
+- variable-length models keep their blocks in a fixed-capacity `castle::dsa::vector` whose capacity is a template parameter (`gps_rtk_observables<RTCM_TYPE_GPS_L1L2_OBS_EXT, 12U>` ...), so nothing allocates.
 
 ## Header
 

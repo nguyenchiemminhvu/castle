@@ -44,7 +44,7 @@ struct drift_hint : ubx::messages::detail::typed_message<drift_hint, SAMPLE_CLAS
 
 int main()
 {
-    using castle::container::array_view;
+    using castle::dsa::array_view;
 
     CASTLE_SAMPLE_CHECK(position_hint::message_type == 0x01U);
     CASTLE_SAMPLE_CHECK(drift_hint::message_type == 0x02U);

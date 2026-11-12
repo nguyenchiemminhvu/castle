@@ -12,7 +12,7 @@ Represents an NMEA GSA DOP/fix-mode sentence. It stores the navigation mode, a f
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
+- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../nmea.md)
 - [`castle_ext/protocols/nmea/field_cursor.hpp`](../field_cursor.md)
 - `stdint.h`
@@ -33,10 +33,10 @@ Represents an NMEA GSA DOP/fix-mode sentence. It stores the navigation mode, a f
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | `valid` | `bool` | `false` | True when decoding completed successfully for the sentence. |
-| `talker` | `castle::container::string_view` | `—` | Non-owning NMEA talker identifier view. |
+| `talker` | `castle::dsa::string_view` | `—` | Non-owning NMEA talker identifier view. |
 | `op_mode` | `gsa_op_mode` | `gsa_op_mode::unknown` | GSA operational mode enumeration. |
 | `nav_mode` | `gsa_nav_mode` | `gsa_nav_mode::unknown` | GSA navigation/fix mode enumeration. |
-| `sat_ids` | `castle::container::array<uint8_t,max_satellites>` | `—` | Fixed-capacity satellite-ID array from GSA. |
+| `sat_ids` | `castle::dsa::array<uint8_t,max_satellites>` | `—` | Fixed-capacity satellite-ID array from GSA. |
 | `pdop` | `double` | `0.0` | Position dilution of precision. |
 | `hdop` | `double` | `0.0` | Horizontal dilution-of-precision value. |
 | `vdop` | `double` | `0.0` | Vertical dilution of precision. |

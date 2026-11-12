@@ -4,7 +4,7 @@
 
 `rxm_measx<MaxSvs>` models UBX-RXM-MEASX (0x02 0x14), the periodic/polled satellite measurement output for RRLP: a 44-byte header followed by `numSV` 24-byte satellite blocks (`44 + numSV·24`). Payload data follows the RRLP (3GPP TS 44.031) conventions, except that GNSS/satellite IDs use the u-blox Satellite Numbering scheme.
 
-Each block is an `rxm_measx_sv` holding the raw wire integers (Doppler, code phase, multipath indicator, RMS error index) plus helpers that apply the spec scales. The header keeps the four per-constellation reference times and their accuracies. Blocks are stored in a fixed-capacity [`castle::container::vector`](../../../../container/vector.md).
+Each block is an `rxm_measx_sv` holding the raw wire integers (Doppler, code phase, multipath indicator, RMS error index) plus helpers that apply the spec scales. The header keeps the four per-constellation reference times and their accuracies. Blocks are stored in a fixed-capacity [`castle::dsa::vector`](../../../../dsa/vector.md).
 
 ## Header
 
@@ -15,7 +15,7 @@ Each block is an `rxm_measx_sv` holding the raw wire integers (Doppler, code pha
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/constants.hpp`](../../../../core/constants.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
@@ -59,7 +59,7 @@ All names live in `castle::protocols::ubx::messages`.
 | `qzss_tow_acc` | `uint16_t` | 2^-4 ms | QZSS reference time accuracy. |
 | `num_svs` | `uint8_t` | - | On-wire satellite count (`numSV`); may exceed `svs.size()`. |
 | `flags` | `uint8_t` | - | Flags, see `FLAGS_*`. |
-| `svs` | `castle::container::vector<rxm_measx_sv, MaxSvs>` | - | Stored satellite blocks; `svs.size()` is the stored count. |
+| `svs` | `castle::dsa::vector<rxm_measx_sv, MaxSvs>` | - | Stored satellite blocks; `svs.size()` is the stored count. |
 
 Reserved header bytes (1..3, 16..19, 30..31, 36..43) are not modelled.
 
@@ -130,7 +130,7 @@ See `samples/castle_ext/protocols/ubx/messages/rxm_measx.cpp` for encode, decode
 - Capacity: storage is capped by `MaxSvs` (default 64). Blocks beyond capacity are skipped and `decode()` still succeeds; `num_svs` keeps the on-wire count, which may exceed the stored `svs.size()`.
 - `encode()` writes `numSV` from `svs.size()`; the `num_svs` member is ignored when encoding. Reserved bytes are written as zero.
 - Scaled values stay raw integers in the model; the `double` helpers apply the scale on demand. Decoding does no floating-point math.
-- Storage is a `castle::container::vector`: `svs.size()` is the stored count and `num_svs` the on-wire count. The field names of the earlier model (`gnss_id`, `doppler_ms`, `gps_tow_acc`, `num_svs`, ...) are preserved.
+- Storage is a `castle::dsa::vector`: `svs.size()` is the stored count and `num_svs` the on-wire count. The field names of the earlier model (`gnss_id`, `doppler_ms`, `gps_tow_acc`, `num_svs`, ...) are preserved.
 - No heap allocation (the vector is embedded in the value), no exceptions.
 - `message_view` is non-owning; its payload must stay valid while `decode()` runs. The decoded model owns its data.
 - Value types; copy freely.

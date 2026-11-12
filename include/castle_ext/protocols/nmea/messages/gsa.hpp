@@ -6,7 +6,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle_ext/protocols/nmea/nmea.hpp"
 #include "castle_ext/protocols/nmea/field_cursor.hpp"
 
@@ -44,10 +44,10 @@ struct gsa
     static CASTLE_CONSTEXPR castle::size_type max_satellites = 12U;
 
     bool valid = false;
-    castle::container::string_view talker{};
+    castle::dsa::string_view talker{};
     gsa_op_mode op_mode = gsa_op_mode::unknown;
     gsa_nav_mode nav_mode = gsa_nav_mode::unknown;
-    castle::container::array<uint8_t, max_satellites> sat_ids{};
+    castle::dsa::array<uint8_t, max_satellites> sat_ids{};
     double pdop = 0.0;
     double hdop = 0.0;
     double vdop = 0.0;

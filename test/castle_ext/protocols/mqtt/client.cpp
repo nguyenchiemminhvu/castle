@@ -301,22 +301,22 @@ TEST(MqttClient, ConnectRejectsNullCallbackAndInvalidOptionsBeforeOpening)
     for (size_type i = 0U; i < 48U; ++i) { long_name[i] = 'u'; }
     const char bad_utf8[] = {static_cast<char>(0xFF)};
     options.has_username = true;
-    options.username = castle::container::string_view(long_name, 48U);
+    options.username = castle::dsa::string_view(long_name, 48U);
     EXPECT_EQ(client.connect(remote, options, 1), castle::status::invalid_argument);
-    options.username = castle::container::string_view(bad_utf8, sizeof(bad_utf8));
+    options.username = castle::dsa::string_view(bad_utf8, sizeof(bad_utf8));
     EXPECT_EQ(client.connect(remote, options, 1), castle::status::invalid_argument);
     options.username = "user";
     options.has_password = true;
-    options.password = castle::container::string_view(long_name, 48U);
+    options.password = castle::dsa::string_view(long_name, 48U);
     EXPECT_EQ(client.connect(remote, options, 1), castle::status::invalid_argument);
-    options.password = castle::container::string_view(bad_utf8, sizeof(bad_utf8));
+    options.password = castle::dsa::string_view(bad_utf8, sizeof(bad_utf8));
     EXPECT_EQ(client.connect(remote, options, 1), castle::status::invalid_argument);
     options.has_password = false;
     options.has_username = false;
 
-    options.client_id = castle::container::string_view(long_name, 48U);
+    options.client_id = castle::dsa::string_view(long_name, 48U);
     EXPECT_EQ(client.connect(remote, options, 1), castle::status::invalid_argument);
-    options.client_id = castle::container::string_view(bad_utf8, sizeof(bad_utf8));
+    options.client_id = castle::dsa::string_view(bad_utf8, sizeof(bad_utf8));
     EXPECT_EQ(client.connect(remote, options, 1), castle::status::invalid_argument);
     options.client_id = "ok";
 
@@ -448,7 +448,7 @@ TEST(MqttClient, ReportsOversizedConnectPropertiesBeforeSending)
 {
     char long_text[61U]{};
     for (size_type i = 0U; i < 60U; ++i) { long_text[i] = 'p'; }
-    const castle::container::string_view text(long_text, 60U);
+    const castle::dsa::string_view text(long_text, 60U);
 
     scripted_peer peer;
     ASSERT_TRUE(peer.open());
@@ -545,7 +545,7 @@ TEST(MqttClient, PublishValidatesStateTopicPayloadAndQosSlots)
 
     char long_topic[49U]{};
     for (size_type i = 0U; i < 48U; ++i) { long_topic[i] = 't'; }
-    EXPECT_EQ(client.publish(castle::container::string_view(long_topic, 48U), payload, sizeof(payload)), castle::status::out_of_range);
+    EXPECT_EQ(client.publish(castle::dsa::string_view(long_topic, 48U), payload, sizeof(payload)), castle::status::out_of_range);
 
     uint8_t oversized[65U]{};
     EXPECT_EQ(client.publish("a/b", oversized, sizeof(oversized), qos::at_most_once), castle::status::out_of_range);
@@ -593,8 +593,8 @@ TEST(MqttClient, SubscribeReleasesRequestSlotsWhenBodyCannotBeSent)
     char medium_filter[19U]{};
     for (size_type i = 0U; i < 18U; ++i) { medium_filter[i] = 'm'; }
     uint16_t id = 0U;
-    EXPECT_EQ(client.subscribe(castle::container::string_view(long_filter, 30U), qos::at_most_once, id), castle::status::full);
-    EXPECT_EQ(client.subscribe(castle::container::string_view(medium_filter, 18U), qos::at_most_once, id), castle::status::full);
+    EXPECT_EQ(client.subscribe(castle::dsa::string_view(long_filter, 30U), qos::at_most_once, id), castle::status::full);
+    EXPECT_EQ(client.subscribe(castle::dsa::string_view(medium_filter, 18U), qos::at_most_once, id), castle::status::full);
     EXPECT_EQ(client.subscribe("a/b", qos::at_most_once, id), castle::status::ok);
     EXPECT_EQ(client.subscribe("a/c", qos::at_most_once, id), castle::status::ok);
     EXPECT_EQ(client.subscribe("a/d", qos::at_most_once, id), castle::status::full);
@@ -615,8 +615,8 @@ TEST(MqttClient, UnsubscribeReleasesRequestSlotsWhenBodyCannotBeSent)
     char medium_filter[20U]{};
     for (size_type i = 0U; i < 19U; ++i) { medium_filter[i] = 'u'; }
     uint16_t id = 0U;
-    EXPECT_EQ(client.unsubscribe(castle::container::string_view(long_filter, 30U), id), castle::status::full);
-    EXPECT_EQ(client.unsubscribe(castle::container::string_view(medium_filter, 19U), id), castle::status::full);
+    EXPECT_EQ(client.unsubscribe(castle::dsa::string_view(long_filter, 30U), id), castle::status::full);
+    EXPECT_EQ(client.unsubscribe(castle::dsa::string_view(medium_filter, 19U), id), castle::status::full);
     EXPECT_EQ(id, 0U);
     EXPECT_EQ(client.unsubscribe("a/b", id), castle::status::ok);
     EXPECT_EQ(id, 3U);
@@ -668,22 +668,22 @@ TEST(MqttClient, SubscribeAndUnsubscribeValidateArguments)
     ASSERT_EQ(connect_to(client, peer, options, kConnackOk, sizeof(kConnackOk)), castle::status::ok);
 
     uint16_t id = 99U;
-    castle::container::string_view const filters[2U] = {"a/#", "b/+"};
+    castle::dsa::string_view const filters[2U] = {"a/#", "b/+"};
     qos const qualities[2U] = {qos::at_most_once, qos::exactly_once};
-    castle::container::string_view const bad_filters[2U] = {"a/#", "a+"};
-    EXPECT_EQ(client.subscribe(static_cast<castle::container::string_view const*>(nullptr), qualities, 1U, id), castle::status::invalid_argument);
+    castle::dsa::string_view const bad_filters[2U] = {"a/#", "a+"};
+    EXPECT_EQ(client.subscribe(static_cast<castle::dsa::string_view const*>(nullptr), qualities, 1U, id), castle::status::invalid_argument);
     EXPECT_EQ(client.subscribe(filters, nullptr, 1U, id), castle::status::invalid_argument);
     EXPECT_EQ(client.subscribe(filters, qualities, 0U, id), castle::status::invalid_argument);
     EXPECT_EQ(client.subscribe(bad_filters, qualities, 2U, id), castle::status::invalid_argument);
     EXPECT_EQ(client.subscribe("a/b", static_cast<qos>(3U), id), castle::status::invalid_argument);
     EXPECT_EQ(id, 0U);
-    EXPECT_EQ(client.unsubscribe(static_cast<castle::container::string_view const*>(nullptr), 1U, id), castle::status::invalid_argument);
+    EXPECT_EQ(client.unsubscribe(static_cast<castle::dsa::string_view const*>(nullptr), 1U, id), castle::status::invalid_argument);
     EXPECT_EQ(client.unsubscribe(filters, 0U, id), castle::status::invalid_argument);
     EXPECT_EQ(client.unsubscribe(bad_filters, 2U, id), castle::status::invalid_argument);
     EXPECT_EQ(id, 0U);
 
     uint32_t now = 0U;
-    castle::container::string_view const pair[2U] = {"a/b", "c/d"};
+    castle::dsa::string_view const pair[2U] = {"a/b", "c/d"};
     qos const pair_qualities[2U] = {qos::at_most_once, qos::at_most_once};
     uint16_t pair_id = 0U;
     ASSERT_EQ(client.subscribe(pair, pair_qualities, 2U, pair_id), castle::status::ok);

@@ -5,7 +5,7 @@
 #define CASTLE_EXT_PROTOCOLS_NMEA_MESSAGES_GBS_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle_ext/protocols/nmea/nmea.hpp"
 #include "castle_ext/protocols/nmea/field_cursor.hpp"
 
@@ -24,7 +24,7 @@ namespace messages
 struct gbs
 {
     bool valid = false;
-    castle::container::string_view talker{};
+    castle::dsa::string_view talker{};
     double utc_time = 0.0;
     double err_lat = 0.0;
     double err_lon = 0.0;

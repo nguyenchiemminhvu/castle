@@ -10,7 +10,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/error/status.hpp"
 
 #include <stdint.h>
@@ -176,7 +176,7 @@ struct property_list
         return castle::status::ok;
     }
 
-    castle::status add_string(property_id id, castle::container::string_view value) CASTLE_NOEXCEPT
+    castle::status add_string(property_id id, castle::dsa::string_view value) CASTLE_NOEXCEPT
     {
         if (full())
         {
@@ -218,8 +218,8 @@ struct property_list
         return castle::status::ok;
     }
 
-    castle::status add_user_property(castle::container::string_view key,
-                                     castle::container::string_view value) CASTLE_NOEXCEPT
+    castle::status add_user_property(castle::dsa::string_view key,
+                                     castle::dsa::string_view value) CASTLE_NOEXCEPT
     {
         if (full())
         {
@@ -262,7 +262,7 @@ struct property_list
 /** @brief Non-owning message delivered to an MQTT application callback. */
 struct message_view
 {
-    castle::container::string_view topic{};
+    castle::dsa::string_view topic{};
     uint8_t CASTLE_CONST* payload = nullptr;
     size_type payload_size = 0U;
     qos quality = qos::at_most_once;
@@ -274,7 +274,7 @@ struct message_view
 /** @brief Optional Last Will and Testament configuration (all data is borrowed until CONNECT completes). */
 struct will_options
 {
-    castle::container::string_view topic{};
+    castle::dsa::string_view topic{};
     uint8_t CASTLE_CONST* payload = nullptr;
     size_type payload_size = 0U;
     qos quality = qos::at_most_once;
@@ -287,13 +287,13 @@ template <size_type PropertyCapacity = 8U, size_type PropertyStringCapacity = 64
 struct connect_options
 {
     version protocol_version = version::v3_1_1;
-    castle::container::string_view client_id{"castle-client"};
+    castle::dsa::string_view client_id{"castle-client"};
     bool clean_session = true; // MQTT 5 calls this Clean Start
     uint16_t keep_alive_seconds = 30U;
     bool has_will = false;
     will_options will{};
-    castle::container::string_view username{};
-    castle::container::string_view password{};
+    castle::dsa::string_view username{};
+    castle::dsa::string_view password{};
     bool has_username = false;
     bool has_password = false;
     property_list<PropertyCapacity, PropertyStringCapacity, PropertyBinaryCapacity> properties{};

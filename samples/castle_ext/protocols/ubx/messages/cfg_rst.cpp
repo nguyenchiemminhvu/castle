@@ -18,7 +18,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == sizeof(frame));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(cfg_rst::matches(raw));
 
     cfg_rst decoded{};
@@ -37,7 +37,7 @@ int main()
     custom.nav_bbr_mask = cfg_rst::BBR_ALM | cfg_rst::BBR_POS;
     custom.reset_mode = cfg_rst_mode::gnss_start;
     CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(custom, frame, sizeof(frame), written)));
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(cfg_rst::decode(raw, decoded));
     CASTLE_SAMPLE_CHECK(decoded.nav_bbr_mask == 0x0012U);
     CASTLE_SAMPLE_CHECK(decoded.reset_mode == cfg_rst_mode::gnss_start);

@@ -84,7 +84,7 @@
           <h2>Standards</h2>
           <p>Automotive projects use guidelines such as MISRA C++, AUTOSAR C++14, CERT C++, and the ISO 26262 safety process. These are not only style rules. They prevent failures that are hard to reproduce and expensive to fix on a real target.</p>
           <h3>Examples</h3>
-          <p><strong>MEM52-CPP: handle allocation failure.</strong> Define a clear response when allocation fails. Often the best choice is to avoid the failure: allocate at start-up, use fixed-capacity containers, or use bounded memory pools. CASTLE containers such as <a href="container.html">vector</a> keep their data inside the object.</p>
+          <p><strong>MEM52-CPP: handle allocation failure.</strong> Define a clear response when allocation fails. Often the best choice is to avoid the failure: allocate at start-up, use fixed-capacity containers, or use bounded memory pools. CASTLE containers such as <a href="dsa.html">vector</a> keep their data inside the object.</p>
           <p><strong>MEM57-CPP: do not use default <code>operator new</code> for over-aligned types.</strong> Alignment can fail on the target MCU or compiler even when PC tests pass. Treat memory layout and alignment as part of the design.</p>
           <p><strong>OOP51-CPP: do not slice derived objects.</strong> Copying a derived object into a base object by value drops its data and behavior. Pick the right model: value semantics, references, runtime polymorphism, or compile-time polymorphism. CASTLE uses compile-time choices by default. See <a href="callbacks.html">callbacks</a>.</p>
         </section>
@@ -306,7 +306,7 @@ HAL --&gt; Static
             <table>
               <thead><tr><th>Concern</th><th>CASTLE approach</th><th>Read more</th></tr></thead>
               <tbody>
-                <tr><td>Memory</td><td>Fixed-capacity containers, no mandatory heap.</td><td><a href="container.html">Containers</a></td></tr>
+                <tr><td>Memory</td><td>Fixed-capacity containers, no mandatory heap.</td><td><a href="dsa.html">Containers</a></td></tr>
                 <tr><td>Failure</td><td>Status values and assertions, no exceptions in normal paths.</td><td><a href="core.html">Error handler</a></td></tr>
                 <tr><td>Dispatch</td><td>Compile-time choices, fixed-storage callbacks.</td><td><a href="callbacks.html">Function</a></td></tr>
                 <tr><td>Concurrency</td><td>Explicit synchronization types, no hidden locks.</td><td><a href="sync.html">Mutex</a></td></tr>

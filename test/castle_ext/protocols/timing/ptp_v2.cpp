@@ -5,7 +5,7 @@
 namespace
 {
 
-using castle::container::array_view;
+using castle::dsa::array_view;
 using castle::status;
 using castle::timing::ptp::message_type;
 using castle::timing::ptp::port_identity;

@@ -13,7 +13,7 @@
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/constants.hpp`](../../../../core/constants.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
@@ -51,7 +51,7 @@
 | `qzss_sv_id` | `uint8_t` | - | QZS/GEO whose correction data is used. |
 | `service_flags` | `uint8_t` | - | SLAS service flags (`SERVICE_FLAGS_*`). |
 | `cnt` | `uint8_t` | - | On-wire correction count; may exceed `corrections.size()`. |
-| `corrections` | `castle::container::vector<nav_slas_correction, MaxCorrections>` | - | Stored correction blocks. |
+| `corrections` | `castle::dsa::vector<nav_slas_correction, MaxCorrections>` | - | Stored correction blocks. |
 
 ### `nav_slas_correction` fields
 

@@ -11,7 +11,7 @@
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
+- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/fixed_message.hpp`](detail/fixed_message.md)
 - `stdint.h`
@@ -38,7 +38,7 @@ All names live in `castle::protocols::ubx::messages`.
 | Field | Type | Unit / scale | Description |
 | --- | --- | --- | --- |
 | `version` | `uint8_t` | - | Message version (0x01 for this version). Offset 0, followed by 3 reserved bytes. |
-| `unique_id` | `castle::container::array<uint8_t, 5U>` | - | Unique chip ID, in wire order. Offset 4. |
+| `unique_id` | `castle::dsa::array<uint8_t, 5U>` | - | Unique chip ID, in wire order. Offset 4. |
 
 ### Functions
 

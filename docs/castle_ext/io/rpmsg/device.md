@@ -7,7 +7,7 @@ Fixed-capacity device facade that owns endpoint/service tables and connects appl
 `#include "castle_ext/io/rpmsg/device.hpp"`
 
 ## Dependencies
-[`types.hpp`](../types.md), [`message.hpp`](../message.md), [`name_service.hpp`](../name_service.md), [`backend.hpp`](../backend.md), [`endpoint.hpp`](../endpoint.md), `castle/callbacks/function.hpp`, `castle/container/string.hpp`.
+[`types.hpp`](../types.md), [`message.hpp`](../message.md), [`name_service.hpp`](../name_service.md), [`backend.hpp`](../backend.md), [`endpoint.hpp`](../endpoint.md), `castle/callbacks/function.hpp`, `castle/dsa/string.hpp`.
 
 ## Public API
 `basic_device<Backend, Options>` and alias `device<Backend, Options>`; `initialize`, `shutdown`, `poll`, `set_name_service_callback` (unclaimed CREATE and device-level DESTROY events), `find_service`, `process_name_service_event`, `endpoint_count`, `service_count`, and `backend`.

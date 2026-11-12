@@ -7,7 +7,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/error/status.hpp"
 
 #include <stdint.h>
@@ -21,7 +21,7 @@ namespace mqtt
 
 namespace detail
 {
-CASTLE_INLINE bool valid_utf8(castle::container::string_view value) CASTLE_NOEXCEPT
+CASTLE_INLINE bool valid_utf8(castle::dsa::string_view value) CASTLE_NOEXCEPT
 {
     if (value.data() == nullptr && !value.empty())
     {
@@ -87,7 +87,7 @@ CASTLE_INLINE bool valid_utf8(castle::container::string_view value) CASTLE_NOEXC
 } // namespace detail
 
 /** @brief Validates an MQTT Topic Name (non-empty UTF-8; wildcards forbidden). */
-CASTLE_INLINE castle::status validate_topic_name(castle::container::string_view topic) CASTLE_NOEXCEPT
+CASTLE_INLINE castle::status validate_topic_name(castle::dsa::string_view topic) CASTLE_NOEXCEPT
 {
     if (topic.empty() || !detail::valid_utf8(topic))
     {
@@ -104,7 +104,7 @@ CASTLE_INLINE castle::status validate_topic_name(castle::container::string_view 
 }
 
 /** @brief Validates an MQTT Topic Filter, including whole-level '+' and final-level '#'. */
-CASTLE_INLINE castle::status validate_topic_filter(castle::container::string_view filter) CASTLE_NOEXCEPT
+CASTLE_INLINE castle::status validate_topic_filter(castle::dsa::string_view filter) CASTLE_NOEXCEPT
 {
     if (filter.empty() || !detail::valid_utf8(filter))
     {
@@ -134,8 +134,8 @@ CASTLE_INLINE castle::status validate_topic_filter(castle::container::string_vie
 }
 
 /** @brief Tests whether a Topic Name is selected by a valid MQTT Topic Filter. */
-CASTLE_INLINE bool topic_matches(castle::container::string_view filter,
-                                 castle::container::string_view topic) CASTLE_NOEXCEPT
+CASTLE_INLINE bool topic_matches(castle::dsa::string_view filter,
+                                 castle::dsa::string_view topic) CASTLE_NOEXCEPT
 {
     if (!castle::succeeded(validate_topic_filter(filter)) ||
         !castle::succeeded(validate_topic_name(topic)))

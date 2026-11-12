@@ -21,7 +21,7 @@
  * struct cfg_valdel : detail::cfg_message<cfg_valdel<MaxKeys>, UBX_ID_CFG_VALDEL, 0x00U>
  * {
  *     uint8_t layers = 0U;
- *     castle::container::vector<uint32_t, MaxKeys> keys{};
+ *     castle::dsa::vector<uint32_t, MaxKeys> keys{};
  *
  *     template <typename Self, typename Stream>
  *     static void layout(Self& self, Stream& stream) noexcept
@@ -38,7 +38,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle/error/status.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/ubx_config.hpp"
@@ -162,7 +162,7 @@ struct cfg_message
  * a reader failure.
  */
 template <castle::size_type N>
-CASTLE_INLINE void cfg_keys(payload_reader& reader, castle::container::vector<uint32_t, N>& keys) CASTLE_NOEXCEPT
+CASTLE_INLINE void cfg_keys(payload_reader& reader, castle::dsa::vector<uint32_t, N>& keys) CASTLE_NOEXCEPT
 {
     static_assert(N <= CFG_MAX_KEYS, "UBX-CFG messages carry at most 64 keys");
     keys.clear();
@@ -178,7 +178,7 @@ CASTLE_INLINE void cfg_keys(payload_reader& reader, castle::container::vector<ui
 
 /** @brief Encodes every stored key ID. */
 template <castle::size_type N>
-CASTLE_INLINE void cfg_keys(payload_writer& writer, CASTLE_CONST castle::container::vector<uint32_t, N>& keys) CASTLE_NOEXCEPT
+CASTLE_INLINE void cfg_keys(payload_writer& writer, CASTLE_CONST castle::dsa::vector<uint32_t, N>& keys) CASTLE_NOEXCEPT
 {
     static_assert(N <= CFG_MAX_KEYS, "UBX-CFG messages carry at most 64 keys");
     for (CASTLE_CONST uint32_t key : keys)
@@ -226,7 +226,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR uint64_t cfg_raw_value(CASTLE_CONST config::co
  * latches a reader failure. Pairs beyond `N` are consumed but not stored.
  */
 template <typename Entry, castle::size_type N>
-CASTLE_INLINE void cfg_data(payload_reader& reader, castle::container::vector<Entry, N>& entries) CASTLE_NOEXCEPT
+CASTLE_INLINE void cfg_data(payload_reader& reader, castle::dsa::vector<Entry, N>& entries) CASTLE_NOEXCEPT
 {
     static_assert(N <= CFG_MAX_KEYS, "UBX-CFG messages carry at most 64 key/value pairs");
     entries.clear();
@@ -253,7 +253,7 @@ CASTLE_INLINE void cfg_data(payload_reader& reader, castle::container::vector<En
  * @note A key with an unknown size code latches `castle::status::invalid_argument`.
  */
 template <typename Entry, castle::size_type N>
-CASTLE_INLINE void cfg_data(payload_writer& writer, CASTLE_CONST castle::container::vector<Entry, N>& entries) CASTLE_NOEXCEPT
+CASTLE_INLINE void cfg_data(payload_writer& writer, CASTLE_CONST castle::dsa::vector<Entry, N>& entries) CASTLE_NOEXCEPT
 {
     static_assert(N <= CFG_MAX_KEYS, "UBX-CFG messages carry at most 64 key/value pairs");
     for (CASTLE_CONST Entry& entry : entries)

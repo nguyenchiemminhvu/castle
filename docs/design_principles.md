@@ -37,7 +37,7 @@ Automotive projects use guidelines such as MISRA C++, AUTOSAR C++14, CERT C++, a
 
 ### Examples
 
-**MEM52-CPP: handle allocation failure.** Define a clear response when allocation fails. Often the best choice is to avoid the failure: allocate at start-up, use fixed-capacity containers, or use bounded memory pools. CASTLE containers such as [`vector`](container/containers.md) keep their data inside the object.
+**MEM52-CPP: handle allocation failure.** Define a clear response when allocation fails. Often the best choice is to avoid the failure: allocate at start-up, use fixed-capacity containers, or use bounded memory pools. CASTLE containers such as [`vector`](dsa/containers.md) keep their data inside the object.
 
 **MEM57-CPP: do not use default `operator new` for over-aligned types.** Alignment can fail on the target MCU or compiler even when PC tests pass. Treat memory layout and alignment as part of the design.
 
@@ -156,7 +156,7 @@ HAL --> Static
 
 | Concern | CASTLE approach | Read more |
 |---|---|---|
-| Memory | Fixed-capacity containers, no mandatory heap. | [containers](container/containers.md) |
+| Memory | Fixed-capacity containers, no mandatory heap. | [containers](dsa/containers.md) |
 | Failure | Status values and assertions, no exceptions in normal paths. | [error handler](core/error_handler.md) |
 | Dispatch | Compile-time choices, fixed-storage callbacks. | [function](callbacks/function.md) |
 | Concurrency | Explicit synchronization types, no hidden locks. | [mutex](sync/mutex.md) |

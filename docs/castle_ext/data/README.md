@@ -399,7 +399,7 @@ App -> App : ~snapshot() releases buffer
 
 Inboxes OR the incoming sets together. If the IMU publishes five samples while the navigation thread is busy, the next `take()` reports `{imu_sample}` once and `get_snapshot()` returns the newest sample. Nothing is queued, so a slow consumer can never overflow anything. It sees the latest state and skips intermediate values.
 
-That is the right behaviour for **state** data (positions, temperatures, battery level, the latest scan). For **event** data where every item matters (key presses, CAN frames to log, protocol messages), use a queue such as `castle::container::mirrored_ring_buffer` next to the pool.
+That is the right behaviour for **state** data (positions, temperatures, battery level, the latest scan). For **event** data where every item matters (key presses, CAN frames to log, protocol messages), use a queue such as `castle::dsa::mirrored_ring_buffer` next to the pool.
 
 ### 4.3 Thread and context map
 

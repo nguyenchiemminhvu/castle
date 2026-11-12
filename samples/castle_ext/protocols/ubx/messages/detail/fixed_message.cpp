@@ -23,7 +23,7 @@ struct end_of_epoch : ubx::messages::detail::fixed_message<end_of_epoch, ubx::UB
 
 int main()
 {
-    using castle::container::array_view;
+    using castle::dsa::array_view;
 
     CASTLE_SAMPLE_CHECK(end_of_epoch::msg_class == ubx::UBX_CLASS_NAV);
     CASTLE_SAMPLE_CHECK(end_of_epoch::msg_id == ubx::UBX_ID_NAV_EOE);

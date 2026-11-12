@@ -28,7 +28,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == frame_size(esf_meas<4U>::header_length + (2U * esf_meas<4U>::block_length)));
 
     message_view raw;
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(esf_meas<4U>::matches(raw));
 
     esf_meas<4U> decoded;
@@ -54,7 +54,7 @@ int main()
     output.calib_ttag = 9999U;
     CASTLE_SAMPLE_CHECK(output.data.push_back(speed) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(encode_message(output, frame, sizeof(frame), written) == castle::status::ok);
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(raw.payload_length() == 16U);
     CASTLE_SAMPLE_CHECK(esf_meas<4U>::decode(raw, decoded));
     CASTLE_SAMPLE_CHECK(decoded.time_mark_sent() == esf_meas<4U>::TIME_MARK_EXT1);

@@ -12,7 +12,7 @@
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
@@ -64,7 +64,7 @@
 | `i_tow` | `uint32_t` | ms | GPS time of week of the navigation epoch. |
 | `version` | `uint8_t` | - | Message version (0x01). |
 | `num_sv` | `uint8_t` | - | On-wire SV count; may exceed `svs.size()`. |
-| `svs` | `castle::container::vector<nav_orb_sv, MaxSvs>` | - | Stored SV blocks. |
+| `svs` | `castle::dsa::vector<nav_orb_sv, MaxSvs>` | - | Stored SV blocks. |
 
 ### Functions
 

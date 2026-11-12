@@ -13,9 +13,9 @@
 - [`core/types.hpp`](../../../core/types.md)
 - [`error/status.hpp`](../../../error/status.md)
 - [`callbacks/function.hpp`](../../../callbacks/function.md)
-- [`container/array.hpp`](../../../container/array.md)
-- [`container/array_view.hpp`](../../../container/array_view.md)
-- [`container/string_view.hpp`](../../../container/string_view.md)
+- [`dsa/array.hpp`](../../../dsa/array.md)
+- [`dsa/array_view.hpp`](../../../dsa/array_view.md)
+- [`dsa/string_view.hpp`](../../../dsa/string_view.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../../protocols/nmea/nmea.md)
 
 ## Public API

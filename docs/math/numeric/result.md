@@ -7,7 +7,7 @@
 `#include "castle/math/numeric/result.hpp"`
 
 ## Dependencies
-- [`castle/algorithm/algorithm.hpp`](../../algorithm/algorithm.md)
+- [`castle/dsa/algorithm.hpp`](../../dsa/algorithm.md)
 - [`castle/core/compiler.hpp`](../../core/compiler.md)
 - [`castle/error/status.hpp`](../../error/status.md)
 - [`castle/math/abs.hpp`](../abs.md)

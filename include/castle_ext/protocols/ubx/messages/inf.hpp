@@ -26,7 +26,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string.hpp"
+#include "castle/dsa/string.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
 
@@ -59,7 +59,7 @@ namespace detail
  * @note Reads `raw.payload` directly, so an empty payload (null view) yields an empty string.
  */
 template <castle::size_type MaxText>
-CASTLE_INLINE void read_inf_text(CASTLE_CONST message_view& raw, castle::container::string<MaxText>& text) CASTLE_NOEXCEPT
+CASTLE_INLINE void read_inf_text(CASTLE_CONST message_view& raw, castle::dsa::string<MaxText>& text) CASTLE_NOEXCEPT
 {
     text.clear();
     for (castle::size_type index = 0U; (index < raw.payload.size()) && !text.full(); ++index)
@@ -85,7 +85,7 @@ struct basic_inf
     static CASTLE_CONSTEXPR uint8_t msg_id = MsgId;
     static CASTLE_CONSTEXPR inf_subtype subtype = static_cast<inf_subtype>(MsgId);
 
-    castle::container::string<MaxText> text{}; ///< ASCII text (wire bytes before any NUL).
+    castle::dsa::string<MaxText> text{}; ///< ASCII text (wire bytes before any NUL).
 
     /** @brief Reports whether `raw` carries this severity's class/ID. */
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
@@ -148,7 +148,7 @@ struct inf
 
     uint8_t message_id = UBX_ID_INF_ERROR;      ///< Received message ID.
     inf_subtype subtype = inf_subtype::error;   ///< Severity, same value as `message_id`.
-    castle::container::string<MaxText> text{};  ///< ASCII text (wire bytes before any NUL).
+    castle::dsa::string<MaxText> text{};  ///< ASCII text (wire bytes before any NUL).
 
     /** @brief Reports whether `raw` is any of the five UBX-INF messages. */
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT

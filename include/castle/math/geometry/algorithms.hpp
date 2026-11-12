@@ -16,7 +16,7 @@
 #include "castle/core/error_handler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle/math/geometry/detail.hpp"
 #include "castle/math/geometry/line2d.hpp"
 #include "castle/math/geometry/line3d.hpp"
@@ -271,7 +271,7 @@ struct nearest_point_result3d
  */
 template <typename T, size_type N>
 CASTLE_NODISCARD nearest_point_result2d<T> nearest_point(
-    CASTLE_CONST container::array<point2d<T>, N>& points,
+    CASTLE_CONST dsa::array<point2d<T>, N>& points,
     CASTLE_CONST point2d<T>& target) CASTLE_NOEXCEPT
 {
     nearest_point_result2d<T> result;
@@ -309,7 +309,7 @@ CASTLE_NODISCARD nearest_point_result2d<T> nearest_point(
  */
 template <typename T, size_type N>
 CASTLE_NODISCARD nearest_point_result3d<T> nearest_point(
-    CASTLE_CONST container::array<point3d<T>, N>& points,
+    CASTLE_CONST dsa::array<point3d<T>, N>& points,
     CASTLE_CONST point3d<T>& target) CASTLE_NOEXCEPT
 {
     nearest_point_result3d<T> result;
@@ -505,7 +505,7 @@ CASTLE_CONSTEXPR geometry_calc_type<T> orientation(CASTLE_CONST point2d<T>& a,
  * @param count Number of active elements.
  */
 template <typename T, size_type N>
-CASTLE_CONSTEXPR void heap_sift_down(container::array<point2d<T>, N>& values,
+CASTLE_CONSTEXPR void heap_sift_down(dsa::array<point2d<T>, N>& values,
                                      size_type start,
                                      size_type count) CASTLE_NOEXCEPT
 {
@@ -537,7 +537,7 @@ CASTLE_CONSTEXPR void heap_sift_down(container::array<point2d<T>, N>& values,
  * @param count Number of active elements.
  */
 template <typename T, size_type N>
-CASTLE_CONSTEXPR void heap_sort(container::array<point2d<T>, N>& values,
+CASTLE_CONSTEXPR void heap_sort(dsa::array<point2d<T>, N>& values,
                                 size_type count) CASTLE_NOEXCEPT
 {
     if (count < 2U)
@@ -569,9 +569,9 @@ CASTLE_CONSTEXPR void heap_sort(container::array<point2d<T>, N>& values,
  * @param unique_count Output number of unique points written.
  */
 template <typename T, size_type N>
-CASTLE_CONSTEXPR void copy_unique(CASTLE_CONST container::array<point2d<T>, N>& sorted,
+CASTLE_CONSTEXPR void copy_unique(CASTLE_CONST dsa::array<point2d<T>, N>& sorted,
                                   size_type count,
-                                  container::array<point2d<T>, N>& unique,
+                                  dsa::array<point2d<T>, N>& unique,
                                   size_type& unique_count) CASTLE_NOEXCEPT
 {
     unique_count = 0U;
@@ -599,7 +599,7 @@ CASTLE_CONSTEXPR void copy_unique(CASTLE_CONST container::array<point2d<T>, N>& 
  */
 template <typename T, size_type N>
 CASTLE_NODISCARD CASTLE_CONSTEXPR status convex_hull(
-    CASTLE_CONST container::array<point2d<T>, N>& input,
+    CASTLE_CONST dsa::array<point2d<T>, N>& input,
     polygon2d<T, N>& output) CASTLE_NOEXCEPT
 {
     static_assert(meta::is_signed<T>::value || meta::is_floating_point<T>::value,
@@ -611,8 +611,8 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR status convex_hull(
         return status::ok;
     }
 
-    container::array<point2d<T>, N> sorted = input;
-    container::array<point2d<T>, N> unique;
+    dsa::array<point2d<T>, N> sorted = input;
+    dsa::array<point2d<T>, N> unique;
     detail::heap_sort(sorted, N);
 
     size_type unique_count = 0U;
@@ -627,7 +627,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR status convex_hull(
         return output.push_back(unique[1U]);
     }
 
-    container::array<point2d<T>, N> hull;
+    dsa::array<point2d<T>, N> hull;
     size_type hull_count = 0U;
 
     for (size_type i = 0U; i < unique_count; ++i)

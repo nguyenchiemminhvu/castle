@@ -15,7 +15,7 @@ message_view encode_and_parse(CASTLE_CONST Message& message, uint8_t* frame, cas
     CASTLE_SAMPLE_CHECK(encode_message(message, frame, capacity, written) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(written == Message::payload_length + UBX_FRAME_OVERHEAD);
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     return raw;
 }
 

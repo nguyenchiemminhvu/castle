@@ -6,7 +6,7 @@
 namespace
 {
 
-using castle::container::array_view;
+using castle::dsa::array_view;
 using castle::timing::ptp::message_type;
 using castle::timing::ptp::port_identity;
 using castle::timing::ptp::timestamp;

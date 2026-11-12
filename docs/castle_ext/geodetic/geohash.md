@@ -14,8 +14,8 @@ An instance stores every form of one cell: the base-32 text (`Depth` characters)
 
 - [`coord.md`](coord.md) — `geo_point<T>` coordinate representation.
 - [`geo_utils.md`](geo_utils.md) — latitude and longitude range validation.
-- `castle/container/string.hpp` — fixed-capacity owning string storage.
-- `castle/container/string_view.hpp` — non-owning text views.
+- `castle/dsa/string.hpp` — fixed-capacity owning string storage.
+- `castle/dsa/string_view.hpp` — non-owning text views.
 - `castle/error/status.hpp` — deterministic error reporting.
 - `castle/core/compiler.hpp`, `castle/core/types.hpp`, and `castle/core/traits.hpp` — compiler annotations, common size types, and floating-point type validation.
 
@@ -44,12 +44,12 @@ Each `geohash<Depth, T>` specialization exposes:
 |---|---|
 | `point_type` | `geo_point<T>`. |
 | `bounds_type` | `geohash_bounds<T>`. |
-| `string_type` | `castle::container::basic_string<char, Depth>`. |
-| `view_type` | `castle::container::string_view`. |
+| `string_type` | `castle::dsa::basic_string<char, Depth>`. |
+| `view_type` | `castle::dsa::string_view`. |
 | `depth` | Compile-time depth, equal to `Depth`. |
 | `bits_type` | `uint64_t`, the packed binary representation. |
 | `bit_count` | Number of binary digits, equal to `Depth * 5`. |
-| `binary_string_type` | `castle::container::basic_string<char, bit_count>` holding '0' and '1' characters. |
+| `binary_string_type` | `castle::dsa::basic_string<char, bit_count>` holding '0' and '1' characters. |
 
 ### `geohash_bounds<T = double>`
 
@@ -134,8 +134,8 @@ int main()
     // Omitting T selects double; encode() stores every form of the cell.
     geohash<8U> hash;
     assert(hash.encode(position) == castle::status::ok);
-    assert(hash.base32().view().compare(castle::container::string_view("w6ugqkyc")) == 0);
-    assert(hash.binary().view().compare(castle::container::string_view("1110000110110100111110110100101111001011")) == 0);
+    assert(hash.base32().view().compare(castle::dsa::string_view("w6ugqkyc")) == 0);
+    assert(hash.binary().view().compare(castle::dsa::string_view("1110000110110100111110110100101111001011")) == 0);
     assert(hash.bits() == 969404009419ULL);
     assert(hash.bounds().min_latitude <= position.latitude());
     assert(position.latitude() <= hash.bounds().max_latitude);
@@ -143,7 +143,7 @@ int main()
 
     // Each parsed form initializes the same cell.
     geohash<8U> from_text;
-    assert(from_text.assign(castle::container::string_view("W6UGQKYC")) == castle::status::ok);
+    assert(from_text.assign(castle::dsa::string_view("W6UGQKYC")) == castle::status::ok);
     assert(from_text.base32() == hash.base32());
 
     geohash<8U> from_binary;

@@ -14,7 +14,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -66,7 +66,7 @@ struct mon_io
     static CASTLE_CONSTEXPR castle::size_type block_length = mon_io_port::wire_size;
 
     /** @brief Port blocks in wire order; ports beyond `MaxPorts` are skipped. */
-    castle::container::vector<mon_io_port, MaxPorts> ports{};
+    castle::dsa::vector<mon_io_port, MaxPorts> ports{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

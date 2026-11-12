@@ -12,7 +12,7 @@ Model of UBX-MON-RF (class `0x0A`, ID `0x38`): a 4-byte header followed by one 2
 
 - [castle/core/compiler.hpp](../../../../core/compiler.md)
 - [castle/core/types.hpp](../../../../core/types.md)
-- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle/dsa/vector.hpp](../../../../dsa/vector.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
@@ -48,7 +48,7 @@ Model of UBX-MON-RF (class `0x0A`, ID `0x38`): a 4-byte header followed by one 2
 | `version` | `uint8_t` | 0 | Message version (`0x00`). |
 | `n_blocks` | `uint8_t` | 1 | On-wire block count; may exceed `blocks.size()`. |
 | — | reserved | 2..3 | |
-| `blocks` | `castle::container::vector<mon_rf_block, MaxBlocks>` | 4 + n·24 | Stored blocks. |
+| `blocks` | `castle::dsa::vector<mon_rf_block, MaxBlocks>` | 4 + n·24 | Stored blocks. |
 
 ### `mon_rf_block` fields (offset within block)
 
@@ -99,7 +99,7 @@ See `samples/castle_ext/protocols/ubx/messages/mon_rf.cpp`.
 
 ## Constraints & Notes
 
-- Storage: `castle::container::vector<..., MaxBlocks>` (default `MaxBlocks = 2U`) lives inside the object; no heap allocation, no exceptions.
+- Storage: `castle::dsa::vector<..., MaxBlocks>` (default `MaxBlocks = 2U`) lives inside the object; no heap allocation, no exceptions.
 - `decode()` requires the payload length to be exactly `4 + nBlocks·24`; any mismatch (or a different class/ID, or fewer than 4 bytes) returns `false` with `out` value-initialised.
 - Capacity overflow: when `nBlocks` exceeds `MaxBlocks`, the first `MaxBlocks` blocks are stored, the rest are skipped, `decode()` still succeeds and `n_blocks` reports the on-wire count.
 - `encode()` writes the count from the vector's `size()`; the stored count field is ignored.

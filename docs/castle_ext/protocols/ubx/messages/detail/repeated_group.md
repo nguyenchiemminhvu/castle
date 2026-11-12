@@ -7,7 +7,7 @@ Many UBX payloads are a fixed header followed by `N` equally sized blocks, such 
 - validating the payload size (`has_group_length()`, `implied_group_count()`);
 - walking the blocks with the same layout verbs as [`fixed_message`](fixed_message.md) (`read_group()` / `write_group()`), plus free-length byte tails (`read_tail()` / `write_tail()`).
 
-Blocks are stored in a fixed-capacity [`castle::container::vector`](../../../../../container/vector.md), whose `size()` is the number actually stored. Blocks beyond its capacity are skipped, so the cursor always ends on the next field. The message's spec-named count field (e.g. `num_svs`) still reports the on-wire count.
+Blocks are stored in a fixed-capacity [`castle::dsa::vector`](../../../../../dsa/vector.md), whose `size()` is the number actually stored. Blocks beyond its capacity are skipped, so the cursor always ends on the next field. The message's spec-named count field (e.g. `num_svs`) still reports the on-wire count.
 
 ## Header
 
@@ -17,7 +17,7 @@ Blocks are stored in a fixed-capacity [`castle::container::vector`](../../../../
 
 - [`castle/core/compiler.hpp`](../../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../../payload_writer.md)
 

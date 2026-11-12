@@ -38,9 +38,9 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/array_view.hpp"
-#include "castle/container/string.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/array_view.hpp"
+#include "castle/dsa/string.hpp"
 #include "castle/error/status.hpp"
 #include "castle/utility/bit_cast.hpp"
 #include "castle/utility/bytes.hpp"
@@ -59,7 +59,7 @@ namespace ubx
 /**
  * @brief Sequential, bounds-checked little-endian writer over a caller-provided payload view.
  *
- * Mirrors `payload_reader`: both wrap a non-owning `castle::container::array_view`
+ * Mirrors `payload_reader`: both wrap a non-owning `castle::dsa::array_view`
  * and walk it with a cursor; the writer never writes outside the view.
  */
 class payload_writer CASTLE_FINAL
@@ -69,8 +69,8 @@ public:
      * @param payload Destination payload storage. A view with a null data
      * pointer behaves as zero capacity, so every write latches `status::full`.
      */
-    explicit payload_writer(castle::container::array_view<uint8_t> payload) CASTLE_NOEXCEPT
-        : payload_((payload.data() != nullptr) ? payload : castle::container::array_view<uint8_t>())
+    explicit payload_writer(castle::dsa::array_view<uint8_t> payload) CASTLE_NOEXCEPT
+        : payload_((payload.data() != nullptr) ? payload : castle::dsa::array_view<uint8_t>())
     {
     }
 
@@ -180,7 +180,7 @@ public:
 
     /** @brief Writes `N` consecutive elements, e.g. a UBX `U1[8]` field. */
     template <typename T, castle::size_type N>
-    void write(CASTLE_CONST castle::container::array<T, N>& values) CASTLE_NOEXCEPT
+    void write(CASTLE_CONST castle::dsa::array<T, N>& values) CASTLE_NOEXCEPT
     {
         for (CASTLE_CONST T& value : values)
         {
@@ -219,7 +219,7 @@ public:
      * @note Exactly `Width` bytes are produced; the string's capacity is `Width`.
      */
     template <castle::size_type Width>
-    void text(CASTLE_CONST castle::container::string<Width>& value) CASTLE_NOEXCEPT
+    void text(CASTLE_CONST castle::dsa::string<Width>& value) CASTLE_NOEXCEPT
     {
         for (CASTLE_CONST char character : value)
         {
@@ -247,7 +247,7 @@ private:
         return target;
     }
 
-    castle::container::array_view<uint8_t> payload_;
+    castle::dsa::array_view<uint8_t> payload_;
     castle::size_type position_ = 0U;
     castle::status status_ = castle::status::ok;
 };
@@ -289,7 +289,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status encode_message(
         payload_capacity = UBX_MAX_PAYLOAD_LEN;
     }
 
-    payload_writer writer(castle::container::array_view<uint8_t>(&output[UBX_FRAME_INDEX_PAYLOAD], payload_capacity));
+    payload_writer writer(castle::dsa::array_view<uint8_t>(&output[UBX_FRAME_INDEX_PAYLOAD], payload_capacity));
     message.encode(writer);
     if (!writer.ok())
     {
@@ -307,7 +307,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status encode_message(
         Message::msg_class,
         Message::msg_id,
         payload_length,
-        castle::container::array_view<CASTLE_CONST uint8_t>(&output[UBX_FRAME_INDEX_PAYLOAD], payload_length));
+        castle::dsa::array_view<CASTLE_CONST uint8_t>(&output[UBX_FRAME_INDEX_PAYLOAD], payload_length));
 
     CASTLE_CONST castle::size_type ck_a_index = UBX_FRAME_INDEX_PAYLOAD + payload_length;
     output[ck_a_index] = check.ck_a;
@@ -332,7 +332,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status encode_poll(
     return encode_frame(
         Message::msg_class,
         Message::msg_id,
-        castle::container::array_view<CASTLE_CONST uint8_t>(),
+        castle::dsa::array_view<CASTLE_CONST uint8_t>(),
         output,
         output_capacity,
         bytes_written);

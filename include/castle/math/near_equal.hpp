@@ -26,7 +26,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/math/abs.hpp"
-#include "castle/algorithm/algorithm.hpp"
+#include "castle/dsa/algorithm.hpp"
 
 namespace castle
 {

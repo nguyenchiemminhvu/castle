@@ -8,7 +8,7 @@ int main()
 {
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
-    using castle::container::array_view;
+    using castle::dsa::array_view;
 
     static const uint32_t KEY_RATE_MEAS = 0x30210001U;  // U2
     static const uint32_t KEY_UART1_BAUD = 0x40520001U; // U4

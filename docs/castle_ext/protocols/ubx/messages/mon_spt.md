@@ -12,7 +12,7 @@ Model of UBX-MON-SPT (0x0a 0x2f), the sensor production test report (polled). It
 
 - [castle/core/compiler.hpp](../../../../core/compiler.md)
 - [castle/core/types.hpp](../../../../core/types.md)
-- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle/dsa/vector.hpp](../../../../dsa/vector.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
@@ -52,8 +52,8 @@ Model of UBX-MON-SPT (0x0a 0x2f), the sensor production test report (polled). It
 | `num_sensor` | `uint8_t` | 1 | On-wire sensor count; may exceed `sensors.size()`. Encode writes `sensors.size()`. |
 | `num_res` | `uint8_t` | 2 | On-wire result count; may exceed `results.size()`. Encode writes `results.size()`. |
 | (reserved0) | `U1` | 3 | Skipped on decode, written as zero. |
-| `sensors` | `castle::container::vector<mon_spt_sensor, MaxSensors>` | 4 + n·4 | Sensor blocks. |
-| `results` | `castle::container::vector<mon_spt_result, MaxResults>` | 4 + numSensor·4 + n·12 | Result blocks. |
+| `sensors` | `castle::dsa::vector<mon_spt_sensor, MaxSensors>` | 4 + n·4 | Sensor blocks. |
+| `results` | `castle::dsa::vector<mon_spt_result, MaxResults>` | 4 + numSensor·4 + n·12 | Result blocks. |
 
 ### `mon_spt_sensor` fields
 

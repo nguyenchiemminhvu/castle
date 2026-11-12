@@ -10,7 +10,7 @@
  * dimensions are known at compile time and you need inline storage, no heap
  * allocation, no exceptions, no RTTI, no virtual dispatch, and no STL
  * dependency. Elements are stored contiguously in row-major order inside a
- * `castle::container::grid`, which owns the storage while this header adds the
+ * `castle::dsa::grid`, which owns the storage while this header adds the
  * linear algebra. Multiplication follows the conventional
  * `matrix * column_vector` model.
  * Determinants are computed recursively for small fixed matrices, and
@@ -28,7 +28,7 @@
 #ifndef CASTLE_MATH_MATRIX_HPP
 #define CASTLE_MATH_MATRIX_HPP
 
-#include "castle/container/grid.hpp"
+#include "castle/dsa/grid.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/error_handler.hpp"
 #include "castle/core/traits.hpp"
@@ -48,7 +48,7 @@ namespace math
  * @tparam T Arithmetic element type stored in the matrix.
  * @tparam Rows Compile-time number of rows.
  * @tparam Columns Compile-time number of columns.
- * @note Storage is a `castle::container::grid<T, Rows, Columns>`, so element
+ * @note Storage is a `castle::dsa::grid<T, Rows, Columns>`, so element
  * `(r, c)` resides at `data()[r * Columns + c]` and `sizeof(matrix)` equals the
  * size of the element storage.
  * @warning `operator()` does not perform bounds checking; use `at()` when the
@@ -71,7 +71,7 @@ public:
     using const_pointer = CASTLE_CONST T*;
     using iterator = T*;
     using const_iterator = CASTLE_CONST T*;
-    using grid_type = container::grid<T, Rows, Columns>;
+    using grid_type = dsa::grid<T, Rows, Columns>;
 
     /** @brief Compile-time row count exposed as a constant. */
     static CASTLE_CONSTEXPR size_type static_rows = Rows;

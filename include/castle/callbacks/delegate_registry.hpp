@@ -57,7 +57,7 @@
 #include "castle/callbacks/delegate.hpp"
 #include "castle/callbacks/subscription.hpp"
 
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 
 #include <stdint.h>
 
@@ -321,7 +321,7 @@ private:
         uint32_t generation = 0;
     };
 
-    container::array<slot, max_callback> slots_{};
+    dsa::array<slot, max_callback> slots_{};
     size_type active_count_ = 0;
 };
 

@@ -13,7 +13,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -88,7 +88,7 @@ struct mon_patch
 
     uint16_t version = 0U;   ///< Message version (0x0001 for this version).
     uint16_t n_entries = 0U; ///< On-wire patch count; may exceed `entries.size()`.
-    castle::container::vector<mon_patch_entry, MaxEntries> entries{};
+    castle::dsa::vector<mon_patch_entry, MaxEntries> entries{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

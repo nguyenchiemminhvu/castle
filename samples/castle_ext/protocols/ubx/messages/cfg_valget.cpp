@@ -25,7 +25,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + 4U + (3U * 4U)));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(cfg_valget_poll<>::matches(raw));
     CASTLE_SAMPLE_CHECK(!cfg_valget<>::matches(raw)); // version 0 is the request
 
@@ -50,7 +50,7 @@ int main()
 
     CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(response, frame, sizeof(frame), written)));
     CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + 4U + (4U + 2U) + (4U + 4U) + (4U + 1U)));
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(cfg_valget<>::matches(raw));
     CASTLE_SAMPLE_CHECK(!cfg_valget_poll<>::matches(raw));
 
@@ -68,7 +68,7 @@ int main()
     // 3. A response with a key of unknown size cannot be walked and is rejected.
     uint8_t bad[8U] = {cfg_valget<>::version, 0U, 0U, 0U, 0x01U, 0x00U, 0x00U, 0x00U};
     message_view malformed{{UBX_CLASS_CFG, UBX_ID_CFG_VALGET, 8U},
-                           castle::container::array_view<const uint8_t>(bad, 8U), checksum{}};
+                           castle::dsa::array_view<const uint8_t>(bad, 8U), checksum{}};
     CASTLE_SAMPLE_CHECK(!cfg_valget<>::decode(malformed, decoded));
     CASTLE_SAMPLE_CHECK(decoded.entries.empty());
 

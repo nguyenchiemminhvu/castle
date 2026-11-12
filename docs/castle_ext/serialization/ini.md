@@ -8,9 +8,9 @@ A fixed-capacity INI document, parser, and serializer for embedded configuration
 
 ## Dependencies
 - [`../../error/status.md`](../../error/status.md)
-- [`../../container/string.md`](../../container/string.md)
-- [`../../container/string_view.md`](../../container/string_view.md)
-- [`../../container/vector.md`](../../container/vector.md)
+- [`../../dsa/string.md`](../../dsa/string.md)
+- [`../../dsa/string_view.md`](../../dsa/string_view.md)
+- [`../../dsa/vector.md`](../../dsa/vector.md)
 - [`../../utility/optional.md`](../../utility/optional.md)
 
 ## Public API

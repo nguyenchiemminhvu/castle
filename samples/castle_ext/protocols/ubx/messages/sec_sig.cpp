@@ -20,7 +20,7 @@ int main()
     CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(sig, frame, sizeof(frame), written)));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(sec_sig::matches(raw));
 
     sec_sig decoded{};
@@ -38,7 +38,7 @@ int main()
         extended[index] = raw.payload[index];
     }
     message_view longer{{UBX_CLASS_SEC, UBX_ID_SEC_SIG, static_cast<uint16_t>(sizeof(extended))},
-                        castle::container::array_view<const uint8_t>(extended, sizeof(extended)),
+                        castle::dsa::array_view<const uint8_t>(extended, sizeof(extended)),
                         checksum{}};
     CASTLE_SAMPLE_CHECK(sec_sig::decode(longer, decoded));
     CASTLE_SAMPLE_CHECK(decoded.jamming_state() == sec_sig_jamming_state::warning);

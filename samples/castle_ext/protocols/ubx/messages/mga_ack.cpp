@@ -20,11 +20,11 @@ int main()
     uint8_t frame[32U];
     castle::size_type written = 0U;
     CASTLE_SAMPLE_CHECK(encode_frame(mga_ack::msg_class, mga_ack::msg_id,
-                                     castle::container::array_view<const uint8_t>(payload, sizeof(payload)),
+                                     castle::dsa::array_view<const uint8_t>(payload, sizeof(payload)),
                                      frame, sizeof(frame), written) == castle::status::ok);
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(mga_ack::matches(raw));
 
     mga_ack ack{};
@@ -42,7 +42,7 @@ int main()
     done.acked_msg_id = UBX_ID_MGA_DBD;
     done.msg_payload_start[0U] = 0x2AU;
     CASTLE_SAMPLE_CHECK(encode_message(done, frame, sizeof(frame), written) == castle::status::ok);
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     mga_ack done_back{};
     CASTLE_SAMPLE_CHECK(mga_ack::decode(raw, done_back));
     CASTLE_SAMPLE_CHECK(done_back.accepted());
@@ -51,7 +51,7 @@ int main()
     // A version other than 0x00 is rejected.
     payload[1U] = 0x01U;
     message_view bad{{UBX_CLASS_MGA, UBX_ID_MGA_ACK, mga_ack::payload_length},
-                     castle::container::array_view<const uint8_t>(payload, sizeof(payload)), checksum{}};
+                     castle::dsa::array_view<const uint8_t>(payload, sizeof(payload)), checksum{}};
     CASTLE_SAMPLE_CHECK(mga_ack::matches(bad));
     CASTLE_SAMPLE_CHECK(!mga_ack::decode(bad, ack));
 

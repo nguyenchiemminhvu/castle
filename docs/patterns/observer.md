@@ -7,7 +7,7 @@ Fixed-capacity observer interfaces and an observable registry for embedded event
 `#include "castle/patterns/observer.hpp"`
 
 ## Dependencies
-- [`../container/array.md`](../container/array.md)
+- [`../dsa/array.md`](../dsa/array.md)
 - `castle/core/types.hpp`
 - `castle/core/traits.hpp`
 
@@ -35,7 +35,7 @@ struct temperature_observer : castle::patterns::observer<uint16_t>
 ```
 
 ## Constraints & Notes
-- No heap allocation; `observable` stores observer pointers in `castle::container::array`.
+- No heap allocation; `observable` stores observer pointers in `castle::dsa::array`.
 - Lifetime management is manual: observers must outlive their registrations.
 - Duplicate registrations are rejected.
 - Dispatch uses virtual functions, so this header does not avoid virtual dispatch even though it remains RTTI-free.

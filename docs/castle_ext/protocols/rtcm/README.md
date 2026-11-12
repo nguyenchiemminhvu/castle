@@ -314,7 +314,7 @@ Message 1008 adds the antenna serial number after DF031:
 | 40 + 8·N | DF032 | Serial number counter M | uint | 8 |  |  |
 | 48 + 8·N | DF033 | Antenna serial number | char8 | 8 × M |  |  |
 
-* Strings are `uint(8)` count + `char8(count)`. Castle accepts at most 31 characters (`RTCM_MAX_DESCRIPTOR_LEN`): `descriptor_string` is `castle::container::string<31>`, so a longer string cannot be stored.
+* Strings are `uint(8)` count + `char8(count)`. Castle accepts at most 31 characters (`RTCM_MAX_DESCRIPTOR_LEN`): `descriptor_string` is `castle::dsa::string<31>`, so a longer string cannot be stored.
 * The descriptor follows the IGS antenna naming convention (for example `LEIAR25.R4    LEIT`). [K]
 * Payload size: `40 + 8·N` bits for 1007 (N = DF029), so 1007 with a 20-character descriptor is 25 bytes and a 31-byte frame. [C]
 * Castle has no 1008 model; the layout is the 1007 layout plus the two serial-number fields, and was checked against the field table of [P].

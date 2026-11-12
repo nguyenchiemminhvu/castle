@@ -22,7 +22,7 @@
 #include "castle/core/types.hpp"
 #include "castle/utility/compare.hpp"
 
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 
 #include <stdint.h>
 
@@ -133,14 +133,14 @@ struct hash<CASTLE_CONST T>
  * @tparam CharT Character type stored by the view.
  */
 template <typename CharT>
-struct hash<container::basic_string_view<CharT>>
+struct hash<dsa::basic_string_view<CharT>>
 {
     /**
      * @brief Hashes every byte of the view using an FNV-style stream and final mix.
      * @param value String view to hash.
      * @return Deterministic hash value.
      */
-    size_type operator()(container::basic_string_view<CharT> value) CASTLE_CONST CASTLE_NOEXCEPT
+    size_type operator()(dsa::basic_string_view<CharT> value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         uint64_t state = 1469598103934665603ULL;
         for (size_type i = 0U; i < value.size(); ++i)

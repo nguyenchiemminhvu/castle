@@ -11,7 +11,7 @@ Represents an NMEA VTG course-and-speed sentence. It decodes true/magnetic cours
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/string_view.hpp`](../../../../container/string_view.md)
+- [`castle/dsa/string_view.hpp`](../../../../dsa/string_view.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../nmea.md)
 - [`castle_ext/protocols/nmea/field_cursor.hpp`](../field_cursor.md)
 
@@ -28,7 +28,7 @@ Represents an NMEA VTG course-and-speed sentence. It decodes true/magnetic cours
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | `valid` | `bool` | `false` | True when decoding completed successfully for the sentence. |
-| `talker` | `castle::container::string_view` | `—` | Non-owning NMEA talker identifier view. |
+| `talker` | `castle::dsa::string_view` | `—` | Non-owning NMEA talker identifier view. |
 | `course_true` | `double` | `0.0` | True course/track value. |
 | `course_mag` | `double` | `0.0` | Magnetic course/track value when supplied. |
 | `speed_knots` | `double` | `0.0` | Speed over ground in knots. |

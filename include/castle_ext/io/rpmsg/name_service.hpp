@@ -12,7 +12,7 @@
 #ifndef CASTLE_EXT_IO_RPMSG_NAME_SERVICE_HPP
 #define CASTLE_EXT_IO_RPMSG_NAME_SERVICE_HPP
 
-#include "castle/container/string.hpp"
+#include "castle/dsa/string.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
@@ -33,7 +33,7 @@ static CASTLE_INLINE CASTLE_CONSTEXPR size_type name_service_message_size = rpms
 /** @brief Decoded RPMsg Name Service announcement. */
 struct name_service_event
 {
-    container::string<max_name_length> name;
+    dsa::string<max_name_length> name;
     address endpoint_address;
     name_service_action action;
 

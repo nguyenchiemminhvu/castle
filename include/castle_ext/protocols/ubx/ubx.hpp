@@ -17,7 +17,7 @@
  *
  * uint8_t frame[64U];
  * uint8_t payload_data[2U] = {0x01U, 0x02U};
- * castle::container::array_view<const uint8_t> payload(payload_data, 2U);
+ * castle::dsa::array_view<const uint8_t> payload(payload_data, 2U);
  *
  * castle::size_type written = 0U;
  * castle::protocols::ubx::encode_frame(
@@ -35,7 +35,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/array_view.hpp"
+#include "castle/dsa/array_view.hpp"
 #include "castle/utility/bytes.hpp"
 
 #include <stdint.h>
@@ -255,7 +255,7 @@ struct checksum
 struct message_view
 {
     message_header header{};
-    castle::container::array_view<CASTLE_CONST uint8_t> payload{};
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload{};
     checksum check{};
 
     /**
@@ -350,7 +350,7 @@ private:
  * @brief Computes a UBX Fletcher-8 checksum over a byte range.
  */
 CASTLE_NODISCARD CASTLE_INLINE checksum compute_checksum(
-    castle::container::array_view<CASTLE_CONST uint8_t> data) CASTLE_NOEXCEPT
+    castle::dsa::array_view<CASTLE_CONST uint8_t> data) CASTLE_NOEXCEPT
 {
     checksum_accumulator accumulator;
     for (castle::size_type index = 0U; index < data.size(); ++index)
@@ -367,7 +367,7 @@ CASTLE_NODISCARD CASTLE_INLINE checksum compute_frame_checksum(
     uint8_t msg_class,
     uint8_t msg_id,
     uint16_t payload_length,
-    castle::container::array_view<CASTLE_CONST uint8_t> payload) CASTLE_NOEXCEPT
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload) CASTLE_NOEXCEPT
 {
     checksum_accumulator accumulator;
     accumulator.update(msg_class);
@@ -405,7 +405,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR castle::size_type frame_size(castle::size_type
 CASTLE_NODISCARD CASTLE_INLINE castle::status encode_frame(
     uint8_t msg_class,
     uint8_t msg_id,
-    castle::container::array_view<CASTLE_CONST uint8_t> payload,
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload,
     uint8_t* output,
     castle::size_type output_capacity,
     castle::size_type& bytes_written) CASTLE_NOEXCEPT
@@ -466,7 +466,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status encode_frame(
  * @return `true` when the frame is structurally valid and its checksum matches.
  */
 CASTLE_NODISCARD CASTLE_INLINE bool decode_frame(
-    castle::container::array_view<CASTLE_CONST uint8_t> frame,
+    castle::dsa::array_view<CASTLE_CONST uint8_t> frame,
     message_view& output) CASTLE_NOEXCEPT
 {
     output = message_view{};
@@ -489,7 +489,7 @@ CASTLE_NODISCARD CASTLE_INLINE bool decode_frame(
         return false;
     }
 
-    castle::container::array_view<CASTLE_CONST uint8_t> payload(
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload(
         payload_length == 0U ? nullptr : &frame[UBX_FRAME_INDEX_PAYLOAD], payload_length); // LCOV_EXCL_BR_LINE
 
     CASTLE_CONST checksum expected = compute_frame_checksum(

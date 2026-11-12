@@ -20,8 +20,8 @@ struct sample_message
 
     sample_mode mode = sample_mode::idle;
     int16_t offset = 0;
-    castle::container::array<uint8_t, 2U> tags{};
-    castle::container::string<6U> name{};
+    castle::dsa::array<uint8_t, 2U> tags{};
+    castle::dsa::string<6U> name{};
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT
@@ -45,7 +45,7 @@ struct sample_message
 int main()
 {
     using namespace castle::protocols::ubx;
-    using castle::container::array_view;
+    using castle::dsa::array_view;
 
     // 1. Raw writer: little-endian fields, reserved bytes, typed writes.
     uint8_t payload[16U] = {};

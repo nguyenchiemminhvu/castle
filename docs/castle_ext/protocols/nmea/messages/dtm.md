@@ -11,7 +11,7 @@ Represents an NMEA DTM datum-reference sentence. It decodes the talker identifie
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/string_view.hpp`](../../../../container/string_view.md)
+- [`castle/dsa/string_view.hpp`](../../../../dsa/string_view.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../nmea.md)
 - [`castle_ext/protocols/nmea/field_cursor.hpp`](../field_cursor.md)
 
@@ -28,10 +28,10 @@ Represents an NMEA DTM datum-reference sentence. It decodes the talker identifie
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | `valid` | `bool` | `false` | True when decoding completed successfully for the sentence. |
-| `talker` | `castle::container::string_view` | `—` | Non-owning NMEA talker identifier view. |
-| `datum_code` | `castle::container::string_view` | `—` | Primary datum code from the DTM sentence. |
-| `datum_sub` | `castle::container::string_view` | `—` | Datum subdivision/extension code from DTM. |
-| `ref_datum` | `castle::container::string_view` | `—` | Reference datum identifier from DTM. |
+| `talker` | `castle::dsa::string_view` | `—` | Non-owning NMEA talker identifier view. |
+| `datum_code` | `castle::dsa::string_view` | `—` | Primary datum code from the DTM sentence. |
+| `datum_sub` | `castle::dsa::string_view` | `—` | Datum subdivision/extension code from DTM. |
+| `ref_datum` | `castle::dsa::string_view` | `—` | Reference datum identifier from DTM. |
 | `lat_offset` | `double` | `0.0` | Decoded latitude/datum offset value from DTM. |
 | `lon_offset` | `double` | `0.0` | Decoded longitude/datum offset value from DTM. |
 | `alt_offset` | `double` | `0.0` | Decoded altitude/datum offset value from DTM. |

@@ -26,7 +26,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/ubx_config.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/cfg_data.hpp"
@@ -55,7 +55,7 @@ struct cfg_valget_poll : detail::cfg_message<cfg_valget_poll<MaxKeys>, UBX_ID_CF
 {
     uint8_t layer = config::UBX_CFG_VALGET_LAYER_RAM; ///< Source layer: 0 RAM, 1 BBR, 2 Flash, 7 Default.
     uint16_t position = 0U;                           ///< Key values to skip before building the response.
-    castle::container::vector<uint32_t, MaxKeys> keys{}; ///< Key IDs (or wild cards) to retrieve.
+    castle::dsa::vector<uint32_t, MaxKeys> keys{}; ///< Key IDs (or wild cards) to retrieve.
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT
@@ -72,7 +72,7 @@ struct cfg_valget : detail::cfg_message<cfg_valget<MaxEntries>, UBX_ID_CFG_VALGE
 {
     uint8_t layer = config::UBX_CFG_VALGET_LAYER_RAM; ///< Layer the values were read from: 0 RAM, 1 BBR, 2 Flash, 7 Default.
     uint16_t position = 0U;                           ///< Items skipped before this message (mirrors the request).
-    castle::container::vector<cfg_valget_entry, MaxEntries> entries{}; ///< Decoded key/value pairs in wire order.
+    castle::dsa::vector<cfg_valget_entry, MaxEntries> entries{}; ///< Decoded key/value pairs in wire order.
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT

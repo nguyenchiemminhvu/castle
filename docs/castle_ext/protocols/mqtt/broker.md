@@ -9,7 +9,7 @@ A standalone, single-process MQTT broker over `castle::net::tcp_server`. It acce
 ## Dependencies
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp)
-- [`castle/container/string_view.hpp`](../../../../include/castle/container/string_view.hpp)
+- [`castle/dsa/string_view.hpp`](../../../../include/castle/dsa/string_view.hpp)
 - [`castle/error/status.hpp`](../../../../include/castle/error/status.hpp)
 - [`castle_ext/net/server.hpp`](../../../../include/castle_ext/net/server.hpp)
 - [`codec.hpp`](codec.md)

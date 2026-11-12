@@ -22,7 +22,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 
 #include "castle_ext/protocols/rtcm/bit_writer.hpp"
 #include "castle_ext/protocols/rtcm/rtcm.hpp"
@@ -89,7 +89,7 @@ struct glonass_rtk_observables : detail::rtk_observables_family<RTCM_TYPE_GLO_L1
     bool synchronous = false;                           ///< DF005: more messages follow for this epoch.
     bool divergence_free = false;                       ///< DF036: divergence-free smoothing indicator.
     uint8_t smoothing_interval = 0U;                    ///< DF037 (3 bit): smoothing interval.
-    castle::container::vector<glonass_rtk_satellite, MaxSatellites> satellites{}; ///< DF035 is `satellites.size()`.
+    castle::dsa::vector<glonass_rtk_satellite, MaxSatellites> satellites{}; ///< DF035 is `satellites.size()`.
 
     /** @brief Writes the message payload; see `encode_message()`. */
     void encode(bit_writer& writer) CASTLE_CONST CASTLE_NOEXCEPT

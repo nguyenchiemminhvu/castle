@@ -10,7 +10,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle_ext/net/endpoint.hpp"
 
 #include <stdint.h>
@@ -93,7 +93,7 @@ struct response
     bool recursion_desired = false;
     bool recursion_available = false;
     char question_name[256U]{};
-    castle::container::array<resource_record, MaxRecords> records{};
+    castle::dsa::array<resource_record, MaxRecords> records{};
     size_type record_count = 0U;
 
     /** @brief Clears the decoded response without allocating or changing its capacity. */

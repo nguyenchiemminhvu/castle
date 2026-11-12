@@ -8,7 +8,7 @@ int main()
 
     // Encode a CFG-VALSET frame with a 2-byte payload into a caller buffer.
     uint8_t payload_data[2U] = {0x01U, 0x02U};
-    castle::container::array_view<const uint8_t> payload(payload_data, 2U);
+    castle::dsa::array_view<const uint8_t> payload(payload_data, 2U);
 
     uint8_t frame[64U];
     castle::size_type written = 0U;
@@ -19,7 +19,7 @@ int main()
 
     // Decode it back into a zero-copy view over the same buffer.
     message_view view;
-    bool decoded = decode_frame(castle::container::array_view<const uint8_t>(frame, written), view);
+    bool decoded = decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), view);
     CASTLE_SAMPLE_CHECK(decoded);
     CASTLE_SAMPLE_CHECK(view.is(UBX_CLASS_CFG, UBX_ID_CFG_VALSET));
     CASTLE_SAMPLE_CHECK(view.payload_length() == 2U);
@@ -34,7 +34,7 @@ int main()
     }
     corrupted[written - 1U] ^= 0xFFU;
     message_view rejected;
-    CASTLE_SAMPLE_CHECK(!decode_frame(castle::container::array_view<const uint8_t>(corrupted, written), rejected));
+    CASTLE_SAMPLE_CHECK(!decode_frame(castle::dsa::array_view<const uint8_t>(corrupted, written), rejected));
 
     // Little-endian field helpers used to decode a message payload manually.
     uint8_t little_endian_u32[4U] = {0x78U, 0x56U, 0x34U, 0x12U};

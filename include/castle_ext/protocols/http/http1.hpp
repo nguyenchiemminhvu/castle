@@ -28,7 +28,7 @@
 #ifndef CASTLE_EXT_PROTOCOLS_HTTP_HTTP1_HPP
 #define CASTLE_EXT_PROTOCOLS_HTTP_HTTP1_HPP
 
-#include "castle/algorithm/algorithm.hpp"
+#include "castle/dsa/algorithm.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"

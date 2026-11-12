@@ -28,7 +28,7 @@ int main()
     satellites[4U].snr = 42U;
 
     gsv_input input;
-    input.satellites = castle::container::array_view<const gsv_satellite_record>(satellites, 5U);
+    input.satellites = castle::dsa::array_view<const gsv_satellite_record>(satellites, 5U);
     input.valid = true;
     CASTLE_SAMPLE_CHECK(gsv_message_count(input) == 2U);
 
@@ -36,12 +36,12 @@ int main()
     char sentence[128U];
     castle::size_type written = 0U;
     CASTLE_SAMPLE_CHECK(castle::succeeded(generate_gsv_message(
-        input, castle::container::string_view(TALKER_GP), 1U, sentence, sizeof(sentence), written)));
+        input, castle::dsa::string_view(TALKER_GP), 1U, sentence, sizeof(sentence), written)));
 
-    castle::container::string_view field_storage[24U];
+    castle::dsa::string_view field_storage[24U];
     message_view raw;
     CASTLE_SAMPLE_CHECK(decode_sentence(
-        castle::container::string_view(sentence, written), field_storage, 24U, raw));
+        castle::dsa::string_view(sentence, written), field_storage, 24U, raw));
     CASTLE_SAMPLE_CHECK(gsv::matches(raw));
 
     gsv message_1;
@@ -60,9 +60,9 @@ int main()
     // Second message: the trailing 1 satellite only.
     written = 0U;
     CASTLE_SAMPLE_CHECK(castle::succeeded(generate_gsv_message(
-        input, castle::container::string_view(TALKER_GP), 2U, sentence, sizeof(sentence), written)));
+        input, castle::dsa::string_view(TALKER_GP), 2U, sentence, sizeof(sentence), written)));
     CASTLE_SAMPLE_CHECK(decode_sentence(
-        castle::container::string_view(sentence, written), field_storage, 24U, raw));
+        castle::dsa::string_view(sentence, written), field_storage, 24U, raw));
     CASTLE_SAMPLE_CHECK(gsv::matches(raw));
 
     gsv message_2;

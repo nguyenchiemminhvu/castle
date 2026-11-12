@@ -7,7 +7,7 @@ namespace
 {
 
 using namespace castle::protocols::rtcm;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 /** @brief Message 1005 golden frame, decoded and CRC-checked with pyrtcm. */
 const uint8_t golden_1005[25U] = {
@@ -733,7 +733,7 @@ TEST(RtcmBitWriter, ReservedOverflowLatchesFull)
 
 TEST(RtcmBitWriter, TextWritesEightBitCountThenCharacters)
 {
-    castle::container::string<16U> value;
+    castle::dsa::string<16U> value;
     ASSERT_EQ(value.assign("ABC"), castle::status::ok);
 
     uint8_t buffer[8U] = {};
@@ -749,7 +749,7 @@ TEST(RtcmBitWriter, TextWritesEightBitCountThenCharacters)
 
 TEST(RtcmBitWriter, TextEmptyStringWritesOnlyZeroCount)
 {
-    castle::container::string<16U> value;
+    castle::dsa::string<16U> value;
     uint8_t buffer[2U] = {0xEEU, 0xEEU};
     bit_writer writer = make_writer(buffer);
     writer.text(value);
@@ -761,7 +761,7 @@ TEST(RtcmBitWriter, TextEmptyStringWritesOnlyZeroCount)
 
 TEST(RtcmBitWriter, TextAtUnalignedOffsetAndNonAsciiBytes)
 {
-    castle::container::string<4U> value;
+    castle::dsa::string<4U> value;
     ASSERT_EQ(value.assign("\xE9Z"), castle::status::ok);
 
     uint8_t buffer[5U];
@@ -781,7 +781,7 @@ TEST(RtcmBitWriter, TextAtUnalignedOffsetAndNonAsciiBytes)
 
 TEST(RtcmBitWriter, TextOf255CharactersUsesFullCountRange)
 {
-    castle::container::string<255U> value;
+    castle::dsa::string<255U> value;
     for (size_t i = 0U; i < 255U; ++i)
     {
         ASSERT_EQ(value.push_back(static_cast<char>('a' + (i % 26U))), castle::status::ok);
@@ -799,7 +799,7 @@ TEST(RtcmBitWriter, TextOf255CharactersUsesFullCountRange)
 
 TEST(RtcmBitWriter, TextOverflowLatchesFullAndStops)
 {
-    castle::container::string<16U> value;
+    castle::dsa::string<16U> value;
     ASSERT_EQ(value.assign("ABCD"), castle::status::ok);
 
     uint8_t buffer[4U] = {};

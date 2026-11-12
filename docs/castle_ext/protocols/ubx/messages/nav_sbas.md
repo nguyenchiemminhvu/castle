@@ -13,7 +13,7 @@
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/constants.hpp`](../../../../core/constants.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
@@ -53,7 +53,7 @@
 | `service` | `uint8_t` | - | Services available (`SERVICE_*`). |
 | `cnt` | `uint8_t` | - | On-wire SV count; may exceed `svs.size()`. |
 | `status_flags` | `uint8_t` | - | Status flags (`STATUS_FLAGS_*`). |
-| `svs` | `castle::container::vector<nav_sbas_sv, MaxSvs>` | - | Stored SV blocks. |
+| `svs` | `castle::dsa::vector<nav_sbas_sv, MaxSvs>` | - | Stored SV blocks. |
 
 ### `nav_sbas_sv` fields
 

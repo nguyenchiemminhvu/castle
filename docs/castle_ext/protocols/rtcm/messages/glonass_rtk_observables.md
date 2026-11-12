@@ -23,7 +23,7 @@ This is an **encode-only** model: it produces the message payload for `encode_me
 
 - [`core/compiler.hpp`](../../../../core/compiler.md)
 - [`core/types.hpp`](../../../../core/types.md)
-- [`container/vector.hpp`](../../../../container/vector.md)
+- [`dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`error/status.hpp`](../../../../error/status.md)
 - [`castle_ext/protocols/rtcm/bit_writer.hpp`](../bit_writer.md)
 - [`castle_ext/protocols/rtcm/rtcm.hpp`](../rtcm.md)
@@ -69,7 +69,7 @@ The satellite vector type depends only on `MaxSatellites`, so models of differen
 | `synchronous` | `bool` | DF005 | More messages follow for this epoch. |
 | `divergence_free` | `bool` | DF036 | Divergence-free smoothing indicator. |
 | `smoothing_interval` | `uint8_t` | DF037, 3 bit | Smoothing interval, 0..7. |
-| `satellites` | `castle::container::vector<glonass_rtk_satellite, MaxSatellites>` | one block each | The satellite count DF035 (5 bit) is `satellites.size()`; 0 satellites is valid. |
+| `satellites` | `castle::dsa::vector<glonass_rtk_satellite, MaxSatellites>` | one block each | The satellite count DF035 (5 bit) is `satellites.size()`; 0 satellites is valid. |
 
 ### Satellite fields (`glonass_rtk_satellite`)
 

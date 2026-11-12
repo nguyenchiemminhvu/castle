@@ -12,7 +12,7 @@ and an optional calibrated time tag.
   (bits 1..0), which is wrong.
 - `numMeas` is read from `flags` bits 15..11. When it is non-zero the payload length is validated exactly; when it
   is zero the count is implied by the payload length (the spec marks `numMeas` optional).
-- Storage is now a `castle::container::vector`.
+- Storage is now a `castle::dsa::vector`.
 - `num_meas` / `has_calib_ttag` members became the `num_meas()` / `calib_ttag_valid()` accessors over `flags`, so
   they can never disagree with the wire.
 - `FLAGS_TIME_TAG_TYPE_MASK` / `FLAGS_TIME_MARK_SENT_MASK` (wrong bits) were replaced by spec-named masks.
@@ -26,7 +26,7 @@ and an optional calibrated time tag.
 
 - [castle/core/compiler.hpp](../../../../core/compiler.md)
 - [castle/core/types.hpp](../../../../core/types.md)
-- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle/dsa/vector.hpp](../../../../dsa/vector.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)

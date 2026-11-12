@@ -6,7 +6,7 @@ int main()
 {
     using namespace castle::protocols::ubx;
     using castle::protocols::ubx::messages::mon_ver;
-    using castle::container::string_view;
+    using castle::dsa::string_view;
 
     // Poll the version (empty-payload request).
     uint8_t frame[256U];
@@ -25,7 +25,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == frame_size(mon_ver<4U>::header_length + (2U * mon_ver<4U>::block_length)));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(mon_ver<4U>::matches(raw));
 
     mon_ver<4U> decoded{};

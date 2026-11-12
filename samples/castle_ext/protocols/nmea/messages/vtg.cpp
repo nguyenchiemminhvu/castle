@@ -22,12 +22,12 @@ int main()
     char sentence[128U];
     castle::size_type written = 0U;
     CASTLE_SAMPLE_CHECK(castle::succeeded(
-        generate_vtg(input, castle::container::string_view(TALKER_GP), sentence, sizeof(sentence), written)));
+        generate_vtg(input, castle::dsa::string_view(TALKER_GP), sentence, sizeof(sentence), written)));
 
-    castle::container::string_view field_storage[12U];
+    castle::dsa::string_view field_storage[12U];
     message_view raw;
     CASTLE_SAMPLE_CHECK(decode_sentence(
-        castle::container::string_view(sentence, written), field_storage, 12U, raw));
+        castle::dsa::string_view(sentence, written), field_storage, 12U, raw));
 
     CASTLE_SAMPLE_CHECK(vtg::matches(raw));
 

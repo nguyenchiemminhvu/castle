@@ -9,10 +9,10 @@ int main()
     using namespace castle::protocols::nmea::messages;
 
     // No generator exists for GST; the checksum suffix is simply omitted.
-    CASTLE_CONST castle::container::string_view literal(
+    CASTLE_CONST castle::dsa::string_view literal(
         "$GPGST,024603.00,3.1,0.9,0.5,180.0,0.8,0.6,1.2\r\n");
 
-    castle::container::string_view field_storage[16U];
+    castle::dsa::string_view field_storage[16U];
     message_view raw;
     CASTLE_SAMPLE_CHECK(decode_sentence(literal, field_storage, 16U, raw));
 

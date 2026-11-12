@@ -12,7 +12,7 @@ Models UBX-MGA-DBD (0x13 0x80) navigation database dump entries: 12 reserved byt
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
@@ -38,7 +38,7 @@ Models UBX-MGA-DBD (0x13 0x80) navigation database dump entries: 12 reserved byt
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `data` | `castle::container::vector<uint8_t, MaxData>` | `{}` | Firmware-specific entry bytes (at most `MaxData`; the rest is skipped). |
+| `data` | `castle::dsa::vector<uint8_t, MaxData>` | `{}` | Firmware-specific entry bytes (at most `MaxData`; the rest is skipped). |
 
 ### `mga_dbd<MaxData>` constants
 
@@ -74,6 +74,6 @@ void on_frame(const message_view& raw) {
 - Value types: every field lives inline in the struct; no heap allocation, no exceptions, no RTTI.
 - Not thread-safe: a model is a plain value; synchronise externally if one instance is shared.
 - `message_view` is non-owning; its payload must stay valid while `decode()` runs.
-- Capacity: `data` is a `castle::container::vector<uint8_t, MaxData>`; bytes beyond `MaxData` are dropped (decode still succeeds), so pick `MaxData >= 152` to round-trip every entry losslessly.
+- Capacity: `data` is a `castle::dsa::vector<uint8_t, MaxData>`; bytes beyond `MaxData` are dropped (decode still succeeds), so pick `MaxData >= 152` to round-trip every entry losslessly.
 - The data length is implied by the payload length; there is no count field.
 - `mga_dbd` itself is large (`MaxData` bytes inline); avoid placing many instances on small stacks.

@@ -19,7 +19,7 @@
 #ifndef CASTLE_EXT_CRYPTO_XOR_HPP
 #define CASTLE_EXT_CRYPTO_XOR_HPP
 
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
@@ -285,7 +285,7 @@ public:
     }
 
 private:
-    castle::container::array<uint8_t, MaxKeySize> key_;
+    castle::dsa::array<uint8_t, MaxKeySize> key_;
     size_type key_size_;
     size_type position_;
 };

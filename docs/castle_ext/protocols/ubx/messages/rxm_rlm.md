@@ -17,7 +17,7 @@ Both layouts are identical apart from the size of `params`, so they are aliases 
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
+- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/fixed_message.hpp`](detail/fixed_message.md)
 - `stdint.h`
@@ -54,9 +54,9 @@ All names live in `castle::protocols::ubx::messages`.
 | (version) | `uint8_t` | 0 | Not a member: written as `RXM_RLM_VERSION`, re-validated on decode. |
 | (type) | `uint8_t` | 1 | Not a member: written as `Type`, re-validated on decode. |
 | `sv_id` | `uint8_t` | 2 | Transmitting satellite (see Satellite Numbering). Byte 3 is reserved. |
-| `beacon` | `castle::container::array<uint8_t, 8U>` | 4..11 | Beacon identifier (60 bits), most significant byte first; the top four bits of the first byte are zero. |
+| `beacon` | `castle::dsa::array<uint8_t, 8U>` | 4..11 | Beacon identifier (60 bits), most significant byte first; the top four bits of the first byte are zero. |
 | `message` | `uint8_t` | 12 | Message code (4 bits). |
-| `params` | `castle::container::array<uint8_t, ParamBytes>` | 13.. | Parameters, most significant byte first: 2 bytes (16 bits) short, 12 bytes (96 bits) long. |
+| `params` | `castle::dsa::array<uint8_t, ParamBytes>` | 13.. | Parameters, most significant byte first: 2 bytes (16 bits) short, 12 bytes (96 bits) long. |
 
 Trailing reserved bytes: 15 (short), 25..27 (long).
 

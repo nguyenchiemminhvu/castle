@@ -7,7 +7,7 @@ namespace
 {
 
 using namespace castle::protocols::ubx;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 enum class wire_enum : uint16_t
 {
@@ -22,8 +22,8 @@ struct layout_message
 
     wire_enum kind = wire_enum::first;
     double value = 0.0;
-    castle::container::array<int8_t, 3U> trio{};
-    castle::container::string<4U> label{};
+    castle::dsa::array<int8_t, 3U> trio{};
+    castle::dsa::string<4U> label{};
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT

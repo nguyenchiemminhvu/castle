@@ -2,7 +2,7 @@
 
 ## Overview
 
-`bit_writer.hpp` provides `bit_writer`, a bounds-checked, sequential, **big-endian bit** writer over a caller-provided `castle::container::array_view<uint8_t>`, and `encode_message()`, which turns a message model into a complete RTCM 3 frame. The module is **encode-only**: it produces the frames sent to a GNSS receiver; there is no decoder.
+`bit_writer.hpp` provides `bit_writer`, a bounds-checked, sequential, **big-endian bit** writer over a caller-provided `castle::dsa::array_view<uint8_t>`, and `encode_message()`, which turns a message model into a complete RTCM 3 frame. The module is **encode-only**: it produces the frames sent to a GNSS receiver; there is no decoder.
 
 RTCM payloads are bit streams: data fields (DF) are 1..64 bits wide and are packed most-significant bit first with no alignment between fields. The unused bits of the last byte are zero, which is the padding RTCM requires.
 
@@ -19,8 +19,8 @@ It uses the same sticky-error model as the UBX [`payload_writer`](../ubx/payload
 * [`core/compiler.hpp`](../../../core/compiler.md)
 * [`core/traits.hpp`](../../../core/traits.md)
 * [`core/types.hpp`](../../../core/types.md)
-* [`container/array_view.hpp`](../../../container/array_view.md)
-* [`container/string.hpp`](../../../container/string.md)
+* [`dsa/array_view.hpp`](../../../dsa/array_view.md)
+* [`dsa/string.hpp`](../../../dsa/string.md)
 * [`error/status.hpp`](../../../error/status.md)
 * [`rtcm.hpp`](rtcm.md)
 
@@ -47,7 +47,7 @@ It uses the same sticky-error model as the UBX [`payload_writer`](../ubx/payload
 | `field(T value, size_type bits)` for signed integral `T` | RTCM `intN`, two's complement. Latches `out_of_range` when `bits` is `0` or above `64`, or `value` is outside `-2^(bits-1) .. 2^(bits-1)-1`. |
 | `field(bool value)` | One-bit flag. |
 | `reserved(size_type bits)` | Writes `bits` zero bits; runs longer than 64 bits are split internally. |
-| `text(const castle::container::string<N>& value)` | Writes an 8-bit character count followed by the 8-bit characters (DF029/DF030 and siblings). `N` must be at most 255 (`static_assert`). |
+| `text(const castle::dsa::string<N>& value)` | Writes an 8-bit character count followed by the 8-bit characters (DF029/DF030 and siblings). `N` must be at most 255 (`static_assert`). |
 
 ### Frame helper
 
@@ -65,7 +65,7 @@ using namespace castle::protocols::rtcm;
 
 // Raw bit writer over caller storage.
 uint8_t payload[8U];
-bit_writer writer(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+bit_writer writer(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
 writer.field(static_cast<uint16_t>(1005U), 12U);
 writer.field(static_cast<int32_t>(-2), 12U);
 writer.field(true);

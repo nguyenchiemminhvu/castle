@@ -11,7 +11,7 @@ Models the three UBX-MGA-QZSS (0x13 0x05) assistance layouts sent by the host. T
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
+- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/typed_message.hpp`](detail/typed_message.md)
 - [`castle_ext/protocols/ubx/messages/mga_gps.hpp`](mga_gps.md)
@@ -37,7 +37,7 @@ The fields of `mga_qzss_eph` / `mga_qzss_alm` are documented in [mga_gps](mga_gp
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `health_code` | `castle::container::array<uint8_t, NUM_SVS>` | `{}` | `health_code[i]` is the health of QZSS SV `i + 1`. |
+| `health_code` | `castle::dsa::array<uint8_t, NUM_SVS>` | `{}` | `health_code[i]` is the health of QZSS SV `i + 1`. |
 
 ### `mga_qzss_health` constants
 

@@ -13,7 +13,7 @@
 #define CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_SEC_UNIQID_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/fixed_message.hpp"
 
@@ -32,7 +32,7 @@ namespace messages
 struct sec_uniqid : detail::fixed_message<sec_uniqid, UBX_CLASS_SEC, UBX_ID_SEC_UNIQID, 9U>
 {
     uint8_t version = 0U;                              ///< Message version (0x01 for this version).
-    castle::container::array<uint8_t, 5U> unique_id{}; ///< Unique chip ID, in wire order.
+    castle::dsa::array<uint8_t, 5U> unique_id{}; ///< Unique chip ID, in wire order.
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT

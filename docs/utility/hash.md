@@ -7,7 +7,7 @@ This header provides deterministic hash functors for common embedded key types. 
 `#include "castle/utility/hash.hpp"`
 
 ## Dependencies
-[compiler.md](../core/compiler.md), [traits.md](../core/traits.md), [types.md](../core/types.md), [compare.md](compare.md), [string_view.md](../container/string_view.md)
+[compiler.md](../core/compiler.md), [traits.md](../core/traits.md), [types.md](../core/types.md), [compare.md](compare.md), [string_view.md](../dsa/string_view.md)
 
 ## Public API
 | API | Description |
@@ -15,14 +15,14 @@ This header provides deterministic hash functors for common embedded key types. 
 | `hash_impl<T, ...>` | Helper selected internally by `hash<T>` for integral, enum, and pointer keys. |
 | `hash<T>` | Default hash functor for integral, enum, and pointer types. |
 | `hash<const T>` | Forwards hashing of const-qualified values to `hash<T>`. |
-| `hash<container::basic_string_view<CharT>>` | Hashes every byte of a Castle string view. |
+| `hash<dsa::basic_string_view<CharT>>` | Hashes every byte of a Castle string view. |
 
 ## Usage Example
 See `samples/sample_hash.cpp`.
 
 ```cpp
 castle::size_type id_hash = castle::hash<uint32_t>()(123U);
-castle::size_type name_hash = castle::hash<castle::container::string_view>()("TEMP");
+castle::size_type name_hash = castle::hash<castle::dsa::string_view>()("TEMP");
 ```
 
 ## Constraints & Notes

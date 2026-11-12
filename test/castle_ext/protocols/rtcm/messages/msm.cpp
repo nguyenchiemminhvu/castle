@@ -2013,12 +2013,12 @@ TEST(RtcmMsm, EncodeIntoSmallPayloadWriterLatchesFull)
 {
     const gps_msm4 message = reference_epoch<gps_msm4>(false);
     uint8_t payload[10U] = {};
-    bit_writer writer(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+    bit_writer writer(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
     message.encode(writer);
     EXPECT_FALSE(writer.ok());
     EXPECT_EQ(writer.status(), castle::status::full);
 
-    bit_writer rejecting(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+    bit_writer rejecting(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
     gps_msm4 invalid = message;
     invalid.satellite_mask = 0U;
     invalid.encode(rejecting);

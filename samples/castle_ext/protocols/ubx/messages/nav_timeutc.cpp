@@ -30,7 +30,7 @@ int main()
 
     // Validate the frame and identify it.
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(nav_timeutc::matches(raw));
     CASTLE_SAMPLE_CHECK(raw.payload_length() == nav_timeutc::payload_length);
 

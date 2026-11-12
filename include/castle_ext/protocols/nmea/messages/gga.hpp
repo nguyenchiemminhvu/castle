@@ -6,7 +6,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle_ext/protocols/nmea/nmea.hpp"
 #include "castle_ext/protocols/nmea/field_cursor.hpp"
 
@@ -39,7 +39,7 @@ enum class gga_fix_quality : uint8_t
 struct gga
 {
     bool valid = false;
-    castle::container::string_view talker{};
+    castle::dsa::string_view talker{};
     double utc_time = 0.0;
     double latitude = 0.0;
     double longitude = 0.0;

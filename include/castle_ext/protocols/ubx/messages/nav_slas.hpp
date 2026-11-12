@@ -14,7 +14,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/constants.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -82,7 +82,7 @@ struct nav_slas
     uint8_t qzss_sv_id = 0U;    ///< QZS/GEO whose correction data is used.
     uint8_t service_flags = 0U; ///< SLAS service flags, see `SERVICE_FLAGS_*`.
     uint8_t cnt = 0U;           ///< On-wire correction count; may exceed `corrections.size()`.
-    castle::container::vector<nav_slas_correction, MaxCorrections> corrections{};
+    castle::dsa::vector<nav_slas_correction, MaxCorrections> corrections{};
 
     CASTLE_NODISCARD bool gms_available() CASTLE_CONST CASTLE_NOEXCEPT
     {

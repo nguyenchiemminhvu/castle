@@ -16,16 +16,16 @@
  * #include "castle_ext/protocols/nmea/nmea.hpp"
  *
  * char sentence[96U];
- * castle::container::string_view fields_data[2U] = {
- *     castle::container::string_view("1"),
- *     castle::container::string_view("08")
+ * castle::dsa::string_view fields_data[2U] = {
+ *     castle::dsa::string_view("1"),
+ *     castle::dsa::string_view("08")
  * };
- * castle::container::array_view<const castle::container::string_view> fields(fields_data, 2U);
+ * castle::dsa::array_view<const castle::dsa::string_view> fields(fields_data, 2U);
  *
  * castle::size_type written = 0U;
  * castle::protocols::nmea::encode_sentence(
- *     castle::container::string_view(castle::protocols::nmea::TALKER_GP),
- *     castle::container::string_view(castle::protocols::nmea::SENTENCE_GSA),
+ *     castle::dsa::string_view(castle::protocols::nmea::TALKER_GP),
+ *     castle::dsa::string_view(castle::protocols::nmea::SENTENCE_GSA),
  *     fields,
  *     sentence,
  *     sizeof(sentence),
@@ -38,8 +38,8 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/array_view.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/array_view.hpp"
+#include "castle/dsa/string_view.hpp"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -139,18 +139,18 @@ static CASTLE_CONSTEXPR CASTLE_CONST char* SENTENCE_TXT = "TXT"; /**< Text Trans
  */
 struct message_view
 {
-    castle::container::string_view talker{};
-    castle::container::string_view type{};
-    castle::container::array_view<CASTLE_CONST castle::container::string_view> fields{};
+    castle::dsa::string_view talker{};
+    castle::dsa::string_view type{};
+    castle::dsa::array_view<CASTLE_CONST castle::dsa::string_view> fields{};
     uint8_t checksum = 0U;
     bool checksum_present = false;
 
     /**
      * @brief Returns the field at `index`, or an empty view when out of range.
      */
-    CASTLE_NODISCARD castle::container::string_view field(castle::size_type index) CASTLE_CONST CASTLE_NOEXCEPT
+    CASTLE_NODISCARD castle::dsa::string_view field(castle::size_type index) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        return (index < fields.size()) ? fields[index] : castle::container::string_view();
+        return (index < fields.size()) ? fields[index] : castle::dsa::string_view();
     }
 
     /**
@@ -172,7 +172,7 @@ struct message_view
     /**
      * @brief Reports whether this sentence has the requested type (e.g. "GGA").
      */
-    CASTLE_NODISCARD bool is(castle::container::string_view type_value) CASTLE_CONST CASTLE_NOEXCEPT
+    CASTLE_NODISCARD bool is(castle::dsa::string_view type_value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return type == type_value;
     }
@@ -180,7 +180,7 @@ struct message_view
     /**
      * @brief Reports whether this sentence has the requested talker (e.g. "GP").
      */
-    CASTLE_NODISCARD bool is_talker(castle::container::string_view talker_value) CASTLE_CONST CASTLE_NOEXCEPT
+    CASTLE_NODISCARD bool is_talker(castle::dsa::string_view talker_value) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return talker == talker_value;
     }
@@ -275,7 +275,7 @@ CASTLE_INLINE void write_hex_byte(uint8_t value, char* out) CASTLE_NOEXCEPT
 /**
  * @brief Computes the NMEA XOR checksum over a byte range.
  */
-CASTLE_NODISCARD CASTLE_INLINE uint8_t compute_checksum(castle::container::string_view data) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_INLINE uint8_t compute_checksum(castle::dsa::string_view data) CASTLE_NOEXCEPT
 {
     checksum_accumulator accumulator;
     for (castle::size_type index = 0U; index < data.size(); ++index) // LCOV_EXCL_BR_LINE
@@ -294,12 +294,12 @@ CASTLE_NODISCARD CASTLE_INLINE uint8_t compute_checksum(castle::container::strin
  * type. Shorter identifiers are treated as talker-less (`talker` left empty).
  */
 CASTLE_INLINE void split_identifier(
-    castle::container::string_view id,
-    castle::container::string_view& talker,
-    castle::container::string_view& type) CASTLE_NOEXCEPT
+    castle::dsa::string_view id,
+    castle::dsa::string_view& talker,
+    castle::dsa::string_view& type) CASTLE_NOEXCEPT
 {
-    talker = castle::container::string_view();
-    type = castle::container::string_view();
+    talker = castle::dsa::string_view();
+    type = castle::dsa::string_view();
 
     if (id.empty()) // LCOV_EXCL_BR_LINE
     {
@@ -336,14 +336,14 @@ CASTLE_INLINE void split_identifier(
  * count reflects only the stored subset.
  */
 CASTLE_NODISCARD CASTLE_INLINE castle::size_type tokenize_fields(
-    castle::container::string_view content,
-    castle::container::string_view* field_storage,
+    castle::dsa::string_view content,
+    castle::dsa::string_view* field_storage,
     castle::size_type field_capacity,
-    castle::container::string_view& talker,
-    castle::container::string_view& type) CASTLE_NOEXCEPT
+    castle::dsa::string_view& talker,
+    castle::dsa::string_view& type) CASTLE_NOEXCEPT
 {
-    talker = castle::container::string_view();
-    type = castle::container::string_view();
+    talker = castle::dsa::string_view();
+    type = castle::dsa::string_view();
 
     if (content.empty()) // LCOV_EXCL_BR_LINE
     {
@@ -352,7 +352,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::size_type tokenize_fields(
 
     CASTLE_CONST castle::size_type comma = content.find(NMEA_FIELD_SEP);
 
-    if (comma == castle::container::string_view::npos) // LCOV_EXCL_BR_LINE
+    if (comma == castle::dsa::string_view::npos) // LCOV_EXCL_BR_LINE
     {
         split_identifier(content, talker, type);
         return 0U;
@@ -365,7 +365,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::size_type tokenize_fields(
         return 0U;
     }
 
-    CASTLE_CONST castle::container::string_view remaining = content.substr(comma + 1U);
+    CASTLE_CONST castle::dsa::string_view remaining = content.substr(comma + 1U);
     CASTLE_CONST castle::size_type rlen = remaining.size();
 
     castle::size_type count = 0U;
@@ -373,7 +373,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::size_type tokenize_fields(
     while ((start <= rlen) && (count < field_capacity)) // LCOV_EXCL_BR_LINE
     {
         castle::size_type end = remaining.find(NMEA_FIELD_SEP, start);
-        if (end == castle::container::string_view::npos) // LCOV_EXCL_BR_LINE
+        if (end == castle::dsa::string_view::npos) // LCOV_EXCL_BR_LINE
         {
             end = rlen;
         }
@@ -403,8 +403,8 @@ CASTLE_NODISCARD CASTLE_INLINE castle::size_type tokenize_fields(
  * parser in `castle_ext/parsers/nmea_parser` reuses the same building blocks.
  */
 CASTLE_NODISCARD CASTLE_INLINE bool decode_sentence(
-    castle::container::string_view line,
-    castle::container::string_view* field_storage,
+    castle::dsa::string_view line,
+    castle::dsa::string_view* field_storage,
     castle::size_type field_capacity,
     message_view& output) CASTLE_NOEXCEPT
 {
@@ -421,14 +421,14 @@ CASTLE_NODISCARD CASTLE_INLINE bool decode_sentence(
     }
 
     CASTLE_CONST castle::size_type star = line.find(NMEA_CHECKSUM_CHAR);
-    castle::container::string_view content = line;
+    castle::dsa::string_view content = line;
     bool checksum_present = false;
     uint8_t received_checksum = 0U;
 
-    if (star != castle::container::string_view::npos) // LCOV_EXCL_BR_LINE
+    if (star != castle::dsa::string_view::npos) // LCOV_EXCL_BR_LINE
     {
         content = line.substr(0U, star);
-        CASTLE_CONST castle::container::string_view cs_field = line.substr(star + 1U);
+        CASTLE_CONST castle::dsa::string_view cs_field = line.substr(star + 1U);
         if ((cs_field.size() < 2U) || !parse_hex_byte(cs_field[0U], cs_field[1U], received_checksum)) // LCOV_EXCL_BR_LINE
         {
             return false;
@@ -436,14 +436,14 @@ CASTLE_NODISCARD CASTLE_INLINE bool decode_sentence(
         checksum_present = true;
     }
 
-    castle::container::string_view talker;
-    castle::container::string_view type;
+    castle::dsa::string_view talker;
+    castle::dsa::string_view type;
     CASTLE_CONST castle::size_type field_count =
         tokenize_fields(content, field_storage, field_capacity, talker, type);
 
     output.talker = talker;
     output.type = type;
-    output.fields = castle::container::array_view<CASTLE_CONST castle::container::string_view>(field_storage, field_count);
+    output.fields = castle::dsa::array_view<CASTLE_CONST castle::dsa::string_view>(field_storage, field_count);
     output.checksum = received_checksum;
     output.checksum_present = checksum_present;
 
@@ -476,9 +476,9 @@ CASTLE_NODISCARD CASTLE_INLINE bool decode_sentence(
  * @note This function never allocates and never writes outside `output`.
  */
 CASTLE_NODISCARD CASTLE_INLINE castle::status encode_sentence(
-    castle::container::string_view talker,
-    castle::container::string_view type,
-    castle::container::array_view<CASTLE_CONST castle::container::string_view> fields,
+    castle::dsa::string_view talker,
+    castle::dsa::string_view type,
+    castle::dsa::array_view<CASTLE_CONST castle::dsa::string_view> fields,
     char* output,
     castle::size_type output_capacity,
     castle::size_type& bytes_written) CASTLE_NOEXCEPT
@@ -525,7 +525,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status encode_sentence(
     {
         output[pos] = NMEA_FIELD_SEP;
         ++pos;
-        CASTLE_CONST castle::container::string_view field = fields[field_index];
+        CASTLE_CONST castle::dsa::string_view field = fields[field_index];
         for (castle::size_type index = 0U; index < field.size(); ++index) // LCOV_EXCL_BR_LINE
         {
             output[pos] = field[index];
@@ -533,7 +533,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status encode_sentence(
         }
     }
 
-    CASTLE_CONST castle::container::string_view content(&output[1U], content_length);
+    CASTLE_CONST castle::dsa::string_view content(&output[1U], content_length);
     CASTLE_CONST uint8_t check = compute_checksum(content);
 
     output[pos] = NMEA_CHECKSUM_CHAR;
@@ -553,7 +553,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status encode_sentence(
  * @brief Parses a textual field as a double.
  * @return `true` when `text` is non-empty, within the supported length, and numeric.
  */
-CASTLE_NODISCARD CASTLE_INLINE bool parse_double(castle::container::string_view text, double& out) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_INLINE bool parse_double(castle::dsa::string_view text, double& out) CASTLE_NOEXCEPT
 {
     if (text.empty() || (text.size() > NMEA_MAX_NUMERIC_FIELD_LEN)) // LCOV_EXCL_BR_LINE
     {
@@ -579,7 +579,7 @@ CASTLE_NODISCARD CASTLE_INLINE bool parse_double(castle::container::string_view 
  * @brief Parses a textual field as a signed integer.
  * @return `true` when `text` is non-empty, within the supported length, and numeric.
  */
-CASTLE_NODISCARD CASTLE_INLINE bool parse_int(castle::container::string_view text, int& out, int base = 10) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_INLINE bool parse_int(castle::dsa::string_view text, int& out, int base = 10) CASTLE_NOEXCEPT
 {
     if (text.empty() || (text.size() > NMEA_MAX_NUMERIC_FIELD_LEN)) // LCOV_EXCL_BR_LINE
     {
@@ -605,7 +605,7 @@ CASTLE_NODISCARD CASTLE_INLINE bool parse_int(castle::container::string_view tex
  * @brief Parses a textual field as an unsigned 32-bit integer.
  * @return `true` when `text` is non-empty, within the supported length, and numeric.
  */
-CASTLE_NODISCARD CASTLE_INLINE bool parse_uint(castle::container::string_view text, uint32_t& out, int base = 10) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_INLINE bool parse_uint(castle::dsa::string_view text, uint32_t& out, int base = 10) CASTLE_NOEXCEPT
 {
     if (text.empty() || (text.size() > NMEA_MAX_NUMERIC_FIELD_LEN)) // LCOV_EXCL_BR_LINE
     {
@@ -631,7 +631,7 @@ CASTLE_NODISCARD CASTLE_INLINE bool parse_uint(castle::container::string_view te
  * @brief Extracts the first character of a textual field.
  * @return `true` when `text` is non-empty.
  */
-CASTLE_NODISCARD CASTLE_INLINE bool parse_char(castle::container::string_view text, char& out) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_INLINE bool parse_char(castle::dsa::string_view text, char& out) CASTLE_NOEXCEPT
 {
     if (text.empty()) // LCOV_EXCL_BR_LINE
     {
@@ -649,8 +649,8 @@ CASTLE_NODISCARD CASTLE_INLINE bool parse_char(castle::container::string_view te
  * @return `true` when `value` is numeric.
  */
 CASTLE_NODISCARD CASTLE_INLINE bool parse_latlon(
-    castle::container::string_view value,
-    castle::container::string_view direction,
+    castle::dsa::string_view value,
+    castle::dsa::string_view direction,
     double& out) CASTLE_NOEXCEPT
 {
     double raw = 0.0;
@@ -682,7 +682,7 @@ CASTLE_NODISCARD CASTLE_INLINE bool parse_latlon(
  * `hour = floor(utc_time / 10000)`, `minute = floor(fmod(utc_time, 10000) / 100)`,
  * `second = fmod(utc_time, 100)`.
  */
-CASTLE_NODISCARD CASTLE_INLINE bool parse_utc_time(castle::container::string_view text, double& out) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_INLINE bool parse_utc_time(castle::dsa::string_view text, double& out) CASTLE_NOEXCEPT
 {
     return parse_double(text, out);
 }
@@ -690,7 +690,7 @@ CASTLE_NODISCARD CASTLE_INLINE bool parse_utc_time(castle::container::string_vie
 /**
  * @brief Parses an NMEA `ddmmyy` UTC date field into a raw numeric value.
  */
-CASTLE_NODISCARD CASTLE_INLINE bool parse_utc_date(castle::container::string_view text, uint32_t& out) CASTLE_NOEXCEPT
+CASTLE_NODISCARD CASTLE_INLINE bool parse_utc_date(castle::dsa::string_view text, uint32_t& out) CASTLE_NOEXCEPT
 {
     return parse_uint(text, out);
 }

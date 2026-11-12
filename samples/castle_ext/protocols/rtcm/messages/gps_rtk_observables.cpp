@@ -117,7 +117,7 @@ int main()
     gps_rtk_l1_obs l1_only;
     l1_only.satellites = message.satellites;
     uint8_t payload[32U] = {};
-    bit_writer writer(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+    bit_writer writer(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
     l1_only.encode(writer);
     CASTLE_SAMPLE_CHECK(writer.ok());
     CASTLE_SAMPLE_CHECK(writer.bit_size() == 64U + (2U * 58U));

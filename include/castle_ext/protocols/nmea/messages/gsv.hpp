@@ -5,8 +5,8 @@
 #define CASTLE_EXT_PROTOCOLS_NMEA_MESSAGES_GSV_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle_ext/protocols/nmea/nmea.hpp"
 #include "castle_ext/protocols/nmea/field_cursor.hpp"
 
@@ -36,13 +36,13 @@ struct gsv
     static CASTLE_CONSTEXPR castle::size_type max_satellites = 4U;
 
     bool valid = false;
-    castle::container::string_view talker{};
+    castle::dsa::string_view talker{};
     uint8_t num_msgs = 0U;
     uint8_t msg_num = 0U;
     uint8_t sats_in_view = 0U;
     uint8_t sat_count = 0U;
     uint8_t signal_id = 0U;
-    castle::container::array<gsv_satellite, max_satellites> satellites{};
+    castle::dsa::array<gsv_satellite, max_satellites> satellites{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

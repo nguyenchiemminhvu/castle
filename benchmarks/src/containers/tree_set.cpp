@@ -4,14 +4,14 @@
 #include <cstdint>
 #include <set>
 
-#include <castle/container/set.hpp>
+#include <castle/dsa/set.hpp>
 
 namespace
 {
 
 constexpr std::size_t N = 127;
 
-using castle_set = castle::container::set<int, N>;
+using castle_set = castle::dsa::set<int, N>;
 
 void fill_castle(castle_set& set)
 {

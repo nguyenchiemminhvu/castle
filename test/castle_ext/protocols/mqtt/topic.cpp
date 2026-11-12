@@ -2,7 +2,7 @@
 #include "castle_ext/protocols/mqtt/topic.hpp"
 
 using namespace castle::protocols::mqtt;
-using castle::container::string_view;
+using castle::dsa::string_view;
 
 TEST(MqttTopic, ValidatesTopicNames)
 {

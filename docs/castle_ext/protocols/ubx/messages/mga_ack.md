@@ -11,7 +11,7 @@ Models UBX-MGA-ACK (0x13 0x60), the 8-byte output the receiver sends to acknowle
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
+- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
 - [`castle/utility/bytes.hpp`](../../../../utility/bytes.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/fixed_message.hpp`](detail/fixed_message.md)
@@ -40,7 +40,7 @@ Models UBX-MGA-ACK (0x13 0x60), the 8-byte output the receiver sends to acknowle
 | `type` | `mga_ack_type` | `mga_ack_type::not_used` | Acknowledgement type (spec `type`). |
 | `info_code` | `mga_ack_info_code` | `mga_ack_info_code::accepted` | Receiver outcome (spec `infoCode`). |
 | `acked_msg_id` | `uint8_t` | `0U` | UBX ID of the acknowledged MGA message (spec `msgId`; renamed to avoid `msg_id`). |
-| `msg_payload_start` | `castle::container::array<uint8_t, 4U>` | `{}` | First 4 payload bytes of the acknowledged message. |
+| `msg_payload_start` | `castle::dsa::array<uint8_t, 4U>` | `{}` | First 4 payload bytes of the acknowledged message. |
 
 ### `mga_ack` helpers
 

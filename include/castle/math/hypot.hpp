@@ -26,7 +26,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/math/abs.hpp"
 #include "castle/math/sqrt_real.hpp"
-#include "castle/algorithm/algorithm.hpp"
+#include "castle/dsa/algorithm.hpp"
 
 namespace castle
 {

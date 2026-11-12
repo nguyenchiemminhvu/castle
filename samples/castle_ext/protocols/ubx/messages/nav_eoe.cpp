@@ -17,7 +17,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == sizeof(frame));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(nav_eoe::matches(raw));
 
     nav_eoe decoded{};

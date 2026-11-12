@@ -25,7 +25,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 
 #include <stddef.h>
 
@@ -197,7 +197,7 @@ public:
     }
 
 private:
-    container::array<TOberver*, N> observers_{};
+    dsa::array<TOberver*, N> observers_{};
     size_type observer_count_ = 0U;
 };
 

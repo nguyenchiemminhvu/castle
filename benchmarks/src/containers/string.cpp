@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-#include <castle/container/string.hpp>
+#include <castle/dsa/string.hpp>
 
 namespace
 {
@@ -22,7 +22,7 @@ BENCHMARK_F(string_construct, castle)(benchmark::State& state)
 {
     for (auto _ : state)
     {
-        castle::container::string<N> value(source_text);
+        castle::dsa::string<N> value(source_text);
         benchmark::DoNotOptimize(value);
     }
 
@@ -51,13 +51,13 @@ class string_append : public benchmark::Fixture {};
 
 BENCHMARK_F(string_append, castle)(benchmark::State& state)
 {
-    const castle::container::string<N> source(source_text);
+    const castle::dsa::string<N> source(source_text);
 
     for (auto _ : state)
     {
         state.PauseTiming();
         {
-            castle::container::string<N> value;
+            castle::dsa::string<N> value;
             state.ResumeTiming();
 
             static_cast<void>(value.append(source));
@@ -104,8 +104,8 @@ class string_compare_equal : public benchmark::Fixture {};
 
 BENCHMARK_F(string_compare_equal, castle)(benchmark::State& state)
 {
-    const castle::container::string<N> lhs(source_text);
-    const castle::container::string<N> rhs(source_text);
+    const castle::dsa::string<N> lhs(source_text);
+    const castle::dsa::string<N> rhs(source_text);
 
     for (auto _ : state)
     {
@@ -140,11 +140,11 @@ class string_find : public benchmark::Fixture {};
 
 BENCHMARK_F(string_find, castle)(benchmark::State& state)
 {
-    const castle::container::string<N> value(source_text);
+    const castle::dsa::string<N> value(source_text);
 
     for (auto _ : state)
     {
-        const auto result = value.find(castle::container::string_view("sample"));
+        const auto result = value.find(castle::dsa::string_view("sample"));
         benchmark::DoNotOptimize(result);
     }
 

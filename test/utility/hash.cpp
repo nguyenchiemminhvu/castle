@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "castle/utility/hash.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 
 #include <stdint.h>
 
@@ -79,24 +79,24 @@ TEST(HashTest, ConstQualifiedForwardsToBase)
 
 TEST(HashTest, StringViewDeterministic)
 {
-    castle::hash<castle::container::string_view> hasher;
-    castle::container::string_view a("hello");
-    castle::container::string_view b("hello");
+    castle::hash<castle::dsa::string_view> hasher;
+    castle::dsa::string_view a("hello");
+    castle::dsa::string_view b("hello");
     EXPECT_EQ(hasher(a), hasher(b));
 }
 
 TEST(HashTest, StringViewDistinguishesContent)
 {
-    castle::hash<castle::container::string_view> hasher;
-    castle::container::string_view a("hello");
-    castle::container::string_view b("world");
+    castle::hash<castle::dsa::string_view> hasher;
+    castle::dsa::string_view a("hello");
+    castle::dsa::string_view b("world");
     EXPECT_NE(hasher(a), hasher(b));
 }
 
 TEST(HashTest, EmptyStringView)
 {
-    castle::hash<castle::container::string_view> hasher;
-    castle::container::string_view empty;
+    castle::hash<castle::dsa::string_view> hasher;
+    castle::dsa::string_view empty;
     EXPECT_EQ(hasher(empty), hasher(empty));
 }
 

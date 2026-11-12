@@ -16,7 +16,7 @@ Two flavors share the same handler semantics, with no base class, no virtual fun
 | Flavor | Handlers fixed by | Storage | Use when |
 | --- | --- | --- | --- |
 | `chain_of_responsibility<Handlers...>` | The chain's type (compile-time pack) | `castle::tuple`, no type erasure | The handler list is known at compile time. Every predicate and action can be inlined. |
-| `bounded_chain_of_responsibility<N, void(Args...)>` | A capacity `N`; handlers are registered at runtime | `castle::container::array` of `N` `castle::callbacks::function` slots, one per handler | Handlers are registered or cleared at runtime, or have unrelated callable types behind one signature. |
+| `bounded_chain_of_responsibility<N, void(Args...)>` | A capacity `N`; handlers are registered at runtime | `castle::dsa::array` of `N` `castle::callbacks::function` slots, one per handler | Handlers are registered or cleared at runtime, or have unrelated callable types behind one signature. |
 
 `castle::sigslot::signal` and `castle::events::event_dispatcher` broadcast to every slot and cannot short-circuit, so they are not used as the chain engine. A chain is itself a callable (`operator()`), so it connects to a signal slot as a ready-made "first matching behavior" reaction.
 
@@ -25,7 +25,7 @@ Two flavors share the same handler semantics, with no base class, no virtual fun
 
 ## Dependencies
 - [`../callbacks/function.md`](../callbacks/function.md)
-- [`../container/array.md`](../container/array.md)
+- [`../dsa/array.md`](../dsa/array.md)
 - [`../error/status.md`](../error/status.md)
 - [`../utility/tuple.md`](../utility/tuple.md)
 - `castle/utility/integral_sequence.hpp`, `forward.hpp`, `move.hpp`

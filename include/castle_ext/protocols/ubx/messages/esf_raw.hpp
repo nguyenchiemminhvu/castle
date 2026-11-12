@@ -15,7 +15,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -62,7 +62,7 @@ struct esf_raw
     static CASTLE_CONSTEXPR castle::size_type block_length = esf_raw_sample::wire_size;
 
     castle::size_type num_samples = 0U; ///< On-wire block count implied by the length; may exceed `samples.size()`.
-    castle::container::vector<esf_raw_sample, MaxSamples> samples{};
+    castle::dsa::vector<esf_raw_sample, MaxSamples> samples{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

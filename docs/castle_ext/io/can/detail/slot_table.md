@@ -9,7 +9,7 @@ This is an implementation detail in namespace `detail`: applications use filters
 `#include "castle_ext/io/can/detail/slot_table.hpp"`
 
 ## Dependencies
-- [`../../../../container/array.md`](../../../../container/array.md)
+- [`../../../../dsa/array.md`](../../../../dsa/array.md)
 - [`../../../../core/compiler.md`](../../../../core/compiler.md)
 - [`../../../../core/types.md`](../../../../core/types.md)
 - [`../../../../utility/bitset.md`](../../../../utility/bitset.md)
@@ -66,7 +66,7 @@ int main()
 ```
 
 ## Constraints & Notes
-- Storage is `container::array<T, N>` plus `castle::bitset<N>`: no heap, exceptions, RTTI or virtual functions. The table is as large as `N * sizeof(T)` plus the bitset.
+- Storage is `dsa::array<T, N>` plus `castle::bitset<N>`: no heap, exceptions, RTTI or virtual functions. The table is as large as `N * sizeof(T)` plus the bitset.
 - Handles are stable while a slot is occupied and are reused after `release()`/`clear()`, always lowest-first. A stale handle can therefore name a newer filter; backends only hand handles to the application through `add_filter()` and treat unknown values with `is_used()` (reporting `not_found`).
 - The table has no locking. Backends that mutate it from several contexts must serialise access themselves (the SocketCAN backend documents that filter changes need external synchronisation).
 - Zephyr stores the driver's filter id (`int`) as `T`, SocketCAN and the mock store the `filter` itself.

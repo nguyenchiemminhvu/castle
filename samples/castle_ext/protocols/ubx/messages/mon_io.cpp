@@ -30,7 +30,7 @@ int main()
 
     // Validate the frame and decode it back.
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(mon_io<4U>::matches(raw));
 
     mon_io<4U> decoded{};
@@ -54,16 +54,16 @@ int main()
     // Zero ports is a valid (empty) MON-IO payload.
     mon_io<4U> no_ports{};
     CASTLE_SAMPLE_CHECK(encode_message(no_ports, frame, sizeof(frame), written) == castle::status::ok);
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(mon_io<4U>::decode(raw, decoded));
     CASTLE_SAMPLE_CHECK(decoded.ports.empty());
 
     // A length that is not a whole number of 20-byte blocks is rejected.
     uint8_t invalid_payload[21U] = {};
     CASTLE_SAMPLE_CHECK(encode_frame(UBX_CLASS_MON, UBX_ID_MON_IO,
-                                     castle::container::array_view<const uint8_t>(invalid_payload, sizeof(invalid_payload)),
+                                     castle::dsa::array_view<const uint8_t>(invalid_payload, sizeof(invalid_payload)),
                                      frame, sizeof(frame), written) == castle::status::ok);
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(!mon_io<4U>::decode(raw, decoded));
 
     // Request the message with an empty poll frame.

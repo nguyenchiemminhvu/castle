@@ -13,7 +13,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -162,7 +162,7 @@ struct esf_status
     uint8_t version = 0U; ///< Message version (0x02 for this version).
     esf_fusion_mode fusion_mode = esf_fusion_mode::initialization;
     uint8_t num_sens = 0U; ///< On-wire sensor count; may exceed `sensors.size()`.
-    castle::container::vector<esf_status_sensor, MaxSensors> sensors{};
+    castle::dsa::vector<esf_status_sensor, MaxSensors> sensors{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

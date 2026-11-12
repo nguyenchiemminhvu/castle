@@ -14,8 +14,8 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/string.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -126,8 +126,8 @@ struct mon_hw3
     uint8_t version = 0U;  ///< Message version (0x00).
     uint8_t n_pins = 0U;   ///< On-wire pin count; may exceed `pins.size()`.
     uint8_t flags = 0U;
-    castle::container::string<HW_VERSION_LENGTH> hw_version{}; ///< Hardware version (as in UBX-MON-VER).
-    castle::container::vector<mon_hw3_pin, MaxPins> pins{};
+    castle::dsa::string<HW_VERSION_LENGTH> hw_version{}; ///< Hardware version (as in UBX-MON-VER).
+    castle::dsa::vector<mon_hw3_pin, MaxPins> pins{};
 
     CASTLE_NODISCARD bool rtc_calib() CASTLE_CONST CASTLE_NOEXCEPT
     {

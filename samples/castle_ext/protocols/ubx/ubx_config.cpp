@@ -8,7 +8,7 @@ int main()
 {
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::config;
-    using castle::container::array_view;
+    using castle::dsa::array_view;
 
     // ---------------------------------------------------------------------
     // config_value: strongly typed construction, raw-bit storage.

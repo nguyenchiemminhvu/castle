@@ -7,7 +7,7 @@ Distance, projection, containment, and convex-hull helpers for Castle geometry t
 `#include "castle/math/geometry/algorithms.hpp"`
 
 ## Dependencies
-- [`../../container/array.md`](../../container/array.md)
+- [`../../dsa/array.md`](../../dsa/array.md)
 - [`detail.md`](detail.md)
 - [`line2d.md`](line2d.md)
 - [`line3d.md`](line3d.md)
@@ -26,7 +26,7 @@ Distance, projection, containment, and convex-hull helpers for Castle geometry t
 | `nearest_point(point, line)` | Projects a point onto an infinite 2D or 3D line. |
 | `nearest_point_on_segment(point, first, second)` | Projects a point onto a closed 2D or 3D segment. |
 | `nearest_point_result2d<T>` / `nearest_point_result3d<T>` | Result structs carrying `found`, `index`, `point`, and `distance_squared`. |
-| `nearest_point(array, target)` | Linear nearest-neighbor search over a fixed `container::array`. |
+| `nearest_point(array, target)` | Linear nearest-neighbor search over a fixed `dsa::array`. |
 | `point_on_segment(point, first, second, epsilon)` | Segment membership test with epsilon tolerance. |
 | `point_in_polygon(point, vertices, count, epsilon)` | Ray-casting point-in-polygon test; boundary counts as inside. |
 | `point_in_polygon(point, polygon, epsilon)` | Convenience overload for `polygon2d`. |

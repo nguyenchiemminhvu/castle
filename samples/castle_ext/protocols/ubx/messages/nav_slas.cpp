@@ -36,7 +36,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + nav_slas<>::header_length + (2U * nav_slas<>::block_length)));
 
     message_view raw;
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(nav_slas<>::matches(raw));
 
     nav_slas<> decoded;

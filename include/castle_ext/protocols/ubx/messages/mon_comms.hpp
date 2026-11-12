@@ -15,8 +15,8 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -62,7 +62,7 @@ struct mon_comms_port
     uint8_t rx_usage = 0U;        ///< Max receiver buffer usage during the last sysmon period [%].
     uint8_t rx_peak_usage = 0U;   ///< Max receiver buffer usage [%].
     uint16_t overrun_errs = 0U;   ///< Number of 100 ms timeslots with overrun errors.
-    castle::container::array<uint16_t, MON_COMMS_PROTOCOL_SLOTS> msgs{}; ///< Parsed messages per `prot_ids` slot [msg].
+    castle::dsa::array<uint16_t, MON_COMMS_PROTOCOL_SLOTS> msgs{}; ///< Parsed messages per `prot_ids` slot [msg].
     uint32_t skipped = 0U;        ///< Skipped bytes [bytes].
 
     template <typename Self, typename Stream>
@@ -103,9 +103,9 @@ struct mon_comms
     uint8_t version = 0U;   ///< Message version (0x00).
     uint8_t n_ports = 0U;   ///< On-wire port count; may exceed `ports.size()`.
     uint8_t tx_errors = 0U;
-    castle::container::array<mon_comms_protocol, MON_COMMS_PROTOCOL_SLOTS> prot_ids{
+    castle::dsa::array<mon_comms_protocol, MON_COMMS_PROTOCOL_SLOTS> prot_ids{
         mon_comms_protocol::none, mon_comms_protocol::none, mon_comms_protocol::none, mon_comms_protocol::none};
-    castle::container::vector<mon_comms_port, MaxPorts> ports{};
+    castle::dsa::vector<mon_comms_port, MaxPorts> ports{};
 
     CASTLE_NODISCARD bool tx_error_mem() CASTLE_CONST CASTLE_NOEXCEPT
     {

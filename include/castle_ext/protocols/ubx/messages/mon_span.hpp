@@ -13,8 +13,8 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -39,7 +39,7 @@ struct mon_span_rf_block
 {
     static CASTLE_CONSTEXPR castle::size_type wire_size = 272U;
 
-    castle::container::array<uint8_t, MON_SPAN_SPECTRUM_BINS> spectrum{}; ///< Amplitude per bin [dB].
+    castle::dsa::array<uint8_t, MON_SPAN_SPECTRUM_BINS> spectrum{}; ///< Amplitude per bin [dB].
     uint32_t span = 0U;   ///< Spectrum span [Hz].
     uint32_t res = 0U;    ///< Resolution of the spectrum (bin width) [Hz].
     uint32_t center = 0U; ///< Center of the spectrum span [Hz].
@@ -79,7 +79,7 @@ struct mon_span
 
     uint8_t version = 0U;       ///< Message version (0x00 for this version).
     uint8_t num_rf_blocks = 0U; ///< On-wire RF block count; may exceed `rf_blocks.size()`.
-    castle::container::vector<mon_span_rf_block, MaxRfBlocks> rf_blocks{};
+    castle::dsa::vector<mon_span_rf_block, MaxRfBlocks> rf_blocks{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

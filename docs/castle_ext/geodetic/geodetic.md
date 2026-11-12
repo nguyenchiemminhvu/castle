@@ -48,7 +48,7 @@ int main()
     castle::geodetic::geohash<9U> hash;
     assert(hash.encode(origin) == castle::status::ok);
 
-    assert(hash.base32().view().compare(castle::container::string_view("s00000000")) == 0);
+    assert(hash.base32().view().compare(castle::dsa::string_view("s00000000")) == 0);
     assert(hash.center().latitude() == hash.bounds().center_latitude());
     return 0;
 }

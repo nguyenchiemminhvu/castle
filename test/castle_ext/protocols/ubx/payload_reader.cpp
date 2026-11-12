@@ -6,7 +6,7 @@ namespace
 {
 
 using namespace castle::protocols::ubx;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 TEST(PayloadReader, ReadsAllLittleEndianWidthsAndAdvances)
 {
@@ -98,12 +98,12 @@ TEST(PayloadReader, ReadsFloatingPointAndTypedFields)
     char ch = '\0';
     int8_t i8 = 0;
     reader_enum kind = reader_enum::alpha;
-    castle::container::array<int8_t, 3U> trio{};
+    castle::dsa::array<int8_t, 3U> trio{};
     int16_t i16 = 0;
     uint32_t u32 = 0U;
     int32_t i32 = 0;
     uint64_t u64 = 0U;
-    castle::container::array<uint8_t, 3U> tail{};
+    castle::dsa::array<uint8_t, 3U> tail{};
 
     reader.read(r4);
     reader.read(r8);
@@ -178,17 +178,17 @@ TEST(PayloadReader, TextReadsNulPaddedAndFullWidthFields)
     uint8_t payload[9U] = {'R', 'O', 'M', 0U, 'x', 'A', 'B', 'C', 'D'};
     payload_reader reader(array_view<CASTLE_CONST uint8_t>(payload, sizeof(payload)));
 
-    castle::container::string<5U> padded{};
+    castle::dsa::string<5U> padded{};
     reader.text(padded); // "ROM\0x": stops at NUL but consumes all 5 bytes
-    EXPECT_TRUE(padded.view() == castle::container::string_view("ROM", 3U));
+    EXPECT_TRUE(padded.view() == castle::dsa::string_view("ROM", 3U));
     EXPECT_EQ(reader.position(), 5U);
 
-    castle::container::string<4U> full("old");
+    castle::dsa::string<4U> full("old");
     reader.text(full); // no NUL: all 4 characters kept, previous content replaced
-    EXPECT_TRUE(full.view() == castle::container::string_view("ABCD", 4U));
+    EXPECT_TRUE(full.view() == castle::dsa::string_view("ABCD", 4U));
     EXPECT_TRUE(reader.ok());
 
-    castle::container::string<2U> beyond("zz");
+    castle::dsa::string<2U> beyond("zz");
     reader.text(beyond);
     EXPECT_FALSE(reader.ok());
     EXPECT_TRUE(beyond.empty());

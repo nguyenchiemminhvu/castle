@@ -129,7 +129,7 @@ TEST(MqttCodec, WriterRejectsInvalidStateAndCapacity)
     EXPECT_EQ(overflow_varint.put_varint(maximum_remaining_length + 1U), castle::status::out_of_range);
 
     static const char huge_text[65536U]{};
-    EXPECT_EQ(bytes_writer.put_utf8(castle::container::string_view(huge_text, sizeof(huge_text))), castle::status::out_of_range);
+    EXPECT_EQ(bytes_writer.put_utf8(castle::dsa::string_view(huge_text, sizeof(huge_text))), castle::status::out_of_range);
     static const uint8_t huge_bytes[65536U]{};
     EXPECT_EQ(bytes_writer.put_binary(huge_bytes, sizeof(huge_bytes)), castle::status::out_of_range);
 }

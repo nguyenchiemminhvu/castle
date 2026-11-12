@@ -12,7 +12,7 @@
 #ifndef CASTLE_EXT_IO_CAN_DETAIL_SLOT_TABLE_HPP
 #define CASTLE_EXT_IO_CAN_DETAIL_SLOT_TABLE_HPP
 
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/utility/bitset.hpp"
@@ -99,7 +99,7 @@ public:
     T CASTLE_CONST& at(filter_handle handle) CASTLE_CONST CASTLE_NOEXCEPT { return items_[static_cast<size_type>(handle)]; }
 
 private:
-    container::array<T, N> items_;
+    dsa::array<T, N> items_;
     castle::bitset<N> used_;
 };
 

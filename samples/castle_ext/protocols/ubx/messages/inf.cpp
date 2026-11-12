@@ -17,7 +17,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + 10U));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
 
     // Per-severity models only match their own ID.
     CASTLE_SAMPLE_CHECK(inf_notice<>::matches(raw));
@@ -29,7 +29,7 @@ int main()
 
     inf_notice<> decoded_notice{};
     CASTLE_SAMPLE_CHECK(inf_notice<>::decode(raw, decoded_notice));
-    CASTLE_SAMPLE_CHECK(decoded_notice.text == castle::container::string_view("GNSS ready"));
+    CASTLE_SAMPLE_CHECK(decoded_notice.text == castle::dsa::string_view("GNSS ready"));
 
     // The any-severity model records which ID arrived.
     inf<> any{};
@@ -42,12 +42,12 @@ int main()
     // A small capacity keeps only the first characters.
     inf<4U> clipped{};
     CASTLE_SAMPLE_CHECK(inf<4U>::decode(raw, clipped));
-    CASTLE_SAMPLE_CHECK(clipped.text == castle::container::string_view("GNSS"));
+    CASTLE_SAMPLE_CHECK(clipped.text == castle::dsa::string_view("GNSS"));
 
     // An empty INF string is valid.
     inf_error<> empty{};
     CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(empty, frame, sizeof(frame), written)));
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(inf_error<>::decode(raw, empty));
     CASTLE_SAMPLE_CHECK(empty.text.empty());
 

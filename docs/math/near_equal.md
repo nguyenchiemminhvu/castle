@@ -10,7 +10,7 @@ Caller-tuned floating-point comparison that combines absolute and relative toler
 - [compiler](../core/compiler.md)
 - [traits](../core/traits.md)
 - [abs](abs.md)
-- [algorithm](../algorithm/algorithm.md)
+- [algorithm](../dsa/algorithm.md)
 
 ## Public API
 | API | Description |

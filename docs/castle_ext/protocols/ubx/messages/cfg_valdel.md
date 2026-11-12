@@ -17,7 +17,7 @@ Both carry up to 64 `U4` key IDs.
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/ubx_config.hpp`](../ubx_config.md) (`config::config_layer`)
 - [`detail/cfg_data.hpp`](detail/cfg_data.md)

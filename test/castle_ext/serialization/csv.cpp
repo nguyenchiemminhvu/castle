@@ -6,8 +6,8 @@
 namespace
 {
 
-using castle::container::string;
-using castle::container::string_view;
+using castle::dsa::string;
+using castle::dsa::string_view;
 using castle::serialization::csv::document;
 using castle::serialization::csv::error_code;
 using castle::serialization::csv::options;
@@ -391,23 +391,23 @@ TEST(CsvDetailTest, NumericAndFieldFormattingFailureBranches)
     EXPECT_EQ(parse_floating(string_view("1e100000"), floating_value), castle::status::out_of_range);
     EXPECT_EQ(parse_floating(string_view("1.2x"), floating_value), castle::status::invalid_argument);
 
-    castle::container::string<1U> tiny_integer;
+    castle::dsa::string<1U> tiny_integer;
     EXPECT_EQ(format_integer(static_cast<int32_t>(-12), tiny_integer), castle::status::full);
     EXPECT_EQ(tiny_integer.view(), string_view("-"));
 
-    castle::container::string<1U> tiny_float;
+    castle::dsa::string<1U> tiny_float;
     EXPECT_EQ(format_floating(-1.0, tiny_float, 0U), castle::status::full);
     EXPECT_EQ(tiny_float.view(), string_view("-"));
 
-    castle::container::string<2U> closing_quote_full;
+    castle::dsa::string<2U> closing_quote_full;
     EXPECT_EQ(append_serialized_field(string_view(","), ',', closing_quote_full), castle::status::full);
     EXPECT_EQ(closing_quote_full.view(), string_view("\","));
 
-    castle::container::string<2U> escaped_quote_full;
+    castle::dsa::string<2U> escaped_quote_full;
     EXPECT_EQ(append_serialized_field(string_view("\""), ',', escaped_quote_full), castle::status::full);
     EXPECT_EQ(escaped_quote_full.view(), string_view("\""));
 
-    castle::container::string<16U> direct_output;
+    castle::dsa::string<16U> direct_output;
     EXPECT_EQ(append_serialized_field(string_view("plain"), ',', direct_output), castle::status::ok);
     EXPECT_EQ(append_serialized_field(string_view("line\nfeed"), ',', direct_output), castle::status::ok);
     const char bad[] = {'a', '\0', 'b'};
@@ -417,7 +417,7 @@ TEST(CsvDetailTest, NumericAndFieldFormattingFailureBranches)
 TEST(CsvSerializeTest, EmptyDocumentProducesEmptyOutput)
 {
     document<4U, 4U, 16U> doc;
-    castle::container::string<16U> output;
+    castle::dsa::string<16U> output;
     ASSERT_TRUE(serialize(doc, output).succeeded());
     EXPECT_TRUE(output.empty());
 }
@@ -433,7 +433,7 @@ TEST(CsvSerializeTest, CanonicalOutputEscapesQuotesCommasAndNewlines)
     ASSERT_EQ(doc.append(row, string_view("line1\nline2")), castle::status::ok);
     ASSERT_EQ(doc.append(row, string_view() ), castle::status::ok);
 
-    castle::container::string<256U> output;
+    castle::dsa::string<256U> output;
     const auto result = serialize(doc, output);
     ASSERT_TRUE(result.succeeded());
     EXPECT_EQ(output.view(), string_view("plain,\"hello, world\",\"quote \"\" here\",\"line1\nline2\",\n"));
@@ -458,7 +458,7 @@ TEST(CsvSerializeTest, CustomDelimiterAndWriteAlias)
     options csv_options;
     csv_options.delimiter = ';';
 
-    castle::container::string<64U> output;
+    castle::dsa::string<64U> output;
     ASSERT_TRUE(write(doc, output, csv_options).succeeded());
     EXPECT_EQ(output.view(), string_view("\"a;b\";c\n"));
 
@@ -477,13 +477,13 @@ TEST(CsvSerializeTest, InvalidDelimiterAndOutputCapacity)
 
     options invalid;
     invalid.delimiter = '\n';
-    castle::container::string<64U> output;
+    castle::dsa::string<64U> output;
     auto result = serialize(doc, output, invalid);
     EXPECT_EQ(result.status, castle::status::invalid_argument);
     EXPECT_EQ(result.code, error_code::invalid_delimiter);
     EXPECT_TRUE(output.empty());
 
-    castle::container::string<3U> small_output;
+    castle::dsa::string<3U> small_output;
     result = serialize(doc, small_output);
     EXPECT_EQ(result.status, castle::status::full);
     EXPECT_EQ(result.code, error_code::output_full);
@@ -657,7 +657,7 @@ TEST(CsvParseTest, ConversionParserAndFieldCapacityEdges)
     string<2U> decimal_tight;
     EXPECT_EQ(detail::format_floating(12.3, decimal_tight, 1U), castle::status::full);
 
-    // castle::container::string requires MaxCapacity > 0, so the negative-sign
+    // castle::dsa::string requires MaxCapacity > 0, so the negative-sign
     // push_full branch in format_floating cannot be exercised through a valid
     // string instantiation without changing the frozen container API.
 

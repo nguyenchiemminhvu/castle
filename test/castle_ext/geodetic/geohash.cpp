@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "castle/core/traits.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle_ext/geodetic/geohash.hpp"
 
 namespace
@@ -29,7 +29,7 @@ static_assert(castle::meta::is_same<geohash<8U>::bits_type, uint64_t>::value,
               "packed binary Geohash bits use uint64_t");
 static_assert(geohash<1U>::bit_count == 5U, "one base-32 character carries five bits");
 static_assert(geohash<12U>::bit_count == 60U, "twelve base-32 characters carry sixty bits");
-static_assert(castle::meta::is_same<geohash<8U>::binary_string_type, castle::container::string<40U>>::value,
+static_assert(castle::meta::is_same<geohash<8U>::binary_string_type, castle::dsa::string<40U>>::value,
               "binary text capacity equals bit_count");
 
 TEST(GeodeticGeohash, KnownDaNangEncodingStoresEveryForm)
@@ -43,7 +43,7 @@ TEST(GeodeticGeohash, KnownDaNangEncodingStoresEveryForm)
     EXPECT_STREQ(hash.c_str(), "w6ugqkyc");
     EXPECT_EQ(hash.base32().size(), 8U);
     EXPECT_EQ(hash.base32().capacity(), 8U);
-    EXPECT_EQ(hash.binary().view().compare(castle::container::string_view("1110000110110100111110110100101111001011")), 0);
+    EXPECT_EQ(hash.binary().view().compare(castle::dsa::string_view("1110000110110100111110110100101111001011")), 0);
     EXPECT_EQ(hash.bits(), 969404009419ULL);
 
     const geohash_bounds<double>& bounds = hash.bounds();
@@ -72,7 +72,7 @@ TEST(GeodeticGeohash, CompileTimeDepthAndStaticBufferApi)
     EXPECT_STREQ(output, "s");
 
     EXPECT_EQ(geohash<12U>::encode(origin, output, sizeof(output)), status::ok);
-    EXPECT_EQ(castle::container::string_view(output).size(), 12U);
+    EXPECT_EQ(castle::dsa::string_view(output).size(), 12U);
     EXPECT_EQ(output[12U], '\0');
 }
 
@@ -100,13 +100,13 @@ TEST(GeodeticGeohash, ConfigurableFloatingPointType)
     char output[float_hash::depth + 1U] = {};
     EXPECT_EQ(float_hash::encode(position, output, sizeof(output)), status::ok);
     float_hash::point_type static_center;
-    EXPECT_EQ(float_hash::decode(castle::container::string_view(output), static_center), status::ok);
+    EXPECT_EQ(float_hash::decode(castle::dsa::string_view(output), static_center), status::ok);
     EXPECT_TRUE(static_center == hash.center());
 }
 
 TEST(GeodeticGeohash, DecodeStaticAndInstanceApis)
 {
-    const castle::container::string_view encoded("w6ugqkyc", 8U);
+    const castle::dsa::string_view encoded("w6ugqkyc", 8U);
     geo_point<double> static_center;
     geohash_bounds<double> static_bounds;
     geohash<8U> hash;
@@ -133,7 +133,7 @@ TEST(GeodeticGeohash, AssignAcceptsUppercaseAndAllAlphabetSymbols)
     for (castle::size_type i = 0U; i < 32U; ++i)
     {
         geohash<1U> single_character;
-        EXPECT_EQ(single_character.assign(castle::container::string_view(alphabet + i, 1U)), status::ok)
+        EXPECT_EQ(single_character.assign(castle::dsa::string_view(alphabet + i, 1U)), status::ok)
             << "alphabet index " << i;
         EXPECT_EQ(single_character.bits(), static_cast<geohash<1U>::bits_type>(i)) << "alphabet index " << i;
     }
@@ -179,9 +179,9 @@ TEST(GeodeticGeohash, AssignReportsEmptyLengthAndAlphabetErrors)
     geohash<8U> hash;
     ASSERT_EQ(hash.assign("w6ugqkyc"), status::ok);
 
-    EXPECT_EQ(hash.assign(castle::container::string_view()), status::empty);
+    EXPECT_EQ(hash.assign(castle::dsa::string_view()), status::empty);
     EXPECT_EQ(hash.assign(static_cast<const char*>(nullptr)), status::invalid_argument);
-    EXPECT_EQ(hash.assign(castle::container::string_view(nullptr, 8U)), status::invalid_argument);
+    EXPECT_EQ(hash.assign(castle::dsa::string_view(nullptr, 8U)), status::invalid_argument);
     EXPECT_EQ(hash.assign("w6ugqky"), status::invalid_argument);
     EXPECT_EQ(hash.assign("w6ugqkyc0"), status::out_of_range);
     EXPECT_EQ(hash.assign("w6ugqkyy"), status::ok);
@@ -201,11 +201,11 @@ TEST(GeodeticGeohash, DecodeRejectsEmptyAndMismatchedDepthWithoutChangingOutputs
     bounds.min_longitude = -2.0;
     bounds.max_longitude = 2.0;
 
-    EXPECT_EQ(geohash<8U>::decode(castle::container::string_view(), center, &bounds), status::empty);
-    EXPECT_EQ(geohash<8U>::decode(castle::container::string_view(nullptr, 8U), center, &bounds), status::invalid_argument);
-    EXPECT_EQ(geohash<8U>::decode(castle::container::string_view("w6ugqky", 7U), center, &bounds), status::invalid_argument);
-    EXPECT_EQ(geohash<8U>::decode(castle::container::string_view("w6ugqkyc0", 9U), center, &bounds), status::out_of_range);
-    EXPECT_EQ(geohash<8U>::decode(castle::container::string_view("w6ugqky?", 8U), center, &bounds), status::invalid_argument);
+    EXPECT_EQ(geohash<8U>::decode(castle::dsa::string_view(), center, &bounds), status::empty);
+    EXPECT_EQ(geohash<8U>::decode(castle::dsa::string_view(nullptr, 8U), center, &bounds), status::invalid_argument);
+    EXPECT_EQ(geohash<8U>::decode(castle::dsa::string_view("w6ugqky", 7U), center, &bounds), status::invalid_argument);
+    EXPECT_EQ(geohash<8U>::decode(castle::dsa::string_view("w6ugqkyc0", 9U), center, &bounds), status::out_of_range);
+    EXPECT_EQ(geohash<8U>::decode(castle::dsa::string_view("w6ugqky?", 8U), center, &bounds), status::invalid_argument);
 
     geohash<8U> empty_hash;
     EXPECT_TRUE(empty_hash.empty());
@@ -241,15 +241,15 @@ TEST(GeodeticGeohash, EncodeBinaryMatchesReferenceStrings)
     geohash<8U>::binary_string_type binary;
     ASSERT_EQ(geohash<8U>::encode_binary(geo_point<double>(16.066389083862305, 108.21378707885742), binary), status::ok);
     EXPECT_EQ(binary.size(), 40U);
-    EXPECT_EQ(binary.view().compare(castle::container::string_view("1110000110110100111110110100101111001011")), 0);
+    EXPECT_EQ(binary.view().compare(castle::dsa::string_view("1110000110110100111110110100101111001011")), 0);
 
     geohash<6U>::binary_string_type sydney;
     ASSERT_EQ(geohash<6U>::encode_binary(geo_point<double>(-33.8688, 151.2093), sydney), status::ok);
-    EXPECT_EQ(sydney.view().compare(castle::container::string_view("101110001101111111010001001110")), 0);
+    EXPECT_EQ(sydney.view().compare(castle::dsa::string_view("101110001101111111010001001110")), 0);
 
     geohash<10U>::binary_string_type london;
     ASSERT_EQ(geohash<10U>::encode_binary(geo_point<double>(51.5074, -0.1278), london), status::ok);
-    EXPECT_EQ(london.view().compare(castle::container::string_view("01111010111010111011100010000001100110101011000101")), 0);
+    EXPECT_EQ(london.view().compare(castle::dsa::string_view("01111010111010111011100010000001100110101011000101")), 0);
 
     char london_base32[geohash<10U>::depth + 1U] = {};
     ASSERT_EQ(geohash<10U>::encode(geo_point<double>(51.5074, -0.1278), london_base32, sizeof(london_base32)), status::ok);
@@ -271,11 +271,11 @@ void expect_binary_and_base32_agree(const geo_point<double>& point)
     ASSERT_EQ(hash_type::encode_binary(point, binary), status::ok);
     ASSERT_EQ(hash_type::encode_bits(point, bits), status::ok);
 
-    ASSERT_EQ(hash_type::base32_to_binary(castle::container::string_view(base32), binary_from_base32), status::ok);
+    ASSERT_EQ(hash_type::base32_to_binary(castle::dsa::string_view(base32), binary_from_base32), status::ok);
     EXPECT_TRUE(binary_from_base32 == binary);
 
     ASSERT_EQ(hash_type::binary_to_base32(binary.view(), base32_from_binary), status::ok);
-    EXPECT_EQ(base32_from_binary.view().compare(castle::container::string_view(base32)), 0);
+    EXPECT_EQ(base32_from_binary.view().compare(castle::dsa::string_view(base32)), 0);
 
     geo_point<double> base32_center;
     geo_point<double> binary_center;
@@ -283,7 +283,7 @@ void expect_binary_and_base32_agree(const geo_point<double>& point)
     geohash_bounds<double> base32_bounds;
     geohash_bounds<double> binary_bounds;
 
-    ASSERT_EQ(hash_type::decode(castle::container::string_view(base32), base32_center, &base32_bounds), status::ok);
+    ASSERT_EQ(hash_type::decode(castle::dsa::string_view(base32), base32_center, &base32_bounds), status::ok);
     ASSERT_EQ(hash_type::decode_binary(binary.view(), binary_center, &binary_bounds), status::ok);
     ASSERT_EQ(hash_type::decode_bits(bits, bits_center), status::ok);
 
@@ -329,7 +329,7 @@ TEST(GeodeticGeohash, DecodeBinaryMatchesBase32AndReportsErrors)
     geo_point<double> center;
     geohash_bounds bounds;
 
-    ASSERT_EQ(geohash<8U>::decode_binary(castle::container::string_view(bits_text), center, &bounds), status::ok);
+    ASSERT_EQ(geohash<8U>::decode_binary(castle::dsa::string_view(bits_text), center, &bounds), status::ok);
     EXPECT_NEAR(center.latitude(), 16.066389083862305, 1.0e-12);
     EXPECT_NEAR(center.longitude(), 108.21378707885742, 1.0e-12);
     EXPECT_NEAR(bounds.min_latitude, 16.066303253173828, 1.0e-12);
@@ -338,7 +338,7 @@ TEST(GeodeticGeohash, DecodeBinaryMatchesBase32AndReportsErrors)
     EXPECT_NEAR(bounds.max_longitude, 108.21395874023438, 1.0e-12);
 
     geo_point<double> base32_center;
-    ASSERT_EQ(geohash<8U>::decode(castle::container::string_view("w6ugqkyc", 8U), base32_center), status::ok);
+    ASSERT_EQ(geohash<8U>::decode(castle::dsa::string_view("w6ugqkyc", 8U), base32_center), status::ok);
     EXPECT_TRUE(center == base32_center);
 
     geo_point<double> unchanged(12.0, 34.0);
@@ -349,11 +349,11 @@ TEST(GeodeticGeohash, DecodeBinaryMatchesBase32AndReportsErrors)
     }
     bad_bits[39] = '2';
 
-    EXPECT_EQ(geohash<8U>::decode_binary(castle::container::string_view(), unchanged, &bounds), status::empty);
-    EXPECT_EQ(geohash<8U>::decode_binary(castle::container::string_view(nullptr, 40U), unchanged, &bounds), status::invalid_argument);
-    EXPECT_EQ(geohash<8U>::decode_binary(castle::container::string_view(bits_text, 39U), unchanged, &bounds), status::invalid_argument);
-    EXPECT_EQ(geohash<7U>::decode_binary(castle::container::string_view(bits_text, 40U), unchanged, &bounds), status::out_of_range);
-    EXPECT_EQ(geohash<8U>::decode_binary(castle::container::string_view(bad_bits, 40U), unchanged, &bounds), status::invalid_argument);
+    EXPECT_EQ(geohash<8U>::decode_binary(castle::dsa::string_view(), unchanged, &bounds), status::empty);
+    EXPECT_EQ(geohash<8U>::decode_binary(castle::dsa::string_view(nullptr, 40U), unchanged, &bounds), status::invalid_argument);
+    EXPECT_EQ(geohash<8U>::decode_binary(castle::dsa::string_view(bits_text, 39U), unchanged, &bounds), status::invalid_argument);
+    EXPECT_EQ(geohash<7U>::decode_binary(castle::dsa::string_view(bits_text, 40U), unchanged, &bounds), status::out_of_range);
+    EXPECT_EQ(geohash<8U>::decode_binary(castle::dsa::string_view(bad_bits, 40U), unchanged, &bounds), status::invalid_argument);
     EXPECT_EQ(geohash<8U>::decode_bits(1ULL << 40U, unchanged, &bounds), status::out_of_range);
     EXPECT_DOUBLE_EQ(unchanged.latitude(), 12.0);
     EXPECT_DOUBLE_EQ(unchanged.longitude(), 34.0);
@@ -365,17 +365,17 @@ TEST(GeodeticGeohash, BinaryConversionsAcceptUppercaseBase32AndRejectInvalidText
     geohash<8U>::binary_string_type binary;
     geohash<8U>::string_type text;
 
-    EXPECT_EQ(geohash<8U>::base32_to_binary(castle::container::string_view("W6UGQKYC"), binary), status::ok);
-    EXPECT_EQ(binary.view().compare(castle::container::string_view("1110000110110100111110110100101111001011")), 0);
+    EXPECT_EQ(geohash<8U>::base32_to_binary(castle::dsa::string_view("W6UGQKYC"), binary), status::ok);
+    EXPECT_EQ(binary.view().compare(castle::dsa::string_view("1110000110110100111110110100101111001011")), 0);
 
     EXPECT_EQ(geohash<8U>::binary_to_base32(binary.view(), text), status::ok);
     EXPECT_STREQ(text.c_str(), "w6ugqkyc");
 
-    EXPECT_EQ(geohash<8U>::base32_to_binary(castle::container::string_view("w6ugqky"), binary), status::invalid_argument);
-    EXPECT_EQ(geohash<8U>::base32_to_binary(castle::container::string_view("w6ugqkyi"), binary), status::invalid_argument);
-    EXPECT_EQ(geohash<8U>::binary_to_base32(castle::container::string_view(), text), status::empty);
+    EXPECT_EQ(geohash<8U>::base32_to_binary(castle::dsa::string_view("w6ugqky"), binary), status::invalid_argument);
+    EXPECT_EQ(geohash<8U>::base32_to_binary(castle::dsa::string_view("w6ugqkyi"), binary), status::invalid_argument);
+    EXPECT_EQ(geohash<8U>::binary_to_base32(castle::dsa::string_view(), text), status::empty);
     geohash<1U>::string_type single;
-    EXPECT_EQ(geohash<1U>::binary_to_base32(castle::container::string_view("01a10", 5U), single), status::invalid_argument);
+    EXPECT_EQ(geohash<1U>::binary_to_base32(castle::dsa::string_view("01a10", 5U), single), status::invalid_argument);
     EXPECT_TRUE(single.empty());
     EXPECT_STREQ(text.c_str(), "w6ugqkyc");
 }
@@ -387,16 +387,16 @@ TEST(GeodeticGeohash, ObjectBinaryRoundTripPreservesValueOnFailure)
     EXPECT_EQ(hash.binary().size(), 0U);
 
     ASSERT_EQ(hash.assign("w6ugqkyc"), status::ok);
-    EXPECT_EQ(hash.binary().view().compare(castle::container::string_view("1110000110110100111110110100101111001011")), 0);
+    EXPECT_EQ(hash.binary().view().compare(castle::dsa::string_view("1110000110110100111110110100101111001011")), 0);
 
-    EXPECT_EQ(hash.assign_binary(castle::container::string_view("0101")), status::invalid_argument);
+    EXPECT_EQ(hash.assign_binary(castle::dsa::string_view("0101")), status::invalid_argument);
     EXPECT_STREQ(hash.c_str(), "w6ugqkyc");
     EXPECT_EQ(hash.bits(), 969404009419ULL);
 
     geohash<8U> restored;
     ASSERT_EQ(restored.assign_binary(hash.binary().view()), status::ok);
     EXPECT_EQ(restored.view().compare(hash.view()), 0);
-    EXPECT_EQ(restored.assign_binary(castle::container::string_view()), status::empty);
+    EXPECT_EQ(restored.assign_binary(castle::dsa::string_view()), status::empty);
     EXPECT_STREQ(restored.c_str(), "w6ugqkyc");
 }
 
@@ -430,7 +430,7 @@ TEST(GeodeticGeohash, FailedAssignPreservesEveryForm)
 
     EXPECT_EQ(hash.assign_bits(1ULL << 40U), status::out_of_range);
     EXPECT_EQ(hash.assign("w6ugqky"), status::invalid_argument);
-    EXPECT_EQ(hash.assign_binary(castle::container::string_view("0101")), status::invalid_argument);
+    EXPECT_EQ(hash.assign_binary(castle::dsa::string_view("0101")), status::invalid_argument);
 
     EXPECT_EQ(hash.bits(), before.bits());
     EXPECT_TRUE(hash.base32() == before.base32());
@@ -445,7 +445,7 @@ TEST(GeodeticGeohash, MatchesPythonReferenceVectors)
     // Reference: geohash.py encode/decode (base32, binary, lat_err, lon_err, bounds).
     geohash<8U> tnd;
     ASSERT_EQ(tnd.assign("tnd0c8k1"), status::ok);
-    EXPECT_EQ(tnd.binary().view().compare(castle::container::string_view("1100110100011000000001011010001001000001")), 0);
+    EXPECT_EQ(tnd.binary().view().compare(castle::dsa::string_view("1100110100011000000001011010001001000001")), 0);
     EXPECT_DOUBLE_EQ(tnd.center().latitude(), 36.695966720581055);
     EXPECT_DOUBLE_EQ(tnd.center().longitude(), 47.88408279418945);
     EXPECT_DOUBLE_EQ(tnd.bounds().min_latitude, 36.69588088989258);
@@ -458,7 +458,7 @@ TEST(GeodeticGeohash, MatchesPythonReferenceVectors)
     geohash<9U> origin;
     ASSERT_EQ(origin.encode(geo_point<double>(0.0, 0.0)), status::ok);
     EXPECT_STREQ(origin.c_str(), "s00000000");
-    EXPECT_EQ(origin.binary().view().compare(castle::container::string_view("110000000000000000000000000000000000000000000")), 0);
+    EXPECT_EQ(origin.binary().view().compare(castle::dsa::string_view("110000000000000000000000000000000000000000000")), 0);
     EXPECT_DOUBLE_EQ(origin.bounds().max_latitude, 4.291534423828125e-05);
     EXPECT_DOUBLE_EQ(origin.bounds().latitude_error(), 2.1457672119140625e-05);
 

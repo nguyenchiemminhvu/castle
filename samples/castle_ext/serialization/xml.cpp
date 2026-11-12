@@ -7,8 +7,8 @@
 int main()
 {
     using xml_document = castle::serialization::xml::document<32U, 32U, 1024U, 8U>;
-    using xml_string = castle::container::string<1024U>;
-    using xml_view = castle::container::string_view;
+    using xml_string = castle::dsa::string<1024U>;
+    using xml_view = castle::dsa::string_view;
 
     const xml_view source(
         "<?xml version=\"1.0\"?>"

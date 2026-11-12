@@ -11,7 +11,7 @@ Represents an NMEA GST pseudorange-noise/statistics sentence. It decodes the UTC
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/string_view.hpp`](../../../../container/string_view.md)
+- [`castle/dsa/string_view.hpp`](../../../../dsa/string_view.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../nmea.md)
 - [`castle_ext/protocols/nmea/field_cursor.hpp`](../field_cursor.md)
 
@@ -28,7 +28,7 @@ Represents an NMEA GST pseudorange-noise/statistics sentence. It decodes the UTC
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | `valid` | `bool` | `false` | True when decoding completed successfully for the sentence. |
-| `talker` | `castle::container::string_view` | `—` | Non-owning NMEA talker identifier view. |
+| `talker` | `castle::dsa::string_view` | `—` | Non-owning NMEA talker identifier view. |
 | `utc_time` | `double` | `0.0` | UTC time field decoded from the sentence. |
 | `rms_dev` | `double` | `0.0` | GST RMS deviation estimate. |
 | `semi_major` | `double` | `0.0` | GST semi-major error term. |

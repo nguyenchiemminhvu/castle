@@ -7,7 +7,7 @@ Encodes and decodes the fixed-layout OpenAMP/Linux RPMsg Name Service payload an
 `#include "castle_ext/io/rpmsg/name_service.hpp"`
 
 ## Dependencies
-[`types.hpp`](../types.md), `castle/container/string.hpp`, `castle/error/status.hpp`.
+[`types.hpp`](../types.md), `castle/dsa/string.hpp`, `castle/error/status.hpp`.
 
 ## Public API
 `name_service_event`, `decode_name_service_message()`, `encode_name_service_message()`, `name_service_message_size`.

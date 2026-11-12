@@ -12,8 +12,8 @@ Model of UBX-MON-SPAN (0x0a 0x31), a basic spectrum analyzer output (periodic/po
 
 - [castle/core/compiler.hpp](../../../../core/compiler.md)
 - [castle/core/types.hpp](../../../../core/types.md)
-- [castle/container/array.hpp](../../../../container/array.md)
-- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle/dsa/array.hpp](../../../../dsa/array.md)
+- [castle/dsa/vector.hpp](../../../../dsa/vector.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
@@ -44,7 +44,7 @@ Model of UBX-MON-SPAN (0x0a 0x31), a basic spectrum analyzer output (periodic/po
 | `version` | `uint8_t` | 0 | Message version (`0x00`). |
 | `num_rf_blocks` | `uint8_t` | 1 | On-wire RF block count; may exceed `rf_blocks.size()`. Encode writes `rf_blocks.size()`. |
 | (reserved0) | `U1[2]` | 2 | Skipped on decode, written as zero. |
-| `rf_blocks` | `castle::container::vector<mon_span_rf_block, MaxRfBlocks>` | 4 | RF blocks in wire order. |
+| `rf_blocks` | `castle::dsa::vector<mon_span_rf_block, MaxRfBlocks>` | 4 | RF blocks in wire order. |
 
 ### `mon_span_rf_block` fields
 

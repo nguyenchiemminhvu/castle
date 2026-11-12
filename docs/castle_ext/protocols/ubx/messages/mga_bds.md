@@ -11,7 +11,7 @@ Models the five UBX-MGA-BDS (0x13 0x03) BeiDou assistance layouts sent by the ho
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
+- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/typed_message.hpp`](detail/typed_message.md)
 - `stdint.h`
@@ -90,7 +90,7 @@ Models the five UBX-MGA-BDS (0x13 0x03) BeiDou assistance layouts sent by the ho
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `health_code` | `castle::container::array<uint16_t, NUM_SVS>` | `{}` | `health_code[i]` is the health word of SV `i + 1`. |
+| `health_code` | `castle::dsa::array<uint16_t, NUM_SVS>` | `{}` | `health_code[i]` is the health word of SV `i + 1`. |
 
 ### `mga_bds_health` constants
 
@@ -115,8 +115,8 @@ Models the five UBX-MGA-BDS (0x13 0x03) BeiDou assistance layouts sent by the ho
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `alpha` | `castle::container::array<int8_t, 4U>` | `{}` | alpha0..3 [2^-30, -27, -24, -24]. |
-| `beta` | `castle::container::array<int8_t, 4U>` | `{}` | beta0..3 [2^11, 14, 16, 16]. |
+| `alpha` | `castle::dsa::array<int8_t, 4U>` | `{}` | alpha0..3 [2^-30, -27, -24, -24]. |
+| `beta` | `castle::dsa::array<int8_t, 4U>` | `{}` | beta0..3 [2^11, 14, 16, 16]. |
 
 ## Usage Example
 

@@ -10,7 +10,7 @@ int main()
 {
     using csv_t = castle::serialization::csv::document<8U, 8U, 32U>;
 
-    const castle::container::string_view source(
+    const castle::dsa::string_view source(
         "signal,value,enabled\n"
         "rpm,2500,true\n"
         "temperature,87.5,false\n");
@@ -42,7 +42,7 @@ int main()
         return 3;
     }
 
-    castle::container::string<256U> output;
+    castle::dsa::string<256U> output;
     const castle::serialization::csv::result write_result =
         castle::serialization::csv::write(table, output);
     if (!write_result.succeeded())

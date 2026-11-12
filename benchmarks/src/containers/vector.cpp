@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <castle/container/vector.hpp>
+#include <castle/dsa/vector.hpp>
 
 namespace
 {
@@ -21,7 +21,7 @@ BENCHMARK_F(vector_construct, castle)(benchmark::State& state)
 {
     for (auto _ : state)
     {
-        castle::container::vector<int, N> value;
+        castle::dsa::vector<int, N> value;
         benchmark::DoNotOptimize(value);
     }
 
@@ -54,7 +54,7 @@ BENCHMARK_F(vector_push_back, castle)(benchmark::State& state)
     {
         state.PauseTiming();
         {
-            castle::container::vector<int, N> value;
+            castle::dsa::vector<int, N> value;
             state.ResumeTiming();
 
             for (std::size_t i = 0U; i < N; ++i)
@@ -109,7 +109,7 @@ BENCHMARK_F(vector_emplace_back, castle)(benchmark::State& state)
     {
         state.PauseTiming();
         {
-            castle::container::vector<int, N> value;
+            castle::dsa::vector<int, N> value;
             state.ResumeTiming();
 
             for (std::size_t i = 0U; i < N; ++i)
@@ -164,7 +164,7 @@ BENCHMARK_F(vector_pop_back, castle)(benchmark::State& state)
     {
         state.PauseTiming();
         {
-            castle::container::vector<int, N> value;
+            castle::dsa::vector<int, N> value;
             for (std::size_t i = 0U; i < N; ++i)
             {
                 static_cast<void>(value.emplace_back(static_cast<int>(i)));
@@ -227,7 +227,7 @@ BENCHMARK_F(vector_clear, castle)(benchmark::State& state)
     {
         state.PauseTiming();
         {
-            castle::container::vector<int, N> value;
+            castle::dsa::vector<int, N> value;
             for (std::size_t i = 0U; i < N; ++i)
             {
                 static_cast<void>(value.emplace_back(static_cast<int>(i)));

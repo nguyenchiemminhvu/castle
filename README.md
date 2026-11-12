@@ -85,12 +85,11 @@ standards it follows (MISRA C++, AUTOSAR C++14, CERT C++, ISO 26262).
 
 ## Module map
 
-- [`algorithm/`](docs/algorithm/algorithm.md) — Range algorithms and iterator-based utilities.
 - [`bit/`](docs/bit/bit.md) — Bit operations, masks, rotations, and flags.
 - [`cache/`](docs/cache/cache.md) — Fixed-capacity key/value caches with FIFO, LIFO, LRU, MRU, and LFU eviction.
 - [`callbacks/`](docs/callbacks/delegate.md) — Fixed-storage delegates, functions, registries, and execution policies.
 - [`chrono/`](docs/chrono/chrono.md) — Durations, time points, clocks, and literals.
-- [`container/`](docs/container/containers.md) — Fixed-capacity sequences, associative containers, buffers, and strings.
+- [`dsa/`](docs/dsa/containers.md) — Fixed-capacity sequences, associative containers, buffers, strings, and range algorithms ([`algorithm.hpp`](docs/dsa/algorithm.md)).
 - [`core/`](docs/core/compiler.md) — Compiler abstraction, configuration, traits, type ranges, and error handling.
 - [`patterns/`](docs/patterns/observer.md) — Observer, singleton, and visitor helpers.
 - [`error/`](docs/error/status.md) — Common status/error values.
@@ -121,10 +120,10 @@ Castle is header-only. Add `include/` to the compiler include path and include t
 
 ```cpp
 #include "castle/core/error_handler.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle/utility/optional.hpp"
 
-castle::container::vector<int, 4U> values;
+castle::dsa::vector<int, 4U> values;
 CASTLE_ASSERT((values.push_back(42) == castle::status::ok), "Push failed");
 castle::optional<int> reading(42);
 CASTLE_ASSERT(reading.has_value(), "Has no value");

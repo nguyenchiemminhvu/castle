@@ -159,7 +159,7 @@ TEST(UbxMessages, InfSeverityAliasesMatchOnlyTheirId)
 {
     uint8_t text[2U] = {'h', 'i'};
     message_view raw{{UBX_CLASS_INF, UBX_ID_INF_WARNING, 2U},
-                     castle::container::array_view<CASTLE_CONST uint8_t>(text, 2U),
+                     castle::dsa::array_view<CASTLE_CONST uint8_t>(text, 2U),
                      checksum{}};
     EXPECT_TRUE(inf<>::matches(raw));
     EXPECT_TRUE(inf_warning<>::matches(raw));

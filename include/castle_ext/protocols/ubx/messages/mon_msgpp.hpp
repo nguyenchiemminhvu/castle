@@ -14,7 +14,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/fixed_message.hpp"
 
@@ -36,8 +36,8 @@ struct mon_msgpp : detail::fixed_message<mon_msgpp, UBX_CLASS_MON, UBX_ID_MON_MS
     static CASTLE_CONSTEXPR castle::size_type num_protocols = 8U;
 
     /** @brief `msg[p][k]` = spec `msg<p+1>[k]`: messages successfully parsed for protocol `k` on port `p` [msgs]. */
-    castle::container::array<castle::container::array<uint16_t, num_protocols>, num_ports> msg{};
-    castle::container::array<uint32_t, num_ports> skipped{}; ///< Skipped bytes per port [bytes].
+    castle::dsa::array<castle::dsa::array<uint16_t, num_protocols>, num_ports> msg{};
+    castle::dsa::array<uint32_t, num_ports> skipped{}; ///< Skipped bytes per port [bytes].
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT

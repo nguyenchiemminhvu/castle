@@ -61,7 +61,7 @@ Payload size in bits: `169 + nsat*nsig + nsat*S + ncell*C`, where `S` is 18 (MSM
 * [`bit/bit_count.hpp`](../../../../bit/bit_count.md)
 * [`core/compiler.hpp`](../../../../core/compiler.md)
 * [`core/types.hpp`](../../../../core/types.md)
-* [`container/vector.hpp`](../../../../container/vector.md)
+* [`dsa/vector.hpp`](../../../../dsa/vector.md)
 * [`error/status.hpp`](../../../../error/status.md)
 * [`bit_writer.hpp`](../bit_writer.md)
 * [`rtcm.hpp`](../rtcm.md)
@@ -117,8 +117,8 @@ All names live in `castle::protocols::rtcm::messages`.
 | `satellite_mask` | `uint64_t` | DF394, 64 | See `satellite_bit()`. |
 | `signal_mask` | `uint32_t` | DF395, 32 | See `signal_bit()`. |
 | `cell_mask` | `uint64_t` | DF396, `nsat * nsig` | See `cell_bit()`. |
-| `satellites` | `castle::container::vector<msm_satellite, MaxSatellites>` | - | One entry per set bit of `satellite_mask`, in ascending ID order. |
-| `signals` | `castle::container::vector<msm_signal, MaxCells>` | - | One entry per set bit of `cell_mask`, in cell order. |
+| `satellites` | `castle::dsa::vector<msm_satellite, MaxSatellites>` | - | One entry per set bit of `satellite_mask`, in ascending ID order. |
+| `signals` | `castle::dsa::vector<msm_signal, MaxCells>` | - | One entry per set bit of `cell_mask`, in cell order. |
 
 ### Constants
 

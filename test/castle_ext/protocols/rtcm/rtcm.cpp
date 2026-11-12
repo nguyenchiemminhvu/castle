@@ -7,7 +7,7 @@ namespace
 
 using namespace castle::protocols::rtcm;
 using castle::checksums::crc24q;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 /**
  * @brief Message 1005 frame (station 1234, ECEF 4027894.0060 / 307045.6000 / 4919474.9100 m),

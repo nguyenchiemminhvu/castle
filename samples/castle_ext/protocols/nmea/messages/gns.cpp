@@ -9,10 +9,10 @@ int main()
     using namespace castle::protocols::nmea::messages;
 
     // No generator exists for GNS; the checksum suffix is simply omitted.
-    CASTLE_CONST castle::container::string_view literal(
+    CASTLE_CONST castle::dsa::string_view literal(
         "$GPGNS,014035.00,4332.69262,S,17235.48549,E,RR,13,0.9,25.63,11.24,,\r\n");
 
-    castle::container::string_view field_storage[16U];
+    castle::dsa::string_view field_storage[16U];
     message_view raw;
     CASTLE_SAMPLE_CHECK(decode_sentence(literal, field_storage, 16U, raw));
 
@@ -21,7 +21,7 @@ int main()
     gns fix;
     CASTLE_SAMPLE_CHECK(gns::decode(raw, fix));
     CASTLE_SAMPLE_CHECK(fix.valid);
-    CASTLE_SAMPLE_CHECK(fix.mode_indicator == castle::container::string_view("RR"));
+    CASTLE_SAMPLE_CHECK(fix.mode_indicator == castle::dsa::string_view("RR"));
     CASTLE_SAMPLE_CHECK((fix.latitude < -43.0) && (fix.latitude > -44.0)); // 'S' -> negative
     CASTLE_SAMPLE_CHECK((fix.longitude > 172.0) && (fix.longitude < 173.0));
     CASTLE_SAMPLE_CHECK(fix.num_sats == 13);

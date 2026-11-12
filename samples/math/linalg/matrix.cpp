@@ -35,7 +35,7 @@ int main()
 
     // Data assembled with container APIs can be promoted to a matrix, and the
     // matrix exposes its storage back as a grid without copying.
-    castle::container::grid<float, 2U, 2U> cells;
+    castle::dsa::grid<float, 2U, 2U> cells;
     cells.fill(1.0F);
     cells(1U, 1U) = 3.0F;
     castle::math::matrix<float, 2U, 2U> from_cells(cells);

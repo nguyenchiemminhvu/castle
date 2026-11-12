@@ -20,7 +20,7 @@ int main()
 
     // Loop back: only the 16-byte model matches a 16-byte frame.
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(rxm_pmreq_v1::matches(raw));
     CASTLE_SAMPLE_CHECK(!rxm_pmreq_v0::matches(raw));
 
@@ -41,7 +41,7 @@ int main()
 
     uint8_t legacy_frame[UBX_FRAME_OVERHEAD + rxm_pmreq_v0::payload_length];
     CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(legacy, legacy_frame, sizeof(legacy_frame), written)));
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(legacy_frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(legacy_frame, written), raw));
     CASTLE_SAMPLE_CHECK(rxm_pmreq_v0::matches(raw));
     CASTLE_SAMPLE_CHECK(!rxm_pmreq_v1::matches(raw));
 

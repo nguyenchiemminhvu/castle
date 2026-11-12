@@ -23,7 +23,7 @@
  * #include "castle_ext/protocols/rtcm/rtcm.hpp"
  *
  * uint8_t payload_data[2U] = {0x3EU, 0x90U};
- * castle::container::array_view<const uint8_t> payload(payload_data, 2U);
+ * castle::dsa::array_view<const uint8_t> payload(payload_data, 2U);
  *
  * uint8_t frame[16U];
  * castle::size_type written = 0U;
@@ -36,7 +36,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/array_view.hpp"
+#include "castle/dsa/array_view.hpp"
 #include "castle/utility/bytes.hpp"
 
 #include "castle_ext/checksums/crc24q.hpp"
@@ -145,7 +145,7 @@ CASTLE_INLINE castle::size_type finish_frame(uint8_t* frame, castle::size_type p
  * @note Never allocates and never writes outside `output`.
  */
 CASTLE_NODISCARD CASTLE_INLINE castle::status encode_frame(
-    castle::container::array_view<CASTLE_CONST uint8_t> payload,
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload,
     uint8_t* output,
     castle::size_type output_capacity,
     castle::size_type& bytes_written) CASTLE_NOEXCEPT

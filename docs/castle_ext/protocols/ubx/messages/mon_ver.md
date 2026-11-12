@@ -2,7 +2,7 @@
 
 ## Overview
 
-Model of UBX-MON-VER (0x0a 0x04), the receiver and software version report (polled). The payload is `swVersion` CH[30] and `hwVersion` CH[10], followed by `[0..n]` CH[30] extension strings (`40 + [0..n]·30`). The extension count is implied by the payload length. Strings are stored as fixed-capacity `castle::container::string` with the NUL padding stripped. Request the message with `encode_poll<mon_ver<>>()`.
+Model of UBX-MON-VER (0x0a 0x04), the receiver and software version report (polled). The payload is `swVersion` CH[30] and `hwVersion` CH[10], followed by `[0..n]` CH[30] extension strings (`40 + [0..n]·30`). The extension count is implied by the payload length. Strings are stored as fixed-capacity `castle::dsa::string` with the NUL padding stripped. Request the message with `encode_poll<mon_ver<>>()`.
 
 ## Header
 
@@ -12,8 +12,8 @@ Model of UBX-MON-VER (0x0a 0x04), the receiver and software version report (poll
 
 - [castle/core/compiler.hpp](../../../../core/compiler.md)
 - [castle/core/types.hpp](../../../../core/types.md)
-- [castle/container/string.hpp](../../../../container/string.md)
-- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle/dsa/string.hpp](../../../../dsa/string.md)
+- [castle/dsa/vector.hpp](../../../../dsa/vector.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
@@ -41,9 +41,9 @@ Model of UBX-MON-VER (0x0a 0x04), the receiver and software version report (poll
 
 | Field | Type | Offset | Description |
 | --- | --- | --- | --- |
-| `sw_version` | `castle::container::string<30>` | 0 | Software version, up to the first NUL. |
-| `hw_version` | `castle::container::string<10>` | 30 | Hardware version, up to the first NUL. |
-| `extensions` | `castle::container::vector<castle::container::string<30>, MaxExtensions>` | 40 + n·30 | Extension strings in wire order; `extensions.size()` is the number stored. |
+| `sw_version` | `castle::dsa::string<30>` | 0 | Software version, up to the first NUL. |
+| `hw_version` | `castle::dsa::string<10>` | 30 | Hardware version, up to the first NUL. |
+| `extensions` | `castle::dsa::vector<castle::dsa::string<30>, MaxExtensions>` | 40 + n·30 | Extension strings in wire order; `extensions.size()` is the number stored. |
 
 ### Functions
 
@@ -59,7 +59,7 @@ Model of UBX-MON-VER (0x0a 0x04), the receiver and software version report (poll
 ```cpp
 using namespace castle::protocols::ubx;
 using castle::protocols::ubx::messages::mon_ver;
-using castle::container::string_view;
+using castle::dsa::string_view;
 
 void on_message(const message_view& raw) {
     mon_ver<> version{};

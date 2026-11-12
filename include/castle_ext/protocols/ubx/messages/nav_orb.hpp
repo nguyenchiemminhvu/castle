@@ -13,7 +13,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -163,7 +163,7 @@ struct nav_orb
     uint32_t i_tow = 0U;  ///< GPS time of week of the navigation epoch [ms].
     uint8_t version = 0U; ///< Message version (0x01 for this version).
     uint8_t num_sv = 0U;  ///< On-wire SV count; may exceed `svs.size()`.
-    castle::container::vector<nav_orb_sv, MaxSvs> svs{};
+    castle::dsa::vector<nav_orb_sv, MaxSvs> svs{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

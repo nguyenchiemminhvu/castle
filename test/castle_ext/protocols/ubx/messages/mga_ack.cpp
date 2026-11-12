@@ -9,7 +9,7 @@ namespace
 {
 using namespace castle::protocols::ubx;
 using namespace castle::protocols::ubx::messages;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 template <typename M>
 struct spec;

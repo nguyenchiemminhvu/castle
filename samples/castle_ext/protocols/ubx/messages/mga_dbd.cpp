@@ -13,7 +13,7 @@ int main()
     CASTLE_SAMPLE_CHECK(encode_poll<mga_dbd<>>(poll, sizeof(poll), written) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(written == UBX_FRAME_OVERHEAD);
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(poll, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(poll, written), raw));
     CASTLE_SAMPLE_CHECK(raw.is(UBX_CLASS_MGA, UBX_ID_MGA_DBD));
     CASTLE_SAMPLE_CHECK(!mga_dbd<>::matches(raw)); // the poll is not a database entry
 
@@ -25,9 +25,9 @@ int main()
     }
     uint8_t frame[12U + 164U + UBX_FRAME_OVERHEAD];
     CASTLE_SAMPLE_CHECK(encode_frame(UBX_CLASS_MGA, UBX_ID_MGA_DBD,
-                                     castle::container::array_view<const uint8_t>(payload, sizeof(payload)),
+                                     castle::dsa::array_view<const uint8_t>(payload, sizeof(payload)),
                                      frame, sizeof(frame), written) == castle::status::ok);
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(mga_dbd<>::matches(raw));
 
     mga_dbd<> entry{};
@@ -42,7 +42,7 @@ int main()
 
     // A smaller capacity keeps only the first bytes.
     mga_dbd<2U> small{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(mga_dbd<2U>::decode(raw, small));
     CASTLE_SAMPLE_CHECK(small.data.size() == 2U && small.data[1U] == 0xB1U);
 

@@ -21,7 +21,7 @@ int main()
 
     // Each frame matches exactly one of the two layouts.
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(rxm_rlm_short::matches(raw));
     CASTLE_SAMPLE_CHECK(!rxm_rlm_long::matches(raw));
     CASTLE_SAMPLE_CHECK(raw.payload[1U] == RXM_RLM_TYPE_SHORT);
@@ -45,7 +45,7 @@ int main()
     }
 
     CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(long_rlm, frame, sizeof(frame), written)));
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(rxm_rlm_long::matches(raw));
     CASTLE_SAMPLE_CHECK(!rxm_rlm_short::matches(raw));
 

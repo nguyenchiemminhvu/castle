@@ -17,7 +17,7 @@ Both use the same text decoder.
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/string.hpp`](../../../../container/string.md)
+- [`castle/dsa/string.hpp`](../../../../dsa/string.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
 - `stdint.h`
@@ -45,7 +45,7 @@ Both use the same text decoder.
 
 | Model | Field | Type | Description |
 | --- | --- | --- | --- |
-| both | `text` | `castle::container::string<MaxText>` | Up to `MaxText` characters, stopping at the first NUL if one is present. |
+| both | `text` | `castle::dsa::string<MaxText>` | Up to `MaxText` characters, stopping at the first NUL if one is present. |
 | `inf` | `message_id` | `uint8_t` | ID that was received. |
 | `inf` | `subtype` | `inf_subtype` | Severity (same value as `message_id`). |
 

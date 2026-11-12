@@ -4,14 +4,14 @@
 #include <cstdint>
 #include <unordered_set>
 
-#include <castle/container/hash_set.hpp>
+#include <castle/dsa/hash_set.hpp>
 
 namespace
 {
 
 constexpr std::size_t N = 127;
 
-void fill_castle(castle::container::hash_set<int, N>& set)
+void fill_castle(castle::dsa::hash_set<int, N>& set)
 {
     for (std::size_t i = 0U; i < N / 2U; ++i)
     {
@@ -42,7 +42,7 @@ BENCHMARK_F(hash_set_insert, castle)(benchmark::State& state)
     {
         state.PauseTiming();
         {
-            castle::container::hash_set<int, N> set;
+            castle::dsa::hash_set<int, N> set;
             state.ResumeTiming();
 
             for (std::size_t i = 0U; i < N / 2U; ++i)
@@ -94,7 +94,7 @@ class hash_set_contains : public benchmark::Fixture {};
 BENCHMARK_F(hash_set_contains, castle)(benchmark::State& state)
 {
     state.PauseTiming();
-    castle::container::hash_set<int, N> set;
+    castle::dsa::hash_set<int, N> set;
     fill_castle(set);
     state.ResumeTiming();
 
@@ -139,7 +139,7 @@ BENCHMARK_F(hash_set_erase, castle)(benchmark::State& state)
     {
         state.PauseTiming();
         {
-            castle::container::hash_set<int, N> set;
+            castle::dsa::hash_set<int, N> set;
             fill_castle(set);
             state.ResumeTiming();
 

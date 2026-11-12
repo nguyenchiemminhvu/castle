@@ -31,7 +31,7 @@ int main()
     CASTLE_SAMPLE_CHECK(castle::math::point_in_polygon(castle::math::point2d<int>(1, 1), square));
     CASTLE_SAMPLE_CHECK(!castle::math::point_in_polygon(castle::math::point2d<int>(4, 4), square));
 
-    castle::container::array<castle::math::point2d<int>, 5U> input = {
+    castle::dsa::array<castle::math::point2d<int>, 5U> input = {
         castle::math::point2d<int>(0, 0),
         castle::math::point2d<int>(2, 0),
         castle::math::point2d<int>(1, 1),
@@ -46,7 +46,7 @@ int main()
     CASTLE_SAMPLE_CHECK(hull[2U] == castle::math::point2d<int>(2, 2));
     CASTLE_SAMPLE_CHECK(hull[3U] == castle::math::point2d<int>(0, 2));
 
-    castle::container::array<castle::math::point2d<int>, 3U> candidates = {
+    castle::dsa::array<castle::math::point2d<int>, 3U> candidates = {
         castle::math::point2d<int>(1, 1),
         castle::math::point2d<int>(4, 4),
         castle::math::point2d<int>(2, 2)

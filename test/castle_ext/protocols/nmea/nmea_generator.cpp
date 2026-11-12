@@ -8,7 +8,7 @@ namespace
 
 using namespace castle::protocols::nmea;
 using namespace castle::protocols::nmea::generator;
-using castle::container::string_view;
+using castle::dsa::string_view;
 
 CASTLE_NODISCARD bool decode(
     string_view line, message_view& view, string_view* storage, castle::size_type capacity)
@@ -630,15 +630,15 @@ TEST(NmeaGeneratorGsv, MessageCount)
 {
     gsv_input input;
 
-    input.satellites = castle::container::array_view<CASTLE_CONST gsv_satellite_record>(nullptr, 0U);
+    input.satellites = castle::dsa::array_view<CASTLE_CONST gsv_satellite_record>(nullptr, 0U);
     EXPECT_EQ(gsv_message_count(input), 1U);
 
     gsv_satellite_record four[4U] = {};
-    input.satellites = castle::container::array_view<CASTLE_CONST gsv_satellite_record>(four, 4U);
+    input.satellites = castle::dsa::array_view<CASTLE_CONST gsv_satellite_record>(four, 4U);
     EXPECT_EQ(gsv_message_count(input), 1U);
 
     gsv_satellite_record five[5U] = {};
-    input.satellites = castle::container::array_view<CASTLE_CONST gsv_satellite_record>(five, 5U);
+    input.satellites = castle::dsa::array_view<CASTLE_CONST gsv_satellite_record>(five, 5U);
     EXPECT_EQ(gsv_message_count(input), 2U);
 }
 
@@ -698,7 +698,7 @@ TEST(NmeaGeneratorGsv, OutputCapacityTooSmallIsFull)
 TEST(NmeaGeneratorGsv, EmptySatelliteListProducesHeaderOnlyMessage)
 {
     gsv_input input;
-    input.satellites = castle::container::array_view<CASTLE_CONST gsv_satellite_record>(nullptr, 0U);
+    input.satellites = castle::dsa::array_view<CASTLE_CONST gsv_satellite_record>(nullptr, 0U);
     input.valid = true;
 
     char output[128U];
@@ -725,7 +725,7 @@ TEST(NmeaGeneratorGsv, FiveSatellitesSplitAcrossTwoMessages)
         {5U, 30, 359, 0U},   // in message 2, snr omitted
     };
     gsv_input input;
-    input.satellites = castle::container::array_view<CASTLE_CONST gsv_satellite_record>(satellites, 5U);
+    input.satellites = castle::dsa::array_view<CASTLE_CONST gsv_satellite_record>(satellites, 5U);
     input.valid = true;
 
     ASSERT_EQ(gsv_message_count(input), 2U);

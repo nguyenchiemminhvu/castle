@@ -7,7 +7,7 @@ namespace
 {
 using namespace castle::protocols::ubx;
 using namespace castle::protocols::ubx::messages;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 static CASTLE_CONSTEXPR uint32_t KEY_U1 = 0x10000001U;
 static CASTLE_CONSTEXPR uint32_t KEY_U2 = 0x30000002U;

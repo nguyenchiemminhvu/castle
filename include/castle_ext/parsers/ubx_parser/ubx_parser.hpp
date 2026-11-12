@@ -48,8 +48,8 @@
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
 #include "castle/callbacks/function.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/array_view.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/array_view.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/move.hpp"
 
@@ -299,7 +299,7 @@ public:
     /**
      * @brief Feeds a Castle array view.
      */
-    void feed(castle::container::array_view<CASTLE_CONST uint8_t> data) CASTLE_NOEXCEPT
+    void feed(castle::dsa::array_view<CASTLE_CONST uint8_t> data) CASTLE_NOEXCEPT
     {
         feed(data.data(), data.size());
     }
@@ -395,7 +395,7 @@ private:
 
         CASTLE_CONST protocols::ubx::message_view message{
             header_,
-            castle::container::array_view<CASTLE_CONST uint8_t>(
+            castle::dsa::array_view<CASTLE_CONST uint8_t>(
                 payload_.data(),
                 payload_size_),
             received
@@ -533,7 +533,7 @@ private:
     protocols::ubx::message_header header_{};
     protocols::ubx::checksum_accumulator checksum_{};
 
-    castle::container::array<uint8_t, MaxPayload> payload_{};
+    castle::dsa::array<uint8_t, MaxPayload> payload_{};
     size_type payload_size_ = 0U;
 
     uint8_t received_ck_a_ = 0U;

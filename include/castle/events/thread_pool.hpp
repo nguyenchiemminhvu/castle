@@ -42,7 +42,7 @@
 #include "castle/core/config.hpp"
 #include "castle/core/types.hpp"
 #include "castle/core/traits.hpp"
-#include "castle/container/ring_buffer.hpp"
+#include "castle/dsa/ring_buffer.hpp"
 #include "castle/callbacks/function.hpp"
 
 #if CASTLE_USING_PTHREAD
@@ -489,8 +489,8 @@ private:
 
     pthread_t threads_[ThreadCount];
     task_type tasks_[PendingTaskCount];
-    castle::container::ring_buffer<size_type, PendingTaskCount> pending_queue_;
-    castle::container::ring_buffer<size_type, PendingTaskCount> free_queue_;
+    castle::dsa::ring_buffer<size_type, PendingTaskCount> pending_queue_;
+    castle::dsa::ring_buffer<size_type, PendingTaskCount> free_queue_;
     CASTLE_MUTABLE pthread_mutex_t queue_mutex_;
     pthread_cond_t queue_condition_;
     size_type created_thread_count_;

@@ -12,7 +12,7 @@ Model of UBX-MON-PATCH (0x0a 0x27), the installed patches report (polled). A 4-b
 
 - [castle/core/compiler.hpp](../../../../core/compiler.md)
 - [castle/core/types.hpp](../../../../core/types.md)
-- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle/dsa/vector.hpp](../../../../dsa/vector.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
@@ -45,7 +45,7 @@ Model of UBX-MON-PATCH (0x0a 0x27), the installed patches report (polled). A 4-b
 | --- | --- | --- | --- |
 | `version` | `uint16_t` | 0 | Message version (`0x0001`). |
 | `n_entries` | `uint16_t` | 2 | On-wire patch count; may exceed `entries.size()`. Encode writes `entries.size()`. |
-| `entries` | `castle::container::vector<mon_patch_entry, MaxEntries>` | 4 | Patch blocks in wire order. |
+| `entries` | `castle::dsa::vector<mon_patch_entry, MaxEntries>` | 4 | Patch blocks in wire order. |
 
 ### `mon_patch_entry` fields
 

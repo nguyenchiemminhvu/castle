@@ -128,7 +128,7 @@ package "castle_ext/net" {
 
 package "castle core" {
   [callbacks::function] as Function
-  [container::string_view] as Sv
+  [dsa::string_view] as Sv
   [error::status] as Status
 }
 

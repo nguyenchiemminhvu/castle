@@ -17,7 +17,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == frame_size(mon_rxr::payload_length));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(mon_rxr::matches(raw));
 
     mon_rxr decoded{};

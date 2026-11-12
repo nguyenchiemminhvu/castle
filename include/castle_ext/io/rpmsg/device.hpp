@@ -13,7 +13,7 @@
 #define CASTLE_EXT_IO_RPMSG_DEVICE_HPP
 
 #include "castle/callbacks/function.hpp"
-#include "castle/container/string.hpp"
+#include "castle/dsa/string.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
@@ -47,7 +47,7 @@ public:
     using receive_callback = typename endpoint_type::receive_callback;
     using unbind_callback = typename endpoint_type::unbind_callback;
     using name_service_callback = castle::callbacks::function<void(name_service_event CASTLE_CONST&), Options::callback_storage>;
-    using service_name_type = container::string<Options::max_name_length>;
+    using service_name_type = dsa::string<Options::max_name_length>;
 
     basic_device() CASTLE_DELETE;
 

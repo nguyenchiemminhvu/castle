@@ -31,9 +31,9 @@
 #include "castle/core/type_ranges.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/string.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/string.hpp"
+#include "castle/dsa/string_view.hpp"
 
 #include <float.h>
 #include <stdint.h>
@@ -45,7 +45,7 @@ namespace serialization
 namespace csv
 {
 
-using string_view = castle::container::string_view;
+using string_view = castle::dsa::string_view;
 
 /**
 * @brief Parser and serializer error codes.
@@ -344,7 +344,7 @@ enable_integer_t<T> parse_integer(string_view text, T& output) CASTLE_NOEXCEPT
  * @note This function is marked `CASTLE_NOEXCEPT` and guarantees exception safety.
  */
 template <typename T, castle::size_type MaxValueLength = serialization::max_integer_str_len>
-enable_integer_t<T> format_integer(T value, castle::container::string<MaxValueLength>& output) CASTLE_NOEXCEPT
+enable_integer_t<T> format_integer(T value, castle::dsa::string<MaxValueLength>& output) CASTLE_NOEXCEPT
 {
     using U = meta::make_unsigned_t<T>;
     output.clear();
@@ -601,7 +601,7 @@ enable_float_t<T> parse_floating(string_view text, T& output) CASTLE_NOEXCEPT
 template <typename T, castle::size_type MaxValueLength = serialization::max_floating_str_len>
 enable_float_t<T> format_floating(
     T value,
-    castle::container::string<MaxValueLength>& output,
+    castle::dsa::string<MaxValueLength>& output,
     castle::size_type precision = 6U) CASTLE_NOEXCEPT
 {
     output.clear();
@@ -722,7 +722,7 @@ class document
 public:
     using size_type = castle::size_type;
     using view_type = string_view;
-    using field_type = castle::container::string<MaxFieldLength>;
+    using field_type = castle::dsa::string<MaxFieldLength>;
 
     static CASTLE_CONSTEXPR size_type row_capacity = MaxRows;
     static CASTLE_CONSTEXPR size_type column_capacity = MaxColumns;
@@ -884,7 +884,7 @@ private:
         }
 
     private:
-        castle::container::array<field_type, MaxColumns> fields_;
+        castle::dsa::array<field_type, MaxColumns> fields_;
         size_type field_count_;
     };
 
@@ -1200,7 +1200,7 @@ public:
         T value,
         size_type precision = 6U) CASTLE_NOEXCEPT
     {
-        castle::container::string<serialization::max_floating_str_len> text;
+        castle::dsa::string<serialization::max_floating_str_len> text;
         CASTLE_CONST castle::status format_status = detail::format_floating(value, text, precision);
         if (format_status != castle::status::ok)
         {
@@ -1405,7 +1405,7 @@ private:
     template <typename T>
     detail::enable_integer_t<T> set_integer_value(size_type row, size_type column, T value) CASTLE_NOEXCEPT
     {
-        castle::container::string<serialization::max_integer_str_len> text;
+        castle::dsa::string<serialization::max_integer_str_len> text;
         CASTLE_CONST castle::status format_status = detail::format_integer(value, text);
         if (format_status != castle::status::ok)
         {
@@ -1414,7 +1414,7 @@ private:
         return set(row, column, text.view());
     }
 
-    castle::container::array<row_type, MaxRows> rows_;
+    castle::dsa::array<row_type, MaxRows> rows_;
     size_type row_count_ = 0U;
 };
 
@@ -1958,7 +1958,7 @@ template <castle::size_type MaxOutput>
 castle::status append_serialized_field(
     string_view value,
     char delimiter,
-    castle::container::string<MaxOutput>& output) CASTLE_NOEXCEPT
+    castle::dsa::string<MaxOutput>& output) CASTLE_NOEXCEPT
 {
     if (contains_nul(value))
     {
@@ -2100,7 +2100,7 @@ template <castle::size_type OutputCapacity,
           castle::size_type MaxFieldLength>
 CASTLE_NODISCARD result serialize(
     CASTLE_CONST document<MaxRows, MaxColumns, MaxFieldLength>& input,
-    castle::container::string<OutputCapacity>& output,
+    castle::dsa::string<OutputCapacity>& output,
     options serialize_options = options()) CASTLE_NOEXCEPT
 {
     result result_value;
@@ -2177,7 +2177,7 @@ template <castle::size_type OutputCapacity,
           castle::size_type MaxFieldLength>
 CASTLE_NODISCARD result write(
     CASTLE_CONST document<MaxRows, MaxColumns, MaxFieldLength>& input,
-    castle::container::string<OutputCapacity>& output,
+    castle::dsa::string<OutputCapacity>& output,
     options serialize_options = options()) CASTLE_NOEXCEPT
 {
     return serialize(input, output, serialize_options);

@@ -18,7 +18,7 @@
 #ifndef CASTLE_EXT_IO_CAN_BACKENDS_MOCK_HPP
 #define CASTLE_EXT_IO_CAN_BACKENDS_MOCK_HPP
 
-#include "castle/container/mirrored_ring_buffer.hpp"
+#include "castle/dsa/mirrored_ring_buffer.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
@@ -293,8 +293,8 @@ private:
     castle::status forced_send_status_;
     bool open_;
     detail::slot_table<filter, MaxFilters> filters_;
-    container::mirrored_ring_buffer<frame, RxQueueDepth> rx_queue_;
-    container::mirrored_ring_buffer<frame, TxQueueDepth> tx_queue_;
+    dsa::mirrored_ring_buffer<frame, RxQueueDepth> rx_queue_;
+    dsa::mirrored_ring_buffer<frame, TxQueueDepth> tx_queue_;
 };
 
 /** @brief Mock backend with default queue depths (16 receive frames, 16 transmit frames, 8 filters). */

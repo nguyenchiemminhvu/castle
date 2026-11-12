@@ -29,12 +29,12 @@ int main()
     char sentence[128U];
     castle::size_type written = 0U;
     CASTLE_SAMPLE_CHECK(castle::succeeded(
-        generate_gga(input, castle::container::string_view(TALKER_GP), sentence, sizeof(sentence), written)));
+        generate_gga(input, castle::dsa::string_view(TALKER_GP), sentence, sizeof(sentence), written)));
 
-    castle::container::string_view field_storage[16U];
+    castle::dsa::string_view field_storage[16U];
     message_view view;
     CASTLE_SAMPLE_CHECK(decode_sentence(
-        castle::container::string_view(sentence, written), field_storage, 16U, view));
+        castle::dsa::string_view(sentence, written), field_storage, 16U, view));
     CASTLE_SAMPLE_CHECK(view.field_count() == 14U);
 
     // field_cursor removes manual index bookkeeping: each next_*() consumes
@@ -83,11 +83,11 @@ int main()
     // A field that is present but not the expected type keeps the fallback,
     // instead of being treated as a hard parse error (NMEA fields are
     // routinely/legitimately empty or garbage for a given decoder).
-    castle::container::string_view garbage_fields[1U] = {
-        castle::container::string_view("not-a-number")
+    castle::dsa::string_view garbage_fields[1U] = {
+        castle::dsa::string_view("not-a-number")
     };
     message_view garbage_view;
-    garbage_view.fields = castle::container::array_view<const castle::container::string_view>(garbage_fields, 1U);
+    garbage_view.fields = castle::dsa::array_view<const castle::dsa::string_view>(garbage_fields, 1U);
     field_cursor garbage_cursor(garbage_view);
     CASTLE_SAMPLE_CHECK(garbage_cursor.next_double_or(42.0) == 42.0);
 

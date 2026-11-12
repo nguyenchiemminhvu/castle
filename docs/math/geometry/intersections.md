@@ -14,7 +14,7 @@ Relation tests and point-returning intersection helpers for Castle lines, planes
 - [`line3d.md`](line3d.md)
 - [`plane3d.md`](plane3d.md)
 - [`vector3d.md`](vector3d.md)
-- [`../../container/array.md`](../../container/array.md)
+- [`../../dsa/array.md`](../../dsa/array.md)
 - [`../../core/type_ranges.md`](../../core/type_ranges.md)
 - [`../../core/types.md`](../../core/types.md)
 - [`../sqrt_real.md`](../sqrt_real.md)

@@ -10,10 +10,10 @@ int main()
 
     // No generator exists for GBS; the checksum suffix is simply omitted
     // rather than hand-computing one (decode_sentence() treats '*HH' as optional).
-    CASTLE_CONST castle::container::string_view literal(
+    CASTLE_CONST castle::dsa::string_view literal(
         "$GPGBS,235959.00,1.4,1.1,2.9,5,0.50,0.20,0.30\r\n");
 
-    castle::container::string_view field_storage[16U];
+    castle::dsa::string_view field_storage[16U];
     message_view raw;
     CASTLE_SAMPLE_CHECK(decode_sentence(literal, field_storage, 16U, raw));
     CASTLE_SAMPLE_CHECK(!raw.checksum_present);

@@ -186,12 +186,12 @@ TEST(StringBuilderTest, AppendPlainEnum)
 
 TEST(StringBuilderTest, AppendCastleString)
 {
-    castle::container::string<8U> name("temp");
+    castle::dsa::string<8U> name("temp");
     builder16 sb;
     sb.append(name).append('=').append(1);
     EXPECT_STREQ(sb.c_str(), "temp=1");
 
-    castle::container::basic_string<wchar_t, 8U> wname(L"temp");
+    castle::dsa::basic_string<wchar_t, 8U> wname(L"temp");
     wbuilder16 wsb;
     wsb.append(wname).append(L'=').append(1);
     EXPECT_STREQ(wsb.c_str(), L"temp=1");
@@ -355,22 +355,22 @@ TEST(StringBuilderTest, ViewReflectsBufferContent)
 {
     builder16 sb;
     sb.append("abc");
-    EXPECT_EQ(sb.view(), castle::container::string_view("abc"));
+    EXPECT_EQ(sb.view(), castle::dsa::string_view("abc"));
 
     wbuilder16 wsb;
     wsb.append(L"abc");
-    EXPECT_EQ(wsb.view(), castle::container::basic_string_view<wchar_t>(L"abc"));
+    EXPECT_EQ(wsb.view(), castle::dsa::basic_string_view<wchar_t>(L"abc"));
 }
 
 TEST(StringBuilderTest, WideCharBuilderSupportsBasicUsage)
 {
     castle::wstring_builder<16U> sb;
     sb.append(L"n=").append(7).append(L' ');
-    EXPECT_EQ(sb.view(), castle::container::basic_string_view<wchar_t>(L"n=7 "));
+    EXPECT_EQ(sb.view(), castle::dsa::basic_string_view<wchar_t>(L"n=7 "));
 
     castle::wstring_builder<16U> sb2;
     sb2.append(L"m=").append(42).append(L' ');
-    EXPECT_EQ(sb2.view(), castle::container::basic_string_view<wchar_t>(L"m=42 "));
+    EXPECT_EQ(sb2.view(), castle::dsa::basic_string_view<wchar_t>(L"m=42 "));
 }
 
 } // namespace

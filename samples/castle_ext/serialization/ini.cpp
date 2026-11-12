@@ -17,7 +17,7 @@ int main()
 {
     using config_t = castle::serialization::ini::document<16U, 24U, 32U, 96U>;
 
-    const castle::container::string_view source(
+    const castle::dsa::string_view source(
         "device = castle-demo\n"
         "[network]\n"
         "enabled = yes\n"
@@ -50,12 +50,12 @@ int main()
     CASTLE_SAMPLE_CHECK(config.remove("network", "host") == castle::status::ok);
     CASTLE_SAMPLE_CHECK(!config.contains("network", "host"));
 
-    castle::container::string<512U> serialized;
+    castle::dsa::string<512U> serialized;
     const castle::serialization::ini::result write_result =
         castle::serialization::ini::serialize(config, serialized);
     CASTLE_SAMPLE_CHECK(write_result.succeeded());
-    CASTLE_SAMPLE_CHECK(serialized.find("[network]") != castle::container::string_view::npos);
-    CASTLE_SAMPLE_CHECK(serialized.find("port = 1884") != castle::container::string_view::npos);
+    CASTLE_SAMPLE_CHECK(serialized.find("[network]") != castle::dsa::string_view::npos);
+    CASTLE_SAMPLE_CHECK(serialized.find("port = 1884") != castle::dsa::string_view::npos);
 
     return 0;
 }

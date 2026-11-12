@@ -227,7 +227,7 @@ TEST(DnsMessage, HandlesTruncatedFlagAndResponseCode)
 namespace
 {
 // Writes `labels` labels of `label_size` 'a' octets separated by dots.
-castle::container::string_view make_labels(char* buffer, size_type label_size, size_type labels)
+castle::dsa::string_view make_labels(char* buffer, size_type label_size, size_type labels)
 {
     size_type at = 0U;
     for (size_type label = 0U; label < labels; ++label)
@@ -235,7 +235,7 @@ castle::container::string_view make_labels(char* buffer, size_type label_size, s
         if (label != 0U) { buffer[at++] = '.'; }
         for (size_type i = 0U; i < label_size; ++i) { buffer[at++] = 'a'; }
     }
-    return castle::container::string_view(buffer, at);
+    return castle::dsa::string_view(buffer, at);
 }
 
 // Builds a response header with one question "a" A/IN followed by the given resource-record octets.
@@ -258,13 +258,13 @@ TEST(DnsMessage, RejectsTightCapacityEmptyAndUnsafeNames)
     size_type size = 0U;
     EXPECT_EQ(message::encode_query("a", record_type::a, 1U, packet, 11U, size), status::full);
     EXPECT_EQ(size, 0U);
-    EXPECT_EQ(message::encode_query(castle::container::string_view(), record_type::a, 1U, packet, sizeof(packet), size),
+    EXPECT_EQ(message::encode_query(castle::dsa::string_view(), record_type::a, 1U, packet, sizeof(packet), size),
               status::invalid_argument);
     char const embedded_nul[] = {'a', '\0', 'b'};
-    EXPECT_EQ(message::encode_query(castle::container::string_view(embedded_nul, 3U), record_type::a, 1U,
+    EXPECT_EQ(message::encode_query(castle::dsa::string_view(embedded_nul, 3U), record_type::a, 1U,
                                     packet, sizeof(packet), size), status::invalid_argument);
     char const high_octet[] = {static_cast<char>(0xC3), static_cast<char>(0xA9), '.', 'c', 'o', 'm'};
-    EXPECT_EQ(message::encode_query(castle::container::string_view(high_octet, 6U), record_type::a, 1U,
+    EXPECT_EQ(message::encode_query(castle::dsa::string_view(high_octet, 6U), record_type::a, 1U,
                                     packet, sizeof(packet), size), status::invalid_argument);
 }
 

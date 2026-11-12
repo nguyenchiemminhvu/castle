@@ -26,7 +26,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == frame_size(esf_raw<4U>::header_length + (2U * esf_raw<4U>::block_length)));
 
     message_view raw;
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(esf_raw<4U>::matches(raw));
 
     // The sample count is implied by the payload length (4 + N*8).

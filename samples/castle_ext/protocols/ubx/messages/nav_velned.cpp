@@ -33,7 +33,7 @@ int main()
     CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(velocity, frame, sizeof(frame), written)));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(nav_velned::matches(raw));
 
     nav_velned decoded{};

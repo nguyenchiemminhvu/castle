@@ -19,7 +19,7 @@
 #define CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_MGA_ACK_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle/utility/bytes.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/fixed_message.hpp"
@@ -65,7 +65,7 @@ struct mga_ack : detail::fixed_message<mga_ack, UBX_CLASS_MGA, UBX_ID_MGA_ACK, 8
     /** @brief UBX ID of the acknowledged MGA message (spec `msgId`; renamed to avoid `msg_id`). */
     uint8_t acked_msg_id = 0U;
     /** @brief First 4 payload bytes of the acknowledged message. */
-    castle::container::array<uint8_t, 4U> msg_payload_start{};
+    castle::dsa::array<uint8_t, 4U> msg_payload_start{};
 
     /** @brief Reports `type == accepted`. */
     CASTLE_NODISCARD bool accepted() CASTLE_CONST CASTLE_NOEXCEPT

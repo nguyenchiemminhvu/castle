@@ -8,8 +8,8 @@
 namespace
 {
 
-using castle::container::string;
-using castle::container::string_view;
+using castle::dsa::string;
+using castle::dsa::string_view;
 using castle::serialization::ini::document;
 using castle::serialization::ini::error_code;
 using castle::serialization::ini::parse;
@@ -319,7 +319,7 @@ TEST(IniSerializeTest, CanonicalOutputQuotesAndGroupsSections)
     EXPECT_EQ(doc.set("first", "quoted", "quote \" and line\n"), castle::status::ok);
     EXPECT_EQ(doc.set("first", "tail", "3"), castle::status::ok);
 
-    castle::container::string<512U> output;
+    castle::dsa::string<512U> output;
     const auto result = serialize(doc, output);
     ASSERT_TRUE(result.succeeded());
 
@@ -347,7 +347,7 @@ TEST(IniSerializeTest, OutputCapacityFailure)
     document<4U, 16U, 16U, 32U> doc;
     ASSERT_EQ(doc.set("key", "value"), castle::status::ok);
 
-    castle::container::string<1U> output;
+    castle::dsa::string<1U> output;
     const auto result = serialize(doc, output);
     EXPECT_EQ(result.status, castle::status::full);
     EXPECT_EQ(result.code, error_code::output_full);

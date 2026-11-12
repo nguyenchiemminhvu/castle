@@ -16,7 +16,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -125,7 +125,7 @@ struct mon_rf
 
     uint8_t version = 0U;   ///< Message version (0x00).
     uint8_t n_blocks = 0U;  ///< On-wire block count; may exceed `blocks.size()`.
-    castle::container::vector<mon_rf_block, MaxBlocks> blocks{};
+    castle::dsa::vector<mon_rf_block, MaxBlocks> blocks{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

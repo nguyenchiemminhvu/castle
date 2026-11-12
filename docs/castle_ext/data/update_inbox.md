@@ -59,7 +59,7 @@ for (;;)
 
 ## Constraints & Notes
 
-- Notifications are coalesced. If a type is notified several times before `take()`, it is reported once. The consumer then reads the latest value from the pool, so no update is lost; only intermediate values are skipped. For event streams where every sample matters, use a queue such as `castle::container::mirrored_ring_buffer` instead.
+- Notifications are coalesced. If a type is notified several times before `take()`, it is reported once. The consumer then reads the latest value from the pool, so no update is lost; only intermediate values are skipped. For event streams where every sample matters, use a queue such as `castle::dsa::mirrored_ring_buffer` instead.
 - `notify()` does one atomic OR per non-empty 32-bit storage word, with no locks and no allocation.
 - The wake hook runs in the notifier's context, which is often a HAL thread. Keep it short and thread-safe, e.g. a semaphore release or an event-flag set. It fires when a storage word goes from empty to non-empty, so a consumer that waits on it never misses pending updates. With more than 32 types, one notification can wake the consumer more than once; `take()` then returns an empty set.
 - `take()` belongs to the single consumer thread that owns the inbox. Several consumers that share one inbox would take updates away from each other; give each consumer its own inbox.

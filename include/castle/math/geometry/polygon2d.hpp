@@ -16,7 +16,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/math/geometry/detail.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle/error/status.hpp"
 #include "castle/math/geometry/point2d.hpp"
 
@@ -37,7 +37,7 @@ class polygon2d
 {
 public:
     using value_type = point2d<T>;
-    using container_type = container::array<value_type, Capacity>;
+    using container_type = dsa::array<value_type, Capacity>;
     using iterator = typename container_type::iterator;
     using const_iterator = typename container_type::const_iterator;
 

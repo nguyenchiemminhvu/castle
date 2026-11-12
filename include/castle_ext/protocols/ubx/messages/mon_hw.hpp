@@ -15,7 +15,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/fixed_message.hpp"
 #include "castle_ext/protocols/ubx/messages/mon_rf.hpp"
@@ -54,7 +54,7 @@ struct mon_hw : detail::fixed_message<mon_hw, UBX_CLASS_MON, UBX_ID_MON_HW, 60U>
     mon_antenna_power a_power = mon_antenna_power::off;
     uint8_t flags = 0U;
     uint32_t used_mask = 0U; ///< Mask of pins used by the virtual pin manager.
-    castle::container::array<uint8_t, VP_COUNT> vp{}; ///< Pin mapping for each of the 17 physical pins.
+    castle::dsa::array<uint8_t, VP_COUNT> vp{}; ///< Pin mapping for each of the 17 physical pins.
     uint8_t jam_ind = 0U;    ///< CW jamming indicator (0 = none, 255 = strong).
     uint32_t pin_irq = 0U;   ///< Mask of pins using the PIO IRQ.
     uint32_t pull_h = 0U;    ///< Mask of pins using the PIO pull-high resistor.

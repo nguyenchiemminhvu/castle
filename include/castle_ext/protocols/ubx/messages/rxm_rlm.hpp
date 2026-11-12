@@ -19,7 +19,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/fixed_message.hpp"
 
@@ -61,9 +61,9 @@ struct basic_rxm_rlm
     static CASTLE_CONSTEXPR uint64_t BEACON_ID_MASK = 0x0FFFFFFFFFFFFFFFULL;
 
     uint8_t sv_id = 0U;                                     ///< Transmitting satellite (see Satellite Numbering).
-    castle::container::array<uint8_t, 8U> beacon{};         ///< Beacon identifier, most significant byte first.
+    castle::dsa::array<uint8_t, 8U> beacon{};         ///< Beacon identifier, most significant byte first.
     uint8_t message = 0U;                                   ///< Message code (4 bits).
-    castle::container::array<uint8_t, ParamBytes> params{}; ///< Parameters, most significant byte first.
+    castle::dsa::array<uint8_t, ParamBytes> params{}; ///< Parameters, most significant byte first.
 
     /** @brief Reports whether `raw` has this class/ID, exact length, and `type` byte. */
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT

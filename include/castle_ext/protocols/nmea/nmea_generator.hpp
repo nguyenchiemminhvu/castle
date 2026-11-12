@@ -37,7 +37,7 @@
  *
  * char sentence[96U];
  * castle::size_type written = 0U;
- * generate_gga(input, castle::container::string_view("GP"), sentence, sizeof(sentence), written);
+ * generate_gga(input, castle::dsa::string_view("GP"), sentence, sizeof(sentence), written);
  * @endcode
  */
 #ifndef CASTLE_EXT_PROTOCOLS_NMEA_NMEA_GENERATOR_HPP
@@ -46,8 +46,8 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/array_view.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/array_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/utility/string_builder.hpp"
 
 #include "castle_ext/protocols/nmea/nmea.hpp"
@@ -171,7 +171,7 @@ struct gsv_satellite_record
  */
 struct gsv_input
 {
-    castle::container::array_view<CASTLE_CONST gsv_satellite_record> satellites{};
+    castle::dsa::array_view<CASTLE_CONST gsv_satellite_record> satellites{};
     bool valid = false;
 };
 
@@ -359,7 +359,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status finalize_sentence(
         return castle::status::full;
     }
 
-    CASTLE_CONST castle::container::string_view content = builder.view();
+    CASTLE_CONST castle::dsa::string_view content = builder.view();
     for (castle::size_type index = 0U; index < content.size(); ++index)
     {
         output[index] = content[index];
@@ -379,7 +379,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status finalize_sentence(
  */
 template <castle::size_type MaxSentenceLen = NMEA_GENERATOR_MAX_SENTENCE_LEN>
 CASTLE_NODISCARD CASTLE_INLINE castle::status generate_gga(
-    CASTLE_CONST gga_input& input, castle::container::string_view talker,
+    CASTLE_CONST gga_input& input, castle::dsa::string_view talker,
     char* output, castle::size_type output_capacity, castle::size_type& bytes_written) CASTLE_NOEXCEPT
 {
     bytes_written = 0U;
@@ -449,7 +449,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status generate_gga(
  */
 template <castle::size_type MaxSentenceLen = NMEA_GENERATOR_MAX_SENTENCE_LEN>
 CASTLE_NODISCARD CASTLE_INLINE castle::status generate_rmc(
-    CASTLE_CONST rmc_input& input, castle::container::string_view talker,
+    CASTLE_CONST rmc_input& input, castle::dsa::string_view talker,
     char* output, castle::size_type output_capacity, castle::size_type& bytes_written) CASTLE_NOEXCEPT
 {
     bytes_written = 0U;
@@ -511,7 +511,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status generate_rmc(
  */
 template <castle::size_type MaxSentenceLen = NMEA_GENERATOR_MAX_SENTENCE_LEN>
 CASTLE_NODISCARD CASTLE_INLINE castle::status generate_gsa(
-    CASTLE_CONST gsa_input& input, castle::container::string_view talker,
+    CASTLE_CONST gsa_input& input, castle::dsa::string_view talker,
     char* output, castle::size_type output_capacity, castle::size_type& bytes_written) CASTLE_NOEXCEPT
 {
     bytes_written = 0U;
@@ -573,7 +573,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status generate_gsa(
  */
 template <castle::size_type MaxSentenceLen = NMEA_GENERATOR_MAX_SENTENCE_LEN>
 CASTLE_NODISCARD CASTLE_INLINE castle::status generate_vtg(
-    CASTLE_CONST vtg_input& input, castle::container::string_view talker,
+    CASTLE_CONST vtg_input& input, castle::dsa::string_view talker,
     char* output, castle::size_type output_capacity, castle::size_type& bytes_written) CASTLE_NOEXCEPT
 {
     bytes_written = 0U;
@@ -622,7 +622,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status generate_vtg(
  */
 template <castle::size_type MaxSentenceLen = NMEA_GENERATOR_MAX_SENTENCE_LEN>
 CASTLE_NODISCARD CASTLE_INLINE castle::status generate_gll(
-    CASTLE_CONST gll_input& input, castle::container::string_view talker,
+    CASTLE_CONST gll_input& input, castle::dsa::string_view talker,
     char* output, castle::size_type output_capacity, castle::size_type& bytes_written) CASTLE_NOEXCEPT
 {
     bytes_written = 0U;
@@ -664,7 +664,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status generate_gll(
  */
 template <castle::size_type MaxSentenceLen = NMEA_GENERATOR_MAX_SENTENCE_LEN>
 CASTLE_NODISCARD CASTLE_INLINE castle::status generate_zda(
-    CASTLE_CONST zda_input& input, castle::container::string_view talker,
+    CASTLE_CONST zda_input& input, castle::dsa::string_view talker,
     char* output, castle::size_type output_capacity, castle::size_type& bytes_written) CASTLE_NOEXCEPT
 {
     bytes_written = 0U;
@@ -723,7 +723,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::size_type gsv_message_count(CASTLE_CONST 
  */
 template <castle::size_type MaxSentenceLen = NMEA_GENERATOR_MAX_SENTENCE_LEN>
 CASTLE_NODISCARD CASTLE_INLINE castle::status generate_gsv_message(
-    CASTLE_CONST gsv_input& input, castle::container::string_view talker, castle::size_type message_number,
+    CASTLE_CONST gsv_input& input, castle::dsa::string_view talker, castle::size_type message_number,
     char* output, castle::size_type output_capacity, castle::size_type& bytes_written) CASTLE_NOEXCEPT
 {
     bytes_written = 0U;

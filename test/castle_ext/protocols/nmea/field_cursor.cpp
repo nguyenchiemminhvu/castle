@@ -6,8 +6,8 @@ namespace
 {
 
 using namespace castle::protocols::nmea;
-using castle::container::array_view;
-using castle::container::string_view;
+using castle::dsa::array_view;
+using castle::dsa::string_view;
 
 TEST(NmeaFieldCursorMirror, AdvancesAndParsesPrimitiveFields)
 {

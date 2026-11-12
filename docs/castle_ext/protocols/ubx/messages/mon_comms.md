@@ -12,12 +12,12 @@ Model of UBX-MON-COMMS (class `0x0A`, ID `0x36`), the consolidated communication
 
 - [castle/core/compiler.hpp](../../../../core/compiler.md)
 - [castle/core/types.hpp](../../../../core/types.md)
-- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle/dsa/vector.hpp](../../../../dsa/vector.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
 - [detail/repeated_group.hpp](detail/repeated_group.md)
-- [castle/container/array.hpp](../../../../container/array.md)
+- [castle/dsa/array.hpp](../../../../dsa/array.md)
 
 ## Public API
 
@@ -48,8 +48,8 @@ Model of UBX-MON-COMMS (class `0x0A`, ID `0x36`), the consolidated communication
 | `n_ports` | `uint8_t` | 1 | On-wire port count; may exceed `ports.size()`. |
 | `tx_errors` | `uint8_t` (X1) | 2 | See `TX_ERRORS_*`. |
 | — | reserved | 3 | |
-| `prot_ids` | `castle::container::array<mon_comms_protocol, 4>` | 4 | Protocol of each `msgs` slot (defaults to `none`). |
-| `ports` | `castle::container::vector<mon_comms_port, MaxPorts>` | 8 + n·40 | Stored port blocks. |
+| `prot_ids` | `castle::dsa::array<mon_comms_protocol, 4>` | 4 | Protocol of each `msgs` slot (defaults to `none`). |
+| `ports` | `castle::dsa::vector<mon_comms_port, MaxPorts>` | 8 + n·40 | Stored port blocks. |
 
 ### `mon_comms_port` fields (offset within block)
 
@@ -65,7 +65,7 @@ Model of UBX-MON-COMMS (class `0x0A`, ID `0x36`), the consolidated communication
 | `rx_usage` | `uint8_t` | 16 | % | Max RX buffer usage, last sysmon period. |
 | `rx_peak_usage` | `uint8_t` | 17 | % | Max RX buffer usage. |
 | `overrun_errs` | `uint16_t` | 18 | - | 100 ms timeslots with overrun errors. |
-| `msgs` | `castle::container::array<uint16_t, 4>` | 20 | msg | Parsed messages per `prot_ids` slot. |
+| `msgs` | `castle::dsa::array<uint16_t, 4>` | 20 | msg | Parsed messages per `prot_ids` slot. |
 | — | reserved | 28..35 | | |
 | `skipped` | `uint32_t` | 36 | bytes | Skipped bytes. |
 
@@ -101,7 +101,7 @@ See `samples/castle_ext/protocols/ubx/messages/mon_comms.cpp`.
 
 ## Constraints & Notes
 
-- Storage: `castle::container::vector<..., MaxPorts>` (default `MaxPorts = 5U`) lives inside the object; no heap allocation, no exceptions.
+- Storage: `castle::dsa::vector<..., MaxPorts>` (default `MaxPorts = 5U`) lives inside the object; no heap allocation, no exceptions.
 - `decode()` requires the payload length to be exactly `8 + nPorts·40`; any mismatch (or a different class/ID, or fewer than 8 bytes) returns `false` with `out` value-initialised.
 - Capacity overflow: when `nPorts` exceeds `MaxPorts`, the first `MaxPorts` blocks are stored, the rest are skipped, `decode()` still succeeds and `n_ports` reports the on-wire count.
 - `encode()` writes the count from the vector's `size()`; the stored count field is ignored.

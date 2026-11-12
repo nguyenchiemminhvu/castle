@@ -6,9 +6,9 @@ int main()
 {
     using document = castle::serialization::json::document<32U, 512U, 8U>;
     using node_id = document::node_id;
-    using output_string = castle::container::string<512U>;
+    using output_string = castle::dsa::string<512U>;
 
-    const castle::container::string_view source(
+    const castle::dsa::string_view source(
         "{\"device\":{\"name\":\"castle\",\"enabled\":true,\"baud\":115200},\"channels\":[1,2]}");
 
     document parsed;
@@ -24,7 +24,7 @@ int main()
     CASTLE_SAMPLE_CHECK(device != document::npos);
     CASTLE_SAMPLE_CHECK(channels != document::npos);
 
-    castle::container::string_view name_text;
+    castle::dsa::string_view name_text;
     bool enabled_value = false;
     int baud_value = 0;
     CASTLE_SAMPLE_CHECK(parsed.get_string(name, name_text) == castle::status::ok);
@@ -55,7 +55,7 @@ int main()
     const castle::serialization::json::result serialized =
         castle::serialization::json::serialize(built, output, true, 2U);
     CASTLE_SAMPLE_CHECK(serialized.succeeded());
-    CASTLE_SAMPLE_CHECK(output.find("\"gain\": 1.25") != castle::container::string_view::npos);
-    CASTLE_SAMPLE_CHECK(output.find("\"channels\": [") != castle::container::string_view::npos);
+    CASTLE_SAMPLE_CHECK(output.find("\"gain\": 1.25") != castle::dsa::string_view::npos);
+    CASTLE_SAMPLE_CHECK(output.find("\"channels\": [") != castle::dsa::string_view::npos);
     return 0;
 }

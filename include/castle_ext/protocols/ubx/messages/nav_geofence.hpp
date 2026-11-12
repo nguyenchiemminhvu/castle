@@ -13,7 +13,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -72,7 +72,7 @@ struct nav_geofence
     uint8_t status = STATUS_NOT_AVAILABLE;
     uint8_t num_fences = 0U; ///< On-wire fence count; may exceed `fences.size()`.
     nav_geofence_state comb_state = nav_geofence_state::unknown;
-    castle::container::vector<nav_geofence_fence, MaxFences> fences{};
+    castle::dsa::vector<nav_geofence_fence, MaxFences> fences{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

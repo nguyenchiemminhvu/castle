@@ -21,9 +21,9 @@
 #ifndef CASTLE_EXT_IO_CAN_FRAME_HPP
 #define CASTLE_EXT_IO_CAN_FRAME_HPP
 
-#include "castle/container/array.hpp"
-#include "castle/container/array_view.hpp"
-#include "castle/container/initializer_list.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/array_view.hpp"
+#include "castle/dsa/initializer_list.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
@@ -77,7 +77,7 @@ struct frame
     id_format format;
     frame_type type;
     uint8_t dlc;
-    container::array<uint8_t, max_data_length> data;
+    dsa::array<uint8_t, max_data_length> data;
 
     /** @brief Creates a standard-format data frame with identifier 0 and no payload. */
     CASTLE_CONSTEXPR frame() CASTLE_NOEXCEPT
@@ -119,9 +119,9 @@ struct frame
     }
 
     /** @brief Returns a read-only view of the valid payload bytes. */
-    CASTLE_NODISCARD container::array_view<CASTLE_CONST uint8_t> payload() CASTLE_CONST CASTLE_NOEXCEPT
+    CASTLE_NODISCARD dsa::array_view<CASTLE_CONST uint8_t> payload() CASTLE_CONST CASTLE_NOEXCEPT
     {
-        return container::array_view<CASTLE_CONST uint8_t>(data.data(), data_length());
+        return dsa::array_view<CASTLE_CONST uint8_t>(data.data(), data_length());
     }
 
     /**
@@ -153,7 +153,7 @@ struct frame
     }
 
     /** @brief Turns the frame into a data frame carrying the brace-enclosed bytes. */
-    castle::status set_data(container::initializer_list<uint8_t> bytes) CASTLE_NOEXCEPT
+    castle::status set_data(dsa::initializer_list<uint8_t> bytes) CASTLE_NOEXCEPT
     {
         return set_data(bytes.begin(), bytes.size());
     }

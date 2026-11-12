@@ -38,14 +38,14 @@ bool runtime_point_in_polygon(const point2d<int>& point,
     return castle::math::point_in_polygon(point, vertices, count, epsilon);
 }
 
-void runtime_heap_sift_down(castle::container::array<point2d<int>, 4>& values,
+void runtime_heap_sift_down(castle::dsa::array<point2d<int>, 4>& values,
                             castle::size_type start,
                             castle::size_type count)
 {
     castle::math::detail::heap_sift_down(values, start, count);
 }
 
-void runtime_heap_sort(castle::container::array<point2d<int>, 4>& values,
+void runtime_heap_sort(castle::dsa::array<point2d<int>, 4>& values,
                        castle::size_type count)
 {
     castle::math::detail::heap_sort(values, count);
@@ -118,7 +118,7 @@ TEST(GeometryAlgorithms, NearestPointOnSegments)
 
 TEST(GeometryAlgorithms, NearestPointInFixedArrays)
 {
-    castle::container::array<point2d<int>, 3> points2;
+    castle::dsa::array<point2d<int>, 3> points2;
     points2[0] = point2d<int>(10, 10);
     points2[1] = point2d<int>(2, 2);
     points2[2] = point2d<int>(5, 5);
@@ -128,7 +128,7 @@ TEST(GeometryAlgorithms, NearestPointInFixedArrays)
     EXPECT_EQ(result2.point, point2d<int>(2, 2));
     EXPECT_EQ(result2.distance_squared, 2);
 
-    castle::container::array<point3d<int>, 3> points3;
+    castle::dsa::array<point3d<int>, 3> points3;
     points3[0] = point3d<int>(10, 10, 10);
     points3[1] = point3d<int>(1, 2, 3);
     points3[2] = point3d<int>(5, 5, 5);
@@ -218,12 +218,12 @@ TEST(GeometryAlgorithms, DetailPrimitivesAndHeapBranches)
     EXPECT_LT(orientation(point2d<int>(0, 0), point2d<int>(0, 2), point2d<int>(2, 0)), 0);
     EXPECT_EQ(orientation(point2d<int>(0, 0), point2d<int>(1, 1), point2d<int>(2, 2)), 0);
 
-    castle::container::array<point2d<int>, 1> one;
+    castle::dsa::array<point2d<int>, 1> one;
     one[0] = point2d<int>(1, 1);
     castle::math::detail::heap_sort(one, 1U);
     EXPECT_EQ(one[0], point2d<int>(1, 1));
 
-    castle::container::array<point2d<int>, 4> heap = {
+    castle::dsa::array<point2d<int>, 4> heap = {
         runtime_point2d(1, 1), runtime_point2d(4, 0),
         runtime_point2d(3, 3), runtime_point2d(2, 2)
     };
@@ -234,11 +234,11 @@ TEST(GeometryAlgorithms, DetailPrimitivesAndHeapBranches)
     EXPECT_EQ(heap[0], point2d<int>(1, 1));
     EXPECT_EQ(heap[3], point2d<int>(4, 0));
 
-    castle::container::array<point2d<int>, 4> sorted = {
+    castle::dsa::array<point2d<int>, 4> sorted = {
         runtime_point2d(0, 0), runtime_point2d(0, 0),
         runtime_point2d(1, 0), runtime_point2d(1, 0)
     };
-    castle::container::array<point2d<int>, 4> unique;
+    castle::dsa::array<point2d<int>, 4> unique;
     castle::size_type unique_count = 0U;
     castle::math::detail::copy_unique(sorted, 4U, unique, unique_count);
     EXPECT_EQ(unique_count, 2U);
@@ -248,13 +248,13 @@ TEST(GeometryAlgorithms, DetailPrimitivesAndHeapBranches)
 
 TEST(GeometryAlgorithms, ConvexHull)
 {
-    castle::container::array<point2d<int>, 1> single = { point2d<int>(2, 3) };
+    castle::dsa::array<point2d<int>, 1> single = { point2d<int>(2, 3) };
     castle::math::polygon2d<int, 1> single_hull;
     EXPECT_EQ(castle::math::convex_hull(single, single_hull), castle::status::ok);
     ASSERT_EQ(single_hull.size(), 1U);
     EXPECT_EQ(single_hull[0], point2d<int>(2, 3));
 
-    castle::container::array<point2d<int>, 2> pair = {
+    castle::dsa::array<point2d<int>, 2> pair = {
         point2d<int>(2, 2), point2d<int>(0, 0)
     };
     castle::math::polygon2d<int, 2> pair_hull;
@@ -263,7 +263,7 @@ TEST(GeometryAlgorithms, ConvexHull)
     EXPECT_EQ(pair_hull[0], point2d<int>(0, 0));
     EXPECT_EQ(pair_hull[1], point2d<int>(2, 2));
 
-    castle::container::array<point2d<int>, 5> duplicates = {
+    castle::dsa::array<point2d<int>, 5> duplicates = {
         point2d<int>(0, 0), point2d<int>(1, 1), point2d<int>(0, 0),
         point2d<int>(2, 2), point2d<int>(3, 3)
     };
@@ -271,7 +271,7 @@ TEST(GeometryAlgorithms, ConvexHull)
     EXPECT_EQ(castle::math::convex_hull(duplicates, duplicate_hull), castle::status::ok);
     EXPECT_EQ(duplicate_hull.size(), 2U);
 
-    castle::container::array<point2d<int>, 8> points = {
+    castle::dsa::array<point2d<int>, 8> points = {
         point2d<int>(0, 0), point2d<int>(4, 0),
         point2d<int>(4, 4), point2d<int>(0, 4),
         point2d<int>(2, 2), point2d<int>(1, 1),
@@ -285,7 +285,7 @@ TEST(GeometryAlgorithms, ConvexHull)
     EXPECT_EQ(hull[2], point2d<int>(4, 4));
     EXPECT_EQ(hull[3], point2d<int>(0, 4));
 
-    castle::container::array<point2d<int>, 4> collinear = {
+    castle::dsa::array<point2d<int>, 4> collinear = {
         point2d<int>(0, 0), point2d<int>(1, 0),
         point2d<int>(2, 0), point2d<int>(3, 0)
     };

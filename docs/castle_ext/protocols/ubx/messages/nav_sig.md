@@ -13,7 +13,7 @@
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/constants.hpp`](../../../../core/constants.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
@@ -65,7 +65,7 @@
 | `i_tow` | `uint32_t` | ms | GPS time of week of the navigation epoch. |
 | `version` | `uint8_t` | - | Message version (0x00). |
 | `num_sigs` | `uint8_t` | - | On-wire signal count; may exceed `signals.size()`. |
-| `signals` | `castle::container::vector<nav_sig_info, MaxSignals>` | - | Stored signal blocks. |
+| `signals` | `castle::dsa::vector<nav_sig_info, MaxSignals>` | - | Stored signal blocks. |
 
 ### Functions
 

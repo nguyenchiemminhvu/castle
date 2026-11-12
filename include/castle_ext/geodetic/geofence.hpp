@@ -16,7 +16,7 @@
  *    country).
  *  - `point_in_boundary()`: the same boundary test as `polygon_geofence`, but
  *    against an ad-hoc, non-owned list of vertices (a raw pointer/count pair
- *    or a `castle::container::array_view`), for one-off checks against data
+ *    or a `castle::dsa::array_view`), for one-off checks against data
  *    that already lives elsewhere (e.g. a boundary table).
  *
  * @par Planar reduction of polygon boundaries
@@ -82,8 +82,8 @@
 #include "castle/core/error_handler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/array_view.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/array_view.hpp"
 #include "castle/error/status.hpp"
 #include "castle/math/geometry/geometry.hpp"
 #include "castle_ext/geodetic/coord.hpp"
@@ -277,7 +277,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR bool point_in_boundary(CASTLE_CONST geo_point<
  */
 template <typename T>
 CASTLE_NODISCARD CASTLE_CONSTEXPR bool point_in_boundary(CASTLE_CONST geo_point<T>& point,
-                                                          castle::container::array_view<CASTLE_CONST geo_point<T>> boundary,
+                                                          castle::dsa::array_view<CASTLE_CONST geo_point<T>> boundary,
                                                           T epsilon_deg = T{}) CASTLE_NOEXCEPT
 {
     return point_in_boundary(point, boundary.data(), boundary.size(), epsilon_deg);
@@ -288,7 +288,7 @@ CASTLE_NODISCARD CASTLE_CONSTEXPR bool point_in_boundary(CASTLE_CONST geo_point<
  * @tparam T Floating-point coordinate type.
  */
 template <typename T>
-using geo_boundary_view = castle::container::array_view<CASTLE_CONST geo_point<T>>;
+using geo_boundary_view = castle::dsa::array_view<CASTLE_CONST geo_point<T>>;
 
 /**
  * @brief Stores a reusable, fixed-capacity polygonal geofence (a region).
@@ -305,7 +305,7 @@ class polygon_geofence
 
 public:
     using value_type = geo_point<T>;
-    using container_type = castle::container::array<value_type, Capacity>;
+    using container_type = castle::dsa::array<value_type, Capacity>;
     using iterator = typename container_type::iterator;
     using const_iterator = typename container_type::const_iterator;
 

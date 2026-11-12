@@ -18,7 +18,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == sizeof(frame));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(ack_ack::matches(raw));
     CASTLE_SAMPLE_CHECK(!ack_nak::matches(raw));
     CASTLE_SAMPLE_CHECK(ack::matches(raw));
@@ -41,7 +41,7 @@ int main()
     rejected.cls_id = UBX_CLASS_CFG;
     rejected.acked_msg_id = UBX_ID_CFG_VALSET;
     CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(rejected, frame, sizeof(frame), written)));
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(ack_nak::matches(raw));
     CASTLE_SAMPLE_CHECK(!ack_ack::decode(raw, decoded));
     CASTLE_SAMPLE_CHECK(ack::decode(raw, reply));

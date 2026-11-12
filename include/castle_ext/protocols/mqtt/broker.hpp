@@ -14,7 +14,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/error/status.hpp"
 #include "castle_ext/net/server.hpp"
 #include "castle_ext/protocols/mqtt/codec.hpp"
@@ -82,8 +82,8 @@ public:
     }
 
     /** @brief Copies fixed-length username/password credentials; empty username disables authentication. */
-    castle::status set_authentication(castle::container::string_view username,
-                                      castle::container::string_view password) CASTLE_NOEXCEPT
+    castle::status set_authentication(castle::dsa::string_view username,
+                                      castle::dsa::string_view password) CASTLE_NOEXCEPT
     {
         if (username.size() >= MaxTopicLength || password.size() >= MaxTopicLength ||
             !detail::valid_utf8(username) || !detail::valid_utf8(password))
@@ -262,7 +262,7 @@ private:
     };
 
     static uint32_t elapsed(uint32_t now, uint32_t then) CASTLE_NOEXCEPT { return now - then; }
-    static void copy_text(char* target, castle::container::string_view value) CASTLE_NOEXCEPT
+    static void copy_text(char* target, castle::dsa::string_view value) CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i < value.size(); ++i)
         {
@@ -270,7 +270,7 @@ private:
         }
         target[value.size()] = '\0';
     }
-    static bool text_equal(char CASTLE_CONST* left, castle::container::string_view right) CASTLE_NOEXCEPT
+    static bool text_equal(char CASTLE_CONST* left, castle::dsa::string_view right) CASTLE_NOEXCEPT
     {
         size_type i = 0U;
         while (left[i] != '\0' && i < right.size())
@@ -469,7 +469,7 @@ private:
         if (will)
         {
             if (!castle::succeeded(reader.get_utf8(will_topic, sizeof(will_topic), will_topic_size)) ||
-                !castle::succeeded(validate_topic_name(castle::container::string_view(will_topic, will_topic_size))) ||
+                !castle::succeeded(validate_topic_name(castle::dsa::string_view(will_topic, will_topic_size))) ||
                 !castle::succeeded(reader.get_binary(will_payload, sizeof(will_payload), will_payload_size)))
             {
                 return castle::status::invalid_argument;
@@ -492,7 +492,7 @@ private:
             return castle::status::invalid_argument;
         }
         if (authentication_enabled_ && (!has_username || !has_password ||
-            !text_equal(expected_username_, castle::container::string_view(username, username_size)) ||
+            !text_equal(expected_username_, castle::dsa::string_view(username, username_size)) ||
             !binary_equal(expected_password_, password, password_size)))
         {
             (void)send_connack(state, false, reason_code::bad_user_name_or_password);
@@ -518,7 +518,7 @@ private:
                 other.will_pending = false;
             }
         }
-        copy_text(state.client_id, castle::container::string_view(id, id_size));
+        copy_text(state.client_id, castle::dsa::string_view(id, id_size));
         state.protocol_level = level;
         state.clean_session = clean;
         state.keep_alive_seconds = keep_alive;
@@ -528,7 +528,7 @@ private:
         state.will_quality = static_cast<qos>((flags >> 3U) & 0x03U);
         if (will)
         {
-            copy_text(state.will_topic, castle::container::string_view(will_topic, will_topic_size));
+            copy_text(state.will_topic, castle::dsa::string_view(will_topic, will_topic_size));
             state.will_payload_size = will_payload_size;
             for (size_type i = 0U; i < will_payload_size; ++i)
             {
@@ -571,7 +571,7 @@ private:
                 static_cast<int32_t>(now_ms_ - sessions_[i].expires_at_ms) >= 0)
             {
                 char expired_id[MaxTopicLength]{};
-                copy_text(expired_id, castle::container::string_view(sessions_[i].client_id));
+                copy_text(expired_id, castle::dsa::string_view(sessions_[i].client_id));
                 clear_session(expired_id);
             }
         }
@@ -642,7 +642,7 @@ private:
             if (!sessions_[i].used)
             {
                 sessions_[i].used = true;
-                copy_text(sessions_[i].client_id, castle::container::string_view(id));
+                copy_text(sessions_[i].client_id, castle::dsa::string_view(id));
                 sessions_[i].expires_at_ms = 0U; // Active session.
                 return true;
             }
@@ -664,7 +664,7 @@ private:
             }
             else
             {
-                castle::container::string_view assigned(assigned_id, assigned_size);
+                castle::dsa::string_view assigned(assigned_id, assigned_size);
                 (void)body.put_varint(static_cast<uint32_t>(3U + assigned.size()));
                 (void)body.put_u8(static_cast<uint8_t>(property_id::assigned_client_identifier));
                 (void)body.put_utf8(assigned);
@@ -688,7 +688,7 @@ private:
         qos quality = static_cast<qos>(quality_value);
         char topic[MaxTopicLength]{}; size_type topic_size = 0U;
         if (!castle::succeeded(reader.get_utf8(topic, sizeof(topic), topic_size)) ||
-            !castle::succeeded(validate_topic_name(castle::container::string_view(topic, topic_size))))
+            !castle::succeeded(validate_topic_name(castle::dsa::string_view(topic, topic_size))))
         {
             return castle::status::invalid_argument;
         }
@@ -724,7 +724,7 @@ private:
                 entry->used = true;
                 entry->identifier = identifier;
                 entry->quality = 2U;
-                copy_text(entry->topic, castle::container::string_view(topic, topic_size));
+                copy_text(entry->topic, castle::dsa::string_view(topic, topic_size));
                 entry->payload_size = payload_size;
                 for (size_type i = 0U; i < payload_size; ++i)
                 {
@@ -734,7 +734,7 @@ private:
             }
             return send_identifier(state.handle, packet_type::pubrec, identifier, false);
         }
-        publish_message(castle::container::string_view(topic, topic_size), reader.current(), payload_size,
+        publish_message(castle::dsa::string_view(topic, topic_size), reader.current(), payload_size,
                         quality, (flags & 1U) != 0U);
         return quality == qos::at_least_once ? send_identifier(state.handle, packet_type::puback, identifier, false) : castle::status::ok;
     }
@@ -763,7 +763,7 @@ private:
         qos_entry* entry = find_qos(state.incoming_qos2, identifier);
         if (entry != nullptr)
         {
-            publish_message(castle::container::string_view(entry->topic), entry->payload, entry->payload_size,
+            publish_message(castle::dsa::string_view(entry->topic), entry->payload, entry->payload_size,
                             qos::exactly_once, entry->retain);
             entry->used = false;
         }
@@ -839,7 +839,7 @@ private:
             size_type filter_size = 0U;
             uint8_t options = 0U;
             if (!castle::succeeded(reader.get_utf8(filters[reason_count], MaxTopicLength, filter_size)) ||
-                !castle::succeeded(validate_topic_filter(castle::container::string_view(filters[reason_count], filter_size))) ||
+                !castle::succeeded(validate_topic_filter(castle::dsa::string_view(filters[reason_count], filter_size))) ||
                 !castle::succeeded(reader.get_u8(options)))
             {
                 return castle::status::invalid_argument;
@@ -859,7 +859,7 @@ private:
                 return castle::status::invalid_argument;
             }
             requested[reason_count] = static_cast<qos>(requested_qos);
-            if (add_subscription(state.client_id, castle::container::string_view(filters[reason_count]), requested[reason_count]))
+            if (add_subscription(state.client_id, castle::dsa::string_view(filters[reason_count]), requested[reason_count]))
             {
                 reasons[reason_count] = requested_qos;
             }
@@ -894,11 +894,11 @@ private:
             for (size_type r = 0U; r < MaxRetained; ++r)
             {
                 retained_entry CASTLE_CONST& retained = retained_[r];
-                if (retained.used && topic_matches(castle::container::string_view(filters[f]), castle::container::string_view(retained.topic)))
+                if (retained.used && topic_matches(castle::dsa::string_view(filters[f]), castle::dsa::string_view(retained.topic)))
                 {
                     qos delivery = static_cast<uint8_t>(retained.quality) < static_cast<uint8_t>(requested[f])
                         ? retained.quality : requested[f];
-                    (void)send_publish_to(state.handle, castle::container::string_view(retained.topic),
+                    (void)send_publish_to(state.handle, castle::dsa::string_view(retained.topic),
                                           retained.payload, retained.payload_size, delivery, true);
                 }
             }
@@ -932,7 +932,7 @@ private:
             char filter[MaxTopicLength]{};
             size_type filter_size = 0U;
             if (!castle::succeeded(reader.get_utf8(filter, sizeof(filter), filter_size)) ||
-                !castle::succeeded(validate_topic_filter(castle::container::string_view(filter, filter_size))))
+                !castle::succeeded(validate_topic_filter(castle::dsa::string_view(filter, filter_size))))
             {
                 return castle::status::invalid_argument;
             }
@@ -953,7 +953,7 @@ private:
         return send_packet(state.handle, packet_type::unsuback, 0U, body.data(), body.size());
     }
 
-    bool add_subscription(char CASTLE_CONST* client_id, castle::container::string_view filter, qos quality) CASTLE_NOEXCEPT
+    bool add_subscription(char CASTLE_CONST* client_id, castle::dsa::string_view filter, qos quality) CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i < MaxSubscriptions; ++i)
         {
@@ -968,7 +968,7 @@ private:
             if (!subscriptions_[i].used)
             {
                 subscriptions_[i].used = true;
-                copy_text(subscriptions_[i].client_id, castle::container::string_view(client_id));
+                copy_text(subscriptions_[i].client_id, castle::dsa::string_view(client_id));
                 copy_text(subscriptions_[i].filter, filter);
                 subscriptions_[i].maximum_quality = quality;
                 return true;
@@ -989,7 +989,7 @@ private:
         return false;
     }
 
-    void publish_message(castle::container::string_view topic, uint8_t CASTLE_CONST* payload,
+    void publish_message(castle::dsa::string_view topic, uint8_t CASTLE_CONST* payload,
                          size_type payload_size, qos quality, bool retain) CASTLE_NOEXCEPT
     {
         if (retain)
@@ -1034,7 +1034,7 @@ private:
             {
                 subscription_entry CASTLE_CONST& sub = subscriptions_[s];
                 if (sub.used && text_equal(sub.client_id, recipient.client_id) &&
-                    topic_matches(castle::container::string_view(sub.filter), topic))
+                    topic_matches(castle::dsa::string_view(sub.filter), topic))
                 {
                     matched = true;
                     uint8_t current = static_cast<uint8_t>(sub.maximum_quality);
@@ -1052,7 +1052,7 @@ private:
         }
     }
 
-    retained_entry* find_retained(castle::container::string_view topic) CASTLE_NOEXCEPT
+    retained_entry* find_retained(castle::dsa::string_view topic) CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i < MaxRetained; ++i)
         {
@@ -1097,7 +1097,7 @@ private:
         return nullptr;
     }
 
-    castle::status send_publish_to(client_handle handle, castle::container::string_view topic,
+    castle::status send_publish_to(client_handle handle, castle::dsa::string_view topic,
                                    uint8_t CASTLE_CONST* payload, size_type payload_size,
                                    qos quality, bool retain) CASTLE_NOEXCEPT
     {
@@ -1214,7 +1214,7 @@ private:
     {
         if (state.will_present && state.will_pending && state.will_topic[0U] != '\0') // LCOV_EXCL_BR_LINE
         {
-            publish_message(castle::container::string_view(state.will_topic), state.will_payload,
+            publish_message(castle::dsa::string_view(state.will_topic), state.will_payload,
                             state.will_payload_size, state.will_quality, state.will_retain);
         }
         state.will_pending = false;

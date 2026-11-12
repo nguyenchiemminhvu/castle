@@ -16,7 +16,7 @@
 - [`../utility/forward.md`](../utility/forward.md)
 - [`delegate.md`](delegate.md)
 - [`subscription.md`](subscription.md)
-- [`../container/array.md`](../container/array.md)
+- [`../dsa/array.md`](../dsa/array.md)
 
 ## Public API
 | API | Description |

@@ -19,7 +19,7 @@
  * Besides the width-named `read_u8()` ... `read_r8()` helpers, the type-deduced
  * `read(T&)` overload set reads exactly `sizeof(T)` bytes into a field, so a
  * decoder's wire width always follows the declared field type. Enumerations
- * are read through their underlying type and `castle::container::array`
+ * are read through their underlying type and `castle::dsa::array`
  * fields are filled element by element.
  *
  * @code
@@ -36,9 +36,9 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/array_view.hpp"
-#include "castle/container/string.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/array_view.hpp"
+#include "castle/dsa/string.hpp"
 #include "castle/utility/bit_cast.hpp"
 
 #include "castle_ext/protocols/ubx/ubx.hpp"
@@ -59,8 +59,8 @@ class payload_reader CASTLE_FINAL
 {
 public:
     explicit payload_reader(
-        castle::container::array_view<CASTLE_CONST uint8_t> payload) CASTLE_NOEXCEPT
-        : payload_(payload.data() != nullptr ? payload : castle::container::array_view<CASTLE_CONST uint8_t>())
+        castle::dsa::array_view<CASTLE_CONST uint8_t> payload) CASTLE_NOEXCEPT
+        : payload_(payload.data() != nullptr ? payload : castle::dsa::array_view<CASTLE_CONST uint8_t>())
         , position_(0U)
         , ok_(payload.data() != nullptr)
     {
@@ -195,7 +195,7 @@ public:
 
     /** @brief Reads `N` consecutive elements, e.g. a UBX `U2[6]` or `CH[30]` field. */
     template <typename T, castle::size_type N>
-    void read(castle::container::array<T, N>& values) CASTLE_NOEXCEPT
+    void read(castle::dsa::array<T, N>& values) CASTLE_NOEXCEPT
     {
         for (T& value : values)
         {
@@ -238,7 +238,7 @@ public:
      * stored in `text`.
      */
     template <castle::size_type Width>
-    void text(castle::container::string<Width>& value) CASTLE_NOEXCEPT
+    void text(castle::dsa::string<Width>& value) CASTLE_NOEXCEPT
     {
         value.clear();
         CASTLE_CONST uint8_t* data = advance(Width);
@@ -267,7 +267,7 @@ private:
         return data;
     }
 
-    castle::container::array_view<CASTLE_CONST uint8_t> payload_;
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload_;
     castle::size_type position_ = 0U;
     bool ok_ = true;
 };

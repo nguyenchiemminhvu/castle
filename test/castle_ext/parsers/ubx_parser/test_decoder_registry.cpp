@@ -28,7 +28,7 @@ TEST(UbxDecoderRegistryMirror, FacadeAliasesAndAttachDispatchAck)
     uint8_t frame[32U] = {};
     castle::size_type written = 0U;
     ASSERT_EQ(encode_frame(UBX_CLASS_ACK, UBX_ID_ACK_ACK,
-                           castle::container::array_view<CASTLE_CONST uint8_t>(payload, 2U),
+                           castle::dsa::array_view<CASTLE_CONST uint8_t>(payload, 2U),
                            frame, sizeof(frame), written), castle::status::ok);
     parser.feed(frame, written);
     EXPECT_EQ(hits, 1);
@@ -45,7 +45,7 @@ castle::parsers::ubx_parser::dispatch_result dispatch_encoded(
         return {};
     }
     message_view raw;
-    if (!decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), raw))
+    if (!decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written), raw))
     {
         return {};
     }

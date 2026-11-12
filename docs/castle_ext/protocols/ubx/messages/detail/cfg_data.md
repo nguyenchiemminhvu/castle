@@ -16,7 +16,7 @@ UBX-CFG-VALSET, -VALGET and -VALDEL share one wire shape: a 4-byte header whose 
 
 - [`castle/core/compiler.hpp`](../../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../../dsa/vector.md)
 - [`castle/error/status.hpp`](../../../../../error/status.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../../ubx.md) (`value_byte_size()`)
 - [`castle_ext/protocols/ubx/ubx_config.hpp`](../../ubx_config.md) (`config::config_value`)
@@ -61,7 +61,7 @@ UBX-CFG-VALSET, -VALGET and -VALDEL share one wire shape: a 4-byte header whose 
 template <castle::size_type MaxKeys = CFG_MAX_KEYS>
 struct cfg_valdel : detail::cfg_message<cfg_valdel<MaxKeys>, UBX_ID_CFG_VALDEL, 0x00U>, cfg_valdel_layers
 {
-    castle::container::vector<uint32_t, MaxKeys> keys{};
+    castle::dsa::vector<uint32_t, MaxKeys> keys{};
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) noexcept

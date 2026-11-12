@@ -6,8 +6,8 @@ namespace
 {
 
 namespace xml = castle::serialization::xml;
-using castle::container::string;
-using castle::container::string_view;
+using castle::dsa::string;
+using castle::dsa::string_view;
 
 using document = xml::document<64U, 64U, 2048U, 8U>;
 
@@ -348,21 +348,21 @@ TEST(XmlDocumentTest, CompactPrettyMixedContentAndOutputOverflow)
     document doc;
     ASSERT_TRUE(xml::parse(doc, string_view("<?xml version=\"1.0\"?><root a=\"1\"><a/><b/></root>")).succeeded());
 
-    castle::container::string<512U> compact;
+    castle::dsa::string<512U> compact;
     ASSERT_TRUE(xml::serialize(doc, compact, false).succeeded());
     EXPECT_EQ(compact.view(), string_view("<?xml version=\"1.0\"?><root a=\"1\"><a/><b/></root>"));
 
-    castle::container::string<512U> pretty;
+    castle::dsa::string<512U> pretty;
     ASSERT_TRUE(xml::serialize(doc, pretty, true, 2U).succeeded());
     EXPECT_NE(pretty.find(string_view("\n  <a/>")), string_view::npos);
 
     document mixed;
     ASSERT_TRUE(xml::parse(mixed, string_view("<root>Hello <b>world</b>!</root>")).succeeded());
-    castle::container::string<256U> mixed_output;
+    castle::dsa::string<256U> mixed_output;
     ASSERT_TRUE(xml::serialize(mixed, mixed_output, true, 2U).succeeded());
     EXPECT_EQ(mixed_output.view(), string_view("<root>Hello <b>world</b>!</root>"));
 
-    castle::container::string<16U> tiny;
+    castle::dsa::string<16U> tiny;
     const xml::result overflow = xml::serialize(doc, tiny);
     EXPECT_EQ(overflow.status, castle::status::full);
     EXPECT_EQ(overflow.code, xml::error_code::output_full);
@@ -372,7 +372,7 @@ TEST(XmlDocumentTest, CompactPrettyMixedContentAndOutputOverflow)
 TEST(XmlDocumentTest, EmptyDocument)
 {
     document doc;
-    castle::container::string<128U> out("not-empty");
+    castle::dsa::string<128U> out("not-empty");
     const xml::result r = xml::serialize(doc, out);
     EXPECT_EQ(r.status, castle::status::empty);
     EXPECT_EQ(r.code, xml::error_code::none);

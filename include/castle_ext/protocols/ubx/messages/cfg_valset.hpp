@@ -33,7 +33,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/ubx_config.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/cfg_data.hpp"
@@ -69,7 +69,7 @@ struct cfg_valset
     : detail::cfg_message<cfg_valset<MaxEntries>, UBX_ID_CFG_VALSET, 0x00U>
     , cfg_valset_layers
 {
-    castle::container::vector<config::config_entry, MaxEntries> entries{}; ///< Key/value pairs in wire order.
+    castle::dsa::vector<config::config_entry, MaxEntries> entries{}; ///< Key/value pairs in wire order.
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT
@@ -87,7 +87,7 @@ struct cfg_valset_transaction
     , cfg_valset_layers
     , cfg_transaction_field
 {
-    castle::container::vector<config::config_entry, MaxEntries> entries{}; ///< Key/value pairs in wire order (may be empty).
+    castle::dsa::vector<config::config_entry, MaxEntries> entries{}; ///< Key/value pairs in wire order (may be empty).
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT

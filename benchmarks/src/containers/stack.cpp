@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <castle/container/stack.hpp>
+#include <castle/dsa/stack.hpp>
 
 namespace
 {
@@ -23,7 +23,7 @@ BENCHMARK_F(stack_push_pop, castle)(benchmark::State& state)
     {
         state.PauseTiming();
         {
-            castle::container::stack_buffer<int, N> stack;
+            castle::dsa::stack_buffer<int, N> stack;
             state.ResumeTiming();
 
             for (std::size_t i = 0U; i < N; ++i)
@@ -84,7 +84,7 @@ class stack_top : public benchmark::Fixture {};
 BENCHMARK_F(stack_top, castle)(benchmark::State& state)
 {
     state.PauseTiming();
-    castle::container::stack_buffer<int, N> stack;
+    castle::dsa::stack_buffer<int, N> stack;
     for (std::size_t i = 0U; i < N; ++i)
     {
         static_cast<void>(stack.push(static_cast<int>(i)));

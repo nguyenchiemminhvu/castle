@@ -21,7 +21,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/error/status.hpp"
 
 #include <stdint.h>
@@ -34,7 +34,7 @@ namespace http
 {
 
 /** @brief Non-owning text view used by every HTTP interface. */
-using string_view = castle::container::string_view;
+using string_view = castle::dsa::string_view;
 
 /** @brief HTTP protocol version of a request or response. */
 enum class version : uint8_t

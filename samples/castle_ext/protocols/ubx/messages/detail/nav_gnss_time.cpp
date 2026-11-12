@@ -80,9 +80,9 @@ int main()
     message_view bds_raw{};
     message_view gal_raw{};
     message_view qzss_raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(bds_frame, bds_written), bds_raw));
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(gal_frame, gal_written), gal_raw));
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(qzss_frame, qzss_written), qzss_raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(bds_frame, bds_written), bds_raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(gal_frame, gal_written), gal_raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(qzss_frame, qzss_written), qzss_raw));
     CASTLE_SAMPLE_CHECK(nav_timebds::matches(bds_raw) && !nav_timegal::matches(bds_raw) && !nav_timeqzss::matches(bds_raw));
     CASTLE_SAMPLE_CHECK(!nav_timebds::matches(gal_raw) && nav_timegal::matches(gal_raw) && !nav_timeqzss::matches(gal_raw));
     CASTLE_SAMPLE_CHECK(!nav_timebds::matches(qzss_raw) && !nav_timegal::matches(qzss_raw) && nav_timeqzss::matches(qzss_raw));

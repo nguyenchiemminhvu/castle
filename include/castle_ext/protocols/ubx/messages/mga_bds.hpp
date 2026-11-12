@@ -22,7 +22,7 @@
 #define CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_MGA_BDS_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/typed_message.hpp"
 
@@ -163,7 +163,7 @@ struct mga_bds_health
     static CASTLE_CONSTEXPR uint16_t HEALTH_CODE_MASK = 0x01FFU;
 
     /** @brief `health_code[i]` is the health word of SV `i + 1`. */
-    castle::container::array<uint16_t, NUM_SVS> health_code{};
+    castle::dsa::array<uint16_t, NUM_SVS> health_code{};
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT
@@ -210,8 +210,8 @@ struct mga_bds_utc
 struct mga_bds_iono
     : detail::typed_message<mga_bds_iono, UBX_CLASS_MGA, UBX_ID_MGA_BDS, MGA_BDS_TYPE_IONO, 16U>
 {
-    castle::container::array<int8_t, 4U> alpha{}; ///< alpha0..3 [2^-30, -27, -24, -24].
-    castle::container::array<int8_t, 4U> beta{};  ///< beta0..3 [2^11, 14, 16, 16].
+    castle::dsa::array<int8_t, 4U> alpha{}; ///< alpha0..3 [2^-30, -27, -24, -24].
+    castle::dsa::array<int8_t, 4U> beta{};  ///< beta0..3 [2^11, 14, 16, 16].
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT

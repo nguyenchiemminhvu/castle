@@ -8,7 +8,7 @@ namespace
 
 using namespace castle::protocols::ubx;
 using namespace castle::protocols::ubx::messages;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 uint32_t read_one(CASTLE_CONST uint8_t* bytes)
 {
@@ -90,7 +90,7 @@ TEST(UbxMessageDetailEsfData, ReadPastEndLatchesReaderFailure)
 TEST(UbxMessageDetailEsfData, WriteEncodesTypeAndTwosComplementField)
 {
     uint8_t payload[16U] = {};
-    payload_writer writer(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+    payload_writer writer(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
     detail::esf_data_word<0x3FU>(writer, static_cast<uint8_t>(63U), static_cast<int32_t>(-8388608));
     detail::esf_data_word<0x3FU>(writer, static_cast<uint8_t>(11U), static_cast<int32_t>(8388607));
     detail::esf_data_word<0xFFU>(writer, static_cast<uint8_t>(0xFFU), static_cast<int32_t>(-1));
@@ -109,7 +109,7 @@ TEST(UbxMessageDetailEsfData, WriteThenReadRoundTripsEdgeValues)
     for (CASTLE_CONST int32_t original : values)
     {
         uint8_t payload[4U] = {};
-        payload_writer writer(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+        payload_writer writer(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
         detail::esf_data_word<0xFFU>(writer, static_cast<uint8_t>(0x81U), original);
         ASSERT_TRUE(writer.ok());
 
@@ -125,7 +125,7 @@ TEST(UbxMessageDetailEsfData, WriteThenReadRoundTripsEdgeValues)
 TEST(UbxMessageDetailEsfData, WriteRejectsTypeWiderThanMask)
 {
     uint8_t payload[8U] = {};
-    payload_writer writer(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+    payload_writer writer(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
     detail::esf_data_word<0x3FU>(writer, static_cast<uint8_t>(0x40U), static_cast<int32_t>(0));
     EXPECT_EQ(writer.status(), castle::status::out_of_range);
     EXPECT_EQ(writer.size(), 0U);
@@ -134,7 +134,7 @@ TEST(UbxMessageDetailEsfData, WriteRejectsTypeWiderThanMask)
     EXPECT_EQ(writer.status(), castle::status::out_of_range);
     EXPECT_EQ(writer.size(), 0U);
 
-    payload_writer wide(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+    payload_writer wide(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
     detail::esf_data_word<0xFFU>(wide, static_cast<uint8_t>(0x40U), static_cast<int32_t>(0));
     EXPECT_TRUE(wide.ok());
     EXPECT_EQ(read_one(&payload[0U]), 0x40000000U);
@@ -143,17 +143,17 @@ TEST(UbxMessageDetailEsfData, WriteRejectsTypeWiderThanMask)
 TEST(UbxMessageDetailEsfData, WriteRejectsValuesOutsideSignedTwentyFourBits)
 {
     uint8_t payload[4U] = {};
-    payload_writer above(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+    payload_writer above(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
     detail::esf_data_word<0xFFU>(above, static_cast<uint8_t>(1U), static_cast<int32_t>(8388608));
     EXPECT_EQ(above.status(), castle::status::out_of_range);
     EXPECT_EQ(above.size(), 0U);
 
-    payload_writer below(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+    payload_writer below(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
     detail::esf_data_word<0xFFU>(below, static_cast<uint8_t>(1U), static_cast<int32_t>(-8388609));
     EXPECT_EQ(below.status(), castle::status::out_of_range);
     EXPECT_EQ(below.size(), 0U);
 
-    payload_writer six_bit(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+    payload_writer six_bit(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
     detail::esf_data_word<0x3FU>(six_bit, static_cast<uint8_t>(1U), static_cast<int32_t>(0x7FFFFFFF));
     EXPECT_EQ(six_bit.status(), castle::status::out_of_range);
 }
@@ -161,7 +161,7 @@ TEST(UbxMessageDetailEsfData, WriteRejectsValuesOutsideSignedTwentyFourBits)
 TEST(UbxMessageDetailEsfData, WriteIntoFullBufferReportsFull)
 {
     uint8_t payload[3U] = {};
-    payload_writer writer(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+    payload_writer writer(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
     detail::esf_data_word<0x3FU>(writer, static_cast<uint8_t>(1U), static_cast<int32_t>(1));
     EXPECT_EQ(writer.status(), castle::status::full);
 }

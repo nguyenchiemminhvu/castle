@@ -2,7 +2,7 @@
 
 #include "castle/utility/type_index.hpp"
 #include "castle/utility/compare.hpp"
-#include "castle/container/hash_map.hpp"
+#include "castle/dsa/hash_map.hpp"
 
 #include <stdint.h>
 #include <string.h>
@@ -65,7 +65,7 @@ int main()
 
     // ---
 
-    using handler_map = castle::container::hash_map<
+    using handler_map = castle::dsa::hash_map<
         castle::type_index,
         uint8_t,
         8U>;

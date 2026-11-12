@@ -45,7 +45,7 @@ TEST(MqttTypes, UserPropertiesAndReasonMapping)
 TEST(MqttTypes, PropertyListRejectsInvalidValuesAndCapacity)
 {
     property_list<1U, 12U, 4U> single;
-    EXPECT_EQ(single.add_string(property_id::reason_string, castle::container::string_view()), castle::status::out_of_range);
+    EXPECT_EQ(single.add_string(property_id::reason_string, castle::dsa::string_view()), castle::status::out_of_range);
     EXPECT_EQ(single.add_integer(property_id::receive_maximum, 1U), castle::status::ok);
     EXPECT_EQ(single.add_binary(property_id::correlation_data, nullptr, 1U), castle::status::full);
     single.clear();
@@ -74,8 +74,8 @@ TEST(MqttTypes, PropertyBinaryValuesAreCopied)
 TEST(MqttTypes, UserPropertyRejectsNullAndOversizedFields)
 {
     property_list<2U, 8U, 4U> properties;
-    EXPECT_EQ(properties.add_user_property(castle::container::string_view(), "v"), castle::status::out_of_range);
-    EXPECT_EQ(properties.add_user_property("k", castle::container::string_view()), castle::status::out_of_range);
+    EXPECT_EQ(properties.add_user_property(castle::dsa::string_view(), "v"), castle::status::out_of_range);
+    EXPECT_EQ(properties.add_user_property("k", castle::dsa::string_view()), castle::status::out_of_range);
     EXPECT_EQ(properties.add_user_property("key-too-long", "v"), castle::status::out_of_range);
     EXPECT_EQ(properties.add_user_property("k", "value-too-long"), castle::status::out_of_range);
     EXPECT_TRUE(properties.empty());

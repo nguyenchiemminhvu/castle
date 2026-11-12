@@ -5,7 +5,7 @@
 #define CASTLE_EXT_PROTOCOLS_NMEA_MESSAGES_GNS_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle_ext/protocols/nmea/nmea.hpp"
 #include "castle_ext/protocols/nmea/field_cursor.hpp"
 
@@ -22,8 +22,8 @@ namespace messages
 struct gns
 {
     bool valid = false;
-    castle::container::string_view talker{};
-    castle::container::string_view mode_indicator{};
+    castle::dsa::string_view talker{};
+    castle::dsa::string_view mode_indicator{};
     double utc_time = 0.0;
     double latitude = 0.0;
     double longitude = 0.0;

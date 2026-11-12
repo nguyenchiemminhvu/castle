@@ -58,8 +58,8 @@ class hash_string_view : public benchmark::Fixture {};
 BENCHMARK_F(hash_string_view, castle)(benchmark::State& state)
 {
     state.PauseTiming();
-    const castle::container::string_view value("embedded systems benchmark string");
-    castle::hash<castle::container::string_view> hasher;
+    const castle::dsa::string_view value("embedded systems benchmark string");
+    castle::hash<castle::dsa::string_view> hasher;
     state.ResumeTiming();
 
     for (auto _ : state)

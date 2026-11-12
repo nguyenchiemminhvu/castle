@@ -26,12 +26,12 @@ int main()
     char sentence[128U];
     castle::size_type written = 0U;
     CASTLE_SAMPLE_CHECK(castle::succeeded(
-        generate_gga(input, castle::container::string_view(TALKER_GP), sentence, sizeof(sentence), written)));
+        generate_gga(input, castle::dsa::string_view(TALKER_GP), sentence, sizeof(sentence), written)));
 
-    castle::container::string_view field_storage[16U];
+    castle::dsa::string_view field_storage[16U];
     message_view raw;
     CASTLE_SAMPLE_CHECK(decode_sentence(
-        castle::container::string_view(sentence, written), field_storage, 16U, raw));
+        castle::dsa::string_view(sentence, written), field_storage, 16U, raw));
 
     // Dispatch-style check before committing to the typed decode.
     CASTLE_SAMPLE_CHECK(gga::matches(raw));
@@ -48,10 +48,10 @@ int main()
     CASTLE_SAMPLE_CHECK((fix.hdop > 0.99) && (fix.hdop < 1.01));
 
     // A sentence of a different type never matches.
-    castle::container::string_view other_fields[4U];
+    castle::dsa::string_view other_fields[4U];
     message_view other_raw;
     CASTLE_SAMPLE_CHECK(decode_sentence(
-        castle::container::string_view("$GPVTG,182.5,T,,M,3.25,N,6.02,K,A*XX\r\n"), other_fields, 4U, other_raw) == false);
+        castle::dsa::string_view("$GPVTG,182.5,T,,M,3.25,N,6.02,K,A*XX\r\n"), other_fields, 4U, other_raw) == false);
     CASTLE_SAMPLE_CHECK(!gga::matches(other_raw));
 
     return 0;

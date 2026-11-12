@@ -6,7 +6,7 @@ namespace
 {
 
 using namespace castle::protocols::ubx;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 // ---------------------------------------------------------------------------
 // message_view
@@ -19,7 +19,7 @@ TEST(UbxProtocol, MessageViewAccessors)
     view.header.msg_class = UBX_CLASS_NAV;
     view.header.msg_id = UBX_ID_NAV_PVT;
     view.header.payload_length = 2U;
-    view.payload = castle::container::array_view<CASTLE_CONST uint8_t>(payload_data, 2U);
+    view.payload = castle::dsa::array_view<CASTLE_CONST uint8_t>(payload_data, 2U);
     view.check = checksum{0x01U, 0x02U};
 
     EXPECT_EQ(view.msg_class(), UBX_CLASS_NAV);
@@ -94,13 +94,13 @@ TEST(UbxProtocol, LittleEndianWriteHelpers)
 
 TEST(UbxProtocol, ComputeChecksumEmptyAndNonEmpty)
 {
-    castle::container::array_view<CASTLE_CONST uint8_t> empty_data(nullptr, 0U);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> empty_data(nullptr, 0U);
     checksum empty_result = compute_checksum(empty_data);
     EXPECT_EQ(empty_result.ck_a, 0U);
     EXPECT_EQ(empty_result.ck_b, 0U);
 
     uint8_t data[3U] = {0x01U, 0x02U, 0x03U};
-    checksum result = compute_checksum(castle::container::array_view<CASTLE_CONST uint8_t>(data, 3U));
+    checksum result = compute_checksum(castle::dsa::array_view<CASTLE_CONST uint8_t>(data, 3U));
     EXPECT_EQ(result.ck_a, 0x06U);
     EXPECT_EQ(result.ck_b, 0x0AU);
 }
@@ -108,7 +108,7 @@ TEST(UbxProtocol, ComputeChecksumEmptyAndNonEmpty)
 TEST(UbxProtocol, ComputeFrameChecksumMatchesManualAccumulation)
 {
     uint8_t payload_data[2U] = {0xAAU, 0xBBU};
-    castle::container::array_view<CASTLE_CONST uint8_t> payload(payload_data, 2U);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload(payload_data, 2U);
 
     checksum frame_checksum = compute_frame_checksum(UBX_CLASS_CFG, UBX_ID_CFG_VALSET, 2U, payload);
 
@@ -136,7 +136,7 @@ TEST(UbxProtocol, FrameSize)
 
 TEST(UbxProtocol, EncodeFrameRejectsPayloadLargerThanMaxLen)
 {
-    castle::container::array_view<CASTLE_CONST uint8_t> oversized_payload(
+    castle::dsa::array_view<CASTLE_CONST uint8_t> oversized_payload(
         nullptr, static_cast<castle::size_type>(UBX_MAX_PAYLOAD_LEN) + 1U);
 
     uint8_t output[16U];
@@ -150,7 +150,7 @@ TEST(UbxProtocol, EncodeFrameRejectsPayloadLargerThanMaxLen)
 
 TEST(UbxProtocol, EncodeFrameRejectsNullPayloadDataWithNonZeroSize)
 {
-    castle::container::array_view<CASTLE_CONST uint8_t> bad_payload(nullptr, 2U);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> bad_payload(nullptr, 2U);
 
     uint8_t output[16U];
     castle::size_type written = 0U;
@@ -162,7 +162,7 @@ TEST(UbxProtocol, EncodeFrameRejectsNullPayloadDataWithNonZeroSize)
 
 TEST(UbxProtocol, EncodeFrameRejectsNullOutput)
 {
-    castle::container::array_view<CASTLE_CONST uint8_t> empty_payload(nullptr, 0U);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> empty_payload(nullptr, 0U);
 
     castle::size_type written = 0U;
     castle::status result = encode_frame(
@@ -174,7 +174,7 @@ TEST(UbxProtocol, EncodeFrameRejectsNullOutput)
 TEST(UbxProtocol, EncodeFrameRejectsUndersizedOutputBuffer)
 {
     uint8_t payload_data[2U] = {0x01U, 0x02U};
-    castle::container::array_view<CASTLE_CONST uint8_t> payload(payload_data, 2U);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload(payload_data, 2U);
 
     uint8_t output[4U];
     castle::size_type written = 0U;
@@ -187,7 +187,7 @@ TEST(UbxProtocol, EncodeFrameRejectsUndersizedOutputBuffer)
 
 TEST(UbxProtocol, EncodeFrameSucceedsWithEmptyPayload)
 {
-    castle::container::array_view<CASTLE_CONST uint8_t> empty_payload(nullptr, 0U);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> empty_payload(nullptr, 0U);
 
     uint8_t output[UBX_FRAME_OVERHEAD];
     castle::size_type written = 0U;
@@ -203,7 +203,7 @@ TEST(UbxProtocol, EncodeFrameSucceedsWithEmptyPayload)
 TEST(UbxProtocol, EncodeFrameSucceedsWithNonEmptyPayload)
 {
     uint8_t payload_data[2U] = {0x01U, 0x02U};
-    castle::container::array_view<CASTLE_CONST uint8_t> payload(payload_data, 2U);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload(payload_data, 2U);
 
     uint8_t output[UBX_FRAME_OVERHEAD + 2U];
     castle::size_type written = 0U;
@@ -224,21 +224,21 @@ TEST(UbxProtocol, DecodeFrameRejectsTooShortFrame)
 {
     uint8_t frame[4U] = {UBX_SYNC_CHAR_1, UBX_SYNC_CHAR_2, 0U, 0U};
     message_view view;
-    EXPECT_FALSE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, 4U), view));
+    EXPECT_FALSE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, 4U), view));
 }
 
 TEST(UbxProtocol, DecodeFrameRejectsBadFirstSyncByte)
 {
     uint8_t frame[UBX_FRAME_OVERHEAD] = {0x00U, UBX_SYNC_CHAR_2, 0U, 0U, 0U, 0U, 0U, 0U};
     message_view view;
-    EXPECT_FALSE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, sizeof(frame)), view));
+    EXPECT_FALSE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, sizeof(frame)), view));
 }
 
 TEST(UbxProtocol, DecodeFrameRejectsBadSecondSyncByte)
 {
     uint8_t frame[UBX_FRAME_OVERHEAD] = {UBX_SYNC_CHAR_1, 0x00U, 0U, 0U, 0U, 0U, 0U, 0U};
     message_view view;
-    EXPECT_FALSE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, sizeof(frame)), view));
+    EXPECT_FALSE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, sizeof(frame)), view));
 }
 
 TEST(UbxProtocol, DecodeFrameRejectsSizeMismatch)
@@ -246,13 +246,13 @@ TEST(UbxProtocol, DecodeFrameRejectsSizeMismatch)
     // Declares a 10-byte payload (LEN_LO=10) but the buffer is only the 0-payload size.
     uint8_t frame[UBX_FRAME_OVERHEAD] = {UBX_SYNC_CHAR_1, UBX_SYNC_CHAR_2, 0U, 0U, 10U, 0U, 0U, 0U};
     message_view view;
-    EXPECT_FALSE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, sizeof(frame)), view));
+    EXPECT_FALSE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, sizeof(frame)), view));
 }
 
 TEST(UbxProtocol, DecodeFrameRejectsChecksumMismatch)
 {
     uint8_t payload_data[2U] = {0x01U, 0x02U};
-    castle::container::array_view<CASTLE_CONST uint8_t> payload(payload_data, 2U);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload(payload_data, 2U);
 
     uint8_t frame[UBX_FRAME_OVERHEAD + 2U];
     castle::size_type written = 0U;
@@ -262,30 +262,30 @@ TEST(UbxProtocol, DecodeFrameRejectsChecksumMismatch)
     frame[written - 1U] ^= 0xFFU;
 
     message_view view;
-    EXPECT_FALSE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), view));
+    EXPECT_FALSE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written), view));
 }
 
 TEST(UbxProtocol, DecodeFrameRoundTripsEmptyAndNonEmptyPayload)
 {
-    castle::container::array_view<CASTLE_CONST uint8_t> empty_payload(nullptr, 0U);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> empty_payload(nullptr, 0U);
     uint8_t empty_frame[UBX_FRAME_OVERHEAD];
     castle::size_type empty_written = 0U;
     ASSERT_EQ(encode_frame(UBX_CLASS_ACK, UBX_ID_ACK_NAK, empty_payload, empty_frame, sizeof(empty_frame), empty_written),
               castle::status::ok);
 
     message_view empty_view;
-    ASSERT_TRUE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(empty_frame, empty_written), empty_view));
+    ASSERT_TRUE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(empty_frame, empty_written), empty_view));
     EXPECT_EQ(empty_view.payload_length(), 0U);
 
     uint8_t payload_data[3U] = {0x01U, 0x02U, 0x03U};
-    castle::container::array_view<CASTLE_CONST uint8_t> payload(payload_data, 3U);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload(payload_data, 3U);
     uint8_t frame[UBX_FRAME_OVERHEAD + 3U];
     castle::size_type written = 0U;
     ASSERT_EQ(encode_frame(UBX_CLASS_NAV, UBX_ID_NAV_PVT, payload, frame, sizeof(frame), written),
               castle::status::ok);
 
     message_view view;
-    ASSERT_TRUE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), view));
+    ASSERT_TRUE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written), view));
     EXPECT_TRUE(view.is(UBX_CLASS_NAV, UBX_ID_NAV_PVT));
     EXPECT_EQ(view.payload_length(), 3U);
     EXPECT_EQ(view.payload[0U], 0x01U);
@@ -322,7 +322,7 @@ TEST(UbxProtocol, EncodesAndDecodesAFrameWithKnownPayload)
                            frame, sizeof(frame), written), castle::status::ok);
 
     message_view view;
-    EXPECT_TRUE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), view));
+    EXPECT_TRUE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written), view));
     EXPECT_EQ(view.msg_class(), UBX_CLASS_NAV);
     EXPECT_EQ(view.msg_id(), UBX_ID_NAV_DOP);
     EXPECT_EQ(view.payload_length(), 3U);
@@ -339,9 +339,9 @@ TEST(UbxProtocol, DecodeRejectsFrameSizeAndChecksumViolations)
                            frame, sizeof(frame), written), castle::status::ok);
 
     message_view view;
-    EXPECT_FALSE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written - 1U), view));
+    EXPECT_FALSE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written - 1U), view));
     frame[written - 1U] ^= 0xFFU;
-    EXPECT_FALSE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), view));
+    EXPECT_FALSE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written), view));
 }
 
 TEST(UbxProtocol, EmptyPayloadAndViewAccessorsRemainValid)
@@ -352,7 +352,7 @@ TEST(UbxProtocol, EmptyPayloadAndViewAccessorsRemainValid)
                            array_view<CASTLE_CONST uint8_t>(nullptr, 0U),
                            frame, sizeof(frame), written), castle::status::ok);
     message_view view;
-    ASSERT_TRUE(decode_frame(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written), view));
+    ASSERT_TRUE(decode_frame(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written), view));
     EXPECT_EQ(view.payload_length(), 0U);
     EXPECT_EQ(frame_size(0U), UBX_FRAME_OVERHEAD);
 }

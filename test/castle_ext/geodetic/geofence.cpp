@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "castle/container/array_view.hpp"
+#include "castle/dsa/array_view.hpp"
 #include "castle/error/status.hpp"
 #include "castle_ext/geodetic/geofence.hpp"
 

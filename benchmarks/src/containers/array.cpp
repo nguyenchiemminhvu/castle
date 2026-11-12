@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include <castle/container/array.hpp>
+#include <castle/dsa/array.hpp>
 
 #if CASTLE_BENCHMARK_ENABLE_STL
 #include <array>
@@ -24,7 +24,7 @@ BENCHMARK_F(array_construct, castle) (benchmark::State& state)
 {
     for (auto _ : state)
     {
-        castle::container::array<int, N> a;
+        castle::dsa::array<int, N> a;
         benchmark::DoNotOptimize(a);
     }
 
@@ -54,7 +54,7 @@ class array_access : public benchmark::Fixture {};
 
 BENCHMARK_F(array_access, castle) (benchmark::State& state)
 {
-    castle::container::array<int, N> a;
+    castle::dsa::array<int, N> a;
     std::uint64_t sum = 0U;
     for (auto _ : state)
     {

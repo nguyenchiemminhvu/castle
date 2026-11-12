@@ -16,7 +16,7 @@ castle::size_type make_frame(
     uint8_t msg_class, uint8_t msg_id,
     CASTLE_CONST uint8_t* payload_data, castle::size_type payload_size)
 {
-    castle::container::array_view<CASTLE_CONST uint8_t> payload(payload_data, payload_size);
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload(payload_data, payload_size);
     castle::size_type written = 0U;
     castle::status result = encode_frame(msg_class, msg_id, payload, output, capacity, written);
     EXPECT_EQ(result, castle::status::ok);
@@ -183,7 +183,7 @@ TEST(UbxParser, FeedArrayView)
     uint8_t frame[32U];
     castle::size_type written = make_frame(frame, sizeof(frame), UBX_CLASS_TIM, UBX_ID_TIM_TP, payload_data, 1U);
 
-    parser.feed(castle::container::array_view<CASTLE_CONST uint8_t>(frame, written));
+    parser.feed(castle::dsa::array_view<CASTLE_CONST uint8_t>(frame, written));
     EXPECT_EQ(hits, 1U);
 }
 

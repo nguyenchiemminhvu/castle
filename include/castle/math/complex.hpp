@@ -33,7 +33,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/error_handler.hpp"
 #include "castle/core/traits.hpp"
-#include "castle/algorithm/algorithm.hpp"
+#include "castle/dsa/algorithm.hpp"
 #include "castle/math/abs.hpp"
 #include "castle/math/exponential.hpp"
 #include "castle/math/hypot.hpp"

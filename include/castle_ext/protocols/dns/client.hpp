@@ -19,7 +19,7 @@
 #include "castle/error/status.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/move.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle_ext/net/client.hpp"
 #include "castle_ext/protocols/dns/message.hpp"
 #include "castle_ext/protocols/dns/types.hpp"
@@ -119,7 +119,7 @@ public:
      * @return `ok`, `not_found` for NXDOMAIN, `time_out`, `full`, or the underlying socket/codec status.
      */
     castle::status resolve(net::endpoint CASTLE_CONST& nameserver,
-                           castle::container::string_view name,
+                           castle::dsa::string_view name,
                            record_type type,
                            response_type& output,
                            int* system_error = nullptr) CASTLE_NOEXCEPT
@@ -208,7 +208,7 @@ public:
      * @return `ok` when started; otherwise a validation or socket error.
      */
     castle::status start_resolve(net::endpoint CASTLE_CONST& nameserver,
-                                 castle::container::string_view name,
+                                 castle::dsa::string_view name,
                                  record_type type,
                                  uint32_t now_ms,
                                  int* system_error = nullptr) CASTLE_NOEXCEPT
@@ -237,7 +237,7 @@ public:
             async_name_storage_[i] = name[i];
         }
         async_name_storage_[name.size()] = '\0';
-        async_name_ = castle::container::string_view(async_name_storage_, name.size());
+        async_name_ = castle::dsa::string_view(async_name_storage_, name.size());
         result = prepare_udp(server_.family(), true, system_error);
         if (!castle::succeeded(result))
         {
@@ -472,7 +472,7 @@ private:
     castle::status parse_and_validate(CASTLE_CONST uint8_t* data,
                                       size_type size,
                                       uint16_t id,
-                                      castle::container::string_view expected_name,
+                                      castle::dsa::string_view expected_name,
                                       record_type expected_type,
                                       response<N>& output) CASTLE_NOEXCEPT
     {
@@ -505,7 +505,7 @@ private:
         return castle::status::ok;
     }
 
-    static bool same_name(castle::container::string_view left, CASTLE_CONST char* right) CASTLE_NOEXCEPT
+    static bool same_name(castle::dsa::string_view left, CASTLE_CONST char* right) CASTLE_NOEXCEPT
     {
         size_type left_size = left.size();
         size_type right_size = 0U;
@@ -542,7 +542,7 @@ private:
     }
 
     castle::status resolve_tcp(net::endpoint CASTLE_CONST& peer,
-                               castle::container::string_view name,
+                               castle::dsa::string_view name,
                                record_type type,
                                uint16_t id,
                                size_type query_size,
@@ -718,7 +718,7 @@ private:
     size_type tcp_message_offset_ = 0U;
     net::endpoint server_{};
     char async_name_storage_[256U]{};
-    castle::container::string_view async_name_{};
+    castle::dsa::string_view async_name_{};
     record_type async_type_ = record_type::a;
     uint16_t attempts_ = 0U;
     uint32_t last_attempt_ms_ = 0U;

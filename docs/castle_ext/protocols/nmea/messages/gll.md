@@ -11,7 +11,7 @@ Represents an NMEA GLL geographic-position sentence. It decodes latitude/longitu
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/string_view.hpp`](../../../../container/string_view.md)
+- [`castle/dsa/string_view.hpp`](../../../../dsa/string_view.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../nmea.md)
 - [`castle_ext/protocols/nmea/field_cursor.hpp`](../field_cursor.md)
 
@@ -28,7 +28,7 @@ Represents an NMEA GLL geographic-position sentence. It decodes latitude/longitu
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | `valid` | `bool` | `false` | True when decoding completed successfully for the sentence. |
-| `talker` | `castle::container::string_view` | `—` | Non-owning NMEA talker identifier view. |
+| `talker` | `castle::dsa::string_view` | `—` | Non-owning NMEA talker identifier view. |
 | `latitude` | `double` | `0.0` | Decoded latitude value. |
 | `longitude` | `double` | `0.0` | Decoded longitude value. |
 | `utc_time` | `double` | `0.0` | UTC time field decoded from the sentence. |

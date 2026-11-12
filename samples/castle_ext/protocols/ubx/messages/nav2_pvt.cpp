@@ -44,7 +44,7 @@ int main()
     CASTLE_SAMPLE_CHECK(encode_message(solution, frame, sizeof(frame), written) == castle::status::ok);
 
     message_view raw;
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(raw.is(UBX_CLASS_NAV2, UBX_ID_NAV2_PVT));
     CASTLE_SAMPLE_CHECK(nav2_pvt::matches(raw));
     CASTLE_SAMPLE_CHECK(!nav_pvt::matches(raw)); // same ID, different class
@@ -70,7 +70,7 @@ int main()
     // A NAV-PVT frame is not accepted as NAV2-PVT.
     nav_pvt primary;
     CASTLE_SAMPLE_CHECK(encode_message(primary, frame, sizeof(frame), written) == castle::status::ok);
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(!nav2_pvt::decode(raw, pvt));
 
     return 0;

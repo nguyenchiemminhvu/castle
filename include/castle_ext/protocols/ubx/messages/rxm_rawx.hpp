@@ -17,7 +17,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/constants.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -168,7 +168,7 @@ struct rxm_rawx
     uint8_t num_meas = 0U;  ///< On-wire measurement count; may exceed `meas.size()`.
     uint8_t rec_stat = 0U;  ///< Receiver tracking status, see `REC_STAT_*`.
     uint8_t version = 0U;   ///< Message version (0x01 for this version).
-    castle::container::vector<rxm_rawx_meas, MaxMeas> meas{};
+    castle::dsa::vector<rxm_rawx_meas, MaxMeas> meas{};
 
     CASTLE_NODISCARD bool leap_sec() CASTLE_CONST CASTLE_NOEXCEPT
     {

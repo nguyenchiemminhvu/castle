@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <deque>
 
-#include <castle/container/ring_buffer.hpp>
+#include <castle/dsa/ring_buffer.hpp>
 
 namespace
 {
@@ -23,7 +23,7 @@ BENCHMARK_F(queue_push_pop, castle)(benchmark::State& state)
     {
         state.PauseTiming();
         {
-            castle::container::ring_buffer<int, N> queue;
+            castle::dsa::ring_buffer<int, N> queue;
             state.ResumeTiming();
 
             for (std::size_t i = 0U; i < N; ++i)
@@ -89,7 +89,7 @@ class queue_front : public benchmark::Fixture {};
 BENCHMARK_F(queue_front, castle)(benchmark::State& state)
 {
     state.PauseTiming();
-    castle::container::ring_buffer<int, N> queue;
+    castle::dsa::ring_buffer<int, N> queue;
     for (std::size_t i = 0U; i < N; ++i)
     {
         static_cast<void>(queue.push(static_cast<int>(i)));

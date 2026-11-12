@@ -21,7 +21,7 @@
  *   `bus-speed`) and starts it. `close()` removes the filters and stops it.
  * - Every filter is registered with `can_add_rx_filter()` using one static callback. The
  *   callback converts the driver frame and pushes it into a fixed SPSC queue
- *   (`container::mirrored_ring_buffer`) and gives a `k_sem`; `receive()` takes the semaphore
+ *   (`dsa::mirrored_ring_buffer`) and gives a `k_sem`; `receive()` takes the semaphore
  *   (honouring the timeout) and pops the queue. Nothing allocates and no thread is created.
  *   Frames that find the queue full are dropped and counted in `bus_status::rx_overruns`.
  * - `send()` queues the frame with a completion callback, so it returns as soon as a TX mailbox
@@ -42,7 +42,7 @@
 #ifndef CASTLE_EXT_IO_CAN_BACKENDS_ZEPHYR_HPP
 #define CASTLE_EXT_IO_CAN_BACKENDS_ZEPHYR_HPP
 
-#include "castle/container/mirrored_ring_buffer.hpp"
+#include "castle/dsa/mirrored_ring_buffer.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/config.hpp"
 #include "castle/core/types.hpp"
@@ -514,7 +514,7 @@ private:
 
     CASTLE_CONST struct device* device_;
     detail::slot_table<int, MaxFilters> filters_;
-    container::mirrored_ring_buffer<frame, RxQueueDepth> rx_queue_;
+    dsa::mirrored_ring_buffer<frame, RxQueueDepth> rx_queue_;
     castle::atomic<uint32_t> rx_overruns_;
     castle::atomic<uint32_t> tx_failures_;
 };

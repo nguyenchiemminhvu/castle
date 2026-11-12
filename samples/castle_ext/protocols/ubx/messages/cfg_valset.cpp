@@ -31,7 +31,7 @@ int main()
     CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + 4U + (4U + 2U) + (4U + 4U)));
 
     message_view raw{};
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(cfg_valset<>::matches(raw));
     CASTLE_SAMPLE_CHECK(!cfg_valset_transaction<>::matches(raw));
 
@@ -56,7 +56,7 @@ int main()
     commit.set_action(cfg_transaction_action::apply); // no entries: only ends the transaction
     CASTLE_SAMPLE_CHECK(castle::succeeded(encode_message(commit, frame, sizeof(frame), written)));
     CASTLE_SAMPLE_CHECK(written == (UBX_FRAME_OVERHEAD + 4U));
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
 
     cfg_valset_transaction<> decoded{};
     CASTLE_SAMPLE_CHECK(cfg_valset_transaction<>::decode(raw, decoded));

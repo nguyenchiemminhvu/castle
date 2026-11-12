@@ -6,7 +6,7 @@ namespace
 {
 using namespace castle::protocols::ubx;
 using namespace castle::protocols::ubx::messages;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 message_view view_of(CASTLE_CONST uint8_t* payload, uint16_t length, uint8_t msg_class = UBX_CLASS_MON,
                      uint8_t msg_id = UBX_ID_MON_HW2)

@@ -8,7 +8,7 @@
 
 ## Dependencies
 - [`function`](../callbacks/function.md)
-- [`ring_buffer`](../container/ring_buffer.md)
+- [`ring_buffer`](../dsa/ring_buffer.md)
 
 ## Public API
 | API | Description |

@@ -41,7 +41,7 @@ Circular containment uses the actual geodesic distance calculation (`haversine_d
 - ../../core/error_handler.md
 - ../../core/traits.md
 - ../../core/types.md
-- ../../container/array.md
+- ../../dsa/array.md
 - [`../../ntainer/array_view.md
 - ../../error/status.md
 - [`../../math/geometry/geometry.md`](../../ublic API
@@ -309,4 +309,4 @@ This matches the simplification used by many lightweight GIS and geofencing syst
 - `distance.hpp` for Haversine and geodesic distance calculations.
 - `datum.hpp` for ellipsoid definitions.
 - `castle::math::geometry` for planar geometric primitives and algorithms.
-- `castle::container::array` and `array_view` for polygon boundary storage and views.
+- `castle::dsa::array` and `array_view` for polygon boundary storage and views.

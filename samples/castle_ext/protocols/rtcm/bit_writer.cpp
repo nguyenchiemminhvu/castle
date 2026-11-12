@@ -12,7 +12,7 @@ struct sample_message
     uint16_t number = 0U;
     int32_t offset = 0;
     bool flag = false;
-    castle::container::string<8U> name{};
+    castle::dsa::string<8U> name{};
 
     void encode(castle::protocols::rtcm::bit_writer& writer) CASTLE_CONST CASTLE_NOEXCEPT
     {
@@ -29,7 +29,7 @@ struct sample_message
 int main()
 {
     using namespace castle::protocols::rtcm;
-    using castle::container::array_view;
+    using castle::dsa::array_view;
 
     // 1. Raw bits, MSB first, no alignment between fields.
     uint8_t payload[8U];
@@ -57,7 +57,7 @@ int main()
     typed.field(static_cast<int32_t>(-2), 12U);
     typed.field(true);
     typed.reserved(3U);
-    castle::container::string<8U> label;
+    castle::dsa::string<8U> label;
     CASTLE_SAMPLE_CHECK(label.assign("AB") == castle::status::ok);
     typed.text(label);
     CASTLE_SAMPLE_CHECK(typed.ok());

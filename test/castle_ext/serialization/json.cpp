@@ -4,8 +4,8 @@
 
 namespace
 {
-using castle::container::string;
-using castle::container::string_view;
+using castle::dsa::string;
+using castle::dsa::string_view;
 using castle::serialization::json::document;
 using castle::serialization::json::error_code;
 using castle::serialization::json::parse;
@@ -109,14 +109,14 @@ TEST(JsonSerializeTest, CompactAndPretty)
 {
     document<16U, 256U, 8U> doc;
     ASSERT_EQ(parse(doc, string_view("{\"b\":true,\"s\":\"x\\ny\",\"a\":[1,2]}" )).status, castle::status::ok);
-    castle::container::string<256U> compact;
+    castle::dsa::string<256U> compact;
     ASSERT_TRUE(serialize(doc, compact).succeeded());
     EXPECT_EQ(compact.view(), string_view("{\"b\":true,\"s\":\"x\\ny\",\"a\":[1,2]}"));
-    castle::container::string<256U> pretty;
+    castle::dsa::string<256U> pretty;
     ASSERT_TRUE(serialize(doc, pretty, true, 2U).succeeded());
     EXPECT_NE(pretty.view().find("\n"), pretty.view().npos);
 
-    castle::container::string<8U> too_small;
+    castle::dsa::string<8U> too_small;
     auto r = serialize(doc, too_small);
     EXPECT_EQ(r.status, castle::status::full);
     EXPECT_TRUE(too_small.empty());
@@ -127,7 +127,7 @@ TEST(JsonSerializeTest, EmptyAndStringEscaping)
     document<4U, 128U, 4U> doc;
     document<4U, 128U, 4U>::node_id root = document<4U, 128U, 4U>::npos;
     ASSERT_EQ(doc.make_array(root), castle::status::ok);
-    castle::container::string<32U> out;
+    castle::dsa::string<32U> out;
     ASSERT_TRUE(serialize(doc, out).succeeded()); EXPECT_EQ(out.view(), string_view("[]"));
     doc.clear();
     ASSERT_EQ(doc.set_string(root, "a\"b\\c\n"), castle::status::ok);

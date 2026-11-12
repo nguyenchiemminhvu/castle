@@ -10,7 +10,7 @@ Encodes one recursive IN-class DNS question and decodes RFC 1035 responses. The 
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp)
 - [`castle/error/status.hpp`](../../../../include/castle/error/status.hpp)
-- [`castle/container/string_view.hpp`](../../../../include/castle/container/string_view.hpp)
+- [`castle/dsa/string_view.hpp`](../../../../include/castle/dsa/string_view.hpp)
 - [`castle_ext/protocols/dns/types.hpp`](types.md)
 
 ## Public API

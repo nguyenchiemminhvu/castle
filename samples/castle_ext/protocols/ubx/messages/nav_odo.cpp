@@ -23,7 +23,7 @@ int main()
     CASTLE_SAMPLE_CHECK(castle::read_le32(&frame[UBX_FRAME_INDEX_PAYLOAD + 4U]) == 123456U);
 
     message_view raw;
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(nav_odo::matches(raw));
 
     nav_odo decoded;

@@ -24,7 +24,7 @@
 #ifndef CASTLE_MATH_NUMERIC_RESULT_HPP
 #define CASTLE_MATH_NUMERIC_RESULT_HPP
 
-#include "castle/algorithm/algorithm.hpp"
+#include "castle/dsa/algorithm.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/error/status.hpp"
 #include "castle/math/abs.hpp"

@@ -8,7 +8,7 @@ namespace
 {
 
 using namespace castle::protocols::nmea;
-using castle::container::string_view;
+using castle::dsa::string_view;
 using castle::parsers::nmea_parser::nmea_parser;
 using castle::parsers::nmea_parser::parse_error;
 using castle::parsers::nmea_parser::parse_state;
@@ -27,7 +27,7 @@ castle::size_type build_sentence(
         ++count;
     }
 
-    castle::container::array_view<CASTLE_CONST string_view> fields(field_storage, count);
+    castle::dsa::array_view<CASTLE_CONST string_view> fields(field_storage, count);
     castle::size_type written = 0U;
     castle::status result = encode_sentence(
         string_view(talker), string_view(type), fields, output, capacity, written);
@@ -229,7 +229,7 @@ TEST(NmeaParser, FeedUint8ArrayView)
     {
         bytes[i] = static_cast<uint8_t>(sentence[i]);
     }
-    parser.feed(castle::container::array_view<CASTLE_CONST uint8_t>(bytes, written));
+    parser.feed(castle::dsa::array_view<CASTLE_CONST uint8_t>(bytes, written));
     EXPECT_EQ(hits, 1U);
 }
 

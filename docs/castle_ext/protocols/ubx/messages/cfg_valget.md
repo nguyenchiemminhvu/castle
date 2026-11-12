@@ -15,7 +15,7 @@ Typed models of UBX-CFG-VALGET (class 0x06, ID 0x8b), which reads configuration 
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/ubx_config.hpp`](../ubx_config.md) (`UBX_CFG_VALGET_LAYER_*`)
 - [`detail/cfg_data.hpp`](detail/cfg_data.md)

@@ -7,7 +7,7 @@ namespace
 
 using namespace castle::protocols::ubx;
 using namespace castle::protocols::ubx::messages;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 struct block
 {
@@ -55,7 +55,7 @@ TEST(UbxMessageDetailGroup, ReadGroupStoresAndSkipsOverflow)
     payload[9U] = 0x5AU; // trailing field after the group
 
     payload_reader all(array_view<CASTLE_CONST uint8_t>(payload, sizeof(payload)));
-    castle::container::vector<block, 4U> wide;
+    castle::dsa::vector<block, 4U> wide;
     detail::read_group(all, 3U, wide);
     ASSERT_TRUE(all.ok());
     ASSERT_EQ(wide.size(), 3U);
@@ -64,7 +64,7 @@ TEST(UbxMessageDetailGroup, ReadGroupStoresAndSkipsOverflow)
     EXPECT_EQ(all.read_u8(), 0x5AU);
 
     payload_reader capped(array_view<CASTLE_CONST uint8_t>(payload, sizeof(payload)));
-    castle::container::vector<block, 2U> narrow;
+    castle::dsa::vector<block, 2U> narrow;
     static_cast<void>(narrow.push_back(block{}));
     static_cast<void>(narrow.push_back(block{}));
     detail::read_group(capped, 3U, narrow); // cleared first, then filled
@@ -84,12 +84,12 @@ TEST(UbxMessageDetailGroup, ReadGroupLatchesShortPayload)
 {
     uint8_t payload[4U] = {1U, 0x10U, 0x00U, 2U};
     payload_reader reader(array_view<CASTLE_CONST uint8_t>(payload, sizeof(payload)));
-    castle::container::vector<block, 4U> out;
+    castle::dsa::vector<block, 4U> out;
     detail::read_group(reader, 2U, out);
     EXPECT_FALSE(reader.ok());
 
     payload_reader skipping(array_view<CASTLE_CONST uint8_t>(payload, sizeof(payload)));
-    castle::container::vector<block, 1U> one;
+    castle::dsa::vector<block, 1U> one;
     detail::read_group(skipping, 2U, one); // stored 1, skip of 3 overruns
     EXPECT_EQ(one.size(), 1U);
     EXPECT_FALSE(skipping.ok());
@@ -97,7 +97,7 @@ TEST(UbxMessageDetailGroup, ReadGroupLatchesShortPayload)
 
 TEST(UbxMessageDetailGroup, WriteGroupRoundTrip)
 {
-    castle::container::vector<block, 3U> in;
+    castle::dsa::vector<block, 3U> in;
     block first{};
     first.id = 9U;
     first.value = 0xA1B2U;
@@ -117,7 +117,7 @@ TEST(UbxMessageDetailGroup, WriteGroupRoundTrip)
     EXPECT_EQ(buffer[3U], 8U);
 
     payload_reader reader(array_view<CASTLE_CONST uint8_t>(buffer, sizeof(buffer)));
-    castle::container::vector<block, 3U> out;
+    castle::dsa::vector<block, 3U> out;
     detail::read_group(reader, 2U, out);
     ASSERT_EQ(out.size(), 2U);
     EXPECT_EQ(out[1U].value, 0x0102U);
@@ -134,7 +134,7 @@ TEST(UbxMessageDetailGroup, TailHelpers)
     payload_reader reader(array_view<CASTLE_CONST uint8_t>(payload, sizeof(payload)));
     reader.skip(1U);
 
-    castle::container::vector<uint8_t, 3U> tail;
+    castle::dsa::vector<uint8_t, 3U> tail;
     detail::read_tail(reader, tail);
     ASSERT_TRUE(reader.ok());
     ASSERT_EQ(tail.size(), 3U); // capacity-limited
@@ -143,7 +143,7 @@ TEST(UbxMessageDetailGroup, TailHelpers)
     EXPECT_EQ(reader.remaining(), 0U); // rest skipped
 
     payload_reader full(array_view<CASTLE_CONST uint8_t>(payload, sizeof(payload)));
-    castle::container::vector<char, 8U> text;
+    castle::dsa::vector<char, 8U> text;
     detail::read_tail(full, text);
     EXPECT_EQ(text.size(), 6U);
     EXPECT_EQ(text[5U], '!');

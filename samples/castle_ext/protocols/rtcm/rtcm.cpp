@@ -5,7 +5,7 @@
 int main()
 {
     using namespace castle::protocols::rtcm;
-    using castle::container::array_view;
+    using castle::dsa::array_view;
 
     // 1. Frame layout constants and sizes.
     CASTLE_SAMPLE_CHECK(RTCM_PREAMBLE == 0xD3U);

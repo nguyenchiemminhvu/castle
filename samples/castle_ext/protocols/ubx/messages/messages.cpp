@@ -10,7 +10,7 @@ int main()
 {
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
-    using castle::container::array_view;
+    using castle::dsa::array_view;
 
     uint8_t frame[256U] = {};
     castle::size_type written = 0U;

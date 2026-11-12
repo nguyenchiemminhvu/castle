@@ -22,7 +22,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/array_view.hpp"
+#include "castle/dsa/array_view.hpp"
 
 #include <stdint.h>
 #include <limits.h>
@@ -115,7 +115,7 @@ struct message_header
 struct message_view
 {
     message_header header{};
-    castle::container::array_view<CASTLE_CONST uint8_t> payload{};
+    castle::dsa::array_view<CASTLE_CONST uint8_t> payload{};
 
     CASTLE_NODISCARD bool is(message_type value) CASTLE_CONST CASTLE_NOEXCEPT
     {
@@ -430,7 +430,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status encode_common_header(
  * the supplied view.
  */
 CASTLE_NODISCARD CASTLE_INLINE bool decode_message(
-    castle::container::array_view<CASTLE_CONST uint8_t> frame,
+    castle::dsa::array_view<CASTLE_CONST uint8_t> frame,
     message_view& output) CASTLE_NOEXCEPT
 {
     output = message_view{};
@@ -470,7 +470,7 @@ CASTLE_NODISCARD CASTLE_INLINE bool decode_message(
     output.header.sequence_id = detail::read_be16(&frame[30U]);
     output.header.control_field = frame[32U];
     output.header.log_message_interval = static_cast<int8_t>(frame[33U]);
-    output.payload = castle::container::array_view<CASTLE_CONST uint8_t>(
+    output.payload = castle::dsa::array_view<CASTLE_CONST uint8_t>(
         message_length == PTP_HEADER_SIZE ? nullptr : &frame[PTP_HEADER_SIZE],
         message_length - PTP_HEADER_SIZE); // LCOV_EXCL_BR_LINE
     return true;
@@ -579,7 +579,7 @@ public:
      * timestamp required for the calculation is available.
      */
     CASTLE_NODISCARD castle::status receive(
-        castle::container::array_view<CASTLE_CONST uint8_t> packet,
+        castle::dsa::array_view<CASTLE_CONST uint8_t> packet,
         timestamp CASTLE_CONST& receive_timestamp,
         slave_action& action) CASTLE_NOEXCEPT
     {

@@ -11,7 +11,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/utility/bytes.hpp"
 #include "castle_ext/protocols/dns/types.hpp"
 
@@ -43,7 +43,7 @@ public:
      * @return `ok`, `invalid_argument` for malformed names/types, or `full` when capacity is insufficient.
      * @note Complexity is O(name.size()); no allocation occurs.
      */
-    static castle::status encode_query(castle::container::string_view name,
+    static castle::status encode_query(castle::dsa::string_view name,
                                        record_type type,
                                        uint16_t id,
                                        uint8_t* output,

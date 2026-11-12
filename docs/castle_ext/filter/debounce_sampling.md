@@ -7,7 +7,7 @@ A fixed-threshold debounce, hold, and auto-repeat finite-state machine for sampl
 `#include "castle_ext/filter/debounce_sampling.hpp"`
 
 ## Dependencies
-- [`../../algorithm/algorithm.md`](../../algorithm/algorithm.md)
+- [`../../dsa/algorithm.md`](../../dsa/algorithm.md)
 - `castle/callbacks/function.hpp`
 - `castle/core/type_ranges.hpp`
 

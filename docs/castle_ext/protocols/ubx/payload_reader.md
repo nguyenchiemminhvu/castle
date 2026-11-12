@@ -17,9 +17,9 @@ The reader shares its *layout verbs* (`field`, `reserved`, `constant`, `text`) w
 * [`core/compiler.hpp`](../../../core/compiler.md)
 * [`core/traits.hpp`](../../../core/traits.md)
 * [`core/types.hpp`](../../../core/types.md)
-* [`container/array.hpp`](../../../container/array.md)
-* [`container/array_view.hpp`](../../../container/array_view.md)
-* [`container/string.hpp`](../../../container/string.md)
+* [`dsa/array.hpp`](../../../dsa/array.md)
+* [`dsa/array_view.hpp`](../../../dsa/array_view.md)
+* [`dsa/string.hpp`](../../../dsa/string.md)
 * [`utility/bit_cast.hpp`](../../../utility/bit_cast.md)
 * [`ubx.hpp`](ubx.md)
 
@@ -54,7 +54,7 @@ The reader shares its *layout verbs* (`field`, `reserved`, `constant`, `text`) w
 | --- | --- |
 | `read(T& value)` | Overloads for `char`, `uint8_t` ... `int64_t`, `float`, `double`: reads exactly `sizeof(T)` bytes into `value`. |
 | `read(Enum& value)` | Reads an `enum` through its underlying integer type. |
-| `read(castle::container::array<T, N>& values)` | Reads `N` consecutive elements (UBX `U2[6]`, `I1[4]`, ...). |
+| `read(castle::dsa::array<T, N>& values)` | Reads `N` consecutive elements (UBX `U2[6]`, `I1[4]`, ...). |
 
 ### Layout verbs (shared with `payload_writer`)
 
@@ -63,7 +63,7 @@ The reader shares its *layout verbs* (`field`, `reserved`, `constant`, `text`) w
 | `field(T& value)` | Same as `read(value)`; width follows the declared field type. |
 | `reserved(count)` | Skips `count` reserved bytes. |
 | `constant(expected)` | Consumes one byte and calls `fail()` unless it equals `expected` (message type/version bytes). |
-| `text(castle::container::string<W>& value)` | Consumes exactly `W` bytes of a NUL-padded `CH[W]` field and stores the characters before the first NUL. |
+| `text(castle::dsa::string<W>& value)` | Consumes exactly `W` bytes of a NUL-padded `CH[W]` field and stores the characters before the first NUL. |
 
 ## Usage Example
 

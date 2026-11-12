@@ -11,8 +11,8 @@ Represents an NMEA GSV satellite-in-view sentence. It stores message numbering, 
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
-- [`castle/container/string_view.hpp`](../../../../container/string_view.md)
+- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
+- [`castle/dsa/string_view.hpp`](../../../../dsa/string_view.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../nmea.md)
 - [`castle_ext/protocols/nmea/field_cursor.hpp`](../field_cursor.md)
 - `stdint.h`
@@ -41,13 +41,13 @@ Represents an NMEA GSV satellite-in-view sentence. It stores message numbering, 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | `valid` | `bool` | `false` | True when decoding completed successfully for the sentence. |
-| `talker` | `castle::container::string_view` | `—` | Non-owning NMEA talker identifier view. |
+| `talker` | `castle::dsa::string_view` | `—` | Non-owning NMEA talker identifier view. |
 | `num_msgs` | `uint8_t` | `0U` | Total GSV message count in the sequence. |
 | `msg_num` | `uint8_t` | `0U` | Current GSV message number in the sequence. |
 | `sats_in_view` | `uint8_t` | `0U` | Total satellites reported as being in view. |
 | `sat_count` | `uint8_t` | `0U` | Number of GSV satellite blocks decoded into the fixed-capacity array. |
 | `signal_id` | `uint8_t` | `0U` | Optional GSV signal identifier. |
-| `satellites` | `castle::container::array<gsv_satellite,max_satellites>` | `—` | Fixed-capacity Castle container holding decoded records/values. |
+| `satellites` | `castle::dsa::array<gsv_satellite,max_satellites>` | `—` | Fixed-capacity Castle container holding decoded records/values. |
 
 ## Usage Example
 

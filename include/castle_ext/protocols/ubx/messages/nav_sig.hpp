@@ -14,7 +14,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/constants.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -159,7 +159,7 @@ struct nav_sig
     uint32_t i_tow = 0U;   ///< GPS time of week of the navigation epoch [ms].
     uint8_t version = 0U;  ///< Message version (0x00 for this version).
     uint8_t num_sigs = 0U; ///< On-wire signal count; may exceed `signals.size()`.
-    castle::container::vector<nav_sig_info, MaxSignals> signals{};
+    castle::dsa::vector<nav_sig_info, MaxSignals> signals{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

@@ -10,8 +10,8 @@
 - [`core/compiler.hpp`](../../../core/compiler.md)
 - [`core/types.hpp`](../../../core/types.md)
 - [`error/status.hpp`](../../../error/status.md)
-- [`container/array_view.hpp`](../../../container/array_view.md)
-- [`container/string_view.hpp`](../../../container/string_view.md)
+- [`dsa/array_view.hpp`](../../../dsa/array_view.md)
+- [`dsa/string_view.hpp`](../../../dsa/string_view.md)
 
 ## Public API
 | API | Description |
@@ -40,22 +40,22 @@ See `samples/castle_ext/protocols/nmea/nmea.cpp`.
 #include "castle_ext/protocols/nmea/nmea.hpp"
 
 char sentence[96U];
-castle::container::string_view fields_data[2U] = {
-    castle::container::string_view("1"),
-    castle::container::string_view("08")
+castle::dsa::string_view fields_data[2U] = {
+    castle::dsa::string_view("1"),
+    castle::dsa::string_view("08")
 };
-castle::container::array_view<const castle::container::string_view> fields(fields_data, 2U);
+castle::dsa::array_view<const castle::dsa::string_view> fields(fields_data, 2U);
 
 castle::size_type written = 0U;
 castle::protocols::nmea::encode_sentence(
-    castle::container::string_view(castle::protocols::nmea::TALKER_GP),
-    castle::container::string_view(castle::protocols::nmea::SENTENCE_GSA),
+    castle::dsa::string_view(castle::protocols::nmea::TALKER_GP),
+    castle::dsa::string_view(castle::protocols::nmea::SENTENCE_GSA),
     fields, sentence, sizeof(sentence), written);
 
-castle::container::string_view field_storage[8U];
+castle::dsa::string_view field_storage[8U];
 castle::protocols::nmea::message_view view;
 castle::protocols::nmea::decode_sentence(
-    castle::container::string_view(sentence, written), field_storage, 8U, view);
+    castle::dsa::string_view(sentence, written), field_storage, 8U, view);
 ```
 
 ## Constraints & Notes

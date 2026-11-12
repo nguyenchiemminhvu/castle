@@ -18,7 +18,7 @@ int main()
     };
 
     payload_reader reader(
-        castle::container::array_view<const uint8_t>(
+        castle::dsa::array_view<const uint8_t>(
             payload_data,
             sizeof(payload_data)));
 
@@ -50,7 +50,7 @@ int main()
     };
 
     payload_reader skip_reader(
-        castle::container::array_view<const uint8_t>(
+        castle::dsa::array_view<const uint8_t>(
             reserved_payload,
             sizeof(reserved_payload)));
 
@@ -67,7 +67,7 @@ int main()
     uint8_t short_payload[] = {0x01U, 0x02U};
 
     payload_reader failing_reader(
-        castle::container::array_view<const uint8_t>(
+        castle::dsa::array_view<const uint8_t>(
             short_payload,
             sizeof(short_payload)));
 
@@ -91,14 +91,14 @@ int main()
     typed_payload[16U] = '9';                                          // CH[4] "F9" + NUL padding
 
     payload_reader typed_reader(
-        castle::container::array_view<const uint8_t>(typed_payload, sizeof(typed_payload)));
+        castle::dsa::array_view<const uint8_t>(typed_payload, sizeof(typed_payload)));
 
     typed_reader.constant(0x01U);
     float speed = typed_reader.read_r4();
     double offset = typed_reader.read_r8();
     int16_t delta = 0;
     typed_reader.field(delta);
-    castle::container::string<4U> name{};
+    castle::dsa::string<4U> name{};
     typed_reader.text(name);
 
     CASTLE_SAMPLE_CHECK(typed_reader.ok());
@@ -111,7 +111,7 @@ int main()
 
     // A mismatching constant byte latches the reader, like an overrun.
     payload_reader version_reader(
-        castle::container::array_view<const uint8_t>(typed_payload, sizeof(typed_payload)));
+        castle::dsa::array_view<const uint8_t>(typed_payload, sizeof(typed_payload)));
     version_reader.constant(0x02U);
     CASTLE_SAMPLE_CHECK(!version_reader.ok());
 

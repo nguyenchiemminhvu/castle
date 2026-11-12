@@ -6,7 +6,7 @@ namespace
 {
 
 using namespace castle::protocols::nmea;
-using castle::container::string_view;
+using castle::dsa::string_view;
 
 // ---------------------------------------------------------------------------
 // message_view
@@ -18,7 +18,7 @@ TEST(NmeaProtocol, SentenceViewAccessors)
     message_view view;
     view.talker = string_view("GP");
     view.type = string_view("GSA");
-    view.fields = castle::container::array_view<CASTLE_CONST string_view>(fields_data, 3U);
+    view.fields = castle::dsa::array_view<CASTLE_CONST string_view>(fields_data, 3U);
     view.checksum = 0x7BU;
     view.checksum_present = true;
 
@@ -289,7 +289,7 @@ TEST(NmeaProtocol, EncodeSentenceRejectsEmptyType)
     castle::size_type written = 0U;
     castle::status result = encode_sentence(
         string_view("GP"), string_view(),
-        castle::container::array_view<CASTLE_CONST string_view>(nullptr, 0U),
+        castle::dsa::array_view<CASTLE_CONST string_view>(nullptr, 0U),
         out, sizeof(out), written);
     EXPECT_EQ(result, castle::status::invalid_argument);
 }
@@ -299,7 +299,7 @@ TEST(NmeaProtocol, EncodeSentenceRejectsNullOutput)
     castle::size_type written = 0U;
     castle::status result = encode_sentence(
         string_view("GP"), string_view("GSA"),
-        castle::container::array_view<CASTLE_CONST string_view>(nullptr, 0U),
+        castle::dsa::array_view<CASTLE_CONST string_view>(nullptr, 0U),
         nullptr, 32U, written);
     EXPECT_EQ(result, castle::status::invalid_argument);
 }
@@ -311,7 +311,7 @@ TEST(NmeaProtocol, EncodeSentenceRejectsUndersizedBuffer)
     castle::size_type written = 0U;
     castle::status result = encode_sentence(
         string_view("GP"), string_view("GSA"),
-        castle::container::array_view<CASTLE_CONST string_view>(fields_data, 1U),
+        castle::dsa::array_view<CASTLE_CONST string_view>(fields_data, 1U),
         out, sizeof(out), written);
     EXPECT_EQ(result, castle::status::full);
 }
@@ -322,7 +322,7 @@ TEST(NmeaProtocol, EncodeSentenceRoundTripsWithEmptyTalkerAndNoFields)
     castle::size_type written = 0U;
     castle::status result = encode_sentence(
         string_view(), string_view("TXT"),
-        castle::container::array_view<CASTLE_CONST string_view>(nullptr, 0U),
+        castle::dsa::array_view<CASTLE_CONST string_view>(nullptr, 0U),
         out, sizeof(out), written);
     ASSERT_EQ(result, castle::status::ok);
 
@@ -341,7 +341,7 @@ TEST(NmeaProtocol, EncodeSentenceRoundTripsWithFields)
     castle::size_type written = 0U;
     castle::status result = encode_sentence(
         string_view("GP"), string_view("GSA"),
-        castle::container::array_view<CASTLE_CONST string_view>(fields_data, 2U),
+        castle::dsa::array_view<CASTLE_CONST string_view>(fields_data, 2U),
         out, sizeof(out), written);
     ASSERT_EQ(result, castle::status::ok);
 
@@ -458,7 +458,7 @@ TEST(NmeaProtocol, EncodeDecodeRoundTripKeepsChecksumAndFields)
     ASSERT_EQ(
         encode_sentence(
             string_view("GN"), string_view("GSA"),
-            castle::container::array_view<CASTLE_CONST string_view>(fields_data, 3U),
+            castle::dsa::array_view<CASTLE_CONST string_view>(fields_data, 3U),
             output, sizeof(output), written),
         castle::status::ok);
 

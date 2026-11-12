@@ -23,8 +23,8 @@
 #include "castle/core/types.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/string.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string.hpp"
+#include "castle/dsa/string_view.hpp"
 
 #include <stdint.h>
 
@@ -91,8 +91,8 @@ class basic_string_builder
 public:
     using value_type = CharT;
     using size_type = castle::size_type;
-    using view_type = container::basic_string_view<CharT>;
-    using string_type = container::basic_string<CharT, N>;
+    using view_type = dsa::basic_string_view<CharT>;
+    using string_type = dsa::basic_string<CharT, N>;
 
     static CASTLE_CONSTEXPR size_type static_capacity = N;
     static CASTLE_CONSTEXPR size_type default_float_precision = 3U;
@@ -157,8 +157,8 @@ public:
             static_assert(meta::dependent_false<T>::value,
                           "castle::basic_string_builder::append: unsupported argument type. "
                           "Supported: CharT, bool, integral, floating-point, enum, types "
-                          "convertible to castle::container::basic_string_view<CharT>, or any "
-                          "type exposing a view() accessor (e.g. castle::container::basic_string).");
+                          "convertible to castle::dsa::basic_string_view<CharT>, or any "
+                          "type exposing a view() accessor (e.g. castle::dsa::basic_string).");
         }
         return *this;
     }

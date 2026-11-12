@@ -49,7 +49,7 @@
 #include "castle/utility/move.hpp"
 #include "castle/utility/forward.hpp"
 
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 
 #include "castle/callbacks/function.hpp"
 
@@ -685,7 +685,7 @@ private:
         }
     }
 
-    container::array<slot, MaxSlot> slots_{};
+    dsa::array<slot, MaxSlot> slots_{};
     size_type active_count_ = 0U;
 };
 

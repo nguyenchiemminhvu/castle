@@ -14,7 +14,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -159,8 +159,8 @@ struct mon_spt
     uint8_t version = 0U;    ///< Message version (0x01 for this version).
     uint8_t num_sensor = 0U; ///< On-wire sensor block count; may exceed `sensors.size()`.
     uint8_t num_res = 0U;    ///< On-wire result block count; may exceed `results.size()`.
-    castle::container::vector<mon_spt_sensor, MaxSensors> sensors{};
-    castle::container::vector<mon_spt_result, MaxResults> results{};
+    castle::dsa::vector<mon_spt_sensor, MaxSensors> sensors{};
+    castle::dsa::vector<mon_spt_result, MaxResults> results{};
 
     CASTLE_NODISCARD static bool matches(CASTLE_CONST message_view& raw) CASTLE_NOEXCEPT
     {

@@ -47,9 +47,9 @@
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
 #include "castle/callbacks/function.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/array_view.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/array_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/move.hpp"
 
@@ -98,8 +98,8 @@ enum class parser_error_code : uint8_t
 struct parse_error
 {
     parser_error_code code = parser_error_code::none;
-    castle::container::string_view talker{};
-    castle::container::string_view type{};
+    castle::dsa::string_view talker{};
+    castle::dsa::string_view type{};
 };
 
 /**
@@ -298,7 +298,7 @@ public:
     /**
      * @brief Feeds a Castle string view.
      */
-    void feed(castle::container::string_view data) CASTLE_NOEXCEPT
+    void feed(castle::dsa::string_view data) CASTLE_NOEXCEPT
     {
         feed(data.data(), data.size());
     }
@@ -325,7 +325,7 @@ public:
     /**
      * @brief Feeds a Castle array view over raw transport bytes.
      */
-    void feed(castle::container::array_view<CASTLE_CONST uint8_t> data) CASTLE_NOEXCEPT
+    void feed(castle::dsa::array_view<CASTLE_CONST uint8_t> data) CASTLE_NOEXCEPT
     {
         feed(data.data(), data.size());
     }
@@ -406,8 +406,8 @@ private:
 
     void emit_error(
         parser_error_code code,
-        castle::container::string_view talker = castle::container::string_view(),
-        castle::container::string_view type = castle::container::string_view()) CASTLE_NOEXCEPT
+        castle::dsa::string_view talker = castle::dsa::string_view(),
+        castle::dsa::string_view type = castle::dsa::string_view()) CASTLE_NOEXCEPT
     {
         error_type error;
         error.code = code;
@@ -429,10 +429,10 @@ private:
 
     void on_sentence_complete() CASTLE_NOEXCEPT
     {
-        CASTLE_CONST castle::container::string_view content(buffer_.data(), buffer_len_);
+        CASTLE_CONST castle::dsa::string_view content(buffer_.data(), buffer_len_);
 
-        castle::container::string_view talker;
-        castle::container::string_view type;
+        castle::dsa::string_view talker;
+        castle::dsa::string_view type;
         CASTLE_CONST size_type field_count = protocols::nmea::tokenize_fields(
             content, field_storage_.data(), MaxFields, talker, type);
 
@@ -445,7 +445,7 @@ private:
         CASTLE_CONST message_type message{
             talker,
             type,
-            castle::container::array_view<CASTLE_CONST castle::container::string_view>(field_storage_.data(), field_count),
+            castle::dsa::array_view<CASTLE_CONST castle::dsa::string_view>(field_storage_.data(), field_count),
             received_checksum_,
             checksum_present_
         };
@@ -558,7 +558,7 @@ private:
 
     parse_state state_ = parse_state::wait_dollar;
 
-    castle::container::array<char, MaxSentenceLen> buffer_{};
+    castle::dsa::array<char, MaxSentenceLen> buffer_{};
     size_type buffer_len_ = 0U;
 
     protocols::nmea::checksum_accumulator checksum_{};
@@ -566,7 +566,7 @@ private:
     uint8_t received_checksum_ = 0U;
     char checksum_hi_ = '\0';
 
-    castle::container::array<castle::container::string_view, MaxFields> field_storage_{};
+    castle::dsa::array<castle::dsa::string_view, MaxFields> field_storage_{};
 
     size_type messages_decoded_ = 0U;
     size_type messages_discarded_ = 0U;

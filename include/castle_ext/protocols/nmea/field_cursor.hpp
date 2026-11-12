@@ -31,7 +31,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 
 #include "castle_ext/protocols/nmea/nmea.hpp"
 
@@ -59,9 +59,9 @@ public:
     }
 
     /** @brief Returns the current field and advances past it. */
-    CASTLE_NODISCARD castle::container::string_view next() CASTLE_NOEXCEPT
+    CASTLE_NODISCARD castle::dsa::string_view next() CASTLE_NOEXCEPT
     {
-        CASTLE_CONST castle::container::string_view value = sentence_.field(index_);
+        CASTLE_CONST castle::dsa::string_view value = sentence_.field(index_);
         ++index_;
         return value;
     }
@@ -101,8 +101,8 @@ public:
     /** @brief Consumes a value field followed by its N/S or E/W direction field. */
     CASTLE_NODISCARD bool next_latlon(double& out) CASTLE_NOEXCEPT
     {
-        CASTLE_CONST castle::container::string_view value = next();
-        CASTLE_CONST castle::container::string_view direction = next();
+        CASTLE_CONST castle::dsa::string_view value = next();
+        CASTLE_CONST castle::dsa::string_view direction = next();
         return parse_latlon(value, direction, out);
     }
 
@@ -110,7 +110,7 @@ public:
     CASTLE_NODISCARD double next_double_or(double fallback) CASTLE_NOEXCEPT
     {
         double value = fallback;
-        CASTLE_CONST castle::container::string_view field = next();
+        CASTLE_CONST castle::dsa::string_view field = next();
         if (!field.empty()) // LCOV_EXCL_BR_LINE
         {
             // An unparsable non-empty field keeps `fallback`; nothing else to do with the result.
@@ -123,7 +123,7 @@ public:
     CASTLE_NODISCARD uint32_t next_uint_or(uint32_t fallback, int base = 10) CASTLE_NOEXCEPT
     {
         uint32_t value = fallback;
-        CASTLE_CONST castle::container::string_view field = next();
+        CASTLE_CONST castle::dsa::string_view field = next();
         if (!field.empty()) // LCOV_EXCL_BR_LINE
         {
             // An unparsable non-empty field keeps `fallback`; nothing else to do with the result.

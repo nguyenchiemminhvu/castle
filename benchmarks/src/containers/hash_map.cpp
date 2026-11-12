@@ -4,14 +4,14 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include <castle/container/hash_map.hpp>
+#include <castle/dsa/hash_map.hpp>
 
 namespace
 {
 
 constexpr std::size_t N = 127;
 
-void fill_castle(castle::container::hash_map<int, int, N>& map)
+void fill_castle(castle::dsa::hash_map<int, int, N>& map)
 {
     for (std::size_t i = 0U; i < N / 2U; ++i)
     {
@@ -42,7 +42,7 @@ BENCHMARK_F(hash_map_insert, castle)(benchmark::State& state)
     {
         state.PauseTiming();
         {
-            castle::container::hash_map<int, int, N> map;
+            castle::dsa::hash_map<int, int, N> map;
             state.ResumeTiming();
 
             for (std::size_t i = 0U; i < N / 2U; ++i)
@@ -94,7 +94,7 @@ class hash_map_find_hit : public benchmark::Fixture {};
 BENCHMARK_F(hash_map_find_hit, castle)(benchmark::State& state)
 {
     state.PauseTiming();
-    castle::container::hash_map<int, int, N> map;
+    castle::dsa::hash_map<int, int, N> map;
     fill_castle(map);
     state.ResumeTiming();
 
@@ -136,7 +136,7 @@ class hash_map_find_miss : public benchmark::Fixture {};
 BENCHMARK_F(hash_map_find_miss, castle)(benchmark::State& state)
 {
     state.PauseTiming();
-    castle::container::hash_map<int, int, N> map;
+    castle::dsa::hash_map<int, int, N> map;
     fill_castle(map);
     state.ResumeTiming();
 
@@ -181,7 +181,7 @@ BENCHMARK_F(hash_map_erase, castle)(benchmark::State& state)
     {
         state.PauseTiming();
         {
-            castle::container::hash_map<int, int, N> map;
+            castle::dsa::hash_map<int, int, N> map;
             fill_castle(map);
             state.ResumeTiming();
 

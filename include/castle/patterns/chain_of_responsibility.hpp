@@ -22,7 +22,7 @@
  *   a `castle::tuple`, and dispatched with a compile-time fold. No type erasure, no function pointers,
  *   and the compiler can inline every predicate and action.
  * - `bounded_chain_of_responsibility<MaxHandlers, void(Args...)>`: up to `MaxHandlers` handlers are
- *   registered at runtime into a `castle::container::array` of `castle::callbacks::function` slots
+ *   registered at runtime into a `castle::dsa::array` of `castle::callbacks::function` slots
  *   (one slot per handler). Handlers may have different callable types as long as they fit the
  *   inline storage.
  *
@@ -66,7 +66,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/callbacks/function.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle/error/status.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/integral_sequence.hpp"
@@ -579,7 +579,7 @@ private:
         return !callable;
     }
 
-    container::array<handler_type, MaxHandlers> handlers_{};
+    dsa::array<handler_type, MaxHandlers> handlers_{};
     size_type size_ = 0U;
     size_type depth_ = 0U;
 };

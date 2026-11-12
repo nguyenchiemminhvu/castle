@@ -6,7 +6,7 @@ int main()
 {
     using namespace castle::protocols::ubx;
     using namespace castle::protocols::ubx::messages;
-    using castle::container::array_view;
+    using castle::dsa::array_view;
 
     // Receiver output with two active fences: inside fence 1, outside fence 2.
     nav_geofence<4U> status{};

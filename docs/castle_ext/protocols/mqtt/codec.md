@@ -9,7 +9,7 @@ Provides checked MQTT fixed-header handling, canonical Remaining Length encoding
 ## Dependencies
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp)
-- [`castle/container/string_view.hpp`](../../../../include/castle/container/string_view.hpp)
+- [`castle/dsa/string_view.hpp`](../../../../include/castle/dsa/string_view.hpp)
 - [`castle/error/status.hpp`](../../../../include/castle/error/status.hpp)
 - [`castle/utility/bytes.hpp`](../../../../include/castle/utility/bytes.hpp) (network-byte-order integer load/store)
 - [`castle_ext/protocols/mqtt/types.hpp`](types.md)

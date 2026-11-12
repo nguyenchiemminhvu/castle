@@ -43,8 +43,8 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/heap.hpp"
-#include "castle/container/ring_buffer.hpp"
+#include "castle/dsa/heap.hpp"
+#include "castle/dsa/ring_buffer.hpp"
 #include "castle/chrono/chrono.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/move.hpp"
@@ -136,8 +136,8 @@ private:
     };
 
     using scheduled_queue_type =
-        castle::container::min_heap<event_node, MaxEventCount, event_node_compare>;
-    using free_queue_type = castle::container::ring_buffer<size_type, MaxEventCount>;
+        castle::dsa::min_heap<event_node, MaxEventCount, event_node_compare>;
+    using free_queue_type = castle::dsa::ring_buffer<size_type, MaxEventCount>;
 
     /**
      * @brief Wrapper for storing a callable and its bound arguments.

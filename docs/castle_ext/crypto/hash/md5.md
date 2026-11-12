@@ -11,7 +11,7 @@ Provides a streaming RFC 1321 MD5 message digest for compatibility with legacy p
 - [`../../../core/error_handler.md`](../../../core/error_handler.md)
 - [`../../../core/types.md`](../../../core/types.md)
 - [`../../../error/status.md`](../../../error/status.md)
-- [`../../../container/array.md`](../../../container/array.md)
+- [`../../../dsa/array.md`](../../../dsa/array.md)
 - [`../../../../include/castle/utility/bytes.hpp`](../../../../include/castle/utility/bytes.hpp)
 
 ## Public API
@@ -20,7 +20,7 @@ Provides a streaming RFC 1321 MD5 message digest for compatibility with legacy p
 | `digest_size`, `block_size` | Compile-time constants: 16 and 64 bytes. |
 | `reset()` | Starts a new digest. |
 | `update(data, size)` | Adds bytes; returns `castle::status`. |
-| `digest()` | Returns a fixed `castle::container::array<uint8_t, 16>` snapshot. |
+| `digest()` | Returns a fixed `castle::dsa::array<uint8_t, 16>` snapshot. |
 | `final(output, capacity)` | Copies the digest to caller-owned storage. |
 | `static calculate(data, size)` | One-shot digest calculation. |
 

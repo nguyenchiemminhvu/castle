@@ -15,7 +15,7 @@ The header also defines `nav_sv_health` and `nav_signal_quality`, which [`nav_si
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/constants.hpp`](../../../../core/constants.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
@@ -69,7 +69,7 @@ The header also defines `nav_sv_health` and `nav_signal_quality`, which [`nav_si
 | `i_tow` | `uint32_t` | ms | GPS time of week of the navigation epoch. |
 | `version` | `uint8_t` | - | Message version (0x01). |
 | `num_svs` | `uint8_t` | - | On-wire satellite count; may exceed `svs.size()`. |
-| `svs` | `castle::container::vector<nav_sat_sv, MaxSvs>` | - | Stored satellite blocks. |
+| `svs` | `castle::dsa::vector<nav_sat_sv, MaxSvs>` | - | Stored satellite blocks. |
 
 ### Functions
 

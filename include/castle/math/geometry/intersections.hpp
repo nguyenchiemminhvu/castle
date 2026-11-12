@@ -23,7 +23,7 @@
 #include "castle/math/geometry/plane3d.hpp"
 #include "castle/math/geometry/vector3d.hpp"
 #include "castle/math/sqrt_real.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 
 namespace castle
 {
@@ -80,7 +80,7 @@ template <typename T>
 struct intersection_points2d
 {
     size_type count;                         ///< Number of valid entries in points.
-    container::array<point2d<T>, 2U> points; ///< Returned intersection points.
+    dsa::array<point2d<T>, 2U> points; ///< Returned intersection points.
     bool coincident;                        ///< true when the geometric objects coincide.
 
     /** @brief Constructs an empty intersection result. */
@@ -99,7 +99,7 @@ template <typename T>
 struct intersection_points3d
 {
     size_type count;                         ///< Number of valid entries in points.
-    container::array<point3d<T>, 2U> points; ///< Returned intersection points.
+    dsa::array<point3d<T>, 2U> points; ///< Returned intersection points.
     bool coincident;                        ///< true when the geometric objects coincide.
 
     /** @brief Constructs an empty intersection result. */

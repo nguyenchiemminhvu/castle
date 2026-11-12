@@ -31,7 +31,7 @@
  * };
  * @endcode
  *
- * Decoded blocks land in a fixed-capacity `castle::container::vector`, whose
+ * Decoded blocks land in a fixed-capacity `castle::dsa::vector`, whose
  * `size()` is the number actually stored. Blocks beyond its capacity are
  * skipped, so the reader cursor always ends on the next field and the
  * message's spec-named count field still reports the on-wire count.
@@ -41,7 +41,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
 
@@ -106,7 +106,7 @@ template <typename Block, castle::size_type N>
 CASTLE_INLINE void read_group(
     payload_reader& reader,
     castle::size_type wire_count,
-    castle::container::vector<Block, N>& out) CASTLE_NOEXCEPT
+    castle::dsa::vector<Block, N>& out) CASTLE_NOEXCEPT
 {
     out.clear();
     for (castle::size_type index = 0U; index < wire_count; ++index)
@@ -130,7 +130,7 @@ CASTLE_INLINE void read_group(
 template <typename Block, castle::size_type N>
 CASTLE_INLINE void write_group(
     payload_writer& writer,
-    CASTLE_CONST castle::container::vector<Block, N>& blocks) CASTLE_NOEXCEPT
+    CASTLE_CONST castle::dsa::vector<Block, N>& blocks) CASTLE_NOEXCEPT
 {
     for (CASTLE_CONST Block& block : blocks)
     {
@@ -143,7 +143,7 @@ CASTLE_INLINE void write_group(
  * UBX-MGA-DBD `data`, UBX-INF `str`) and skips the rest.
  */
 template <typename T, castle::size_type N>
-CASTLE_INLINE void read_tail(payload_reader& reader, castle::container::vector<T, N>& out) CASTLE_NOEXCEPT
+CASTLE_INLINE void read_tail(payload_reader& reader, castle::dsa::vector<T, N>& out) CASTLE_NOEXCEPT
 {
     static_assert(sizeof(T) == 1U, "read_tail stores byte-sized elements only");
     out.clear();
@@ -158,7 +158,7 @@ CASTLE_INLINE void read_tail(payload_reader& reader, castle::container::vector<T
 
 /** @brief Encodes every byte stored in `bytes`. */
 template <typename T, castle::size_type N>
-CASTLE_INLINE void write_tail(payload_writer& writer, CASTLE_CONST castle::container::vector<T, N>& bytes) CASTLE_NOEXCEPT
+CASTLE_INLINE void write_tail(payload_writer& writer, CASTLE_CONST castle::dsa::vector<T, N>& bytes) CASTLE_NOEXCEPT
 {
     for (CASTLE_CONST T& value : bytes)
     {

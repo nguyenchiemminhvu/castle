@@ -10,7 +10,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/error/status.hpp"
 #include "castle/utility/bytes.hpp"
 #include "castle_ext/protocols/mqtt/types.hpp"
@@ -234,7 +234,7 @@ public:
         }
         size_ += count; return result_;
     }
-    castle::status put_utf8(castle::container::string_view value) CASTLE_NOEXCEPT
+    castle::status put_utf8(castle::dsa::string_view value) CASTLE_NOEXCEPT
     {
         if (value.size() > 65535U)
         {
@@ -473,15 +473,15 @@ CASTLE_INLINE castle::status encode_properties(property_list<Count, StrCap, BinC
         }
         else if (detail::property_is_pair(item.id))
         {
-            result = writer.put_utf8(castle::container::string_view(item.string_value));
+            result = writer.put_utf8(castle::dsa::string_view(item.string_value));
             if (castle::succeeded(result)) // LCOV_EXCL_BR_LINE
             {
-                result = writer.put_utf8(castle::container::string_view(item.user_value));
+                result = writer.put_utf8(castle::dsa::string_view(item.user_value));
             }
         }
         else if (detail::property_is_string(item.id))
         {
-            result = writer.put_utf8(castle::container::string_view(item.string_value));
+            result = writer.put_utf8(castle::dsa::string_view(item.string_value));
         }
         else
         {

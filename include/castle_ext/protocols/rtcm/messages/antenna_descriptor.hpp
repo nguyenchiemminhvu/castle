@@ -13,7 +13,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string.hpp"
+#include "castle/dsa/string.hpp"
 #include "castle/error/status.hpp"
 
 #include "castle_ext/protocols/rtcm/bit_writer.hpp"
@@ -34,7 +34,7 @@ namespace messages
 static CASTLE_CONSTEXPR castle::size_type RTCM_MAX_DESCRIPTOR_LEN = 31U;
 
 /** @brief Descriptor string of messages 1007 and 1033. */
-using descriptor_string = castle::container::string<RTCM_MAX_DESCRIPTOR_LEN>;
+using descriptor_string = castle::dsa::string<RTCM_MAX_DESCRIPTOR_LEN>;
 
 /** @brief RTCM message 1007. */
 struct antenna_descriptor

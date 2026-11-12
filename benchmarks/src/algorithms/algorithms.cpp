@@ -6,15 +6,15 @@
 #include <algorithm>
 #include <functional>
 
-#include <castle/algorithm/algorithm.hpp>
-#include <castle/container/array.hpp>
+#include <castle/dsa/algorithm.hpp>
+#include <castle/dsa/array.hpp>
 
 namespace
 {
 
 constexpr std::size_t N = 255;
 
-using castle_array = castle::container::array<int, N>;
+using castle_array = castle::dsa::array<int, N>;
 
 castle_array make_castle_data()
 {

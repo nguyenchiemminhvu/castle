@@ -14,7 +14,7 @@ This is an **encode-only** model: it produces the message payload for `encode_me
 
 - [`core/compiler.hpp`](../../../../core/compiler.md)
 - [`core/types.hpp`](../../../../core/types.md)
-- [`container/string.hpp`](../../../../container/string.md)
+- [`dsa/string.hpp`](../../../../dsa/string.md)
 - [`error/status.hpp`](../../../../error/status.md)
 - [`castle_ext/protocols/rtcm/bit_writer.hpp`](../bit_writer.md)
 - [`castle_ext/protocols/rtcm/rtcm.hpp`](../rtcm.md)
@@ -28,7 +28,7 @@ All names live in `castle::protocols::rtcm::messages`.
 | Name | Description |
 | --- | --- |
 | `RTCM_MAX_DESCRIPTOR_LEN` | `31U`, the longest descriptor string RTCM allows in messages 1007 and 1033. |
-| `descriptor_string` | `castle::container::string<RTCM_MAX_DESCRIPTOR_LEN>`. |
+| `descriptor_string` | `castle::dsa::string<RTCM_MAX_DESCRIPTOR_LEN>`. |
 | `antenna_descriptor::MESSAGE_TYPE` | `RTCM_TYPE_ANTENNA_DESCRIPTOR` (1007), the message number (DF002), written first. |
 
 ### Fields

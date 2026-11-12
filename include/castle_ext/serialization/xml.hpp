@@ -27,9 +27,9 @@
 #include "castle/core/types.hpp"
 #include "castle/core/type_ranges.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/array.hpp"
-#include "castle/container/string.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/array.hpp"
+#include "castle/dsa/string.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/utility/string_builder.hpp"
 
 #include <float.h>
@@ -42,7 +42,7 @@ namespace serialization
 namespace xml
 {
 
-using string_view = castle::container::string_view;
+using string_view = castle::dsa::string_view;
 
 /**
  * @brief XML DOM node kinds supported by Castle's embedded parser.
@@ -1636,7 +1636,7 @@ public:
     template <typename T>
     detail::enable_integer_t<T> set_attribute(node_id element, view_type attribute_name_view, T value) CASTLE_NOEXCEPT
     {
-        castle::container::string<max_integer_str_len> encoded;
+        castle::dsa::string<max_integer_str_len> encoded;
         castle::string_builder<max_integer_str_len> builder;
         if (builder.append(value).truncated())
         {
@@ -3187,7 +3187,7 @@ castle::status serialize_node(Document CASTLE_CONST& doc, typename Document::nod
  */
 template <castle::size_type MaxNodes, castle::size_type MaxAttributes, castle::size_type MaxStringBytes, castle::size_type MaxDepth, castle::size_type MaxOutput>
 result serialize(CASTLE_CONST document<MaxNodes, MaxAttributes, MaxStringBytes, MaxDepth>& doc,
-                 castle::container::string<MaxOutput>& output,
+                 castle::dsa::string<MaxOutput>& output,
                  bool pretty = false, castle::size_type indent_spaces = 2U) CASTLE_NOEXCEPT
 {
     result r;

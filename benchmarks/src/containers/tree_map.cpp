@@ -4,14 +4,14 @@
 #include <cstdint>
 #include <map>
 
-#include <castle/container/map.hpp>
+#include <castle/dsa/map.hpp>
 
 namespace
 {
 
 constexpr std::size_t N = 127;
 
-using castle_map = castle::container::map<int, int, N>;
+using castle_map = castle::dsa::map<int, int, N>;
 
 void fill_castle(castle_map& map)
 {

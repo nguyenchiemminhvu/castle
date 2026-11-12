@@ -43,7 +43,7 @@ int main()
 
     // Parse the frame back.
     message_view raw;
-    CASTLE_SAMPLE_CHECK(decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw));
+    CASTLE_SAMPLE_CHECK(decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw));
     CASTLE_SAMPLE_CHECK(nav_sig<>::matches(raw));
 
     nav_sig<> decoded;

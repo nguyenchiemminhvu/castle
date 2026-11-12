@@ -15,7 +15,7 @@
 #include "castle/core/error_handler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle/utility/bytes.hpp"
 
 #include <stdint.h>
@@ -38,7 +38,7 @@ public:
     /** @brief Internal block length in bytes. */
     static CASTLE_CONSTEXPR size_type block_size = 64U;
     /** @brief Fixed-size digest container. */
-    using digest_type = castle::container::array<uint8_t, digest_size>;
+    using digest_type = castle::dsa::array<uint8_t, digest_size>;
 
     /** @brief Constructs a hasher in its initial state. */
     md5() CASTLE_NOEXCEPT

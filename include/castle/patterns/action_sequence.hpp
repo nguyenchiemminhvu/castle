@@ -19,7 +19,7 @@
  * millisecond sequence); finer units are rejected at compile time because truncating them would make
  * delays fire early or let small `update()` steps be lost.
  *
- * Steps are stored in a `castle::container::array`; callables are stored in
+ * Steps are stored in a `castle::dsa::array`; callables are stored in
  * `castle::callbacks::function` wrappers, so the sequence owns every captured state inline. There is no
  * heap allocation, no exception, and no RTTI. Sequences compose with `append()`, which copies the steps
  * of another sequence (flattening, so the destination never refers back to the source).
@@ -49,7 +49,7 @@
 #include "castle/core/types.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/chrono/duration.hpp"
-#include "castle/container/array.hpp"
+#include "castle/dsa/array.hpp"
 #include "castle/error/status.hpp"
 #include "castle/math/ratio.hpp"
 #include "castle/utility/forward.hpp"
@@ -476,7 +476,7 @@ private:
         return !callable;
     }
 
-    container::array<step, MaxActions> steps_{};
+    dsa::array<step, MaxActions> steps_{};
     size_type size_ = 0U;
     size_type next_index_ = 0U;
     rep remaining_ = static_cast<rep>(0);

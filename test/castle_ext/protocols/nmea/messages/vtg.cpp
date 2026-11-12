@@ -7,7 +7,7 @@ namespace
 
 using namespace castle::protocols::nmea;
 using namespace castle::protocols::nmea::messages;
-using castle::container::string_view;
+using castle::dsa::string_view;
 
 TEST(NmeaMessageVtgMirror, DecodesMagneticCourseAndMode)
 {

@@ -13,7 +13,7 @@
  *
  * headers.add("Accept", "text/plain");
  * headers.set("accept", "application/json");   // replaces the existing field
- * castle::container::string_view accept = headers.get("ACCEPT");
+ * castle::dsa::string_view accept = headers.get("ACCEPT");
  * @endcode
  */
 #ifndef CASTLE_EXT_PROTOCOLS_HTTP_HEADERS_HPP

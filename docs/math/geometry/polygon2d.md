@@ -9,7 +9,7 @@ A fixed-capacity container of 2D vertices stored directly inside the object. Use
 ## Dependencies
 - [`detail.md`](detail.md)
 - [`point2d.md`](point2d.md)
-- [`../../container/array.md`](../../container/array.md)
+- [`../../dsa/array.md`](../../dsa/array.md)
 - [`../../core/compiler.md`](../../core/compiler.md)
 - [`../../core/error_handler.md`](../../core/error_handler.md)
 - [`../../core/traits.md`](../../core/traits.md)

@@ -7,7 +7,7 @@ namespace
 {
 using namespace castle::parsers::nmea_parser;
 using namespace castle::protocols::nmea;
-using castle::container::string_view;
+using castle::dsa::string_view;
 
 TEST(NmeaDecoderRegistryMirror, FacadeAliasesAndAttachDispatchDecodedSentence)
 {

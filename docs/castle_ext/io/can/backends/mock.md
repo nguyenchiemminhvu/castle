@@ -11,7 +11,7 @@
 - [`../frame.md`](../frame.md)
 - [`../filter.md`](../filter.md)
 - [`../types.md`](../types.md)
-- [`../../../../container/mirrored_ring_buffer.md`](../../../../container/mirrored_ring_buffer.md)
+- [`../../../../dsa/mirrored_ring_buffer.md`](../../../../dsa/mirrored_ring_buffer.md)
 - [`../../../../error/status.md`](../../../../error/status.md)
 
 ## Public API

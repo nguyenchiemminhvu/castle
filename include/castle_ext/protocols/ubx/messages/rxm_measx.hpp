@@ -16,7 +16,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/constants.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -133,7 +133,7 @@ struct rxm_measx
     uint16_t qzss_tow_acc = 0U;  ///< QZSS reference time accuracy [2^-4 ms].
     uint8_t num_svs = 0U;        ///< On-wire satellite count (`numSV`); may exceed `svs.size()`.
     uint8_t flags = 0U;          ///< Flags, see `FLAGS_*`.
-    castle::container::vector<rxm_measx_sv, MaxSvs> svs{};
+    castle::dsa::vector<rxm_measx_sv, MaxSvs> svs{};
 
     /** @brief Raw `towSet` value (0 = not set, 1 or 2 = set). */
     CASTLE_NODISCARD uint8_t tow_set() CASTLE_CONST CASTLE_NOEXCEPT

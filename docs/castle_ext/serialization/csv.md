@@ -8,9 +8,9 @@ A fixed-capacity CSV document, parser, and serializer for embedded configuration
 
 ## Dependencies
 - [`../../error/status.md`](../../error/status.md)
-- [`../../container/array.md`](../../container/array.md)
-- [`../../container/string.md`](../../container/string.md)
-- [`/container/string_view.md`](/container/string_view.md)
+- [`../../dsa/array.md`](../../dsa/array.md)
+- [`../../dsa/string.md`](../../dsa/string.md)
+- [`/dsa/string_view.md`](/dsa/string_view.md)
 
 ## Public API
 

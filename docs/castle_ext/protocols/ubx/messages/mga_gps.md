@@ -11,7 +11,7 @@ Models the five UBX-MGA-GPS (0x13 0x00) assistance layouts the host sends to the
 ## Dependencies
 
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/container/array.hpp`](../../../../container/array.md)
+- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/typed_message.hpp`](detail/typed_message.md)
 - `stdint.h`
@@ -91,7 +91,7 @@ Models the five UBX-MGA-GPS (0x13 0x00) assistance layouts the host sends to the
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `health_code` | `castle::container::array<uint8_t, NUM_SVS>` | `{}` | `health_code[i]` is the 6-bit health of PRN `i + 1`. |
+| `health_code` | `castle::dsa::array<uint8_t, NUM_SVS>` | `{}` | `health_code[i]` is the 6-bit health of PRN `i + 1`. |
 
 ### `mga_gps_health` constants
 
@@ -116,8 +116,8 @@ Models the five UBX-MGA-GPS (0x13 0x00) assistance layouts the host sends to the
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `iono_alpha` | `castle::container::array<int8_t, 4U>` | `{}` | alpha0..3 [2^-30, -27, -24, -24]. |
-| `iono_beta` | `castle::container::array<int8_t, 4U>` | `{}` | beta0..3 [2^11, 14, 16, 16]. |
+| `iono_alpha` | `castle::dsa::array<int8_t, 4U>` | `{}` | alpha0..3 [2^-30, -27, -24, -24]. |
+| `iono_beta` | `castle::dsa::array<int8_t, 4U>` | `{}` | beta0..3 [2^11, 14, 16, 16]. |
 
 ## Usage Example
 
@@ -135,7 +135,7 @@ castle::status result = encode_message(utc, frame, sizeof(frame), written);
 
 // Receiving side (loop-back / logging): only the UTC model claims this frame.
 message_view raw{};
-if (decode_frame(castle::container::array_view<const uint8_t>(frame, written), raw) && mga_gps_utc::matches(raw)) {
+if (decode_frame(castle::dsa::array_view<const uint8_t>(frame, written), raw) && mga_gps_utc::matches(raw)) {
     mga_gps_utc back{};
     static_cast<void>(mga_gps_utc::decode(raw, back));
 }

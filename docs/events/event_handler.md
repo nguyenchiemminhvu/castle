@@ -43,8 +43,8 @@ Each accepted event occupies one event slot and one entry in the scheduling heap
 
 The implementation uses:
 
-- `castle::container::min_heap` for timestamp ordering
-- `castle::container::ring_buffer` for free event-slot management
+- `castle::dsa::min_heap` for timestamp ordering
+- `castle::dsa::ring_buffer` for free event-slot management
 - `castle::callbacks::function` for callback storage
 - `castle::chrono::steady_clock::now()` for the event timestamp source
 - `pthread_mutex_t` and `pthread_cond_t` for synchronization
@@ -334,8 +334,8 @@ The event handler depends only on CASTLE facilities and POSIX pthread APIs:
 ```text
 castle/core/*
 castle/error/status.hpp
-castle/container/heap.hpp
-castle/container/ring_buffer.hpp
+castle/dsa/heap.hpp
+castle/dsa/ring_buffer.hpp
 castle/chrono/chrono.hpp
 castle/utility/forward.hpp
 castle/utility/move.hpp

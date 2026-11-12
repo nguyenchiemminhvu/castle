@@ -9,7 +9,7 @@
 ## Dependencies
 - [`castle/core/compiler.hpp`](../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/container/vector.hpp`](../../../../container/vector.md)
+- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
@@ -43,7 +43,7 @@
 | `status` | `uint8_t` | `status` U1 @5 | Geofencing status, see `STATUS_*`. |
 | `num_fences` | `uint8_t` | `numFences` U1 @6 | Fence count **on the wire**; may exceed `fences.size()`. |
 | `comb_state` | `nav_geofence_state` | `combState` U1 @7 | Combined state over all fences. |
-| `fences` | `castle::container::vector<nav_geofence_fence, MaxFences>` | `8 + n·2` | Stored fence blocks (`state` U1, `id` U1). |
+| `fences` | `castle::dsa::vector<nav_geofence_fence, MaxFences>` | `8 + n·2` | Stored fence blocks (`state` U1, `id` U1). |
 
 ### Functions
 

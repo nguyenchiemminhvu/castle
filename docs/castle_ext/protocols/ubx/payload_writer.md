@@ -2,7 +2,7 @@
 
 ## Overview
 
-`payload_writer.hpp` is the encoding mirror of [`payload_reader`](payload_reader.md). `payload_writer` is a bounds-checked, sequential little-endian cursor over a caller-provided `castle::container::array_view<uint8_t>`: every `write()` stores one field in UBX byte order and advances.
+`payload_writer.hpp` is the encoding mirror of [`payload_reader`](payload_reader.md). `payload_writer` is a bounds-checked, sequential little-endian cursor over a caller-provided `castle::dsa::array_view<uint8_t>`: every `write()` stores one field in UBX byte order and advances.
 
 It uses the same sticky-error model as the reader. The first overflow latches `castle::status::full` (or the first status passed to `fail()`), every later write becomes a no-op, and the encoder checks `status()` once at the end.
 
@@ -20,9 +20,9 @@ The header also provides two frame-level helpers:
 * [`core/compiler.hpp`](../../../core/compiler.md)
 * [`core/traits.hpp`](../../../core/traits.md)
 * [`core/types.hpp`](../../../core/types.md)
-* [`container/array.hpp`](../../../container/array.md)
-* [`container/array_view.hpp`](../../../container/array_view.md)
-* [`container/string.hpp`](../../../container/string.md)
+* [`dsa/array.hpp`](../../../dsa/array.md)
+* [`dsa/array_view.hpp`](../../../dsa/array_view.md)
+* [`dsa/string.hpp`](../../../dsa/string.md)
 * [`error/status.hpp`](../../../error/status.md)
 * [`utility/bit_cast.hpp`](../../../utility/bit_cast.md)
 * [`utility/bytes.hpp`](../../../utility/bytes.md)
@@ -54,7 +54,7 @@ The header also provides two frame-level helpers:
 | `field(const T& value)` | Same as `write(value)`. |
 | `reserved(count)` | Writes `count` zero bytes. |
 | `constant(value)` | Writes a fixed protocol byte (message type or version). |
-| `text(const castle::container::string<W>& value)` | Writes a `CH[W]` field: the characters, then NUL padding up to exactly `W` bytes. |
+| `text(const castle::dsa::string<W>& value)` | Writes a `CH[W]` field: the characters, then NUL padding up to exactly `W` bytes. |
 
 ### Frame helpers
 
@@ -83,7 +83,7 @@ result = encode_poll<messages::mon_ver<>>(frame, sizeof(frame), written);
 
 // Raw writer over caller storage.
 uint8_t payload[4U];
-payload_writer writer(castle::container::array_view<uint8_t>(payload, sizeof(payload)));
+payload_writer writer(castle::dsa::array_view<uint8_t>(payload, sizeof(payload)));
 writer.field(static_cast<uint16_t>(0x1234U));
 writer.reserved(2U);
 // writer.status() == castle::status::ok, writer.size() == 4

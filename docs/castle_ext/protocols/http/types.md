@@ -9,7 +9,7 @@ Defines the shared HTTP method, version, error, header-view, and response-view t
 ## Dependencies
 - [CASTLE compiler annotations](../../../../include/castle/core/compiler.hpp)
 - [CASTLE core types](../../../../include/castle/core/types.hpp)
-- [CASTLE string view](../../../../include/castle/container/string_view.hpp)
+- [CASTLE string view](../../../../include/castle/dsa/string_view.hpp)
 - [CASTLE status](../../../../include/castle/error/status.hpp)
 
 ## Public API

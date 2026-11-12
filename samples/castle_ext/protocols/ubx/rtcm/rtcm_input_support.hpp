@@ -24,7 +24,7 @@
 
 #include "sample_support.hpp"
 
-#include "castle/container/array_view.hpp"
+#include "castle/dsa/array_view.hpp"
 #include "castle/math/round.hpp"
 
 #include "castle_ext/checksums/crc24q.hpp"
@@ -100,9 +100,9 @@ struct receiver_port
     }
 
     /** @brief The most recent frame. */
-    castle::container::array_view<const uint8_t> last_frame() const noexcept
+    castle::dsa::array_view<const uint8_t> last_frame() const noexcept
     {
-        return castle::container::array_view<const uint8_t>(&bytes[last_start], size - last_start);
+        return castle::dsa::array_view<const uint8_t>(&bytes[last_start], size - last_start);
     }
 
 private:
@@ -117,7 +117,7 @@ private:
 inline receiver_port uart1{};
 
 /** @brief Reads `width` (<= 32) payload bits of `frame` starting at payload bit `position`, MSB first. */
-inline uint32_t payload_bits(castle::container::array_view<const uint8_t> frame,
+inline uint32_t payload_bits(castle::dsa::array_view<const uint8_t> frame,
                              castle::size_type position,
                              castle::size_type width) noexcept
 {
@@ -141,7 +141,7 @@ inline void check_rtcm_frame(const receiver_port& port, uint16_t type, uint16_t 
 {
     using namespace castle::protocols::rtcm;
 
-    const castle::container::array_view<const uint8_t> frame = port.last_frame();
+    const castle::dsa::array_view<const uint8_t> frame = port.last_frame();
     CASTLE_SAMPLE_CHECK(frame.size() > RTCM_FRAME_OVERHEAD);
     CASTLE_SAMPLE_CHECK(frame[0U] == RTCM_PREAMBLE);                              // preamble, not UBX 0xb5 0x62
     CASTLE_SAMPLE_CHECK((frame[1U] & 0xFCU) == 0U);                               // res1: 6 reserved zero bits

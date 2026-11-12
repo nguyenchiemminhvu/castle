@@ -30,7 +30,7 @@ struct sv_block
 
 int main()
 {
-    using castle::container::array_view;
+    using castle::dsa::array_view;
 
     // Payload = 1-byte count header + 3 blocks.
     CASTLE_CONST castle::size_type header = 1U;
@@ -43,7 +43,7 @@ int main()
     CASTLE_SAMPLE_CHECK(!detail::implied_group_count(12U, header, sv_block::wire_size, implied));
 
     // Encode three blocks.
-    castle::container::vector<sv_block, 3U> blocks;
+    castle::dsa::vector<sv_block, 3U> blocks;
     for (uint8_t index = 0U; index < 3U; ++index)
     {
         sv_block block{};
@@ -63,7 +63,7 @@ int main()
     // Decode into a 2-slot vector: the third block is skipped, the cursor stays aligned.
     ubx::payload_reader reader(array_view<const uint8_t>(payload, sizeof(payload)));
     CASTLE_CONST uint8_t wire_count = reader.read_u8();
-    castle::container::vector<sv_block, 2U> stored;
+    castle::dsa::vector<sv_block, 2U> stored;
     detail::read_group(reader, wire_count, stored);
     CASTLE_SAMPLE_CHECK(reader.ok());
     CASTLE_SAMPLE_CHECK(wire_count == 3U);
@@ -75,7 +75,7 @@ int main()
     // Free-length tails (e.g. MGA-DBD data).
     CASTLE_CONST uint8_t tail_bytes[4U] = {0xDEU, 0xADU, 0xBEU, 0xEFU};
     ubx::payload_reader tail_reader(array_view<const uint8_t>(tail_bytes, sizeof(tail_bytes)));
-    castle::container::vector<uint8_t, 8U> tail;
+    castle::dsa::vector<uint8_t, 8U> tail;
     detail::read_tail(tail_reader, tail);
     CASTLE_SAMPLE_CHECK(tail.size() == 4U);
 

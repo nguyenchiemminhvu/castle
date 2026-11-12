@@ -12,12 +12,12 @@ Model of UBX-MON-HW3 (class `0x0A`, ID `0x37`), the I/O pin status: a 22-byte he
 
 - [castle/core/compiler.hpp](../../../../core/compiler.md)
 - [castle/core/types.hpp](../../../../core/types.md)
-- [castle/container/vector.hpp](../../../../container/vector.md)
+- [castle/dsa/vector.hpp](../../../../dsa/vector.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
 - [detail/repeated_group.hpp](detail/repeated_group.md)
-- [castle/container/string.hpp](../../../../container/string.md)
+- [castle/dsa/string.hpp](../../../../dsa/string.md)
 
 ## Public API
 
@@ -55,9 +55,9 @@ Model of UBX-MON-HW3 (class `0x0A`, ID `0x37`), the I/O pin status: a 22-byte he
 | `version` | `uint8_t` | 0 | Message version (`0x00`). |
 | `n_pins` | `uint8_t` | 1 | On-wire pin count; may exceed `pins.size()`. |
 | `flags` | `uint8_t` (X1) | 2 | See `FLAGS_*`. |
-| `hw_version` | `castle::container::string<10>` | 3 | Hardware version (same as UBX-MON-VER), read with `stream.text`. |
+| `hw_version` | `castle::dsa::string<10>` | 3 | Hardware version (same as UBX-MON-VER), read with `stream.text`. |
 | — | reserved | 13..21 | |
-| `pins` | `castle::container::vector<mon_hw3_pin, MaxPins>` | 22 + n·6 | Stored pin blocks. |
+| `pins` | `castle::dsa::vector<mon_hw3_pin, MaxPins>` | 22 + n·6 | Stored pin blocks. |
 
 ### `mon_hw3_pin` fields (offset within block)
 
@@ -102,7 +102,7 @@ See `samples/castle_ext/protocols/ubx/messages/mon_hw3.cpp`.
 
 ## Constraints & Notes
 
-- Storage: `castle::container::vector<..., MaxPins>` (default `MaxPins = 32U`) lives inside the object; no heap allocation, no exceptions.
+- Storage: `castle::dsa::vector<..., MaxPins>` (default `MaxPins = 32U`) lives inside the object; no heap allocation, no exceptions.
 - `decode()` requires the payload length to be exactly `22 + nPins·6`; any mismatch (or a different class/ID, or fewer than 22 bytes) returns `false` with `out` value-initialised.
 - Capacity overflow: when `nPins` exceeds `MaxPins`, the first `MaxPins` blocks are stored, the rest are skipped, `decode()` still succeeds and `n_pins` reports the on-wire count.
 - `encode()` writes the count from the vector's `size()`; the stored count field is ignored.

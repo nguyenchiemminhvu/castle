@@ -9,7 +9,7 @@ Defines the fixed-capacity value types shared by the DNS message codec and resol
 ## Dependencies
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp)
-- [`castle/container/array.hpp`](../../../../include/castle/container/array.hpp)
+- [`castle/dsa/array.hpp`](../../../../include/castle/dsa/array.hpp)
 - [`castle_ext/net/endpoint.hpp`](../../../../include/castle_ext/net/endpoint.hpp)
 
 ## Public API
@@ -38,4 +38,4 @@ config.retries = 1U;
 See [`samples/castle_ext/protocols/dns/types.cpp`](../../../../samples/castle_ext/protocols/dns/types.cpp).
 
 ## Constraints & Notes
-The RR collection uses `castle::container::array`; all other storage is inline and fixed-capacity. `response<N>` retains supported records from all three RR sections and reports `full` if more than `N` supported records are present. Names use 256-byte null-terminated arrays. Values are plain data and require no initialization service or heap allocation.
+The RR collection uses `castle::dsa::array`; all other storage is inline and fixed-capacity. `response<N>` retains supported records from all three RR sections and reports `full` if more than `N` supported records are present. Names use 256-byte null-terminated arrays. Values are plain data and require no initialization service or heap allocation.

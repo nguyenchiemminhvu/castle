@@ -7,7 +7,7 @@ namespace
 {
 using namespace castle::protocols::ubx;
 using namespace castle::protocols::ubx::messages;
-using castle::container::array_view;
+using castle::dsa::array_view;
 
 using spt = mon_spt<4U, 8U>;
 

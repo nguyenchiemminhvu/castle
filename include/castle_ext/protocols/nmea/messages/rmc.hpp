@@ -5,7 +5,7 @@
 #define CASTLE_EXT_PROTOCOLS_NMEA_MESSAGES_RMC_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle_ext/protocols/nmea/nmea.hpp"
 #include "castle_ext/protocols/nmea/field_cursor.hpp"
 
@@ -36,7 +36,7 @@ enum class rmc_mode : char
 struct rmc
 {
     bool valid = false;
-    castle::container::string_view talker{};
+    castle::dsa::string_view talker{};
     double utc_time = 0.0;
     double latitude = 0.0;
     double longitude = 0.0;

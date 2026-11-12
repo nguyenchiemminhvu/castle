@@ -27,9 +27,9 @@
 #include "castle/core/types.hpp"
 #include "castle/core/type_ranges.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/string.hpp"
-#include "castle/container/string_view.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/string.hpp"
+#include "castle/dsa/string_view.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle/utility/optional.hpp"
 
 #include <float.h>
@@ -42,7 +42,7 @@ namespace serialization
 namespace ini
 {
 
-using string_view = castle::container::string_view;
+using string_view = castle::dsa::string_view;
 
 /**
  * @brief INI-specific diagnostics paired with `castle::status`.
@@ -361,7 +361,7 @@ CASTLE_INLINE char decode_escape(char value) CASTLE_NOEXCEPT
 template <castle::size_type MaxValueLength>
 result decode_value(
     string_view raw,
-    castle::container::string<MaxValueLength>& output,
+    castle::dsa::string<MaxValueLength>& output,
     castle::size_type line,
     castle::size_type column) CASTLE_NOEXCEPT
 {
@@ -470,7 +470,7 @@ result decode_value(
 template <castle::size_type MaxOutput>
 castle::status append_escaped_value(
     string_view value,
-    castle::container::string<MaxOutput>& output) CASTLE_NOEXCEPT
+    castle::dsa::string<MaxOutput>& output) CASTLE_NOEXCEPT
 {
     CASTLE_CONST bool quote = needs_quotes(value);
     if (quote && output.push_back('"') != castle::status::ok)
@@ -619,7 +619,7 @@ castle::status parse_integer_value(string_view text, T& output) CASTLE_NOEXCEPT
  * @note The output string must have sufficient capacity to hold the formatted integer.
  */
 template <typename T, size_type MaxValueLength = 128U>
-castle::status format_integer_value(T value, castle::container::string<MaxValueLength>& output) CASTLE_NOEXCEPT
+castle::status format_integer_value(T value, castle::dsa::string<MaxValueLength>& output) CASTLE_NOEXCEPT
 {
     using U = meta::make_unsigned_t<T>;
     output.clear();
@@ -797,18 +797,18 @@ class document
 
     struct entry
     {
-        castle::container::string<MaxSectionLength> section;
-        castle::container::string<MaxKeyLength> key;
-        castle::container::string<MaxValueLength> value;
+        castle::dsa::string<MaxSectionLength> section;
+        castle::dsa::string<MaxKeyLength> key;
+        castle::dsa::string<MaxValueLength> value;
     };
 
 public:
     /** @brief Alias for the document size type. */
     using size_type = castle::size_type;
     /** @brief Alias for owned value storage. */
-    using value_type = castle::container::string<MaxValueLength>;
+    using value_type = castle::dsa::string<MaxValueLength>;
     /** @brief Alias for non-owning string views returned by lookups. */
-    using view_type = castle::container::string_view;
+    using view_type = castle::dsa::string_view;
 
     /** @brief Compile-time maximum number of entries. */
     static CASTLE_CONSTEXPR size_type static_capacity = MaxEntries;
@@ -1043,7 +1043,7 @@ public:
     template <typename T>
     CASTLE_NODISCARD detail::enable_integer_t<T> set_integer(view_type section, view_type key, T value) CASTLE_NOEXCEPT
     {
-        castle::container::string<MaxValueLength> encoded;
+        castle::dsa::string<MaxValueLength> encoded;
         CASTLE_CONST castle::status status = detail::format_integer_value(value, encoded);
         if (status != castle::status::ok)
         {
@@ -1346,7 +1346,7 @@ private:
         entries_.pop_back();
     }
 
-    castle::container::vector<entry, MaxEntries> entries_;
+    castle::dsa::vector<entry, MaxEntries> entries_;
 };
 
 namespace detail
@@ -1368,7 +1368,7 @@ result parse_document(
     string_view input) CASTLE_NOEXCEPT
 {
     result result_value;
-    castle::container::string<MaxSectionLength> current_section;
+    castle::dsa::string<MaxSectionLength> current_section;
     output.clear();
 
     castle::size_type position = 0U;
@@ -1469,7 +1469,7 @@ result parse_document(
                     return result_value;
                 }
 
-                castle::container::string<MaxValueLength> decoded_value;
+                castle::dsa::string<MaxValueLength> decoded_value;
                 CASTLE_CONST result decoded = decode_value<MaxValueLength>(
                     trimmed.substr(separator + 1U),
                     decoded_value,
@@ -1561,7 +1561,7 @@ template <castle::size_type OutputCapacity,
           castle::size_type MaxValueLength>
 CASTLE_NODISCARD result serialize(
     CASTLE_CONST document<MaxEntries, MaxSectionLength, MaxKeyLength, MaxValueLength>& input,
-    castle::container::string<OutputCapacity>& output) CASTLE_NOEXCEPT
+    castle::dsa::string<OutputCapacity>& output) CASTLE_NOEXCEPT
 {
     result result_value;
     output.clear();
@@ -1700,7 +1700,7 @@ template <castle::size_type OutputCapacity,
           castle::size_type MaxValueLength>
 CASTLE_NODISCARD result write(
     CASTLE_CONST document<MaxEntries, MaxSectionLength, MaxKeyLength, MaxValueLength>& input,
-    castle::container::string<OutputCapacity>& output) CASTLE_NOEXCEPT
+    castle::dsa::string<OutputCapacity>& output) CASTLE_NOEXCEPT
 {
     return serialize(input, output);
 }

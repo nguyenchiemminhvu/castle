@@ -31,7 +31,7 @@ int main()
 
     // Build one valid frame and feed it byte-by-byte, as a UART driver would.
     uint8_t payload_data[2U] = {0xAAU, 0xBBU};
-    castle::container::array_view<const uint8_t> payload(payload_data, 2U);
+    castle::dsa::array_view<const uint8_t> payload(payload_data, 2U);
 
     uint8_t frame[64U];
     castle::size_type written = 0U;

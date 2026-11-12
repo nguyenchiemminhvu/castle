@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string_view>
 
-#include <castle/container/string_view.hpp>
+#include <castle/dsa/string_view.hpp>
 
 namespace
 {
@@ -23,7 +23,7 @@ BENCHMARK_F(string_view_construct, castle)(benchmark::State& state)
 {
     for (auto _ : state)
     {
-        castle::container::string_view value(text);
+        castle::dsa::string_view value(text);
         benchmark::DoNotOptimize(value);
     }
 
@@ -51,7 +51,7 @@ class string_view_find : public benchmark::Fixture {};
 
 BENCHMARK_F(string_view_find, castle)(benchmark::State& state)
 {
-    const castle::container::string_view value(text);
+    const castle::dsa::string_view value(text);
 
     for (auto _ : state)
     {
@@ -85,8 +85,8 @@ class string_view_find_substring : public benchmark::Fixture {};
 
 BENCHMARK_F(string_view_find_substring, castle)(benchmark::State& state)
 {
-    const castle::container::string_view value(text);
-    const castle::container::string_view needle("sample");
+    const castle::dsa::string_view value(text);
+    const castle::dsa::string_view needle("sample");
 
     for (auto _ : state)
     {
@@ -121,8 +121,8 @@ class string_view_compare : public benchmark::Fixture {};
 
 BENCHMARK_F(string_view_compare, castle)(benchmark::State& state)
 {
-    const castle::container::string_view lhs(text);
-    const castle::container::string_view rhs(text);
+    const castle::dsa::string_view lhs(text);
+    const castle::dsa::string_view rhs(text);
 
     for (auto _ : state)
     {

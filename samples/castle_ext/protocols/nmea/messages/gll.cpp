@@ -23,12 +23,12 @@ int main()
     char sentence[128U];
     castle::size_type written = 0U;
     CASTLE_SAMPLE_CHECK(castle::succeeded(
-        generate_gll(input, castle::container::string_view(TALKER_GP), sentence, sizeof(sentence), written)));
+        generate_gll(input, castle::dsa::string_view(TALKER_GP), sentence, sizeof(sentence), written)));
 
-    castle::container::string_view field_storage[8U];
+    castle::dsa::string_view field_storage[8U];
     message_view raw;
     CASTLE_SAMPLE_CHECK(decode_sentence(
-        castle::container::string_view(sentence, written), field_storage, 8U, raw));
+        castle::dsa::string_view(sentence, written), field_storage, 8U, raw));
 
     CASTLE_SAMPLE_CHECK(gll::matches(raw));
 

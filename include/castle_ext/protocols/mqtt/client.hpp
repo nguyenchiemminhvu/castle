@@ -16,7 +16,7 @@
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle/error/status.hpp"
 #include "castle/utility/bytes.hpp"
 #include "castle_ext/net/client.hpp"
@@ -180,7 +180,7 @@ public:
     }
 
     /** @brief Sends a PUBLISH packet at the selected QoS. QoS 1/2 reserve an identifier and bounded retry slot. */
-    castle::status publish(castle::container::string_view topic, uint8_t CASTLE_CONST* payload,
+    castle::status publish(castle::dsa::string_view topic, uint8_t CASTLE_CONST* payload,
                            size_type payload_size, qos quality = qos::at_most_once,
                            bool retain = false) CASTLE_NOEXCEPT
     {
@@ -227,23 +227,23 @@ public:
     }
 
     /** @brief Convenience overload for a string-literal payload. */
-    castle::status publish(castle::container::string_view topic, castle::container::string_view payload,
+    castle::status publish(castle::dsa::string_view topic, castle::dsa::string_view payload,
                            qos quality = qos::at_most_once, bool retain = false) CASTLE_NOEXCEPT
     {
         return publish(topic, reinterpret_cast<uint8_t CASTLE_CONST*>(payload.data()), payload.size(), quality, retain);
     }
 
     /** @brief Subscribes to one Topic Filter and returns its Packet Identifier. */
-    castle::status subscribe(castle::container::string_view filter, qos maximum_quality,
+    castle::status subscribe(castle::dsa::string_view filter, qos maximum_quality,
                              uint16_t& packet_identifier) CASTLE_NOEXCEPT
     {
-        castle::container::string_view filters[1U] = {filter};
+        castle::dsa::string_view filters[1U] = {filter};
         qos qualities[1U] = {maximum_quality};
         return subscribe(filters, qualities, 1U, packet_identifier);
     }
 
     /** @brief Subscribes to one or more filters in a single MQTT SUBSCRIBE packet. */
-    castle::status subscribe(castle::container::string_view CASTLE_CONST* filters, qos CASTLE_CONST* qualities,
+    castle::status subscribe(castle::dsa::string_view CASTLE_CONST* filters, qos CASTLE_CONST* qualities,
                              size_type count, uint16_t& packet_identifier) CASTLE_NOEXCEPT
     {
         packet_identifier = 0U;
@@ -304,14 +304,14 @@ public:
     }
 
     /** @brief Unsubscribes from one Topic Filter. */
-    castle::status unsubscribe(castle::container::string_view filter, uint16_t& packet_identifier) CASTLE_NOEXCEPT
+    castle::status unsubscribe(castle::dsa::string_view filter, uint16_t& packet_identifier) CASTLE_NOEXCEPT
     {
-        castle::container::string_view filters[1U] = {filter};
+        castle::dsa::string_view filters[1U] = {filter};
         return unsubscribe(filters, 1U, packet_identifier);
     }
 
     /** @brief Unsubscribes from one or more filters in a single MQTT UNSUBSCRIBE packet. */
-    castle::status unsubscribe(castle::container::string_view CASTLE_CONST* filters, size_type count,
+    castle::status unsubscribe(castle::dsa::string_view CASTLE_CONST* filters, size_type count,
                                uint16_t& packet_identifier) CASTLE_NOEXCEPT
     {
         packet_identifier = 0U;
@@ -498,7 +498,7 @@ private:
     };
 
     static uint32_t elapsed(uint32_t now, uint32_t then) CASTLE_NOEXCEPT { return now - then; }
-    static void copy_text(char* target, castle::container::string_view text) CASTLE_NOEXCEPT
+    static void copy_text(char* target, castle::dsa::string_view text) CASTLE_NOEXCEPT
     {
         for (size_type i = 0U; i < text.size(); ++i)
         {
@@ -535,8 +535,8 @@ private:
     castle::status send_connect() CASTLE_NOEXCEPT
     {
         packet_writer body(body_, MaxPacketSize);
-        castle::container::string_view protocol_name = options_.protocol_version == version::v3_1_0
-            ? castle::container::string_view("MQIsdp") : castle::container::string_view("MQTT");
+        castle::dsa::string_view protocol_name = options_.protocol_version == version::v3_1_0
+            ? castle::dsa::string_view("MQIsdp") : castle::dsa::string_view("MQTT");
         (void)body.put_utf8(protocol_name);
         (void)body.put_u8(static_cast<uint8_t>(options_.protocol_version));
         uint8_t flags = options_.clean_session ? 0x02U : 0U;
@@ -631,7 +631,7 @@ private:
         return result;
     }
 
-    castle::status send_publish(castle::container::string_view topic, uint8_t CASTLE_CONST* payload, size_type payload_size,
+    castle::status send_publish(castle::dsa::string_view topic, uint8_t CASTLE_CONST* payload, size_type payload_size,
                                 qos quality, bool retain, uint16_t identifier, bool duplicate) CASTLE_NOEXCEPT
     {
         packet_writer body(body_, MaxPacketSize);
@@ -811,7 +811,7 @@ private:
             }
             else
             {
-                (void)send_publish(castle::container::string_view(entry.topic), entry.payload, entry.payload_size,
+                (void)send_publish(castle::dsa::string_view(entry.topic), entry.payload, entry.payload_size,
                                    entry.quality, entry.retain, entry.identifier, true);
             }
         }
@@ -981,7 +981,7 @@ private:
         }
         char topic[MaxTopicLength]{}; size_type topic_size = 0U;
         castle::status status = reader.get_utf8(topic, sizeof(topic), topic_size);
-        if (!castle::succeeded(status) || !castle::succeeded(validate_topic_name(castle::container::string_view(topic, topic_size))))
+        if (!castle::succeeded(status) || !castle::succeeded(validate_topic_name(castle::dsa::string_view(topic, topic_size))))
         {
             return castle::status::invalid_argument;
         }
@@ -1008,7 +1008,7 @@ private:
             return castle::status::out_of_range;
         }
         message_view message;
-        message.topic = castle::container::string_view(topic, topic_size);
+        message.topic = castle::dsa::string_view(topic, topic_size);
         message.payload = reader.current();
         message.payload_size = payload_size;
         message.quality = quality;
@@ -1073,7 +1073,7 @@ private:
         if (entry != nullptr)
         {
             message_view message;
-            message.topic = castle::container::string_view(entry->topic);
+            message.topic = castle::dsa::string_view(entry->topic);
             message.payload = entry->payload;
             message.payload_size = entry->payload_size;
             message.quality = qos::exactly_once;

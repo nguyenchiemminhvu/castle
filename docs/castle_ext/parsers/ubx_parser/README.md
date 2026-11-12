@@ -589,7 +589,7 @@ castle::parsers::ubx_parser::ubx_parser<4096U> parser;
 
 `MaxPayload` defaults to `UBX_SAFE_MAX_PAYLOAD_LEN` (4096 bytes), must be greater than zero, and cannot exceed the 16-bit UBX length field. It is a compile-time storage choice, not a run-time setting. No frame-sized heap allocation is performed.
 
-The `feed()` overloads accept one `uint8_t`, a `(const uint8_t*, size)` range, or `castle::container::array_view<const uint8_t>`. Calls may split a frame at any byte boundary or contain several frames. Bytes other than the expected sync sequence are ignored while searching for a frame; malformed or checksum-invalid frames are reported through the error callback.
+The `feed()` overloads accept one `uint8_t`, a `(const uint8_t*, size)` range, or `castle::dsa::array_view<const uint8_t>`. Calls may split a frame at any byte boundary or contain several frames. Bytes other than the expected sync sequence are ignored while searching for a frame; malformed or checksum-invalid frames are reported through the error callback.
 
 The parser states are `wait_sync_1`, `wait_sync_2`, `wait_class`, `wait_id`, `wait_length_low`, `wait_length_high`, `read_payload`, `wait_checksum_a`, and `wait_checksum_b`. A payload length larger than the configured capacity is discarded as soon as its two length bytes have arrived.
 

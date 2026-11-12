@@ -10,7 +10,7 @@
 - [`castle/core/compiler.hpp`](../core/compiler.md)
 - [`castle/core/error_handler.hpp`](../core/error_handler.md)
 - [`castle/core/traits.hpp`](../core/traits.md)
-- [`castle/algorithm/algorithm.hpp`](../algorithm/algorithm.md)
+- [`castle/dsa/algorithm.hpp`](../dsa/algorithm.md)
 - [`castle/math/abs.hpp`](abs.md)
 - [`castle/math/exponential.hpp`](exponential.md)
 - [`castle/math/hypot.hpp`](hypot.md)

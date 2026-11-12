@@ -10,7 +10,7 @@
 - [`core/compiler.hpp`](../../../core/compiler.md)
 - [`core/types.hpp`](../../../core/types.md)
 - [`error/status.hpp`](../../../error/status.md)
-- [`container/array_view.hpp`](../../../container/array_view.md)
+- [`dsa/array_view.hpp`](../../../dsa/array_view.md)
 - [`utility/bytes.hpp`](../../../utility/bytes.md)
 
 ## Public API
@@ -38,7 +38,7 @@ See `samples/castle_ext/protocols/ubx/ubx.cpp`.
 #include "castle_ext/protocols/ubx/ubx.hpp"
 
 uint8_t payload_data[2] = {0x01U, 0x02U};
-castle::container::array_view<const uint8_t> payload(payload_data, 2U);
+castle::dsa::array_view<const uint8_t> payload(payload_data, 2U);
 
 uint8_t frame[64U];
 castle::size_type written = 0U;
@@ -49,7 +49,7 @@ castle::protocols::ubx::encode_frame(
 
 castle::protocols::ubx::message_view view;
 castle::protocols::ubx::decode_frame(
-    castle::container::array_view<const uint8_t>(frame, written), view);
+    castle::dsa::array_view<const uint8_t>(frame, written), view);
 ```
 
 ## Constraints & Notes

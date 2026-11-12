@@ -247,7 +247,7 @@ This header declares nothing itself. It exposes the following models, all in `ca
 | --- | --- |
 | [`detail/fixed_message.hpp`](detail/fixed_message.md) | CRTP base for fixed-length messages: `matches`/`decode`/`encode` from one `layout()`. |
 | [`detail/typed_message.hpp`](detail/typed_message.md) | Fixed layout selected by payload byte 0 (MGA, UPD-SOS, RXM-RLM). |
-| [`detail/repeated_group.hpp`](detail/repeated_group.md) | Length validation and block decode/encode into `castle::container::vector`. |
+| [`detail/repeated_group.hpp`](detail/repeated_group.md) | Length validation and block decode/encode into `castle::dsa::vector`. |
 | [`detail/cfg_data.hpp`](detail/cfg_data.md) | Versioned CFG base plus key-list and key/value `cfgData` codecs. |
 | [`detail/esf_data.hpp`](detail/esf_data.md) | Signed 24-bit ESF data-word codec shared by ESF-MEAS and ESF-RAW. |
 | [`detail/nav_gnss_time.hpp`](detail/nav_gnss_time.md) | Shared layout of NAV-TIMEBDS / TIMEGAL / TIMEQZSS. |
@@ -280,7 +280,7 @@ result = encode_poll<mon_ver<>>(frame, sizeof(frame), written);
 See [`samples/castle_ext/protocols/ubx/messages/messages.cpp`](../../../../../samples/castle_ext/protocols/ubx/messages/messages.cpp). For subscription-based dispatch of every receiver output, use `castle::parsers::ubx_parser::default_decoder_registry<>` ([decoder registry](../../../parsers/ubx_parser/decoder_registry.md)).
 
 ## Constraints & Notes
-- Header-only. No heap allocation, exceptions, RTTI, virtual dispatch or STL. Variable-length messages store their blocks in a fixed-capacity `castle::container::vector` whose capacity is a template parameter (`nav_sat<16>` ...). The spec-named count field holds the wire count; `.size()` is what was stored.
+- Header-only. No heap allocation, exceptions, RTTI, virtual dispatch or STL. Variable-length messages store their blocks in a fixed-capacity `castle::dsa::vector` whose capacity is a template parameter (`nav_sat<16>` ...). The spec-named count field holds the wire count; `.size()` is what was stored.
 - Decoded models own their data and never alias the parser's payload buffer.
 - Models are plain value types and are not thread-safe.
 - Messages that share one class/ID (MGA-*, UPD-SOS, RXM-RLM, RXM-PMREQ, CFG v0/v1) are distinct models; at most one of them matches a given frame.

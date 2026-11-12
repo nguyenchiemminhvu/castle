@@ -9,9 +9,9 @@ CAN FD is out of scope: the payload is fixed at 8 bytes (classic CAN only).
 `#include "castle_ext/io/can/frame.hpp"`
 
 ## Dependencies
-- [`../../../container/array.md`](../../../container/array.md)
-- [`../../../container/array_view.md`](../../../container/array_view.md)
-- [`../../../container/initializer_list.md`](../../../container/initializer_list.md)
+- [`../../../dsa/array.md`](../../../dsa/array.md)
+- [`../../../dsa/array_view.md`](../../../dsa/array_view.md)
+- [`../../../dsa/initializer_list.md`](../../../dsa/initializer_list.md)
 - [`../../../core/compiler.md`](../../../core/compiler.md)
 - [`../../../core/types.md`](../../../core/types.md)
 - [`../../../error/status.md`](../../../error/status.md)
@@ -36,7 +36,7 @@ All names live in `castle::io::can`.
 | `id_format format` | Identifier format. |
 | `frame_type type` | Data or remote frame. |
 | `uint8_t dlc` | Data length code. Must be at most 8 to pass `validate_frame()`. |
-| `container::array<uint8_t, 8> data` | Inline payload. Bytes beyond `data_length()` are kept at zero by the mutators. |
+| `dsa::array<uint8_t, 8> data` | Inline payload. Bytes beyond `data_length()` are kept at zero by the mutators. |
 | `frame()` | `constexpr`. Standard-format data frame, identifier `0`, `dlc` `0`, zeroed payload. |
 | `explicit frame(uint32_t identifier, id_format id_kind = id_format::standard)` | `constexpr`. Empty data frame with the given identifier and format. The identifier is not range-checked here; see `validate_frame()`. |
 | `is_extended()` | `constexpr bool`. True when `format == id_format::extended`. |

@@ -25,7 +25,7 @@
  * hash.bounds();   // geohash_bounds<double>
  *
  * castle::geodetic::geohash<8U> parsed;
- * parsed.assign(castle::container::string_view("w6ugqkyc"));
+ * parsed.assign(castle::dsa::string_view("w6ugqkyc"));
  * parsed.assign_binary(hash.binary().view());
  * parsed.assign_bits(hash.bits());
  * @endcode
@@ -45,8 +45,8 @@
 #include "castle/bit/bit_core.hpp"
 #include "castle/bit/bit_utils.hpp"
 #include "castle/error/status.hpp"
-#include "castle/container/string.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle_ext/geodetic/coord.hpp"
 #include "castle_ext/geodetic/geo_utils.hpp"
 
@@ -143,14 +143,14 @@ CASTLE_INLINE int geohash_digit_value(char character) CASTLE_NOEXCEPT
         character = static_cast<char>(character - 'A' + 'a');
     }
 
-    CASTLE_CONST castle::container::string_view alphabet(geohash_alphabet, geohash_radix);
+    CASTLE_CONST castle::dsa::string_view alphabet(geohash_alphabet, geohash_radix);
     CASTLE_CONST castle::size_type index = alphabet.find(character);
-    return (index == castle::container::string_view::npos) ? -1 : static_cast<int>(index);
+    return (index == castle::dsa::string_view::npos) ? -1 : static_cast<int>(index);
 }
 
 /** @brief Validates an exact-depth view and its alphabet without changing output. */
 template <castle::size_type Depth>
-CASTLE_NODISCARD status validate_geohash(castle::container::string_view encoded) CASTLE_NOEXCEPT
+CASTLE_NODISCARD status validate_geohash(castle::dsa::string_view encoded) CASTLE_NOEXCEPT
 {
     if (encoded.empty())
     {
@@ -184,7 +184,7 @@ CASTLE_CONSTEXPR int geohash_bit_value(char character) CASTLE_NOEXCEPT
 
 /** @brief Validates an exact-length binary view and its characters without changing output. */
 template <castle::size_type Depth>
-CASTLE_NODISCARD status validate_geohash_binary(castle::container::string_view encoded) CASTLE_NOEXCEPT
+CASTLE_NODISCARD status validate_geohash_binary(castle::dsa::string_view encoded) CASTLE_NOEXCEPT
 {
     CASTLE_CONST castle::size_type bit_count = geohash_bit_count<Depth>;
     if (encoded.empty())
@@ -213,7 +213,7 @@ CASTLE_NODISCARD status validate_geohash_binary(castle::container::string_view e
 
 /** @brief Packs an exact-depth base-32 view into MSB-first Geohash bits. */
 template <castle::size_type Depth>
-CASTLE_NODISCARD status base32_to_bits(castle::container::string_view encoded, uint64_t& bits) CASTLE_NOEXCEPT
+CASTLE_NODISCARD status base32_to_bits(castle::dsa::string_view encoded, uint64_t& bits) CASTLE_NOEXCEPT
 {
     CASTLE_CONST status validation = validate_geohash<Depth>(encoded);
     if (validation != status::ok)
@@ -233,7 +233,7 @@ CASTLE_NODISCARD status base32_to_bits(castle::container::string_view encoded, u
 
 /** @brief Packs an exact-length binary view into MSB-first Geohash bits. */
 template <castle::size_type Depth>
-CASTLE_NODISCARD status binary_to_bits(castle::container::string_view encoded, uint64_t& bits) CASTLE_NOEXCEPT
+CASTLE_NODISCARD status binary_to_bits(castle::dsa::string_view encoded, uint64_t& bits) CASTLE_NOEXCEPT
 {
     CASTLE_CONST status validation = validate_geohash_binary<Depth>(encoded);
     if (validation != status::ok)
@@ -441,7 +441,7 @@ CASTLE_NODISCARD status encode_geohash(CASTLE_CONST geo_point<T>& point,
 
 /** @brief Decodes an exact-depth base-32 Geohash into its cell center and bounds. */
 template <castle::size_type Depth, typename T>
-CASTLE_NODISCARD status decode_geohash(castle::container::string_view encoded,
+CASTLE_NODISCARD status decode_geohash(castle::dsa::string_view encoded,
                                         geo_point<T>& center,
                                         geohash_bounds<T>* bounds) CASTLE_NOEXCEPT
 {
@@ -482,9 +482,9 @@ public:
     using point_type = geo_point<T>;
     using bounds_type = geohash_bounds<T>;
     using bits_type = uint64_t;
-    using string_type = castle::container::string<Depth>;
-    using binary_string_type = castle::container::string<geohash_bit_count<Depth>>;
-    using view_type = castle::container::string_view;
+    using string_type = castle::dsa::string<Depth>;
+    using binary_string_type = castle::dsa::string<geohash_bit_count<Depth>>;
+    using view_type = castle::dsa::string_view;
 
     /** @brief Compile-time precision in base-32 characters. */
     static CASTLE_CONSTEXPR castle::size_type depth = Depth;

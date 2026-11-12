@@ -14,7 +14,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/constants.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
@@ -161,7 +161,7 @@ struct nav_sbas
     uint8_t service = 0U;      ///< SBAS services available, see `SERVICE_*`.
     uint8_t cnt = 0U;          ///< On-wire SV count; may exceed `svs.size()`.
     uint8_t status_flags = 0U; ///< SBAS status flags, see `STATUS_FLAGS_*`.
-    castle::container::vector<nav_sbas_sv, MaxSvs> svs{};
+    castle::dsa::vector<nav_sbas_sv, MaxSvs> svs{};
 
     CASTLE_NODISCARD bool ranging() CASTLE_CONST CASTLE_NOEXCEPT
     {

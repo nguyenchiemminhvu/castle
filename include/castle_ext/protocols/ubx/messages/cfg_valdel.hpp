@@ -28,7 +28,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/container/vector.hpp"
+#include "castle/dsa/vector.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/ubx_config.hpp"
 #include "castle_ext/protocols/ubx/messages/detail/cfg_data.hpp"
@@ -62,7 +62,7 @@ struct cfg_valdel
     : detail::cfg_message<cfg_valdel<MaxKeys>, UBX_ID_CFG_VALDEL, 0x00U>
     , cfg_valdel_layers
 {
-    castle::container::vector<uint32_t, MaxKeys> keys{}; ///< Key IDs to delete.
+    castle::dsa::vector<uint32_t, MaxKeys> keys{}; ///< Key IDs to delete.
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT
@@ -80,7 +80,7 @@ struct cfg_valdel_transaction
     , cfg_valdel_layers
     , cfg_transaction_field
 {
-    castle::container::vector<uint32_t, MaxKeys> keys{}; ///< Key IDs to delete (may be empty).
+    castle::dsa::vector<uint32_t, MaxKeys> keys{}; ///< Key IDs to delete (may be empty).
 
     template <typename Self, typename Stream>
     static void layout(Self& self, Stream& stream) CASTLE_NOEXCEPT

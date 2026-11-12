@@ -5,7 +5,7 @@
 #define CASTLE_EXT_PROTOCOLS_NMEA_MESSAGES_DTM_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/container/string_view.hpp"
+#include "castle/dsa/string_view.hpp"
 #include "castle_ext/protocols/nmea/nmea.hpp"
 #include "castle_ext/protocols/nmea/field_cursor.hpp"
 
@@ -22,10 +22,10 @@ namespace messages
 struct dtm
 {
     bool valid = false;
-    castle::container::string_view talker{};
-    castle::container::string_view datum_code{};
-    castle::container::string_view datum_sub{};
-    castle::container::string_view ref_datum{};
+    castle::dsa::string_view talker{};
+    castle::dsa::string_view datum_code{};
+    castle::dsa::string_view datum_sub{};
+    castle::dsa::string_view ref_datum{};
     double lat_offset = 0.0;
     double lon_offset = 0.0;
     double alt_offset = 0.0;

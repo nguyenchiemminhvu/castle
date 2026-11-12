@@ -25,7 +25,7 @@ Everything works on caller-provided buffers.
 * [`core/compiler.hpp`](../../../core/compiler.md)
 * [`core/types.hpp`](../../../core/types.md)
 * [`error/status.hpp`](../../../error/status.md)
-* [`container/array_view.hpp`](../../../container/array_view.md)
+* [`dsa/array_view.hpp`](../../../dsa/array_view.md)
 * [`utility/bytes.hpp`](../../../utility/bytes.md)
 * [`checksums/crc24q.hpp`](../../checksums/crc24q.md)
 
@@ -82,7 +82,7 @@ const uint8_t payload_bytes[2U] = {0x3EU, 0x90U};
 uint8_t frame[16U];
 castle::size_type written = 0U;
 castle::status result = encode_frame(
-    castle::container::array_view<const uint8_t>(payload_bytes, sizeof(payload_bytes)),
+    castle::dsa::array_view<const uint8_t>(payload_bytes, sizeof(payload_bytes)),
     frame, sizeof(frame), written);
 // result == castle::status::ok, written == frame_size(2U) == 8
 // frame[0] == RTCM_PREAMBLE, frame[2] == 2, frame[5..7] == CRC-24Q (big-endian)
