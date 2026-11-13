@@ -41,7 +41,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/error_handler.hpp"
 #include "castle/core/traits.hpp"
-#include "castle/math/ratio.hpp"
+#include "castle/units/scale.hpp"
 #include "castle/chrono/time_point.hpp"
 
 #if CASTLE_COMPILER_ARM
@@ -78,11 +78,11 @@ extern "C" int64_t castle_chrono_steady_clock_now() CASTLE_NOEXCEPT;
 #endif
 
 #ifndef CASTLE_CHRONO_SYSTEM_CLOCK_PERIOD
-#define CASTLE_CHRONO_SYSTEM_CLOCK_PERIOD castle::nano
+#define CASTLE_CHRONO_SYSTEM_CLOCK_PERIOD castle::units::nano
 #endif
 
 #ifndef CASTLE_CHRONO_STEADY_CLOCK_PERIOD
-#define CASTLE_CHRONO_STEADY_CLOCK_PERIOD castle::nano
+#define CASTLE_CHRONO_STEADY_CLOCK_PERIOD castle::units::nano
 #endif
 
 namespace castle

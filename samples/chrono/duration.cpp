@@ -7,9 +7,9 @@
 int main()
 {
     using half_seconds = castle::chrono::duration<int64_t, castle::math::ratio<1, 2> >;
-    using milliseconds32 = castle::chrono::duration<int32_t, castle::milli>;
+    using milliseconds32 = castle::chrono::duration<int32_t, castle::units::milli>;
 
-    CASTLE_SAMPLE_CHECK((castle::chrono::is_valid_period<castle::milli>::value));
+    CASTLE_SAMPLE_CHECK((castle::chrono::is_valid_period<castle::units::milli>::value));
     CASTLE_SAMPLE_CHECK(castle::chrono::duration_values<int32_t>::zero() == 0);
 
     castle::chrono::milliseconds sample_period(10);
@@ -49,12 +49,12 @@ int main()
     const auto scaled_right = 2 * castle::chrono::milliseconds(7);
     const auto divided = castle::chrono::milliseconds(9) / 2;
     const auto ratio = castle::chrono::operator/<
-        int64_t, castle::seconds, int64_t, castle::milli>(
+        int64_t, castle::units::second, int64_t, castle::units::milli>(
             castle::chrono::seconds(3),
             castle::chrono::milliseconds(500));
     const auto mod_scalar = castle::chrono::milliseconds(10) % 6;
     const auto mod_duration = castle::chrono::operator%<
-        int64_t, castle::seconds, int64_t, castle::milli>(
+        int64_t, castle::units::second, int64_t, castle::units::milli>(
             castle::chrono::seconds(5),
             castle::chrono::milliseconds(1200));
 

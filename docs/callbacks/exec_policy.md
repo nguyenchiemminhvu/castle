@@ -33,7 +33,7 @@
 See `samples/sample_exec_policy.cpp`.
 
 ```cpp
-using namespace castle::chrono::literals::chrono_literals;
+using namespace castle::units::literals;
 
 int hits = 0;
 auto once = castle::callbacks::policy::make_once([&hits]() noexcept { ++hits; });

@@ -19,7 +19,7 @@
  *
  * @code
  * #include "castle/callbacks/exec_policy.hpp"
- * #include "castle/chrono/literals.hpp"
+ * #include "castle/units/time.hpp"
  *
  * struct fake_clock
  * {
@@ -38,7 +38,7 @@
  *
  * int main()
  * {
- *     using namespace castle::chrono::literals::chrono_literals;
+ *     using namespace castle::units::literals;
  *
  *     int hits = 0;
  *     auto once = castle::callbacks::policy::make_once([&hits]() noexcept { ++hits; });

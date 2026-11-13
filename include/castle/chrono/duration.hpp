@@ -43,6 +43,7 @@
 #include "castle/math/gcd.hpp"
 #include "castle/math/lcm.hpp"
 #include "castle/math/ratio.hpp"
+#include "castle/units/scale.hpp"
 
 #include <float.h>
 #include <limits.h>
@@ -368,42 +369,42 @@ private:
 /**
  * @brief Nanosecond duration alias using an @c int64_t tick count.
  */
-using nanoseconds  = duration<int64_t, castle::nano>;
+using nanoseconds  = duration<int64_t, castle::units::nano>;
 
 /**
  * @brief Microsecond duration alias using an @c int64_t tick count.
  */
-using microseconds = duration<int64_t, castle::micro>;
+using microseconds = duration<int64_t, castle::units::micro>;
 
 /**
  * @brief Millisecond duration alias using an @c int64_t tick count.
  */
-using milliseconds = duration<int64_t, castle::milli>;
+using milliseconds = duration<int64_t, castle::units::milli>;
 
 /**
  * @brief Second duration alias using an @c int64_t tick count.
  */
-using seconds      = duration<int64_t, castle::seconds>;
+using seconds      = duration<int64_t, castle::units::second>;
 
 /**
  * @brief Minute duration alias using an @c int64_t tick count.
  */
-using minutes      = duration<int64_t, castle::minutes>;
+using minutes      = duration<int64_t, castle::units::minute>;
 
 /**
  * @brief Hour duration alias using an @c int64_t tick count.
  */
-using hours        = duration<int64_t, castle::hours>;
+using hours        = duration<int64_t, castle::units::hour>;
 
 /**
  * @brief Day duration alias using an @c int64_t tick count.
  */
-using days         = duration<int64_t, castle::days>;
+using days         = duration<int64_t, castle::units::day>;
 
 /**
  * @brief Week duration alias using an @c int64_t tick count.
  */
-using weeks        = duration<int64_t, castle::weeks>;
+using weeks        = duration<int64_t, castle::units::week>;
 
 /**
  * @brief Casts a duration to another duration type, potentially changing the tick count and period.
@@ -569,9 +570,11 @@ operator-(
  * @param value Duration to scale.
  * @param scalar Multiplier.
  * @return Duration in the same period with a common representation type.
+ * @note Participates only for arithmetic @p Scalar, so quantity types keep their own operators.
  * @warning Multiplication is unchecked and may overflow the result representation type.
  */
-template <typename Rep, typename Period, typename Scalar>
+template <typename Rep, typename Period, typename Scalar,
+          typename meta::enable_if<meta::is_arithmetic<Scalar>::value, int>::type = 0>
 CASTLE_CONSTEXPR duration<meta::common_type_t<Rep, Scalar>, Period>
 operator*(
     CASTLE_CONST duration<Rep, Period>& value,
@@ -591,9 +594,11 @@ operator*(
  * @param scalar Multiplier.
  * @param value Duration to scale.
  * @return Duration in the same period with a common representation type.
+ * @note Participates only for arithmetic @p Scalar, so quantity types keep their own operators.
  * @warning Multiplication is unchecked and may overflow the result representation type.
  */
-template <typename Scalar, typename Rep, typename Period>
+template <typename Scalar, typename Rep, typename Period,
+          typename meta::enable_if<meta::is_arithmetic<Scalar>::value, int>::type = 0>
 CASTLE_CONSTEXPR duration<meta::common_type_t<Rep, Scalar>, Period>
 operator*(
     CASTLE_CONST Scalar& scalar,
@@ -610,10 +615,12 @@ operator*(
  * @param value Duration to divide.
  * @param scalar Divisor.
  * @return Duration in the same period with a common representation type.
- * @note Integral representations use integral division semantics.
+ * @note Integral representations use integral division semantics. Participates only for
+ *       arithmetic @p Scalar.
  * @warning Division by zero is undefined and is not checked.
  */
-template <typename Rep, typename Period, typename Scalar>
+template <typename Rep, typename Period, typename Scalar,
+          typename meta::enable_if<meta::is_arithmetic<Scalar>::value, int>::type = 0>
 CASTLE_CONSTEXPR duration<meta::common_type_t<Rep, Scalar>, Period>
 operator/(
     CASTLE_CONST duration<Rep, Period>& value,
@@ -658,10 +665,12 @@ operator/(
  * @param value Duration to reduce.
  * @param scalar Scalar modulus.
  * @return Duration with the same period containing the remainder tick count.
- * @note This operator requires that the underlying representation supports @c %.
+ * @note This operator requires that the underlying representation supports @c %. Participates
+ *       only for arithmetic @p Scalar.
  * @warning Modulo by zero is undefined and is not checked.
  */
-template <typename Rep, typename Period, typename Scalar>
+template <typename Rep, typename Period, typename Scalar,
+          typename meta::enable_if<meta::is_arithmetic<Scalar>::value, int>::type = 0>
 CASTLE_CONSTEXPR duration<Rep, Period>
 operator%(
     CASTLE_CONST duration<Rep, Period>& value,

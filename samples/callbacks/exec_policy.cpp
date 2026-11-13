@@ -24,7 +24,7 @@ int64_t fake_clock::now_ms = 0;
 
 int main()
 {
-    using namespace castle::chrono::literals::chrono_literals;
+    using namespace castle::units::literals;
     namespace policy = castle::callbacks::policy;
 
     int hits = 0;

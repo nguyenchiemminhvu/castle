@@ -4,7 +4,7 @@
 
 int main()
 {
-    using namespace castle::chrono::literals::chrono_literals;
+    using namespace castle::units::literals;
 
     const auto timeout = 250_ms;
     const auto start = castle::chrono::steady_clock::now();

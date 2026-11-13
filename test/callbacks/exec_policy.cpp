@@ -111,7 +111,7 @@ TEST(CallbackPolicyTest, EveryNZeroBecomesOne)
 
 TEST(CallbackPolicyTest, ArmedWindowConcurrentCasFailureBranch)
 {
-    using namespace castle::chrono::literals::chrono_literals;
+    using namespace castle::units::literals;
 
     FakeClock::now_ms = 0;
 
@@ -149,7 +149,7 @@ TEST(CallbackPolicyTest, ArmedWindowConcurrentCasFailureBranch)
 
 TEST(CallbackPolicyTest, ArmedThrottlePeriodicWithControlledClock)
 {
-    using namespace castle::chrono::literals::chrono_literals;
+    using namespace castle::units::literals;
     FakeClock::now_ms=0;
     int hits=0;
     auto aw=policy::make_armed_window<policy::single_thread, FakeClock>(10_ms,[&](){++hits;});

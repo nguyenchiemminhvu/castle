@@ -111,19 +111,4 @@ TEST(MathRatio, Ordering)
     SUCCEED();
 }
 
-// ---------------------------------------------------------------------------
-// Convenience SI / chrono ratios at castle:: scope
-// ---------------------------------------------------------------------------
-TEST(MathRatio, ConvenienceAliases)
-{
-    static_assert(castle::milli::num == 1, "");
-    static_assert(castle::milli::den == 1000, "");
-    static_assert(castle::kilo::num == 1000, "");
-    static_assert(castle::kilo::den == 1, "");
-    static_assert(castle::minutes::num == 60, "");
-    static_assert(castle::hours::num == 3600, "");
-    static_assert(castle::days::num == 86400, "");
-    SUCCEED();
-}
-
 } // namespace

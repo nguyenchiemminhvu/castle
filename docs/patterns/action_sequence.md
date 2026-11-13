@@ -65,7 +65,7 @@ See [`samples/patterns/action_sequence.cpp`](../../samples/patterns/action_seque
 ## Constraints & Notes
 - No heap allocation, exceptions, or RTTI. Capacity, time resolution, and callable storage are compile-time parameters.
 - Time units finer than the resolution (for example `microseconds` into a millisecond sequence) do not compile: truncating them would make delays end early or make small `update()` steps vanish. Convert explicitly with `castle::chrono::ceil<duration_type>()` for delays, or pick a finer `Duration`.
-- On small 32-bit targets, `castle::chrono::duration<uint32_t, castle::milli>` avoids 64-bit arithmetic.
+- On small 32-bit targets, `castle::chrono::duration<uint32_t, castle::units::milli>` avoids 64-bit arithmetic.
 - Callables must be copy-constructible and fit `CallbackStorageSize`; they are stored in `castle::callbacks::function`.
 - Steps can be added only when the sequence is not running. Calling `start()`, `reset()`, `clear()`, `add_*()`, or `append()` from inside a step returns `status::invalid_config`. A step must not destroy the sequence that runs it.
 - Editing a completed sequence returns it to `idle`.

@@ -830,8 +830,8 @@ private:
             return false;
         }
 
-        if ((epoch_duration::period::num == castle::nano::num) &&
-            (epoch_duration::period::den == castle::nano::den))
+        if ((epoch_duration::period::num == castle::units::nano::num) &&
+            (epoch_duration::period::den == castle::units::nano::den))
         {
             out.tv_sec = static_cast<time_t>(count / 1000000000LL);
             out.tv_nsec = static_cast<long>(count % 1000000000LL);

@@ -98,6 +98,7 @@ standards it follows (MISRA C++, AUTOSAR C++14, CERT C++, ISO 26262).
 - [`math/`](docs/math/geometry/geometry.md) — Integer math, geometry, linear algebra, ratios, roots, random helpers, and more.
 - [`memory/`](docs/memory/memory.md) — Alignment, storage, object lifetime, construction, and destruction helpers.
 - [`sync/`](docs/sync/mutex.md) — Mutexes, semaphores, shared locking, and wait policies.
+- [`units/`](docs/units/units.md) — Type-safe physical quantities with dimensional analysis, SI prefixes, time scales, and unit literals.
 - [`utility/`](docs/utility/utility.md) — Bit cast, bitset, compare, hash, optional, pair, tuple, variant, and basic move/forward utilities.
 - [`castle_ext/`](docs/castle_ext/README.md) - External standards and domain-specific implementations
 

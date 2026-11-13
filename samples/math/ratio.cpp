@@ -13,7 +13,6 @@ int main()
     static_assert(sum::num == 5 && sum::den == 6, "");
     static_assert(product::num == 1 && product::den == 6, "");
     static_assert(castle::math::ratio_less<third, half>::value, "");
-    static_assert(castle::milli::num == 1 && castle::milli::den == 1000, "");
 
     CASTLE_SAMPLE_CHECK(sum::num == 5 && sum::den == 6);
     return 0;

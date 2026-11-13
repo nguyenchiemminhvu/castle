@@ -237,32 +237,6 @@ struct ratio_greater_equal
 };
 
 } // namespace math
-
-/**
- * @brief Common SI-scale and time-period ratio aliases.
- * @note These aliases live directly in namespace `castle` for chrono-style use.
- */
-using atto  = math::ratio<1LL, 1000000000000000000LL>;
-using femto = math::ratio<1LL, 1000000000000000LL>;
-using pico  = math::ratio<1LL, 1000000000000LL>;
-using nano  = math::ratio<1LL, 1000000000LL>;
-using micro = math::ratio<1LL, 1000000LL>;
-using milli = math::ratio<1LL, 1000LL>;
-using centi = math::ratio<1LL, 100LL>;
-using deci  = math::ratio<1LL, 10LL>;
-
-using deca  = math::ratio<10LL, 1LL>;
-using hecto = math::ratio<100LL, 1LL>;
-using kilo  = math::ratio<1000LL, 1LL>;
-using mega  = math::ratio<1000000LL, 1LL>;
-using giga  = math::ratio<1000000000LL, 1LL>;
-
-using seconds = math::ratio<1LL, 1LL>;
-using minutes = math::ratio<60LL, 1LL>;
-using hours   = math::ratio<3600LL, 1LL>;
-using days    = math::ratio<86400LL, 1LL>;
-using weeks   = math::ratio<604800LL, 1LL>;
-
 } // namespace castle
 
 #endif // CASTLE_MATH_RATIO_HPP

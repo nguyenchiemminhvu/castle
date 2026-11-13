@@ -61,7 +61,7 @@ TEST(DurationTest, CastCommonArithmeticComparisonAndRounding)
     EXPECT_EQ(castle::chrono::abs(milliseconds(7)).count(),7);
     EXPECT_EQ(+milliseconds(4).count(),4);
     EXPECT_EQ((-milliseconds(4)).count(),-4);
-    static_assert(castle::meta::is_same<castle::chrono::seconds::period,castle::seconds>::value,"period");
+    static_assert(castle::meta::is_same<castle::chrono::seconds::period,castle::units::second>::value,"period");
 }
 
 TEST(DurationTest, FloorNegativeDurationCoversGreaterBranch)

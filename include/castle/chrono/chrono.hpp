@@ -18,7 +18,7 @@
  * @code
  * #include "castle/chrono/chrono.hpp"
  *
- * using namespace castle::chrono::literals::chrono_literals;
+ * using namespace castle::units::literals;
  *
  * int main()
  * {
@@ -37,6 +37,6 @@
 #include "castle/chrono/duration.hpp"
 #include "castle/chrono/time_point.hpp"
 #include "castle/chrono/clocks.hpp"
-#include "castle/chrono/literals.hpp"
+#include "castle/units/time.hpp"
 
 #endif

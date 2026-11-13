@@ -89,7 +89,7 @@ struct is_chrono_duration<chrono::duration<Rep, Period>> : meta::true_type
  *
  * @tparam MaxActions Maximum number of steps (calls plus delays); must be non-zero.
  * @tparam Duration `castle::chrono::duration` with an integral representation; its period is the
- *         time resolution of the sequence. Use for example `chrono::duration<uint32_t, castle::milli>`
+ *         time resolution of the sequence. Use for example `chrono::duration<uint32_t, castle::units::milli>`
  *         on 32-bit targets, or `chrono::steady_clock::duration` when driving the sequence from
  *         `steady_clock::now()` differences.
  * @tparam CallbackStorageSize Inline bytes reserved for each stored callable.

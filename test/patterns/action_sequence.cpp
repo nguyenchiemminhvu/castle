@@ -12,7 +12,7 @@ namespace
 {
 using state = dp::action_sequence_state;
 using ms = castle::chrono::milliseconds;
-using ms8 = castle::chrono::duration<uint8_t, castle::milli>;
+using ms8 = castle::chrono::duration<uint8_t, castle::units::milli>;
 
 struct recorder
 {
