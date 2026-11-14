@@ -713,7 +713,7 @@ SUBSCRIBE validates every filter (`validate_topic_filter`) and the options byte,
 
 ## 9. Status mapping
 
-All APIs return `castle::status` (see [`status.hpp`](../../../../include/castle/error/status.hpp)). The most relevant values:
+All APIs return `castle::status` (see [`status.hpp`](../../../../include/castle/core/status.hpp)). The most relevant values:
 
 | Status | Typical cause |
 |---|---|

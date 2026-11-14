@@ -9,7 +9,7 @@ Converts bytes to two-character hexadecimal text and back. Encoding can use lowe
 ## Dependencies
 - [`../../core/compiler.md`](../../core/compiler.md)
 - [`../../core/types.md`](../../core/types.md)
-- [`../../error/status.md`](../../error/status.md)
+- [`../../core/status.md`](../../core/status.md)
 
 ## Public API
 | API | Description |

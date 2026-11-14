@@ -26,7 +26,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle_ext/protocols/http/types.hpp"
 
 #include <stdint.h>

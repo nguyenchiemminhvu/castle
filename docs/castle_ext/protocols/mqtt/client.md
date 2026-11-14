@@ -12,7 +12,7 @@ A polling-based MQTT client over `castle::net::tcp_client`. It builds CONNECT, P
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp)
 - [`castle/dsa/string_view.hpp`](../../../../include/castle/dsa/string_view.hpp)
-- [`castle/error/status.hpp`](../../../../include/castle/error/status.hpp)
+- [`castle/core/status.hpp`](../../../../include/castle/core/status.hpp)
 - [`castle_ext/net/client.hpp`](../../../../include/castle_ext/net/client.hpp)
 - [`codec.hpp`](codec.md)
 - [`topic.hpp`](topic.md)

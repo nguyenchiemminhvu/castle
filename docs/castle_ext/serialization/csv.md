@@ -7,7 +7,7 @@ A fixed-capacity CSV document, parser, and serializer for embedded configuration
 `#include "castle_ext/serialization/csv.hpp"`
 
 ## Dependencies
-- [`../../error/status.md`](../../error/status.md)
+- [`../../core/status.md`](../../core/status.md)
 - [`../../dsa/array.md`](../../dsa/array.md)
 - [`../../dsa/string.md`](../../dsa/string.md)
 - [`/dsa/string_view.md`](/dsa/string_view.md)

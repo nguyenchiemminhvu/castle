@@ -7,7 +7,7 @@ A move-only logical endpoint handle that registers an RX callback and sends to t
 `#include "castle_ext/io/rpmsg/endpoint.hpp"`
 
 ## Dependencies
-[`types.hpp`](../types.md), [`message.hpp`](../message.md), [`backend.hpp`](../backend.md), `castle/callbacks/function.hpp`, `castle/error/status.hpp`.
+[`types.hpp`](../types.md), [`message.hpp`](../message.md), [`backend.hpp`](../backend.md), `castle/callbacks/function.hpp`, `castle/core/status.hpp`.
 
 ## Public API
 `basic_endpoint<Backend, Options>` and alias `endpoint<Backend, Options>`; `create`, `destroy`, `send`, `try_send`, `send_to`/`sendto`, `try_send_to`/`try_sendto`, `send_offchannel`, `try_send_offchannel`, `acquire_tx_buffer`, `send_nocopy`, and `release_tx_buffer`.

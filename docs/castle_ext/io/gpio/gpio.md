@@ -9,7 +9,7 @@ Collects the platform-neutral GPIO pin and fixed-width port facades together wit
 ## Dependencies
 - `castle/core/compiler.hpp`
 - `castle/core/traits.hpp`
-- `castle/error/status.hpp`
+- `castle/core/status.hpp`
 - [`types.md`](types.md)
 - [`pin.md`](pin.md)
 - [`port.md`](port.md)

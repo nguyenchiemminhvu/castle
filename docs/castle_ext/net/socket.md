@@ -10,7 +10,7 @@
 - [`castle/core/config.hpp`](../../../include/castle/core/config.hpp)
 - [`castle/core/compiler.hpp`](../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp)
-- [`castle/error/status.hpp`](../../../include/castle/error/status.hpp)
+- [`castle/core/status.hpp`](../../../include/castle/core/status.hpp)
 - [`castle/utility/move.hpp`](../../../include/castle/utility/move.hpp)
 - [`endpoint.hpp`](endpoint.md)
 - [`detail/native.hpp`](detail/native.md)

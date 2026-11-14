@@ -29,7 +29,7 @@
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle_ext/protocols/http/hpack.hpp"
 #include "castle_ext/protocols/http/headers.hpp"
 

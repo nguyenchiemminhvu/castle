@@ -11,7 +11,7 @@
 - [`../core/error_handler.md`](../core/error_handler.md)
 - [`../core/traits.md`](../core/traits.md)
 - [`../core/types.md`](../core/types.md)
-- [`../error/status.md`](../error/status.md)
+- [`../core/status.md`](../core/status.md)
 - [`../sync/atomic.md`](../sync/atomic.md)
 - [`array.md`](array.md)
 - [`array_view.md`](array_view.md)

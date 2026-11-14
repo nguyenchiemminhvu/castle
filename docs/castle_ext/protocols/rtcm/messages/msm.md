@@ -62,7 +62,7 @@ Payload size in bits: `169 + nsat*nsig + nsat*S + ncell*C`, where `S` is 18 (MSM
 * [`core/compiler.hpp`](../../../../core/compiler.md)
 * [`core/types.hpp`](../../../../core/types.md)
 * [`dsa/vector.hpp`](../../../../dsa/vector.md)
-* [`error/status.hpp`](../../../../error/status.md)
+* [`core/status.hpp`](../../../../core/status.md)
 * [`bit_writer.hpp`](../bit_writer.md)
 * [`rtcm.hpp`](../rtcm.md)
 * [`math/round.hpp`](../../../../math/round.md)

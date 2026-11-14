@@ -7,7 +7,7 @@
 `#include "castle/utility/string_builder.hpp"`
 
 ## Dependencies
-[compiler.md](../core/compiler.md), [config.md](../core/config.md), [types.md](../core/types.md), [traits.md](../core/traits.md), [status.md](../error/status.md), [string.md](../dsa/string.md), [string_view.md](../dsa/string_view.md)
+[compiler.md](../core/compiler.md), [config.md](../core/config.md), [types.md](../core/types.md), [traits.md](../core/traits.md), [status.md](../core/status.md), [string.md](../dsa/string.md), [string_view.md](../dsa/string_view.md)
 
 ## Public API
 | API | Description |

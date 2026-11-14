@@ -43,7 +43,7 @@
 #include "castle/core/types.hpp"
 #include "castle/dsa/array_view.hpp"
 #include "castle/dsa/string.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 
 #include "castle_ext/protocols/rtcm/rtcm.hpp"
 

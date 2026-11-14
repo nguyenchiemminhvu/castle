@@ -9,7 +9,7 @@ Implements the RFC 4648 Base32 alphabet using caller-owned buffers. Encoding emi
 ## Dependencies
 - [`../../core/compiler.md`](../../core/compiler.md)
 - [`../../core/types.md`](../../core/types.md)
-- [`../../error/status.md`](../../error/status.md)
+- [`../../core/status.md`](../../core/status.md)
 
 ## Public API
 | API | Description |

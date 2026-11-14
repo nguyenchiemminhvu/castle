@@ -24,7 +24,7 @@ Everything works on caller-provided buffers.
 
 * [`core/compiler.hpp`](../../../core/compiler.md)
 * [`core/types.hpp`](../../../core/types.md)
-* [`error/status.hpp`](../../../error/status.md)
+* [`core/status.hpp`](../../../core/status.md)
 * [`dsa/array_view.hpp`](../../../dsa/array_view.md)
 * [`utility/bytes.hpp`](../../../utility/bytes.md)
 * [`checksums/crc24q.hpp`](../../checksums/crc24q.md)

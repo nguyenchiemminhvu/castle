@@ -7,7 +7,7 @@ Adapts a BSP-exposed GPIO value file (for example a sysfs-style `.../value` node
 `#include "castle_ext/io/gpio/backends/linux_file.hpp"`
 
 ## Dependencies
-- `castle/error/status.hpp`
+- `castle/core/status.hpp`
 - [`../types.md`](../types.md)
 - POSIX `<fcntl.h>` and `<unistd.h>` when `CASTLE_EXT_ENABLE_GPIO_LINUX_FILE` is defined.
 

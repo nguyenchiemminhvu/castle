@@ -35,7 +35,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/memory/construct.hpp"
 #include "castle/memory/destroy.hpp"
 #include "castle/memory/object.hpp"

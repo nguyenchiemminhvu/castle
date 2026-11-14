@@ -48,7 +48,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/dsa/vector.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/math/round.hpp"
 
 #include "castle_ext/protocols/rtcm/bit_writer.hpp"

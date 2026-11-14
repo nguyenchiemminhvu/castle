@@ -67,7 +67,7 @@
 #include "castle/core/types.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/dsa/array.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/utility/forward.hpp"
 #include "castle/utility/integral_sequence.hpp"
 #include "castle/utility/move.hpp"

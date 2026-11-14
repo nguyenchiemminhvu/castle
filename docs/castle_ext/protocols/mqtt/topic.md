@@ -10,7 +10,7 @@ Validates MQTT Topic Names and Topic Filters and evaluates hierarchical filter m
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp)
 - [`castle/dsa/string_view.hpp`](../../../../include/castle/dsa/string_view.hpp)
-- [`castle/error/status.hpp`](../../../../include/castle/error/status.hpp)
+- [`castle/core/status.hpp`](../../../../include/castle/core/status.hpp)
 
 ## Public API
 | Function | Description | Complexity |

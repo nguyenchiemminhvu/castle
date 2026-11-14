@@ -10,7 +10,7 @@ Provides a streaming RFC 1321 MD5 message digest for compatibility with legacy p
 - [`../../../core/compiler.md`](../../../core/compiler.md)
 - [`../../../core/error_handler.md`](../../../core/error_handler.md)
 - [`../../../core/types.md`](../../../core/types.md)
-- [`../../../error/status.md`](../../../error/status.md)
+- [`../../../core/status.md`](../../../core/status.md)
 - [`../../../dsa/array.md`](../../../dsa/array.md)
 - [`../../../../include/castle/utility/bytes.hpp`](../../../../include/castle/utility/bytes.hpp)
 

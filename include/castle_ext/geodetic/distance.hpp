@@ -39,7 +39,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/core/constants.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/math/abs.hpp"
 #include "castle/math/sqrt_real.hpp"
 #include "castle/math/linalg/trigonometry.hpp"

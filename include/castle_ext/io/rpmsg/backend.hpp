@@ -15,7 +15,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle_ext/io/rpmsg/message.hpp"
 #include "castle_ext/io/rpmsg/name_service.hpp"
 #include "castle_ext/io/rpmsg/types.hpp"

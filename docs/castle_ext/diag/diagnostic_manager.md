@@ -18,7 +18,7 @@ The component intentionally does not create a background task or timer. The appl
 - [`castle/core/compiler.hpp`](../../../include/castle/core/compiler.hpp) — portable language and `noexcept` macros.
 - [`castle/core/traits.hpp`](../../../include/castle/core/traits.hpp) — compile-time callable and type checks.
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp) — Castle fixed-width size types.
-- [`castle/error/status.hpp`](../../../include/castle/error/status.hpp) — deterministic API status results.
+- [`castle/core/status.hpp`](../../../include/castle/core/status.hpp) — deterministic API status results.
 - [`castle/utility/tuple.hpp`](../../../include/castle/utility/tuple.hpp) — fixed-size heterogeneous state storage.
 
 The uploaded simplified core snapshot referenced `castle/math/{gcd,lcm,ratio}.hpp` from its chrono headers but did not contain those files. Minimal compile-time implementations are included alongside this component so the existing Castle chrono dependency can be used as intended.

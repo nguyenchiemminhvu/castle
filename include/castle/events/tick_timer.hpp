@@ -42,7 +42,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/core/type_ranges.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 
 #include "castle/callbacks/function.hpp"
 #include "castle/callbacks/function_registry.hpp"

@@ -12,7 +12,7 @@ Backends are compile-time template arguments. `bus<Backend>` is a convenience al
 - [`../../../core/compiler.md`](../../../core/compiler.md)
 - [`../../../core/traits.md`](../../../core/traits.md)
 - [`../../../core/types.md`](../../../core/types.md)
-- [`../../../error/status.md`](../../../error/status.md)
+- [`../../../core/status.md`](../../../core/status.md)
 - [`../../io/fd/control.md`](../../io/fd/control.md) (`fd::detail::clear_system_error`)
 - [`frame.md`](frame.md)
 - [`filter.md`](filter.md)

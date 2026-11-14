@@ -29,7 +29,7 @@
 
 #include "castle/core/config.hpp"
 #include "castle/core/compiler.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 
 #if CASTLE_USING_POSIX_APIS
     #include <errno.h>

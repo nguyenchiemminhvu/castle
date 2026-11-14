@@ -12,7 +12,7 @@ Repeating-key XOR cipher: each data byte is XORed with `key[offset % key_size]`.
 - [`../../dsa/array.md`](../../dsa/array.md)
 - [`../../core/compiler.md`](../../core/compiler.md)
 - [`../../core/types.md`](../../core/types.md)
-- [`../../error/status.md`](../../error/status.md)
+- [`../../core/status.md`](../../core/status.md)
 - [`../../../include/castle/utility/bytes.hpp`](../../../include/castle/utility/bytes.hpp) (`secure_zero`)
 
 ## Public API

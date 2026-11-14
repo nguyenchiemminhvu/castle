@@ -12,7 +12,7 @@
 - [`../filter.md`](../filter.md)
 - [`../types.md`](../types.md)
 - [`../../../../dsa/mirrored_ring_buffer.md`](../../../../dsa/mirrored_ring_buffer.md)
-- [`../../../../error/status.md`](../../../../error/status.md)
+- [`../../../../core/status.md`](../../../../core/status.md)
 
 ## Public API
 Template parameters (all `castle::size_type`):

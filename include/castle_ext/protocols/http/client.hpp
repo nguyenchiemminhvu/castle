@@ -38,7 +38,7 @@
 #include "castle/callbacks/function.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle_ext/protocols/http/http1.hpp"
 #include "castle_ext/protocols/http/http2.hpp"
 #include "castle_ext/net/endpoint.hpp"

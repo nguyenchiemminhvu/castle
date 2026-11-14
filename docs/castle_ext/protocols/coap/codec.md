@@ -9,7 +9,7 @@ Encodes and decodes complete CoAP datagrams using the RFC 7252 four-byte base he
 ## Dependencies
 - [Core compiler macros](../../../../include/castle/core/compiler.hpp)
 - [Core types](../../../../include/castle/core/types.hpp)
-- [Status](../../../../include/castle/error/status.hpp)
+- [Status](../../../../include/castle/core/status.hpp)
 - [Byte helpers](../../../../include/castle/utility/bytes.hpp) (network-byte-order integer load/store)
 - [CoAP Types](types.md)
 

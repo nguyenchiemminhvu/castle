@@ -21,7 +21,7 @@ It uses the same sticky-error model as the UBX [`payload_writer`](../ubx/payload
 * [`core/types.hpp`](../../../core/types.md)
 * [`dsa/array_view.hpp`](../../../dsa/array_view.md)
 * [`dsa/string.hpp`](../../../dsa/string.md)
-* [`error/status.hpp`](../../../error/status.md)
+* [`core/status.hpp`](../../../core/status.md)
 * [`rtcm.hpp`](rtcm.md)
 
 ## Public API

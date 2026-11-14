@@ -45,7 +45,7 @@
 #include "castle/core/config.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/dsa/array.hpp"
 #include "castle/dsa/array_view.hpp"

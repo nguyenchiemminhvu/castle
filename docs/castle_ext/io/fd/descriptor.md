@@ -10,7 +10,7 @@ Provides the common allocation-free POSIX descriptor layer used by the file, UAR
 - `castle/core/config.hpp`
 - `castle/core/compiler.hpp`
 - `castle/core/types.hpp`
-- `castle/error/status.hpp`
+- `castle/core/status.hpp`
 - [`control.md`](control.md)
 
 ## Public API

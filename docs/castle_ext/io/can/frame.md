@@ -14,7 +14,7 @@ CAN FD is out of scope: the payload is fixed at 8 bytes (classic CAN only).
 - [`../../../dsa/initializer_list.md`](../../../dsa/initializer_list.md)
 - [`../../../core/compiler.md`](../../../core/compiler.md)
 - [`../../../core/types.md`](../../../core/types.md)
-- [`../../../error/status.md`](../../../error/status.md)
+- [`../../../core/status.md`](../../../core/status.md)
 
 ## Public API
 All names live in `castle::io::can`.

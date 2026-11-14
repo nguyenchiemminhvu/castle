@@ -17,7 +17,7 @@ A composite may own components by value or hold non-owning references. This supp
 - [`castle/core/compiler.hpp`](../../../include/castle/core/compiler.hpp)
 - [`castle/core/traits.hpp`](../../../include/castle/core/traits.hpp)
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp)
-- [`castle/error/status.hpp`](../../../include/castle/error/status.hpp)
+- [`castle/core/status.hpp`](../../../include/castle/core/status.hpp)
 - [`castle/utility/forward.hpp`](../../../include/castle/utility/forward.hpp)
 - [`castle/utility/integral_sequence.hpp`](../../../include/castle/utility/integral_sequence.hpp)
 - [`castle/utility/tuple.hpp`](../../../include/castle/utility/tuple.hpp)
@@ -47,7 +47,7 @@ Traversal visitors are invoked as lvalues and must be callable with every object
 ## Usage Example
 
 ```cpp
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/patterns/composite.hpp"
 
 namespace dp = castle::patterns;

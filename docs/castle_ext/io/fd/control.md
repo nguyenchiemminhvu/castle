@@ -9,7 +9,7 @@ Provides allocation-free wrappers for common POSIX file-descriptor operations: r
 ## Dependencies
 - [`../../../core/config.md`](../../../core/config.md)
 - [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../error/status.md`](../../../error/status.md)
+- [`../../../core/status.md`](../../../core/status.md)
 
 ## Public API
 | API | Description |

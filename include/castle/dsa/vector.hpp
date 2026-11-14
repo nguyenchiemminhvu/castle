@@ -21,7 +21,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/dsa/initializer_list.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/iterator/reverse_iterator.hpp"
 #include "castle/memory/object.hpp"
 #include "castle/memory/construct.hpp"

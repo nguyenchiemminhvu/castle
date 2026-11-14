@@ -4,7 +4,7 @@
 Castle-wide status codes for expected runtime outcomes in a no-exception environment. Use `castle::status` for capacity, lookup, configuration, and conversion failures instead of exceptions.
 
 ## Header
-`#include "castle/error/status.hpp"`
+`#include "castle/core/status.hpp"`
 
 ## Dependencies
 None
@@ -34,8 +34,8 @@ Status values:
 
 ## Usage Example
 ```cpp
-// See: samples/sample_status.cpp
-#include "castle/error/status.hpp"
+// See: samples/core/status.cpp
+#include "castle/core/status.hpp"
 
 if (!castle::succeeded(castle::status::not_found))
 {

@@ -10,7 +10,7 @@ The header also defines `filter_handle`, the integer that names an installed fil
 
 ## Dependencies
 - [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../error/status.md`](../../../error/status.md)
+- [`../../../core/status.md`](../../../core/status.md)
 - [`frame.md`](frame.md)
 
 ## Public API

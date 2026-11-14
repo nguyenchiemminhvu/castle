@@ -9,7 +9,7 @@ Provides the RFC 8439/IETF ChaCha20 stream cipher using a 256-bit key, 96-bit no
 ## Dependencies
 - [`../../core/compiler.md`](../../core/compiler.md)
 - [`../../core/types.md`](../../core/types.md)
-- [`../../error/status.md`](../../error/status.md)
+- [`../../core/status.md`](../../core/status.md)
 - [`../../../include/castle/utility/bytes.hpp`](../../../include/castle/utility/bytes.hpp)
 
 ## Public API

@@ -84,7 +84,7 @@
 #include "castle/core/types.hpp"
 #include "castle/dsa/array.hpp"
 #include "castle/dsa/array_view.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/math/geometry/geometry.hpp"
 #include "castle_ext/geodetic/coord.hpp"
 #include "castle_ext/geodetic/datum.hpp"

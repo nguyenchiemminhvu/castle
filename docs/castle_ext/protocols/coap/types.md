@@ -9,7 +9,7 @@ Defines the fixed-capacity message, message-code, option-number, and option-valu
 ## Dependencies
 - [Core compiler macros](../../../../include/castle/core/compiler.hpp)
 - [Core types](../../../../include/castle/core/types.hpp)
-- [Status](../../../../include/castle/error/status.hpp)
+- [Status](../../../../include/castle/core/status.hpp)
 
 ## Public API
 

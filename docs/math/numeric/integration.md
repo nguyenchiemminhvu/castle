@@ -11,7 +11,7 @@ Deterministic, allocation-free numerical integration of functions and sampled da
 - [`castle/core/error_handler.hpp`](../../core/error_handler.md)
 - [`castle/core/traits.hpp`](../../core/traits.md)
 - [`castle/core/types.hpp`](../../core/types.md)
-- [`castle/error/status.hpp`](../../error/status.md)
+- [`castle/core/status.hpp`](../../core/status.md)
 - [`castle/math/abs.hpp`](../abs.md)
 - [`castle/math/numeric/result.hpp`](result.md)
 

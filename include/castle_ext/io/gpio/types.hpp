@@ -9,7 +9,7 @@
 #define CASTLE_EXT_IO_GPIO_TYPES_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 
 #include <stdint.h>
 

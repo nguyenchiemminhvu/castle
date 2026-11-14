@@ -11,7 +11,7 @@ Convergence means the error estimate (half bracket width for bisection, last ste
 ## Dependencies
 - [`castle/core/compiler.hpp`](../../core/compiler.md)
 - [`castle/core/traits.hpp`](../../core/traits.md)
-- [`castle/error/status.hpp`](../../error/status.md)
+- [`castle/core/status.hpp`](../../core/status.md)
 - [`castle/math/abs.hpp`](../abs.md)
 - [`castle/math/numeric/result.hpp`](result.md)
 

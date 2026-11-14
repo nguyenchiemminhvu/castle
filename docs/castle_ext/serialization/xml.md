@@ -7,7 +7,7 @@ A fixed-capacity XML DOM, parser, and serializer for embedded configuration and 
 `#include "castle_ext/serialization/xml.hpp"`
 
 ## Dependencies
-- [`../../error/status.md`](../../error/status.md)
+- [`../../core/status.md`](../../core/status.md)
 - [`../../dsa/array.md`](../../dsa/array.md)
 - [`../../dsa/string.md`](../../dsa/string.md)
 - [`../../dsa/string_view.md`](../../dsa/string_view.md)

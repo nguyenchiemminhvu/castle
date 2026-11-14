@@ -45,7 +45,7 @@ A source does not call a recovery action directly. It only reports its condition
 - [`castle/core/compiler.hpp`](../../../include/castle/core/compiler.hpp) — compiler and `noexcept` portability macros.
 - [`castle/core/traits.hpp`](../../../include/castle/core/traits.hpp) — compile-time callable and type traits.
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp) — Castle fixed-width and size types.
-- [`castle/error/status.hpp`](../../../include/castle/error/status.hpp) — status return values.
+- [`castle/core/status.hpp`](../../../include/castle/core/status.hpp) — status return values.
 - [`castle/utility/tuple.hpp`](../../../include/castle/utility/tuple.hpp) — fixed-size heterogeneous state storage.
 
 The simplified CASTLE core snapshot used with this component also includes small implementations of `castle/math/gcd.hpp`, `castle/math/lcm.hpp`, and `castle/math/ratio.hpp`, which are required by its existing chrono headers.

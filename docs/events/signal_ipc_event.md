@@ -14,7 +14,7 @@
 - [`tuple`](../utility/tuple.md)
 - [`bitset`](../utility/bitset.md)
 - [`atomic`](../sync/atomic.md)
-- [`status`](../error/status.md)
+- [`status`](../core/status.md)
 
 ## Public API
 | API | Description |

@@ -12,7 +12,7 @@
 - [`../core/error_handler.md`](../core/error_handler.md)
 - [`initializer_list.md`](initializer_list.md)
 - [`../iterator/tags.md`](../iterator/tags.md)
-- [`../error/status.md`](../error/status.md)
+- [`../core/status.md`](../core/status.md)
 - [`../memory/object.md`](../memory/object.md)
 - [`../memory/construct.md`](../memory/construct.md)
 - [`../memory/destroy.md`](../memory/destroy.md)

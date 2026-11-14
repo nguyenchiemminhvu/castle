@@ -10,7 +10,7 @@ A fixed-capacity, self-contained sequence of one-shot calls and delays, modeled 
 - [`../callbacks/function.md`](../callbacks/function.md)
 - [`../dsa/array.md`](../dsa/array.md)
 - [`../chrono/duration.md`](../chrono/duration.md)
-- [`../error/status.md`](../error/status.md)
+- [`../core/status.md`](../core/status.md)
 - `castle/math/ratio.hpp`, `castle/utility/forward.hpp`
 - `castle/core/compiler.hpp`, `config.hpp`, `traits.hpp`, `type_ranges.hpp`, `types.hpp`
 

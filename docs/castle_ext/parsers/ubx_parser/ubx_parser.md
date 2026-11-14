@@ -11,7 +11,7 @@
 - [`core/config.hpp`](../../../core/config.md)
 - [`core/traits.hpp`](../../../core/traits.md)
 - [`core/types.hpp`](../../../core/types.md)
-- [`error/status.hpp`](../../../error/status.md)
+- [`core/status.hpp`](../../../core/status.md)
 - [`callbacks/function.hpp`](../../../callbacks/function.md)
 - [`dsa/array.hpp`](../../../dsa/array.md)
 - [`dsa/array_view.hpp`](../../../dsa/array_view.md)

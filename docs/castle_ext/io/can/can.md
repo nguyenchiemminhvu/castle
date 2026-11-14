@@ -65,7 +65,7 @@ Other platform differences:
 
 ## Dependencies
 - [`../../../core/config.md`](../../../core/config.md)
-- [`../../../error/status.md`](../../../error/status.md)
+- [`../../../core/status.md`](../../../core/status.md)
 - [`../../io/fd/control.md`](../../io/fd/control.md)
 - [`../../io/fd/poll.md`](../../io/fd/poll.md)
 - [`frame.md`](frame.md)
@@ -222,7 +222,7 @@ These hold on every backend, so code and tests written against the mock behave t
 - The facade validates configuration (`invalid_config`) and frame, filter and timeout arguments (`invalid_argument`) before the backend runs.
 
 ### Error handling
-- Every operation returns `castle::status` (see [`error/status.md`](../../../error/status.md)); there are no exceptions. Test results with `castle::succeeded(...)`.
+- Every operation returns `castle::status` (see [`core/status.md`](../../../core/status.md)); there are no exceptions. Test results with `castle::succeeded(...)`.
 - Statuses the CAN API uses: `ok`, `full` (queue or filter table full), `empty` (nothing received in time), `out_of_range` (payload or DLC above 8), `not_found` (unknown filter handle), `not_configured` (closed, or backend unavailable on this build), `invalid_config` (bad configuration, already open, unsupported mode or filter), `invalid_argument` (bad frame, filter, timeout, endpoint), `system_call_error` (platform call failed), `data_loss` (truncated or unrepresentable frame). A poll timeout is never returned as `time_out`; it is mapped to `empty` or `full`.
 - `system_call_error` carries the platform error in the optional `system_error` argument: `errno` on Linux (for example `ENODEV` for an unknown interface, `ENETDOWN` for an interface that went down) and the positive Zephyr driver errno (for example `ENETUNREACH` while bus-off). SocketCAN `send()` also reports `EAGAIN`/`ENOBUFS` there when it returns `full`; an `empty` `receive()` leaves it `0`. It is `0` for the other statuses. Zephyr driver codes `-EAGAIN`/`-ENOSPC` map to `full`, `-EINVAL` to `invalid_argument`, `-ENOTSUP`/`-ERANGE` to `invalid_config`, `-ENETDOWN` to `not_configured`.
 - Fault confinement is observable through `query_status()` (`bus_state`, error counters, `rx_overruns`, `tx_failures`); see [`types.md`](types.md).

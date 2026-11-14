@@ -10,7 +10,7 @@
 - [`../core/compiler.md`](../core/compiler.md)
 - [`../core/traits.md`](../core/traits.md)
 - [`../core/types.md`](../core/types.md)
-- [`../error/status.md`](../error/status.md)
+- [`../core/status.md`](../core/status.md)
 - [`../memory/construct.md`](../memory/construct.md)
 - [`../memory/destroy.md`](../memory/destroy.md)
 - [`../memory/object.md`](../memory/object.md)

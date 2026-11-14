@@ -32,7 +32,7 @@ The service owns the pool, hands it to the HAL (as `data_pool&`) and to the appl
 - [`castle/core/traits.hpp`](../../../include/castle/core/traits.hpp)
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp)
 - [`castle/patterns/observer.hpp`](../../patterns/observer.md)
-- [`castle/error/status.hpp`](../../../include/castle/error/status.hpp)
+- [`castle/core/status.hpp`](../../../include/castle/core/status.hpp)
 - [`castle/utility/tuple.hpp`](../../utility/tuple.md)
 - [`castle_ext/data/data_slot.hpp`](data_slot.md)
 - [`castle_ext/data/update_inbox.hpp`](update_inbox.md)

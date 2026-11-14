@@ -10,7 +10,7 @@
 - [`function`](../callbacks/function.md)
 - [`function_registry`](../callbacks/function_registry.md)
 - [`subscription`](../callbacks/subscription.md)
-- [`status`](../error/status.md)
+- [`status`](../core/status.md)
 
 ## Public API
 | API | Description |

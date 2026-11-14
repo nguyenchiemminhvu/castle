@@ -43,7 +43,7 @@ Circular containment uses the actual geodesic distance calculation (`haversine_d
 - ../../core/types.md
 - ../../dsa/array.md
 - [`../../ntainer/array_view.md
-- ../../error/status.md
+- ../../core/status.md
 - [`../../math/geometry/geometry.md`](../../ublic API
 
 ### Projection Utilities

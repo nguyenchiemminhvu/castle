@@ -10,7 +10,7 @@
 - [`../core/compiler.md`](../core/compiler.md)
 - [`../core/types.md`](../core/types.md)
 - [`initializer_list.md`](initializer_list.md)
-- [`../error/status.md`](../error/status.md)
+- [`../core/status.md`](../core/status.md)
 - [`../memory/object.md`](../memory/object.md)
 - [`../memory/construct.md`](../memory/construct.md)
 - [`../memory/destroy.md`](../memory/destroy.md)

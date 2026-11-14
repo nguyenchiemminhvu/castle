@@ -7,7 +7,7 @@ Adapts Zephyr's `gpio_dt_spec` device-tree GPIO handle to CASTLE's static pin ba
 `#include "castle_ext/io/gpio/backends/zephyr.hpp"`
 
 ## Dependencies
-- `castle/error/status.hpp`
+- `castle/core/status.hpp`
 - [`../types.md`](../types.md)
 - Zephyr `<zephyr/drivers/gpio.h>` when `CASTLE_EXT_ENABLE_GPIO_ZEPHYR` is defined.
 

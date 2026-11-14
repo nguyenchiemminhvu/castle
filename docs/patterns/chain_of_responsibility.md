@@ -26,7 +26,7 @@ Two flavors share the same handler semantics, with no base class, no virtual fun
 ## Dependencies
 - [`../callbacks/function.md`](../callbacks/function.md)
 - [`../dsa/array.md`](../dsa/array.md)
-- [`../error/status.md`](../error/status.md)
+- [`../core/status.md`](../core/status.md)
 - [`../utility/tuple.md`](../utility/tuple.md)
 - `castle/utility/integral_sequence.hpp`, `forward.hpp`, `move.hpp`
 - `castle/core/compiler.hpp`, `config.hpp`, `traits.hpp`, `types.hpp`

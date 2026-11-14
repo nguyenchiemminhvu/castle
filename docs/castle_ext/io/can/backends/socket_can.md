@@ -17,7 +17,7 @@ An MCP2515 on SPI is an ordinary interface (`can0`) to this backend once the ker
 - [`../../../io/fd/control.md`](../../../io/fd/control.md)
 - [`../../../io/fd/poll.md`](../../../io/fd/poll.md)
 - [`../../../../chrono/clocks.md`](../../../../chrono/clocks.md)
-- [`../../../../error/status.md`](../../../../error/status.md)
+- [`../../../../core/status.md`](../../../../core/status.md)
 
 ## Public API
 `socket_can::backend` is the alias for `basic_backend<>` (eight filters). `socket_can_available` is `true` when the Linux SocketCAN headers were found at build time (`CASTLE_USING_IO_CAN_VIA_SOCKET_CAN`). `endpoint_type` is `const char*`: an interface name (`"can0"`, `"vcan0"`, at most 15 characters) or the literal `"any"`.

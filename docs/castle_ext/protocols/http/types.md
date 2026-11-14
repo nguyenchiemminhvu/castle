@@ -10,7 +10,7 @@ Defines the shared HTTP method, version, error, header-view, and response-view t
 - [CASTLE compiler annotations](../../../../include/castle/core/compiler.hpp)
 - [CASTLE core types](../../../../include/castle/core/types.hpp)
 - [CASTLE string view](../../../../include/castle/dsa/string_view.hpp)
-- [CASTLE status](../../../../include/castle/error/status.hpp)
+- [CASTLE status](../../../../include/castle/core/status.hpp)
 
 ## Public API
 - `version`: HTTP/1.0, HTTP/1.1, and HTTP/2 identifiers.

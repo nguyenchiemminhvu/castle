@@ -24,7 +24,7 @@
 #define CASTLE_EXT_PROTOCOLS_UBX_MESSAGES_DETAIL_ESF_DATA_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"
 #include "castle_ext/protocols/ubx/payload_writer.hpp"
 

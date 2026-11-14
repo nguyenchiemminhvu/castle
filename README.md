@@ -90,9 +90,8 @@ standards it follows (MISRA C++, AUTOSAR C++14, CERT C++, ISO 26262).
 - [`callbacks/`](docs/callbacks/delegate.md) — Fixed-storage delegates, functions, registries, and execution policies.
 - [`chrono/`](docs/chrono/chrono.md) — Durations, time points, clocks, and literals.
 - [`dsa/`](docs/dsa/containers.md) — Fixed-capacity sequences, associative containers, buffers, strings, graphs with graph algorithms ([`graph.hpp`](docs/dsa/graph.md)), and range algorithms ([`algorithm.hpp`](docs/dsa/algorithm.md)).
-- [`core/`](docs/core/compiler.md) — Compiler abstraction, configuration, traits, type ranges, and error handling.
+- [`core/`](docs/core/compiler.md) — Compiler abstraction, configuration, traits, type ranges, common status codes ([`status.hpp`](docs/core/status.md)), and error handling.
 - [`patterns/`](docs/patterns/observer.md) — Observer, singleton, and visitor helpers.
-- [`error/`](docs/error/status.md) — Common status/error values.
 - [`events/`](docs/events/delegate_dispatcher.md) — Event dispatch, signal/slot, IPC, timers, and thread-pool helpers.
 - [`iterator/`](docs/iterator/iterator.md) — Iterator tags, traits, operations, and bounded iterators.
 - [`math/`](docs/math/geometry/geometry.md) — Integer math, geometry, linear algebra, ratios, roots, random helpers, and more.

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "castle/dsa/array_view.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle_ext/geodetic/geofence.hpp"
 
 namespace

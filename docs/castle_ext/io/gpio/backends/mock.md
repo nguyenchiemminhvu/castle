@@ -7,7 +7,7 @@ Provides deterministic, allocation-free in-memory pin and port backends for host
 `#include "castle_ext/io/gpio/backends/mock.hpp"`
 
 ## Dependencies
-- `castle/error/status.hpp`
+- `castle/core/status.hpp`
 - [`../types.md`](../types.md)
 
 ## Public API

@@ -10,7 +10,7 @@ The servo is intentionally stateless. It does not own a timer, store historical 
 
 ## Dependencies
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp) — Castle portability macros.
-- [`castle/error/status.hpp`](../../../../include/castle/error/status.hpp) — deterministic status values.
+- [`castle/core/status.hpp`](../../../../include/castle/core/status.hpp) — deterministic status values.
 
 ## Public API
 

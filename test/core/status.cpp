@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 
 TEST(StatusTest, ValuesAndSucceeded)
 {

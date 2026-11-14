@@ -10,7 +10,7 @@
 - [HTTP shared types](types.md)
 - [CASTLE compiler annotations](../../../../include/castle/core/compiler.hpp)
 - [CASTLE core types](../../../../include/castle/core/types.hpp)
-- [CASTLE status](../../../../include/castle/error/status.hpp)
+- [CASTLE status](../../../../include/castle/core/status.hpp)
 
 ## Public API
 - `basic_headers<MaxHeaders, MaxNameSize, MaxValueSize>`: fixed-capacity owning collection.

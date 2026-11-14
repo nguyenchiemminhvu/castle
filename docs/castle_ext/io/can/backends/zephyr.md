@@ -15,7 +15,7 @@ For the platform-neutral bus API and the Linux counterpart see [`can.md`](../can
 - [`../types.md`](../types.md)
 - [`../../../../dsa/mirrored_ring_buffer.md`](../../../../dsa/mirrored_ring_buffer.md)
 - [`../../../../sync/atomic.md`](../../../../sync/atomic.md)
-- [`../../../../error/status.md`](../../../../error/status.md)
+- [`../../../../core/status.md`](../../../../core/status.md)
 - [`../../../../core/config.md`](../../../../core/config.md)
 - Zephyr 3.2 or newer: `<zephyr/device.h>`, `<zephyr/drivers/can.h>`, `<zephyr/kernel.h>` when `CASTLE_USING_IO_CAN_VIA_ZEPHYR` is `1`.
 

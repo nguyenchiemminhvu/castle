@@ -333,7 +333,7 @@ The event handler depends only on CASTLE facilities and POSIX pthread APIs:
 
 ```text
 castle/core/*
-castle/error/status.hpp
+castle/core/status.hpp
 castle/dsa/heap.hpp
 castle/dsa/ring_buffer.hpp
 castle/chrono/chrono.hpp

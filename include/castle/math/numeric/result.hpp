@@ -26,7 +26,7 @@
 
 #include "castle/dsa/algorithm.hpp"
 #include "castle/core/compiler.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/math/abs.hpp"
 
 namespace castle

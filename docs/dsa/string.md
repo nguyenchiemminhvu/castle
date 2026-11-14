@@ -9,7 +9,7 @@
 ## Dependencies
 - [`../core/compiler.md`](../core/compiler.md)
 - [`../core/types.md`](../core/types.md)
-- [`../error/status.md`](../error/status.md)
+- [`../core/status.md`](../core/status.md)
 - [`string_view.md`](string_view.md)
 
 ## Public API

@@ -44,7 +44,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/bit/bit_core.hpp"
 #include "castle/bit/bit_utils.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/dsa/string.hpp"
 #include "castle/dsa/string_view.hpp"
 #include "castle_ext/geodetic/coord.hpp"

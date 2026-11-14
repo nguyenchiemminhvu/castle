@@ -24,7 +24,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/utility/move.hpp"
 #include "castle/sync/atomic.hpp"
 

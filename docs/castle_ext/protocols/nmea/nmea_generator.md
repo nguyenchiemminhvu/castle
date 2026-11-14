@@ -17,7 +17,7 @@ Unlike `nmea::encode_sentence()`, this generator can emit conditionally empty fi
 ## Dependencies
 - ../../../core/compiler.md
 - ../../../core/types.md
-- ../../../error/status.md
+- ../../../core/status.md
 - ../../../dsa/array_view.md
 - ../../../dsa/string_view.md
 - ../../../utility/string_builder.md

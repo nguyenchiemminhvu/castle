@@ -25,7 +25,7 @@ Both one-step Sync and two-step Sync are supported. Announce/BMCA, peer-to-peer 
 ## Dependencies
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp) — Castle compiler/attribute portability macros.
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp) — fixed Castle size types.
-- [`castle/error/status.hpp`](../../../../include/castle/error/status.hpp) — deterministic error/status results.
+- [`castle/core/status.hpp`](../../../../include/castle/core/status.hpp) — deterministic error/status results.
 - [`castle/dsa/array_view.hpp`](../../../../include/castle/dsa/array_view.hpp) — non-owning packet views.
 
 ## Public API

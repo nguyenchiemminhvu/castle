@@ -11,7 +11,7 @@
 - [`../../../core/config.md`](../../../core/config.md)
 - [`../../../core/compiler.md`](../../../core/compiler.md)
 - [`../../../core/types.md`](../../../core/types.md)
-- [`../../../error/status.md`](../../../error/status.md)
+- [`../../../core/status.md`](../../../core/status.md)
 - [`../../../callbacks/function.md`](../../../callbacks/function.md)
 - [`../../../sync/mutex.md`](../../../sync/mutex.md)
 - [`../../../sync/scoped_mutex.md`](../../../sync/scoped_mutex.md)

@@ -10,7 +10,7 @@ Shared knot-table helpers for the table-based interpolators ([`linear_table`](li
 - [`castle/dsa/algorithm.hpp`](../../dsa/algorithm.md)
 - [`castle/core/compiler.hpp`](../../core/compiler.md)
 - [`castle/core/types.hpp`](../../core/types.md)
-- [`castle/error/status.hpp`](../../error/status.md)
+- [`castle/core/status.hpp`](../../core/status.md)
 
 ## Public API
 | Signature | Description |

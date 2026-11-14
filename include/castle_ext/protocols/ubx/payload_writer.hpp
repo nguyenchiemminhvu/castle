@@ -41,7 +41,7 @@
 #include "castle/dsa/array.hpp"
 #include "castle/dsa/array_view.hpp"
 #include "castle/dsa/string.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/utility/bit_cast.hpp"
 #include "castle/utility/bytes.hpp"
 

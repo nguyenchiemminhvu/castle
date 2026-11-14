@@ -37,7 +37,7 @@
 #include "castle_ext/io/fd/control.hpp"
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/callbacks/function.hpp"
 #include "castle/sync/mutex.hpp"
 #include "castle/sync/scoped_mutex.hpp"

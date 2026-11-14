@@ -30,7 +30,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/type_ranges.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/dsa/array.hpp"
 #include "castle/dsa/string.hpp"
 #include "castle/dsa/string_view.hpp"

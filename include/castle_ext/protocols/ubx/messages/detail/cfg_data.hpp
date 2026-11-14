@@ -39,7 +39,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/dsa/vector.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle_ext/protocols/ubx/ubx.hpp"
 #include "castle_ext/protocols/ubx/ubx_config.hpp"
 #include "castle_ext/protocols/ubx/payload_reader.hpp"

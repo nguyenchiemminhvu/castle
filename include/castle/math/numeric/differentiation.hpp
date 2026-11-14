@@ -35,7 +35,7 @@
 #include "castle/core/error_handler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 
 namespace castle
 {

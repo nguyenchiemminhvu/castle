@@ -31,7 +31,7 @@ Edges are stored as adjacency lists threaded through fixed arrays, so memory is 
 - [grid](grid.md) (`distance_matrix`)
 - [initializer_list](initializer_list.md)
 - [vector](vector.md) (`node_list`, `edge_list`, `color_map`)
-- [status](../error/status.md)
+- [status](../core/status.md)
 - [bitset](../utility/bitset.md) (visited masks)
 - [swap](../utility/swap.md)
 

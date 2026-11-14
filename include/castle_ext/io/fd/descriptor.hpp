@@ -17,7 +17,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/types.hpp"
 #include "castle/core/type_ranges.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle_ext/io/fd/control.hpp"
 
 #if CASTLE_USING_POSIX_APIS

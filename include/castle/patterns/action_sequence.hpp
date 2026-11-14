@@ -50,7 +50,7 @@
 #include "castle/callbacks/function.hpp"
 #include "castle/chrono/duration.hpp"
 #include "castle/dsa/array.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/math/ratio.hpp"
 #include "castle/utility/forward.hpp"
 

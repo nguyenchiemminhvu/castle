@@ -16,7 +16,7 @@
 #ifndef CASTLE_EXT_IO_GPIO_BACKENDS_LINUX_VALUE_FILE_HPP
 #define CASTLE_EXT_IO_GPIO_BACKENDS_LINUX_VALUE_FILE_HPP
 
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle_ext/io/gpio/types.hpp"
 
 #if defined(CASTLE_EXT_ENABLE_GPIO_LINUX_FILE)

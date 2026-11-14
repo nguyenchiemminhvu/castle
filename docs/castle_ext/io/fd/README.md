@@ -64,7 +64,7 @@ The application normally includes `fd.hpp`, or includes `control.hpp` / `poll.hp
 
  package "CASTLE core" {
    [core/config.hpp\nPOSIX feature switch] as CONFIG
-   [error/status.hpp\ncastle::status] as STATUS
+   [core/status.hpp\ncastle::status] as STATUS
    [callbacks/function.hpp\nInline callback storage] as CALLBACK
    [sync/mutex.hpp +\nscoped_mutex.hpp] as SYNC
    [utility/move.hpp] as MOVE

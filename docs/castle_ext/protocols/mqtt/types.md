@@ -10,7 +10,7 @@ Defines MQTT protocol versions, QoS levels, packet and reason-code identifiers, 
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp)
 - [`castle/dsa/string_view.hpp`](../../../../include/castle/dsa/string_view.hpp)
-- [`castle/error/status.hpp`](../../../../include/castle/error/status.hpp)
+- [`castle/core/status.hpp`](../../../../include/castle/core/status.hpp)
 
 ## Public API
 | Symbol | Description |

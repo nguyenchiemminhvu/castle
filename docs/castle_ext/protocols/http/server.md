@@ -16,7 +16,7 @@ Provides a fixed-capacity, zero-allocation HTTP/1.0 and HTTP/1.1 server over CAS
 - [`castle::error_handler`](../../../../include/castle/core/error_handler.hpp)
 - [`castle::net::tcp_server`](../../../../include/castle_ext/net/server.hpp)
 - [`castle::net::endpoint`](../../../../include/castle_ext/net/endpoint.hpp)
-- [`castle::status`](../../../../include/castle/error/status.hpp)
+- [`castle::status`](../../../../include/castle/core/status.hpp)
 
 ## Public API
 

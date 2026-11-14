@@ -10,7 +10,7 @@ Provides bounded RFC 7541 HPACK decoding (static and optional dynamic table, inc
 - [HTTP shared types](types.md)
 - [CASTLE compiler annotations](../../../../include/castle/core/compiler.hpp)
 - [CASTLE core types](../../../../include/castle/core/types.hpp)
-- [CASTLE status](../../../../include/castle/error/status.hpp)
+- [CASTLE status](../../../../include/castle/core/status.hpp)
 
 ## Public API
 - `hpack_decoder<MaxDynamicTableBytes, MaxStringSize, MaxDynamicEntries>::decode_block(input, size, output)`: decodes one header block into a compatible bounded header collection.

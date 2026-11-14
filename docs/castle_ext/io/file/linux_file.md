@@ -10,7 +10,7 @@
 - `castle/core/config.hpp`
 - `castle/core/compiler.hpp`
 - `castle/core/types.hpp`
-- `castle/error/status.hpp`
+- `castle/core/status.hpp`
 - [`../fd/descriptor.md`](../fd/descriptor.md)
 
 ## Public API

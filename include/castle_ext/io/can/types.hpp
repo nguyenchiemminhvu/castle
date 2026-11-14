@@ -13,7 +13,7 @@
 
 #include "castle/chrono/duration.hpp"
 #include "castle/core/compiler.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 
 #include <stdint.h>
 

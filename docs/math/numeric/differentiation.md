@@ -11,7 +11,7 @@ Finite-difference derivative estimators for any callable `T f(T)` and for unifor
 - [`castle/core/error_handler.hpp`](../../core/error_handler.md)
 - [`castle/core/traits.hpp`](../../core/traits.md)
 - [`castle/core/types.hpp`](../../core/types.md)
-- [`castle/error/status.hpp`](../../error/status.md)
+- [`castle/core/status.hpp`](../../core/status.md)
 
 ## Public API
 | Signature | Description |

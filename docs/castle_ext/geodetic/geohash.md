@@ -16,7 +16,7 @@ An instance stores every form of one cell: the base-32 text (`Depth` characters)
 - [`geo_utils.md`](geo_utils.md) — latitude and longitude range validation.
 - `castle/dsa/string.hpp` — fixed-capacity owning string storage.
 - `castle/dsa/string_view.hpp` — non-owning text views.
-- `castle/error/status.hpp` — deterministic error reporting.
+- `castle/core/status.hpp` — deterministic error reporting.
 - `castle/core/compiler.hpp`, `castle/core/types.hpp`, and `castle/core/traits.hpp` — compiler annotations, common size types, and floating-point type validation.
 
 The simplified repository does not provide separate Markdown pages for these core headers. No C++ standard-library headers are required by this component.

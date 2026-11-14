@@ -25,7 +25,7 @@
 #include "castle/core/error_handler.hpp"
 #include "castle/dsa/initializer_list.hpp"
 #include "castle/iterator/tags.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/memory/object.hpp"
 #include "castle/memory/construct.hpp"
 #include "castle/memory/destroy.hpp"

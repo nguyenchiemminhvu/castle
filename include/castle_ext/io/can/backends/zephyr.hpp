@@ -46,7 +46,7 @@
 #include "castle/core/compiler.hpp"
 #include "castle/core/config.hpp"
 #include "castle/core/types.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/sync/atomic.hpp"
 #include "castle_ext/io/can/detail/slot_table.hpp"
 #include "castle_ext/io/can/filter.hpp"

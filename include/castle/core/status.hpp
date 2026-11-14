@@ -9,7 +9,7 @@
  * `uint8_t` enum and does not allocate memory.
  *
  * @code
- * #include "castle/error/status.hpp"
+ * #include "castle/core/status.hpp"
  *
  * castle::status value = castle::status::not_found;
  * if (!castle::succeeded(value))
@@ -18,8 +18,8 @@
  * }
  * @endcode
  */
-#ifndef CASTLE_ERROR_STATUS_HPP
-#define CASTLE_ERROR_STATUS_HPP
+#ifndef CASTLE_CORE_STATUS_HPP
+#define CASTLE_CORE_STATUS_HPP
 
 #include "castle/core/compiler.hpp"
 
@@ -66,4 +66,4 @@ CASTLE_CONSTEXPR bool succeeded(status value) CASTLE_NOEXCEPT
 
 } // namespace castle
 
-#endif // CASTLE_ERROR_STATUS_HPP
+#endif // CASTLE_CORE_STATUS_HPP

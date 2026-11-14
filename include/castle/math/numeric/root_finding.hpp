@@ -34,7 +34,7 @@
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/math/abs.hpp"
 #include "castle/math/numeric/result.hpp"
 

@@ -12,7 +12,7 @@ Fixed-capacity disjoint-set union (union-find) over the dense node indices `0 ..
 - [traits](../core/traits.md) (`meta::smallest_uint_t`)
 - [types](../core/types.md)
 - [array_view](array_view.md)
-- [status](../error/status.md)
+- [status](../core/status.md)
 - [swap](../utility/swap.md)
 
 ## Public API

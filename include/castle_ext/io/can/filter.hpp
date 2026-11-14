@@ -22,7 +22,7 @@
 #define CASTLE_EXT_IO_CAN_FILTER_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle_ext/io/can/frame.hpp"
 
 #include <stdint.h>

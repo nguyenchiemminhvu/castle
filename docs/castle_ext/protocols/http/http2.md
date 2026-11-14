@@ -13,7 +13,7 @@ Implements an incremental HTTP/2 frame parser and a static-memory client session
 - [CASTLE callbacks](../../../../include/castle/callbacks/function.hpp)
 - [CASTLE compiler annotations](../../../../include/castle/core/compiler.hpp)
 - [CASTLE core types](../../../../include/castle/core/types.hpp)
-- [CASTLE status](../../../../include/castle/error/status.hpp)
+- [CASTLE status](../../../../include/castle/core/status.hpp)
 
 ## Public API
 - `http2_frame_parser<MaxFrameSize>::feed(data, size, callback, consumed)`: incrementally parses bounded 9-byte frame headers and payloads.

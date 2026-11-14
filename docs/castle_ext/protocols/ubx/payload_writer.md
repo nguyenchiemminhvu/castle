@@ -23,7 +23,7 @@ The header also provides two frame-level helpers:
 * [`dsa/array.hpp`](../../../dsa/array.md)
 * [`dsa/array_view.hpp`](../../../dsa/array_view.md)
 * [`dsa/string.hpp`](../../../dsa/string.md)
-* [`error/status.hpp`](../../../error/status.md)
+* [`core/status.hpp`](../../../core/status.md)
 * [`utility/bit_cast.hpp`](../../../utility/bit_cast.md)
 * [`utility/bytes.hpp`](../../../utility/bytes.md)
 * [`ubx.hpp`](ubx.md)

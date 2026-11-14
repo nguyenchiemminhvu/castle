@@ -11,7 +11,7 @@ A polling CoAP-over-UDP client using CASTLE's existing UDP client. It retains bo
 - [Callback Dispatcher](../../../../include/castle/callbacks/callback_dispatcher.hpp)
 - [Core compiler macros](../../../../include/castle/core/compiler.hpp)
 - [Core types](../../../../include/castle/core/types.hpp)
-- [Status](../../../../include/castle/error/status.hpp)
+- [Status](../../../../include/castle/core/status.hpp)
 - [Network Client](../../../../include/castle_ext/net/client.hpp)
 - [CoAP Codec](codec.md)
 

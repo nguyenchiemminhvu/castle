@@ -39,7 +39,7 @@
 #include "castle/core/config.hpp"
 #include "castle/core/error_handler.hpp"
 #include "castle/core/traits.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 
 #include <time.h>
 

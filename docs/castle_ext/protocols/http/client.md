@@ -14,7 +14,7 @@ Provides template-based, caller-polled HTTP/1.1 and HTTP/2 client adapters over 
 - [CASTLE callbacks](../../../../include/castle/callbacks/function.hpp)
 - [CASTLE compiler annotations](../../../../include/castle/core/compiler.hpp)
 - [CASTLE core types](../../../../include/castle/core/types.hpp)
-- [CASTLE status](../../../../include/castle/error/status.hpp)
+- [CASTLE status](../../../../include/castle/core/status.hpp)
 - [Network endpoint](../../net/endpoint.md)
 
 ## Public API

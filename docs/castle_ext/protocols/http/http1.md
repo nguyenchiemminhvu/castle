@@ -12,7 +12,7 @@ Contains a fixed-buffer HTTP/1.x request serializer and a byte-at-a-time/increme
 - [CASTLE callbacks](../../../../include/castle/callbacks/function.hpp)
 - [CASTLE compiler annotations](../../../../include/castle/core/compiler.hpp)
 - [CASTLE core types](../../../../include/castle/core/types.hpp)
-- [CASTLE status](../../../../include/castle/error/status.hpp)
+- [CASTLE status](../../../../include/castle/core/status.hpp)
 
 ## Public API
 - `http1_request<Capacity, MaxHeaders, MaxNameSize, MaxValueSize>::build(...)`: serializes a request, adding Host, Content-Length when required, and Connection when absent; invalid method/target/authority text and caller-supplied `Transfer-Encoding` are rejected.

@@ -29,7 +29,7 @@ Choose a policy by access pattern:
 Namespace: `castle::cache`. All aliases default `Hash` to `castle::hash<Key>` and `KeyEqual` to `castle::equal_to<Key>`.
 
 ## Main API
-Every alias shares the `basic_cache` interface. Status codes come from `castle/error/status.hpp`.
+Every alias shares the `basic_cache` interface. Status codes come from `castle/core/status.hpp`.
 
 | Member | Behavior | Returns |
 |---|---|---|

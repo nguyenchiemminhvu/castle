@@ -46,7 +46,7 @@
 #include "castle/dsa/grid.hpp"
 #include "castle/dsa/initializer_list.hpp"
 #include "castle/dsa/vector.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/utility/bitset.hpp"
 #include "castle/utility/swap.hpp"
 

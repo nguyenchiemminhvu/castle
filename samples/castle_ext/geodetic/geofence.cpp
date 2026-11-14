@@ -1,6 +1,6 @@
 #include "sample_support.hpp"
 
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/math/abs.hpp"
 #include "castle_ext/geodetic/geofence.hpp"
 

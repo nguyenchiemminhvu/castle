@@ -8,7 +8,7 @@ Platform-neutral value and configuration types shared by every GPIO backend and 
 
 ## Dependencies
 - [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../error/status.md`](../../../error/status.md)
+- [`../../../core/status.md`](../../../core/status.md)
 
 ## Public API
 | API | Description |

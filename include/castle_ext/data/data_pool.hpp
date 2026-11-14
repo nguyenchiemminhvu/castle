@@ -47,7 +47,7 @@
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
 #include "castle/patterns/observer.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/utility/tuple.hpp"
 #include "castle_ext/data/data_slot.hpp"
 #include "castle_ext/data/update_dispatcher.hpp"

@@ -11,7 +11,7 @@ A fixed-buffer DNS resolver that borrows CASTLE UDP and TCP client transports. I
 - [`castle/core/compiler.hpp`](../../../../include/castle/core/compiler.hpp)
 - [`castle/core/types.hpp`](../../../../include/castle/core/types.hpp)
 - [`castle/dsa/array.hpp`](../../../../include/castle/dsa/array.hpp)
-- [`castle/error/status.hpp`](../../../../include/castle/error/status.hpp)
+- [`castle/core/status.hpp`](../../../../include/castle/core/status.hpp)
 - [`castle/utility/forward.hpp`](../../../../include/castle/utility/forward.hpp)
 - [`castle/utility/move.hpp`](../../../../include/castle/utility/move.hpp)
 - [`castle/dsa/string_view.hpp`](../../../../include/castle/dsa/string_view.hpp)

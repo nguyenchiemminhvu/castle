@@ -11,7 +11,7 @@ Great-circle and ellipsoidal distance/bearing calculations over `geo_point<T>`. 
 - [`../../core/constants.md`](../../core/constants.md)
 - [`../../core/traits.md`](../../core/traits.md)
 - [`../../core/types.md`](../../core/types.md)
-- [`../../error/status.md`](../../error/status.md)
+- [`../../core/status.md`](../../core/status.md)
 - [`../../math/abs.md`](../../math/abs.md)
 - [`../../math/sqrt_real.md`](../../math/sqrt_real.md)
 - [`../../math/linalg/trigonometry.md`](../../math/linalg/trigonometry.md)

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "castle/dsa/mirrored_ring_buffer.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/iterator/traits.hpp"
 
 namespace

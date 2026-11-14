@@ -2,7 +2,7 @@
 
 #include "castle/patterns/composite.hpp"
 #include "castle/core/traits.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 #include "castle/utility/move.hpp"
 
 #include <stdint.h>

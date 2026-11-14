@@ -12,7 +12,7 @@
 - [`../core/traits.md`](../core/traits.md)
 - [`../core/types.md`](../core/types.md)
 - [`initializer_list.md`](initializer_list.md)
-- [`../error/status.md`](../error/status.md)
+- [`../core/status.md`](../core/status.md)
 - [`../iterator/reverse_iterator.md`](../iterator/reverse_iterator.md)
 - [`../memory/object.md`](../memory/object.md)
 - [`../memory/construct.md`](../memory/construct.md)

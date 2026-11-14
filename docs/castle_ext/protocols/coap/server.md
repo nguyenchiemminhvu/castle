@@ -11,7 +11,7 @@ A bounded, polling CoAP-over-UDP resource server built on CASTLE's UDP server pe
 - [Callback Dispatcher](../../../../include/castle/callbacks/callback_dispatcher.hpp)
 - [Core compiler macros](../../../../include/castle/core/compiler.hpp)
 - [Core types](../../../../include/castle/core/types.hpp)
-- [Status](../../../../include/castle/error/status.hpp)
+- [Status](../../../../include/castle/core/status.hpp)
 - [Network Server](../../../../include/castle_ext/net/server.hpp)
 - [CoAP Codec](codec.md)
 

@@ -15,7 +15,7 @@
 #define CASTLE_EXT_PROTOCOLS_TIMING_PTP_SERVO_HPP
 
 #include "castle/core/compiler.hpp"
-#include "castle/error/status.hpp"
+#include "castle/core/status.hpp"
 
 #include <stdint.h>
 #include <limits.h>

@@ -17,7 +17,7 @@ UBX-CFG-VALSET, -VALGET and -VALDEL share one wire shape: a 4-byte header whose 
 - [`castle/core/compiler.hpp`](../../../../../core/compiler.md)
 - [`castle/core/types.hpp`](../../../../../core/types.md)
 - [`castle/dsa/vector.hpp`](../../../../../dsa/vector.md)
-- [`castle/error/status.hpp`](../../../../../error/status.md)
+- [`castle/core/status.hpp`](../../../../../core/status.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../../ubx.md) (`value_byte_size()`)
 - [`castle_ext/protocols/ubx/ubx_config.hpp`](../../ubx_config.md) (`config::config_value`)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../../payload_reader.md)
