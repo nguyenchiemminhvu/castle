@@ -21,6 +21,7 @@
 #define CASTLE_DSA_CONTAINERS_HPP
 
 #include "castle/dsa/array.hpp"
+#include "castle/dsa/fenwick_tree.hpp"
 #include "castle/dsa/grid.hpp"
 #include "castle/dsa/vector.hpp"
 #include "castle/dsa/ring_buffer.hpp"
@@ -39,5 +40,7 @@
 #include "castle/dsa/list.hpp"
 #include "castle/dsa/disjoint_set.hpp"
 #include "castle/dsa/graph.hpp"
+#include "castle/dsa/segment_tree.hpp"
+#include "castle/dsa/trie.hpp"
 
 #endif

@@ -1,49 +1,48 @@
 # Containers
 
 ## Overview
-Umbrella header that pulls the Castle container family into one include. Use it when a translation unit needs several containers and convenience matters more than minimizing header fan-in.
+
+`castle::dsa::containers.hpp` is the umbrella include for CASTLE's fixed-capacity data structures, including the trie, Fenwick tree, and segment trees.
 
 ## Header
+
 `#include "castle/dsa/containers.hpp"`
 
 ## Dependencies
-- [array](array.md)
-- [grid](grid.md)
-- [vector](vector.md)
-- [ring_buffer](ring_buffer.md)
-- [stack](stack.md)
-- [string](string.md)
-- [string_view](string_view.md)
-- [array_view](array_view.md)
-- [heap](heap.md)
-- [avl_tree](avl_tree.md)
-- [map](map.md)
-- [set](set.md)
-- [hash_table](hash_table.md)
-- [hash_map](hash_map.md)
-- [hash_set](hash_set.md)
-- [forward_list](forward_list.md)
-- [list](list.md)
-- [disjoint_set](disjoint_set.md)
-- [graph](graph.md)
+
+The umbrella header aggregates the DSA headers directly, among them [`trie`](trie.md), [`fenwick_tree`](fenwick_tree.md), and [`segment_tree`](segment_tree.md). Each component has its own page in this directory.
 
 ## Public API
-| API | Description |
-| --- | --- |
-| `containers.hpp` | Defines no new types or functions; including it makes the listed container headers available. |
+
+| Header | Public component |
+|---|---|
+| `castle/dsa/trie.hpp` | `castle::dsa::trie`, `castle::dsa::contiguous_alphabet`, `lowercase_alphabet`, `digit_alphabet` |
+| `castle/dsa/fenwick_tree.hpp` | `castle::dsa::fenwick_tree` |
+| `castle/dsa/segment_tree.hpp` | `castle::dsa::segment_tree`, `castle::dsa::lazy_segment_tree`, monoids and lazy policies |
+| Other headers listed in `containers.hpp` | Existing CASTLE container types. |
+
+This header declares no additional classes or functions; including it makes the component headers available.
 
 ## Usage Example
-See `samples/sample_containers.cpp`.
 
 ```cpp
 #include "castle/dsa/containers.hpp"
 
-castle::dsa::array<int, 2U> values{1, 2};
-castle::dsa::map<int, int, 2U> ordered;
-ordered.insert(1, 10);
+castle::dsa::trie<castle::dsa::lowercase_alphabet, 8U, 16U> dictionary;
+dictionary.insert("can");
+
+const int32_t values[] = {2, 3, 5};
+castle::dsa::fenwick_tree<int32_t, 4U> prefix_sums;
+prefix_sums.build(values, 3U);
+
+castle::dsa::segment_tree<castle::dsa::sum_monoid<int32_t>, 4U> interval_sums;
+interval_sums.build(values, 3U);
 ```
 
+See [`samples/dsa/containers.cpp`](../../samples/dsa/containers.cpp) for a standalone sample.
+
 ## Constraints & Notes
-- No allocation behavior is introduced by this header; it only aggregates other Castle headers.
-- Thread-safety depends entirely on the specific container types you use; no synchronization is added here.
-- Prefer individual headers when compile time or preprocessing footprint matters.
+
+- This header introduces no storage or runtime behavior of its own.
+- Allocation, capacity, operation, and thread-safety constraints are defined by each included component.
+- Prefer individual headers when compile time or preprocessor footprint matters.
