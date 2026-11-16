@@ -210,3 +210,113 @@ On the left, vector push_back, vector emplace_back, and string append match the 
 On the right, array access is about 1.31 times faster, string find is about 2.11 times faster, and bitset to_string is about 1.26 times faster. String construct is about six percent slower on CASTLE.
 
 The takeaway matches the rest of the talk. Outside the highlighted rows, the speed gaps are small. The reason to choose CASTLE is its bounded storage and explicit failure paths. Speed alone should not decide it.
+
+**Transition:** Okay, enough charts. Let's look at some real code. I've got seven short samples, and each one shows a different part of the library. No slides with bullets from here on, just code.
+
+---
+
+## Slide 15 — Sample 1: Composite design pattern
+
+Let's see some sample code, start with the composite pattern. Picture a typical ECU. You've got an HMI app, a DTC service, a diag service, and a few drivers: GPIO, CAN, SPI.
+
+Then we group them, layer by layer, with `tie_composite`. And here's the important part: the groups don't copy anything. They only hold references to the objects we already have. And a group can hold another group. See `hal`? It holds the GPIO driver plus the whole `bus_drivers` group.
+
+At the end, one `system` object wraps all three layers. Now when we want to shut down, it's one call. `for_each` walks every component, top-down and left to right, and calls `shutdown` on each one.
+
+The number of children and their types are all fixed at compile time. So there's no runtime list to manage, and no virtual base class either.
+
+**Transition:** So that's how we group objects. Next, let's look at controlling *when* a callback actually runs.
+
+---
+
+## Slide 16 — Sample 2: Callback execution policy
+
+This one is about execution policies. The idea is simple: you wrap a callback, and the wrapper decides whether the call really happens.
+
+First up is `once`. We call it twice, first with 2, then with 5. But only the first call goes through, so `hits` ends up as 2. That's really handy for things like one-time init, or a warning you only want to log once.
+
+Next is `every_n` with an interval of three. We call it three times, and the callback fires once, on the third call. So `ticks` is 1. Think of a slow status print in a fast loop, or a watchdog that only needs every third tick.
+
+The last one is `on_change`. It remembers the last value it saw, and it only calls you when the value is different. We didn't give it a starting value, so the very first call always fires. Then 2 is different from 1, so it fires again, and `changed_value` ends up as 2. If we called it with 2 a second time, nothing would happen. This is perfect for things like a gear position or a door state, where you only care when it changes.
+
+**Transition:** All three of these still store a callable at runtime. But sometimes we already know the target at compile time. So let's go one step further.
+
+---
+
+## Slide 17 — Sample 3: Compile-time callback binding
+
+Here we bind the callback at compile time.
+
+At the top, we have a plain free function, `add_pair`. With `delegate_ptr_ct`, the function address is a template argument. So the delegate doesn't store a pointer at all. Call it with 7 and 8, and you get 15.
+
+At the bottom, we do the same thing with a functor type. `delegate_ft_ct` takes the type, `multiplier`, plus the signature. It just creates a default `multiplier` when you call it. So `factor` is 1, and 3 times 1 plus 1 gives 4.
+
+In both cases, there's no runtime state and no indirection to worry about. The compiler can see exactly what gets called, so it can inline it.
+
+One small catch: the functor has to be default-constructible. If you need state, like a different factor, this isn't the right tool. Use the runtime delegate instead.
+
+**Transition:** Okay, callbacks on their own are useful. But usually we want many listeners for one event. That's where the event dispatcher comes in.
+
+---
+
+## Slide 18 — Sample 4: Synchronous event dispatcher
+
+You saw a tiny version of this earlier in the talk. Here's a slightly bigger one.
+
+We've got two events, `SensorReadyEvent` and `SystemShutdownEvent`. They're just tag types. We don't even define them, we only declare them.
+
+Each event gets its own config. Look at the two numbers in there. The `2U` means at most two listeners for that event. And the signature says what the callback looks like. Sensor ready passes a sample count. Shutdown passes nothing.
+
+Then we put both configs into one dispatcher type. We register a callback for each event, and we keep the subscription objects. Those are our handles, so we can unsubscribe later.
+
+Finally, we dispatch. It's synchronous, so every listener runs right there, inside the `dispatch_event` call. No queue, no extra thread.
+
+**Transition:** The dispatcher is keyed by event type. If you'd rather think in terms of one signal and a few connected slots, CASTLE has that too.
+
+---
+
+## Slide 19 — Sample 5: Signal and slot
+
+If you've used Qt or Boost.Signals, this one will feel familiar.
+
+We have a small `counter` struct with an `add` member function. Then we make a signal. Again, the capacity is in the type. This signal can hold up to four slots, and each slot takes a `uint32_t`.
+
+We connect the signal straight to a member function. We pass the object and `&counter::add`. No lambda, no `std::bind`. Then we emit 5, and `total` goes up by 5.
+
+`connect` gives us back a connection object, the same idea as the subscription in the last sample. That way it's always clear who owns the link, and when it goes away.
+
+**Transition:** Alright, that's it for callbacks and events. Let's switch to something completely different: physical units.
+
+---
+
+## Slide 20 — Sample 6: Units
+
+Units are one of my favorite parts. A lot of embedded bugs are really unit bugs. Degrees mixed up with radians, or meters mixed up with millimeters.
+
+Look at the GPS struct at the top. Latitude and longitude are stored as `geo_degrees<double>`, not as plain doubles. So you can't mix a latitude up with some random number by accident. The type tells you it's an angle, and it tells you the unit.
+
+In the middle, we take 18 degrees and turn it into arcseconds and milliarcseconds. Just construct the other unit, and the scaling is done for you. No magic numbers like 3600 sprinkled through the code.
+
+At the bottom, we compute speed. 100 meters divided by 4 seconds gives meters per second, 25. Then speed times 10 seconds gives meters again, 250. The types come out right on their own. If you tried to store that speed in a `meters` variable, it just wouldn't compile.
+
+**Transition:** Everything so far came from the core library. For the last sample, let's step into the extensions layer and look at diagnostics.
+
+---
+
+## Slide 21 — Sample 7: CASTLE extensions, diagnostics
+
+Last one. This is the diagnostic manager from the extensions.
+
+We have three tags. CAN timeout, low battery, and comm lost. The whole setup is one type.
+
+CAN timeout is a simple event. It goes active as soon as it's reported. Low battery uses `after_cycles<3U>`. So it has to stay reported for three update cycles before it counts. That's our debounce, and it's written right there in the type.
+
+Comm lost is a group. It's active only when *both* CAN timeout and low battery are active. That's what `all_of` means.
+
+Then we hook up a recovery action for comm lost. Here it just bumps a restart counter. In a real system, maybe you'd restart a module or go to a safe state.
+
+We report both faults. Then, from a timer, we call `update`. First call, low battery is at one of three. Second call, two of three. On the third call, low battery is confirmed. So the group becomes active, and the recovery runs.
+
+So all the rules, the debounce, the group logic, and the recovery, live in one place. And there's no heap and no hidden thread.
+
+And that's it for the samples for today workshop. Thanks again, everyone.

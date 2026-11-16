@@ -245,6 +245,12 @@
       .bar-name { text-align: left; }
     }
 
+    /* Sample code slides */
+    .sample-slide h2 { max-width: none; font-size: clamp(34px, 4.4vw, 58px); }
+    .sample-slide .code-panel { width: 100%; margin-top: 22px; }
+    .sample-slide .code-body { padding: clamp(16px, 2vw, 26px) clamp(20px, 2.4vw, 31px); }
+    .sample-slide pre { min-height: 40.5em; font-size: clamp(12px, min(1.3vw, 1.5vh), 18px); line-height: 1.5; }
+
     .controls {
       position: fixed; z-index: 30; right: clamp(18px, 4vw, 64px); bottom: 22px; left: clamp(18px, 4vw, 64px);
       display: flex; align-items: center; justify-content: space-between; gap: 18px;
@@ -316,10 +322,10 @@
 <body>
   <div class="top-progress" aria-hidden="true"><span class="top-progress-fill" id="progress-fill"></span></div>
   <div class="brandline" aria-label="CASTLE workshop"><span class="brand-mark">C</span><strong>CASTLE</strong><span>Compliant Automotive Safety Template Library for Embedded</span></div>
-  <div class="slide-index" id="slide-index">01 / 14</div>
+  <div class="slide-index" id="slide-index">01 / 21</div>
 
   <main id="presentation" aria-label="CASTLE workshop presentation">
-    <section class="slide cover" data-title="CASTLE — C++ built for bounded systems" role="group" aria-roledescription="slide" aria-label="Slide 1 of 14" tabindex="-1">
+    <section class="slide cover" data-title="CASTLE — C++ built for bounded systems" role="group" aria-roledescription="slide" aria-label="Slide 1 of 21" tabindex="-1">
       <div class="slide-inner cover-grid">
         <div>
           <p class="eyebrow"><span class="dot"></span> Embedded C++ library <span class="slash">/</span> Prototype 2.0</p>
@@ -375,7 +381,7 @@
       </div>
     </section>
 
-    <section class="slide" data-title="Embedded systems pay for hidden decisions" role="group" aria-roledescription="slide" aria-label="Slide 2 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="Embedded systems pay for hidden decisions" role="group" aria-roledescription="slide" aria-label="Slide 2 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
         <p class="section-tag">01 <span>/</span> The problem space</p>
         <h2>Embedded systems pay for <span class="accent">hidden decisions.</span></h2>
@@ -391,7 +397,7 @@
       </div>
     </section>
 
-    <section class="slide" data-title="Make the memory budget visible" role="group" aria-roledescription="slide" aria-label="Slide 3 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="Make the memory budget visible" role="group" aria-roledescription="slide" aria-label="Slide 3 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
         <p class="section-tag">02 <span>/</span> Storage by design</p>
         <h2>Make the memory <span class="accent">budget visible.</span></h2>
@@ -419,7 +425,7 @@ castle::dsa::vector&lt;uint16_t, <span class="code-number">16U</span>&gt; sample
       </div>
     </section>
 
-    <section class="slide" data-title="Make failure an ordinary result" role="group" aria-roledescription="slide" aria-label="Slide 4 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="Make failure an ordinary result" role="group" aria-roledescription="slide" aria-label="Slide 4 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
         <p class="section-tag">03 <span>/</span> Failure as data</p>
         <h2>Make failure an <span class="accent">ordinary result.</span></h2>
@@ -437,7 +443,7 @@ castle::dsa::vector&lt;uint16_t, <span class="code-number">16U</span>&gt; sample
       </div>
     </section>
 
-    <section class="slide" data-title="Pay for abstraction deliberately" role="group" aria-roledescription="slide" aria-label="Slide 5 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="Pay for abstraction deliberately" role="group" aria-roledescription="slide" aria-label="Slide 5 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
         <p class="section-tag">04 <span>/</span> Abstraction with a budget</p>
         <h2>Pay for abstraction <span class="accent">deliberately.</span></h2>
@@ -451,7 +457,7 @@ castle::dsa::vector&lt;uint16_t, <span class="code-number">16U</span>&gt; sample
       </div>
     </section>
 
-    <section class="slide" data-title="One library, two layers" role="group" aria-roledescription="slide" aria-label="Slide 6 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="One library, two layers" role="group" aria-roledescription="slide" aria-label="Slide 6 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
         <p class="section-tag">05 <span>/</span> The library shape</p>
         <h2>One library. <span class="accent">Two layers.</span></h2>
@@ -481,7 +487,7 @@ castle::dsa::vector&lt;uint16_t, <span class="code-number">16U</span>&gt; sample
       </div>
     </section>
 
-    <section class="slide" data-title="A different everyday coding habit" role="group" aria-roledescription="slide" aria-label="Slide 7 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="A different everyday coding habit" role="group" aria-roledescription="slide" aria-label="Slide 7 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
         <p class="section-tag">06 <span>/</span> The daily coding shift</p>
         <h2>A different everyday <span class="accent">coding habit.</span></h2>
@@ -510,7 +516,7 @@ sub.unsubscribe();</pre></div>
       </div>
     </section>
 
-    <section class="slide" data-title="A CASTLE code review asks different questions" role="group" aria-roledescription="slide" aria-label="Slide 8 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="A CASTLE code review asks different questions" role="group" aria-roledescription="slide" aria-label="Slide 8 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
         <p class="section-tag">07 <span>/</span> Review mindset</p>
         <h2>A code review asks <span class="accent">different questions.</span></h2>
@@ -525,7 +531,7 @@ sub.unsubscribe();</pre></div>
       </div>
     </section>
 
-    <section class="slide" data-title="Predictability improves, but still must be proven" role="group" aria-roledescription="slide" aria-label="Slide 9 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="Predictability improves, but still must be proven" role="group" aria-roledescription="slide" aria-label="Slide 9 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
         <p class="section-tag">08 <span>/</span> Impact and limits</p>
         <h2>Predictability improves. <span class="accent">It still must be proven.</span></h2>
@@ -538,7 +544,7 @@ sub.unsubscribe();</pre></div>
       </div>
     </section>
 
-    <section class="slide" data-title="Design the bounds, then write the code" role="group" aria-roledescription="slide" aria-label="Slide 10 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="Design the bounds, then write the code" role="group" aria-roledescription="slide" aria-label="Slide 10 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
         <p class="section-tag">09 <span>/</span> Take it into the next change</p>
         <h2 class="closing-title">Design the bounds.<br><span class="accent">Then write the code.</span></h2>
@@ -554,9 +560,9 @@ sub.unsubscribe();</pre></div>
       </div>
     </section>
 
-    <section class="slide" data-title="Appendix A — Benchmark setup and reading notes" role="group" aria-roledescription="slide" aria-label="Slide 11 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="Appendix A — Benchmark setup and reading notes" role="group" aria-roledescription="slide" aria-label="Slide 11 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
-        <p class="section-tag">APPENDIX <span>/</span> A · Method</p>
+        <p class="section-tag">APPENDIX <span>/</span> BENCHMARK A. Method</p>
         <h2>Benchmark <span class="accent">setup.</span></h2>
         <p class="lead">Each CASTLE operation has an STL counterpart run under the same harness. The figures come from one captured run, so read them as a guide, not a statistical result.</p>
         <div class="grid-4">
@@ -572,9 +578,9 @@ sub.unsubscribe();</pre></div>
       </div>
     </section>
 
-    <section class="slide" data-title="Appendix B — Speed ratio overview" role="group" aria-roledescription="slide" aria-label="Slide 12 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="Appendix B — Speed ratio overview" role="group" aria-roledescription="slide" aria-label="Slide 12 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
-        <p class="section-tag">APPENDIX <span>/</span> B · Overview</p>
+        <p class="section-tag">APPENDIX <span>/</span> BENCHMARK B. Overview</p>
         <h2>Speed ratio <span class="accent">overview.</span></h2>
         <p class="lead">Most common operations sit at parity. The clearest CASTLE gains are string search, array access, and associative containers.</p>
         <div class="chart-panel">
@@ -606,9 +612,9 @@ sub.unsubscribe();</pre></div>
       </div>
     </section>
 
-    <section class="slide" data-title="Appendix C — Associative containers" role="group" aria-roledescription="slide" aria-label="Slide 13 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="Appendix C — Associative containers" role="group" aria-roledescription="slide" aria-label="Slide 13 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
-        <p class="section-tag">APPENDIX <span>/</span> C · Containers</p>
+        <p class="section-tag">APPENDIX <span>/</span> BENCHMARK C. Containers</p>
         <h2>Associative <span class="accent">containers.</span></h2>
         <p class="lead">All eight associative operations are faster on CASTLE in this run, between about 1.17x and 1.32x.</p>
         <div class="chart-panel">
@@ -632,9 +638,9 @@ sub.unsubscribe();</pre></div>
       </div>
     </section>
 
-    <section class="slide" data-title="Appendix D — Sequence, string and bit operations" role="group" aria-roledescription="slide" aria-label="Slide 14 of 14" tabindex="-1" hidden>
+    <section class="slide" data-title="Appendix D — Sequence, string and bit operations" role="group" aria-roledescription="slide" aria-label="Slide 14 of 21" tabindex="-1" hidden>
       <div class="slide-inner">
-        <p class="section-tag">APPENDIX <span>/</span> D · Sequences and strings</p>
+        <p class="section-tag">APPENDIX <span>/</span> BENCHMARK D. Sequences and strings</p>
         <h2>Sequences, strings, <span class="accent">bits.</span></h2>
         <p class="lead">Most rows are at parity. The notable gaps are string_find (2.1x faster on CASTLE) and small CASTLE deficits in queue push/pop and string construct.</p>
         <div class="chart-legend">
@@ -665,6 +671,213 @@ sub.unsubscribe();</pre></div>
         <p class="bottom-line">Outside the highlighted rows the gaps are small, so speed alone should not drive the design choice.</p>
       </div>
     </section>
+
+    <section class="slide sample-slide" data-title="Sample 1 — Composite design pattern" role="group" aria-roledescription="slide" aria-label="Slide 15 of 21" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> SAMPLES 01. Patterns</p>
+        <h2>Composite <span class="accent">design pattern.</span></h2>
+        <div class="code-panel">
+          <div class="code-body"><pre><span class="code-muted">// The main service owns every instance.</span>
+hmi_app hmi;
+dtc_service dtc;
+diag_service diag;
+gpio_driver gpio;
+can_driver can;
+spi_driver spi;
+
+<span class="code-muted">// Group the instances layer by layer. Groups only refer to the instances.</span>
+<span class="code-keyword">auto</span> application = dp::tie_composite(hmi);
+<span class="code-keyword">auto</span> services = dp::tie_composite(dtc, diag);
+<span class="code-keyword">auto</span> bus_drivers = dp::tie_composite(can, spi);
+<span class="code-keyword">auto</span> hal = dp::tie_composite(gpio, bus_drivers); <span class="code-muted">// a group can contain another group</span>
+
+<span class="code-muted">// One system object wraps all layers.</span>
+<span class="code-keyword">auto</span> system = dp::tie_composite(application, services, hal);
+
+<span class="code-muted">// A single call reaches every component, top-down and left-to-right.</span>
+system.for_each([](<span class="code-keyword">auto</span>&amp; component)
+{
+    component.shutdown();
+});</pre></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide sample-slide" data-title="Sample 2 — Callback execution policy" role="group" aria-roledescription="slide" aria-label="Slide 16 of 21" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> SAMPLES 02. Callbacks</p>
+        <h2>Callback <span class="accent">execution policy.</span></h2>
+        <div class="code-panel">
+          <div class="code-body"><pre><span class="code-keyword">int</span> hits = <span class="code-number">0</span>;
+policy::once once_policy{[&amp;hits](<span class="code-keyword">int</span> value) <span class="code-keyword">noexcept</span> { hits += value; }};
+once_policy.execute(<span class="code-number">2</span>);
+once_policy(<span class="code-number">5</span>);
+hits == <span class="code-number">2</span>; <span class="code-muted">// true</span>
+
+<span class="code-keyword">int</span> ticks = <span class="code-number">0</span>;
+policy::every_n every_third{<span class="code-number">3U</span>, [&amp;ticks]() <span class="code-keyword">noexcept</span> { ++ticks; }};
+every_third();
+every_third();
+every_third();
+ticks == <span class="code-number">1</span>; <span class="code-muted">// true</span>
+
+<span class="code-keyword">int</span> changed_value = <span class="code-number">0</span>;
+<span class="code-keyword">auto</span> change_policy = policy::make_on_change&lt;<span class="code-keyword">int</span>&gt;(
+    [&amp;changed_value](<span class="code-keyword">int</span> value) <span class="code-keyword">noexcept</span> { changed_value = value; }
+);
+
+change_policy(<span class="code-number">1</span>);
+change_policy(<span class="code-number">2</span>);
+changed_value == <span class="code-number">2</span>; <span class="code-muted">// true</span></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide sample-slide" data-title="Sample 3 — Compile-time callback binding" role="group" aria-roledescription="slide" aria-label="Slide 17 of 21" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> SAMPLES 03. Callbacks</p>
+        <h2>Compile-time <span class="accent">callback binding.</span></h2>
+        <div class="code-panel">
+          <div class="code-body"><pre><span class="code-keyword">int</span> add_pair(<span class="code-keyword">int</span> lhs, <span class="code-keyword">int</span> rhs) <span class="code-keyword">noexcept</span>
+{
+    <span class="code-keyword">return</span> lhs + rhs;
+}
+
+castle::callbacks::delegate_ptr_ct&lt;&amp;add_pair&gt; compile_time_free{};
+compile_time_free(<span class="code-number">7</span>, <span class="code-number">8</span>) == <span class="code-number">15</span>; <span class="code-muted">// true</span>
+
+<span class="code-keyword">struct</span> multiplier
+{
+    <span class="code-keyword">int</span> factor = <span class="code-number">1</span>;
+    <span class="code-keyword">int</span> operator()(<span class="code-keyword">int</span> value, <span class="code-keyword">int</span> bias) <span class="code-keyword">const</span> <span class="code-keyword">noexcept</span>
+    {
+        <span class="code-keyword">return</span> (value * factor) + bias;
+    }
+};
+
+castle::callbacks::delegate_ft_ct&lt;multiplier, <span class="code-keyword">int</span>(<span class="code-keyword">int</span>, <span class="code-keyword">int</span>)&gt; compile_time_functor{};
+compile_time_functor(<span class="code-number">3</span>, <span class="code-number">1</span>) == <span class="code-number">4</span>; <span class="code-muted">// true</span></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide sample-slide" data-title="Sample 4 — Synchronous event dispatcher" role="group" aria-roledescription="slide" aria-label="Slide 18 of 21" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> SAMPLES 04. Events</p>
+        <h2>Synchronous <span class="accent">event dispatcher.</span></h2>
+        <div class="code-panel">
+          <div class="code-body"><pre><span class="code-keyword">struct</span> SensorReadyEvent;
+<span class="code-keyword">struct</span> SystemShutdownEvent;
+
+<span class="code-keyword">using</span> sensor_ready_config = castle::events::event_tag_config&lt;
+    SensorReadyEvent, <span class="code-number">2U</span>, void(uint16_t)&gt;;
+<span class="code-keyword">using</span> system_shutdown_config = castle::events::event_tag_config&lt;
+    SystemShutdownEvent, <span class="code-number">2U</span>, void()&gt;;
+
+<span class="code-keyword">using</span> hal_event_dispatcher = castle::events::event_dispatcher&lt;
+    sensor_ready_config,
+    system_shutdown_config&gt;;
+
+hal_event_dispatcher dispatcher;
+
+<span class="code-keyword">auto</span> sub_sensor = dispatcher.register_callback&lt;SensorReadyEvent&gt;(
+    [](uint16_t sample_count) <span class="code-keyword">noexcept</span> {});
+<span class="code-keyword">auto</span> sub_shutdown = dispatcher.register_callback&lt;SystemShutdownEvent&gt;(
+    []() <span class="code-keyword">noexcept</span> {});
+
+dispatcher.dispatch_event&lt;SensorReadyEvent&gt;(<span class="code-number">23U</span>);
+dispatcher.dispatch_event&lt;SystemShutdownEvent&gt;();</pre></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide sample-slide" data-title="Sample 5 — Signal and slot" role="group" aria-roledescription="slide" aria-label="Slide 19 of 21" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> SAMPLES 05. Signals</p>
+        <h2>Signal <span class="accent">and slot.</span></h2>
+        <div class="code-panel">
+          <div class="code-body"><pre><span class="code-keyword">struct</span> counter
+{
+    uint32_t total = <span class="code-number">0U</span>;
+    void add(uint32_t value)
+    {
+        total += value;
+    }
+};
+
+counter total{};
+
+castle::sigslot::signal&lt;<span class="code-number">4U</span>, void(uint32_t)&gt; on_value;
+<span class="code-keyword">auto</span> member_conn = on_value.connect(total, &amp;counter::add);
+on_value.emit(<span class="code-number">5U</span>);</pre></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide sample-slide" data-title="Sample 6 — Units" role="group" aria-roledescription="slide" aria-label="Slide 20 of 21" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> SAMPLES 06. Units</p>
+        <h2><span class="accent">Units.</span></h2>
+        <div class="code-panel">
+          <div class="code-body"><pre><span class="code-keyword">struct</span> gps_fix
+{
+    castle::units::geo_degrees&lt;double&gt; lat;
+    castle::units::geo_degrees&lt;double&gt; lon;
+};
+
+<span class="code-keyword">const</span> gps_fix seoul = {castle::units::geo_degrees&lt;double&gt;(<span class="code-number">37.5665000</span>),
+                       castle::units::geo_degrees&lt;double&gt;(<span class="code-number">126.9780000</span>)};
+seoul.lat.value();
+
+<span class="code-keyword">const</span> castle::units::geo_degrees&lt;double&gt; lon(<span class="code-number">18.0</span>);
+castle::units::geo_arcseconds&lt;double&gt;(lon).value() == <span class="code-number">18.0</span> * <span class="code-number">3600</span>; <span class="code-muted">// true</span>
+castle::units::geo_milliarcseconds&lt;double&gt;(lon).value() == <span class="code-number">18.0</span> * <span class="code-number">3600000</span>; <span class="code-muted">// true</span>
+
+<span class="code-muted">// Speed from an odometer delta and a timestamp delta.</span>
+<span class="code-keyword">const</span> castle::units::meters&lt;double&gt; delta = <span class="code-number">100.0_m</span>;
+<span class="code-keyword">const</span> castle::units::meters_per_second&lt;double&gt; speed = delta / <span class="code-number">4.0_s</span>;
+near(speed.value(), <span class="code-number">25.0</span>); <span class="code-muted">// true</span>
+
+<span class="code-keyword">const</span> castle::units::meters&lt;double&gt; travelled = speed * <span class="code-number">10.0_s</span>;
+near(travelled.value(), <span class="code-number">250.0</span>); <span class="code-muted">// true</span></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide sample-slide" data-title="Sample 7 — CASTLE extensions: diagnostics" role="group" aria-roledescription="slide" aria-label="Slide 21 of 21" tabindex="-1" hidden>
+      <div class="slide-inner">
+        <p class="section-tag">APPENDIX <span>/</span> SAMPLES 07. Extensions</p>
+        <h2>CASTLE extensions: <span class="accent">diagnostics.</span></h2>
+        <div class="code-panel">
+          <div class="code-body"><pre><span class="code-keyword">struct</span> can_timeout_tag {};
+<span class="code-keyword">struct</span> low_battery_tag {};
+<span class="code-keyword">struct</span> comm_lost_tag {};
+
+<span class="code-keyword">using</span> diagnostics = castle::diag::diagnostic_manager&lt;
+    castle::diag::diagnostic_event&lt;can_timeout_tag&gt;,
+    castle::diag::diagnostic_event&lt;low_battery_tag, castle::diag::after_cycles&lt;<span class="code-number">3U</span>&gt;&gt;,
+    castle::diag::diagnostic_group&lt;
+        comm_lost_tag,
+        castle::diag::all_of&lt;
+            castle::diag::active&lt;can_timeout_tag&gt;,
+            castle::diag::active&lt;low_battery_tag&gt;&gt;&gt;&gt;;
+
+diagnostics diag;
+
+<span class="code-keyword">unsigned</span> restart_count = <span class="code-number">0U</span>;
+<span class="code-keyword">auto</span> on_comm_lost = [&amp;restart_count]() <span class="code-keyword">noexcept</span> { ++restart_count; };
+diag.set_recovery&lt;comm_lost_tag&gt;(on_comm_lost);
+
+diag.report&lt;can_timeout_tag&gt;(<span class="code-keyword">true</span>);
+diag.report&lt;low_battery_tag&gt;(<span class="code-keyword">true</span>);
+
+<span class="code-muted">// Timer interrupts</span>
+diag.update(); <span class="code-muted">// low_battery: 1/3</span>
+diag.update(); <span class="code-muted">// low_battery: 2/3</span>
+diag.update(); <span class="code-muted">// low_battery: 3/3 -&gt; comm_lost active, recovery runs</span></pre></div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <div class="controls" aria-label="Slide controls">
@@ -684,13 +897,20 @@ sub.unsubscribe();</pre></div>
       <button class="dot-button" type="button" data-go="11" aria-label="Go to slide 12" aria-current="false"></button>
       <button class="dot-button" type="button" data-go="12" aria-label="Go to slide 13" aria-current="false"></button>
       <button class="dot-button" type="button" data-go="13" aria-label="Go to slide 14" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="14" aria-label="Go to slide 15" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="15" aria-label="Go to slide 16" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="16" aria-label="Go to slide 17" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="17" aria-label="Go to slide 18" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="18" aria-label="Go to slide 19" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="19" aria-label="Go to slide 20" aria-current="false"></button>
+      <button class="dot-button" type="button" data-go="20" aria-label="Go to slide 21" aria-current="false"></button>
     </div>
     <div class="control-actions">
       <button class="nav-button" id="previous" type="button" disabled><span aria-hidden="true">←</span><span class="label">Previous</span></button>
       <button class="nav-button" id="next" type="button"><span class="label">Next</span><span aria-hidden="true">→</span></button>
     </div>
   </div>
-  <p class="live-region" id="slide-announcer" aria-live="polite" aria-atomic="true">Slide 1 of 14: CASTLE — C++ built for bounded systems</p>
+  <p class="live-region" id="slide-announcer" aria-live="polite" aria-atomic="true">Slide 1 of 21: CASTLE — C++ built for bounded systems</p>
 
   <script>
     (function () {
