@@ -36,10 +36,10 @@ sequenceDiagram
 - [`castle/core/compiler.hpp`](../../../include/castle/core/compiler.hpp)
 - [`castle/core/traits.hpp`](../../../include/castle/core/traits.hpp)
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp)
-- [`castle/callbacks/function.hpp`](../../callbacks/function.md)
-- [`castle/patterns/observer.hpp`](../../patterns/observer.md)
+- [`castle/callbacks/function.hpp`](../../castle/callbacks/function.md)
+- [`castle/patterns/observer.hpp`](../../castle/patterns/observer.md)
 - [`castle/utility/move.hpp`](../../../include/castle/utility/move.hpp)
-- [`castle/utility/tuple.hpp`](../../utility/tuple.md)
+- [`castle/utility/tuple.hpp`](../../castle/utility/tuple.md)
 - [`castle_ext/data/update_set.hpp`](update_set.md)
 
 ## Public API

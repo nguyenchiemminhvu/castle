@@ -9,8 +9,8 @@ The header also defines `filter_handle`, the integer that names an installed fil
 `#include "castle_ext/io/can/filter.hpp"`
 
 ## Dependencies
-- [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../core/status.md`](../../../core/status.md)
+- [`../../../core/compiler.md`](../../../castle/core/compiler.md)
+- [`../../../core/status.md`](../../../castle/core/status.md)
 - [`frame.md`](frame.md)
 
 ## Public API

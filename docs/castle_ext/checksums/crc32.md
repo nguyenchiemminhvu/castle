@@ -8,8 +8,8 @@ Implements CRC-32/ISO-HDLC with polynomial `0x04C11DB7`, reflected input/output,
 
 ## Dependencies
 
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
 
 ## Public API
 | API | Description |

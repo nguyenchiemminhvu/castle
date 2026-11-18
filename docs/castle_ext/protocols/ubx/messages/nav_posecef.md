@@ -10,8 +10,8 @@ Typed model of UBX-NAV-POSECEF (class 0x01, ID 0x01), the periodic/polled positi
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/constants.hpp`](../../../../core/constants.md) (`castle::math::pow10`)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/core/constants.hpp`](../../../../castle/core/constants.md) (`castle::math::pow10`)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)

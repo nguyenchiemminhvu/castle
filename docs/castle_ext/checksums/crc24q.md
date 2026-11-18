@@ -10,8 +10,8 @@ Implements CRC-24Q with width 24, polynomial `0x864CFB`, initial value `0x000000
 
 ## Dependencies
 - [`crc_common.md`](crc_common.md)
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
 
 ## Public API
 | API | Description |

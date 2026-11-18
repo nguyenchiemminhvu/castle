@@ -10,7 +10,7 @@
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/fixed_message.hpp`](detail/fixed_message.md)
 - `stdint.h`

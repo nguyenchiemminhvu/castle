@@ -12,10 +12,10 @@ UBX-NAV2-TIMEGPS (0x29 0x20) carries the same 16-byte payload from the secondary
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/fixed_message.hpp`](detail/fixed_message.md) (supplies `matches()`, `decode()`, `encode()`; payloads are read/written through [`payload_reader`](../payload_reader.md) / [`payload_writer`](../payload_writer.md))
-- [`castle/core/constants.hpp`](../../../../core/constants.md) (`castle::math::pow10`)
+- [`castle/core/constants.hpp`](../../../../castle/core/constants.md) (`castle::math::pow10`)
 
 ## Public API
 

@@ -7,8 +7,8 @@ Implements CRC-16/CCITT-FALSE with polynomial `0x1021`, initial value `0xFFFF`, 
 `#include "castle_ext/checksums/crc16.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
 
 ## Public API
 | API | Description |

@@ -9,10 +9,10 @@ Backends are compile-time template arguments. `bus<Backend>` is a convenience al
 `#include "castle_ext/io/can/bus.hpp"`
 
 ## Dependencies
-- [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../core/traits.md`](../../../core/traits.md)
-- [`../../../core/types.md`](../../../core/types.md)
-- [`../../../core/status.md`](../../../core/status.md)
+- [`../../../core/compiler.md`](../../../castle/core/compiler.md)
+- [`../../../core/traits.md`](../../../castle/core/traits.md)
+- [`../../../core/types.md`](../../../castle/core/types.md)
+- [`../../../core/status.md`](../../../castle/core/status.md)
 - [`../../io/fd/control.md`](../../io/fd/control.md) (`fd::detail::clear_system_error`)
 - [`frame.md`](frame.md)
 - [`filter.md`](filter.md)

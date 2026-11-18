@@ -7,9 +7,9 @@ Provides AES-128, AES-192, and AES-256 as a fixed-size block cipher with raw blo
 `#include "castle_ext/crypto/aes.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
-- [`../../core/status.md`](../../core/status.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
+- [`../../core/status.md`](../../castle/core/status.md)
 
 ## Public API
 | API | Description |

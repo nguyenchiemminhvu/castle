@@ -10,9 +10,9 @@ Represents an NMEA GSV satellite-in-view sentence. It stores message numbering, 
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
-- [`castle/dsa/string_view.hpp`](../../../../dsa/string_view.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/dsa/array.hpp`](../../../../castle/dsa/array.md)
+- [`castle/dsa/string_view.hpp`](../../../../castle/dsa/string_view.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../nmea.md)
 - [`castle_ext/protocols/nmea/field_cursor.hpp`](../field_cursor.md)
 - `stdint.h`

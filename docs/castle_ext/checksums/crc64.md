@@ -7,8 +7,8 @@ Implements CRC-64/ECMA-182 with polynomial `0x42F0E1EBA9EA3693`, initial value `
 `#include "castle_ext/checksums/crc64.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
 
 ## Public API
 | API | Description |

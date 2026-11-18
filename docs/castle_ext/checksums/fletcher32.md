@@ -8,9 +8,9 @@ Implements Fletcher-32 using two modulo-65535 accumulators over 16-bit blocks fo
 
 ## Dependencies
 - [`fletcher_common.md`](fletcher_common.md)
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/traits.md`](../../core/traits.md)
-- [`../../core/types.md`](../../core/types.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/traits.md`](../../castle/core/traits.md)
+- [`../../core/types.md`](../../castle/core/types.md)
 
 ## Public API
 | API | Description |

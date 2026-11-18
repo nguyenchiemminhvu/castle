@@ -15,9 +15,9 @@ Both use the same text decoder.
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/dsa/string.hpp`](../../../../dsa/string.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/core/types.hpp`](../../../../castle/core/types.md)
+- [`castle/dsa/string.hpp`](../../../../castle/dsa/string.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)
 - `stdint.h`

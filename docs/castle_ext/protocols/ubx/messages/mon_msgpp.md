@@ -10,9 +10,9 @@ Model of UBX-MON-MSGPP (0x0a 0x06), the 120-byte message parse and process statu
 
 ## Dependencies
 
-- [castle/core/compiler.hpp](../../../../core/compiler.md)
-- [castle/core/types.hpp](../../../../core/types.md)
-- [castle/dsa/array.hpp](../../../../dsa/array.md)
+- [castle/core/compiler.hpp](../../../../castle/core/compiler.md)
+- [castle/core/types.hpp](../../../../castle/core/types.md)
+- [castle/dsa/array.hpp](../../../../castle/dsa/array.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [detail/fixed_message.hpp](detail/fixed_message.md)
 - `stdint.h`

@@ -7,9 +7,9 @@ Implements RFC 4648 Base64 with optional padding and an optional URL-safe alphab
 `#include "castle_ext/codecs/base64.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
-- [`../../core/status.md`](../../core/status.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
+- [`../../core/status.md`](../../castle/core/status.md)
 
 ## Public API
 | API | Description |

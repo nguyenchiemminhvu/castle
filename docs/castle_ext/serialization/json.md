@@ -7,11 +7,11 @@ A fixed-capacity JSON DOM, parser, and serializer designed for Castle's determin
 `#include "castle_ext/serialization/json.hpp"`
 
 ## Dependencies
-- [`../../core/status.md`](../../core/status.md)
-- [`../../dsa/array.md`](../../dsa/array.md)
-- [`../../dsa/string.md`](../../dsa/string.md)
-- [`../../dsa/string_view.md`](../../dsa/string_view.md)
-- [`../../utility/string_builder.md`](../../utility/string_builder.md)
+- [`../../core/status.md`](../../castle/core/status.md)
+- [`../../dsa/array.md`](../../castle/dsa/array.md)
+- [`../../dsa/string.md`](../../castle/dsa/string.md)
+- [`../../dsa/string_view.md`](../../castle/dsa/string_view.md)
+- [`../../utility/string_builder.md`](../../castle/utility/string_builder.md)
 
 ## Public API
 | API | Description |

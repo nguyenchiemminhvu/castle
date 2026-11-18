@@ -21,10 +21,10 @@ This is an **encode-only** model: it produces the message payload for `encode_me
 
 ## Dependencies
 
-- [`core/compiler.hpp`](../../../../core/compiler.md)
-- [`core/types.hpp`](../../../../core/types.md)
-- [`dsa/vector.hpp`](../../../../dsa/vector.md)
-- [`core/status.hpp`](../../../../core/status.md)
+- [`core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`core/types.hpp`](../../../../castle/core/types.md)
+- [`dsa/vector.hpp`](../../../../castle/dsa/vector.md)
+- [`core/status.hpp`](../../../../castle/core/status.md)
 - [`castle_ext/protocols/rtcm/bit_writer.hpp`](../bit_writer.md)
 - [`castle_ext/protocols/rtcm/rtcm.hpp`](../rtcm.md)
 - [`castle_ext/protocols/rtcm/messages/detail/rtk_observables_family.hpp`](detail/rtk_observables_family.md)

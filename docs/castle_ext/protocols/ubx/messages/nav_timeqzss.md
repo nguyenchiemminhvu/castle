@@ -12,10 +12,10 @@ UBX-NAV-TIMEBDS, UBX-NAV-TIMEGAL and UBX-NAV-TIMEQZSS are byte-identical 20-byte
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/nav_gnss_time.hpp`](detail/nav_gnss_time.md) (layout, generic fields and validity helpers), built on [`detail/fixed_message.hpp`](detail/fixed_message.md)
-- [`castle/core/constants.hpp`](../../../../core/constants.md) (`castle::math::pow10`)
+- [`castle/core/constants.hpp`](../../../../castle/core/constants.md) (`castle::math::pow10`)
 
 ## Public API
 

@@ -17,15 +17,15 @@ The header also provides two frame-level helpers:
 
 ## Dependencies
 
-* [`core/compiler.hpp`](../../../core/compiler.md)
-* [`core/traits.hpp`](../../../core/traits.md)
-* [`core/types.hpp`](../../../core/types.md)
-* [`dsa/array.hpp`](../../../dsa/array.md)
-* [`dsa/array_view.hpp`](../../../dsa/array_view.md)
-* [`dsa/string.hpp`](../../../dsa/string.md)
-* [`core/status.hpp`](../../../core/status.md)
-* [`utility/bit_cast.hpp`](../../../utility/bit_cast.md)
-* [`utility/bytes.hpp`](../../../utility/bytes.md)
+* [`core/compiler.hpp`](../../../castle/core/compiler.md)
+* [`core/traits.hpp`](../../../castle/core/traits.md)
+* [`core/types.hpp`](../../../castle/core/types.md)
+* [`dsa/array.hpp`](../../../castle/dsa/array.md)
+* [`dsa/array_view.hpp`](../../../castle/dsa/array_view.md)
+* [`dsa/string.hpp`](../../../castle/dsa/string.md)
+* [`core/status.hpp`](../../../castle/core/status.md)
+* [`utility/bit_cast.hpp`](../../../castle/utility/bit_cast.md)
+* [`utility/bytes.hpp`](../../../castle/utility/bytes.md)
 * [`ubx.hpp`](ubx.md)
 
 ## Public API

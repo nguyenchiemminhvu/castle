@@ -7,8 +7,8 @@ Reference ellipsoid and datum constants for the geodetic module. Values are expo
 `#include "castle_ext/geodetic/datum.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/traits.md`](../../core/traits.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/traits.md`](../../castle/core/traits.md)
 
 ## Public API
 | API | Description |

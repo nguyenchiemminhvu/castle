@@ -7,8 +7,8 @@ Implements CRC-8/SMBUS with polynomial `0x07`, initial value `0x00`, no final XO
 `#include "castle_ext/checksums/crc8.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
 
 ## Public API
 | API | Description |

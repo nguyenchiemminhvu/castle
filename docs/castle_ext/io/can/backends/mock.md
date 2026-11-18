@@ -11,8 +11,8 @@
 - [`../frame.md`](../frame.md)
 - [`../filter.md`](../filter.md)
 - [`../types.md`](../types.md)
-- [`../../../../dsa/mirrored_ring_buffer.md`](../../../../dsa/mirrored_ring_buffer.md)
-- [`../../../../core/status.md`](../../../../core/status.md)
+- [`../../../../dsa/mirrored_ring_buffer.md`](../../../../castle/dsa/mirrored_ring_buffer.md)
+- [`../../../../core/status.md`](../../../../castle/core/status.md)
 
 ## Public API
 Template parameters (all `castle::size_type`):

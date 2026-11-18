@@ -7,9 +7,9 @@ Shared numeric helpers for the geodetic module. Use it for latitude/longitude ra
 `#include "castle_ext/geodetic/geo_utils.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/traits.md`](../../core/traits.md)
-- [`../../math/clamp.md`](../../math/clamp.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/traits.md`](../../castle/core/traits.md)
+- [`../../math/clamp.md`](../../castle/math/clamp.md)
 
 ## Public API
 | API | Description |

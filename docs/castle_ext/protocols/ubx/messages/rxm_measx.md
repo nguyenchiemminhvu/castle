@@ -4,7 +4,7 @@
 
 `rxm_measx<MaxSvs>` models UBX-RXM-MEASX (0x02 0x14), the periodic/polled satellite measurement output for RRLP: a 44-byte header followed by `numSV` 24-byte satellite blocks (`44 + numSV·24`). Payload data follows the RRLP (3GPP TS 44.031) conventions, except that GNSS/satellite IDs use the u-blox Satellite Numbering scheme.
 
-Each block is an `rxm_measx_sv` holding the raw wire integers (Doppler, code phase, multipath indicator, RMS error index) plus helpers that apply the spec scales. The header keeps the four per-constellation reference times and their accuracies. Blocks are stored in a fixed-capacity [`castle::dsa::vector`](../../../../dsa/vector.md).
+Each block is an `rxm_measx_sv` holding the raw wire integers (Doppler, code phase, multipath indicator, RMS error index) plus helpers that apply the spec scales. The header keeps the four per-constellation reference times and their accuracies. Blocks are stored in a fixed-capacity [`castle::dsa::vector`](../../../../castle/dsa/vector.md).
 
 ## Header
 
@@ -12,10 +12,10 @@ Each block is an `rxm_measx_sv` holding the raw wire integers (Doppler, code pha
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/constants.hpp`](../../../../core/constants.md)
-- [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/core/constants.hpp`](../../../../castle/core/constants.md)
+- [`castle/core/types.hpp`](../../../../castle/core/types.md)
+- [`castle/dsa/vector.hpp`](../../../../castle/dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)

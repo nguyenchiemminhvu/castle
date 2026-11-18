@@ -10,9 +10,9 @@ Represents an NMEA GSA DOP/fix-mode sentence. It stores the navigation mode, a f
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/core/types.hpp`](../../../../castle/core/types.md)
+- [`castle/dsa/array.hpp`](../../../../castle/dsa/array.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../nmea.md)
 - [`castle_ext/protocols/nmea/field_cursor.hpp`](../field_cursor.md)
 - `stdint.h`

@@ -7,9 +7,9 @@ SM4 is a 128-bit block cipher with a 128-bit key and 32 Feistel-style transforma
 `#include "castle_ext/crypto/sm4.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
-- [`../../core/status.md`](../../core/status.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
+- [`../../core/status.md`](../../castle/core/status.md)
 - [`../../../include/castle/utility/bytes.hpp`](../../../include/castle/utility/bytes.hpp)
 
 ## Public API

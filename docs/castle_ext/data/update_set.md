@@ -15,8 +15,8 @@ Each type in `Ts...` maps to one bit, in declaration order. The set is a plain v
 - [`castle/core/compiler.hpp`](../../../include/castle/core/compiler.hpp)
 - [`castle/core/traits.hpp`](../../../include/castle/core/traits.hpp)
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp)
-- [`castle/utility/bitset.hpp`](../../utility/bitset.md)
-- [`castle/utility/tuple.hpp`](../../utility/tuple.md)
+- [`castle/utility/bitset.hpp`](../../castle/utility/bitset.md)
+- [`castle/utility/tuple.hpp`](../../castle/utility/tuple.md)
 
 ## Public API
 

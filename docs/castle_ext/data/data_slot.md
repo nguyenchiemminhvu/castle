@@ -24,7 +24,7 @@ A held snapshot stays valid and unchanged while newer values are published. Read
 - [`castle/core/traits.hpp`](../../../include/castle/core/traits.hpp)
 - [`castle/core/types.hpp`](../../../include/castle/core/types.hpp)
 - [`castle/core/status.hpp`](../../../include/castle/core/status.hpp)
-- [`castle/sync/atomic.hpp`](../../sync/atomic.md)
+- [`castle/sync/atomic.hpp`](../../castle/sync/atomic.md)
 
 ## Public API
 

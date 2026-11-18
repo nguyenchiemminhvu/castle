@@ -85,20 +85,20 @@ standards it follows (MISRA C++, AUTOSAR C++14, CERT C++, ISO 26262).
 
 ## Module map
 
-- [`bit/`](docs/bit/bit.md) — Bit operations, masks, rotations, and flags.
-- [`cache/`](docs/cache/cache.md) — Fixed-capacity key/value caches with FIFO, LIFO, LRU, MRU, and LFU eviction.
-- [`callbacks/`](docs/callbacks/delegate.md) — Fixed-storage delegates, functions, registries, and execution policies.
-- [`chrono/`](docs/chrono/chrono.md) — Durations, time points, clocks, and literals.
-- [`dsa/`](docs/dsa/containers.md) — Fixed-capacity sequences, associative containers, buffers, strings, graphs with graph algorithms ([`graph.hpp`](docs/dsa/graph.md)), and range algorithms ([`algorithm.hpp`](docs/dsa/algorithm.md)).
-- [`core/`](docs/core/compiler.md) — Compiler abstraction, configuration, traits, type ranges, common status codes ([`status.hpp`](docs/core/status.md)), and error handling.
-- [`patterns/`](docs/patterns/observer.md) — Observer, singleton, and visitor helpers.
-- [`events/`](docs/events/delegate_dispatcher.md) — Event dispatch, signal/slot, IPC, timers, and thread-pool helpers.
-- [`iterator/`](docs/iterator/iterator.md) — Iterator tags, traits, operations, and bounded iterators.
-- [`math/`](docs/math/geometry/geometry.md) — Integer math, geometry, linear algebra, ratios, roots, random helpers, and more.
-- [`memory/`](docs/memory/memory.md) — Alignment, storage, object lifetime, construction, and destruction helpers.
-- [`sync/`](docs/sync/mutex.md) — Mutexes, semaphores, shared locking, and wait policies.
-- [`units/`](docs/units/units.md) — Type-safe physical quantities with dimensional analysis, SI prefixes, time scales, and unit literals.
-- [`utility/`](docs/utility/utility.md) — Bit cast, bitset, compare, hash, optional, pair, tuple, variant, and basic move/forward utilities.
+- [`bit/`](docs/castle/bit/bit.md) — Bit operations, masks, rotations, and flags.
+- [`cache/`](docs/castle/cache/cache.md) — Fixed-capacity key/value caches with FIFO, LIFO, LRU, MRU, and LFU eviction.
+- [`callbacks/`](docs/castle/callbacks/delegate.md) — Fixed-storage delegates, functions, registries, and execution policies.
+- [`chrono/`](docs/castle/chrono/chrono.md) — Durations, time points, clocks, and literals.
+- [`dsa/`](docs/castle/dsa/containers.md) — Fixed-capacity sequences, associative containers, buffers, strings, graphs with graph algorithms ([`graph.hpp`](docs/castle/dsa/graph.md)), and range algorithms ([`algorithm.hpp`](docs/castle/dsa/algorithm.md)).
+- [`core/`](docs/castle/core/compiler.md) — Compiler abstraction, configuration, traits, type ranges, common status codes ([`status.hpp`](docs/castle/core/status.md)), and error handling.
+- [`patterns/`](docs/castle/patterns/observer.md) — Observer, singleton, and visitor helpers.
+- [`events/`](docs/castle/events/delegate_dispatcher.md) — Event dispatch, signal/slot, IPC, timers, and thread-pool helpers.
+- [`iterator/`](docs/castle/iterator/iterator.md) — Iterator tags, traits, operations, and bounded iterators.
+- [`math/`](docs/castle/math/geometry/geometry.md) — Integer math, geometry, linear algebra, ratios, roots, random helpers, and more.
+- [`memory/`](docs/castle/memory/memory.md) — Alignment, storage, object lifetime, construction, and destruction helpers.
+- [`sync/`](docs/castle/sync/mutex.md) — Mutexes, semaphores, shared locking, and wait policies.
+- [`units/`](docs/castle/units/units.md) — Type-safe physical quantities with dimensional analysis, SI prefixes, time scales, and unit literals.
+- [`utility/`](docs/castle/utility/utility.md) — Bit cast, bitset, compare, hash, optional, pair, tuple, variant, and basic move/forward utilities.
 - [`castle_ext/`](docs/castle_ext/README.md) - External standards and domain-specific implementations
 
 See the module guides in [`docs/`](docs/README.md).

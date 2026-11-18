@@ -10,7 +10,7 @@ Model of UBX-MON-RXR (class `0x0A`, ID `0x21`), the 1-byte output the receiver s
 
 ## Dependencies
 
-- [castle/core/compiler.hpp](../../../../core/compiler.md)
+- [castle/core/compiler.hpp](../../../../castle/core/compiler.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)

@@ -7,11 +7,11 @@ A fixed-capacity INI document, parser, and serializer for embedded configuration
 `#include "castle_ext/serialization/ini.hpp"`
 
 ## Dependencies
-- [`../../core/status.md`](../../core/status.md)
-- [`../../dsa/string.md`](../../dsa/string.md)
-- [`../../dsa/string_view.md`](../../dsa/string_view.md)
-- [`../../dsa/vector.md`](../../dsa/vector.md)
-- [`../../utility/optional.md`](../../utility/optional.md)
+- [`../../core/status.md`](../../castle/core/status.md)
+- [`../../dsa/string.md`](../../castle/dsa/string.md)
+- [`../../dsa/string_view.md`](../../castle/dsa/string_view.md)
+- [`../../dsa/vector.md`](../../castle/dsa/vector.md)
+- [`../../utility/optional.md`](../../castle/utility/optional.md)
 
 ## Public API
 | API | Description |

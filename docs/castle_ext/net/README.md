@@ -429,7 +429,7 @@ App -> V : process_client(handle) / process_datagram()
 | `net.hpp` | Umbrella include |
 | `detail/native.hpp` | BSD calls as `castle::status` (internal) |
 
-The callback dispatcher is a core utility: see [`castle/callbacks/callback_dispatcher.hpp`](../../callbacks/callback_dispatcher.md).
+The callback dispatcher is a core utility: see [`castle/callbacks/callback_dispatcher.hpp`](../../castle/callbacks/callback_dispatcher.md).
 
 Samples are in `samples/castle_ext/net/`, tests in `test/castle_ext/net/`.
 

@@ -7,11 +7,11 @@ Provides a streaming RFC 1321 MD5 message digest for compatibility with legacy p
 `#include "castle_ext/crypto/hash/md5.hpp"`
 
 ## Dependencies
-- [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../core/error_handler.md`](../../../core/error_handler.md)
-- [`../../../core/types.md`](../../../core/types.md)
-- [`../../../core/status.md`](../../../core/status.md)
-- [`../../../dsa/array.md`](../../../dsa/array.md)
+- [`../../../core/compiler.md`](../../../castle/core/compiler.md)
+- [`../../../core/error_handler.md`](../../../castle/core/error_handler.md)
+- [`../../../core/types.md`](../../../castle/core/types.md)
+- [`../../../core/status.md`](../../../castle/core/status.md)
+- [`../../../dsa/array.md`](../../../castle/dsa/array.md)
 - [`../../../../include/castle/utility/bytes.hpp`](../../../../include/castle/utility/bytes.hpp)
 
 ## Public API

@@ -10,8 +10,8 @@ Models the three UBX-MGA-QZSS (0x13 0x05) assistance layouts sent by the host. T
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/dsa/array.hpp`](../../../../castle/dsa/array.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/typed_message.hpp`](detail/typed_message.md)
 - [`castle_ext/protocols/ubx/messages/mga_gps.hpp`](mga_gps.md)

@@ -12,10 +12,10 @@ The header also defines `nav_sv_health` and `nav_signal_quality`, which [`nav_si
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/constants.hpp`](../../../../core/constants.md)
-- [`castle/core/types.hpp`](../../../../core/types.md)
-- [`castle/dsa/vector.hpp`](../../../../dsa/vector.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/core/constants.hpp`](../../../../castle/core/constants.md)
+- [`castle/core/types.hpp`](../../../../castle/core/types.md)
+- [`castle/dsa/vector.hpp`](../../../../castle/dsa/vector.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/payload_reader.hpp`](../payload_reader.md)
 - [`castle_ext/protocols/ubx/payload_writer.hpp`](../payload_writer.md)

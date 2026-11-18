@@ -17,7 +17,7 @@ The legacy RTK observables are two families of four consecutive message numbers 
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../../core/compiler.md)
+- [`castle/core/compiler.hpp`](../../../../../castle/core/compiler.md)
 
 ## Public API
 

@@ -7,15 +7,15 @@
 `#include "castle_ext/parsers/nmea_parser/nmea_parser.hpp"`
 
 ## Dependencies
-- [`core/compiler.hpp`](../../../core/compiler.md)
-- [`core/config.hpp`](../../../core/config.md)
-- [`core/traits.hpp`](../../../core/traits.md)
-- [`core/types.hpp`](../../../core/types.md)
-- [`core/status.hpp`](../../../core/status.md)
-- [`callbacks/function.hpp`](../../../callbacks/function.md)
-- [`dsa/array.hpp`](../../../dsa/array.md)
-- [`dsa/array_view.hpp`](../../../dsa/array_view.md)
-- [`dsa/string_view.hpp`](../../../dsa/string_view.md)
+- [`core/compiler.hpp`](../../../castle/core/compiler.md)
+- [`core/config.hpp`](../../../castle/core/config.md)
+- [`core/traits.hpp`](../../../castle/core/traits.md)
+- [`core/types.hpp`](../../../castle/core/types.md)
+- [`core/status.hpp`](../../../castle/core/status.md)
+- [`callbacks/function.hpp`](../../../castle/callbacks/function.md)
+- [`dsa/array.hpp`](../../../castle/dsa/array.md)
+- [`dsa/array_view.hpp`](../../../castle/dsa/array_view.md)
+- [`dsa/string_view.hpp`](../../../castle/dsa/string_view.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../../protocols/nmea/nmea.md)
 
 ## Public API

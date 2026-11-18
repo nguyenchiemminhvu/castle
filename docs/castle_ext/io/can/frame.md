@@ -9,12 +9,12 @@ CAN FD is out of scope: the payload is fixed at 8 bytes (classic CAN only).
 `#include "castle_ext/io/can/frame.hpp"`
 
 ## Dependencies
-- [`../../../dsa/array.md`](../../../dsa/array.md)
-- [`../../../dsa/array_view.md`](../../../dsa/array_view.md)
-- [`../../../dsa/initializer_list.md`](../../../dsa/initializer_list.md)
-- [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../core/types.md`](../../../core/types.md)
-- [`../../../core/status.md`](../../../core/status.md)
+- [`../../../dsa/array.md`](../../../castle/dsa/array.md)
+- [`../../../dsa/array_view.md`](../../../castle/dsa/array_view.md)
+- [`../../../dsa/initializer_list.md`](../../../castle/dsa/initializer_list.md)
+- [`../../../core/compiler.md`](../../../castle/core/compiler.md)
+- [`../../../core/types.md`](../../../castle/core/types.md)
+- [`../../../core/status.md`](../../../castle/core/status.md)
 
 ## Public API
 All names live in `castle::io::can`.

@@ -10,8 +10,8 @@ Models the five UBX-MGA-BDS (0x13 0x03) BeiDou assistance layouts sent by the ho
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/dsa/array.hpp`](../../../../castle/dsa/array.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/typed_message.hpp`](detail/typed_message.md)
 - `stdint.h`

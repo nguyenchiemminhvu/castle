@@ -32,8 +32,8 @@ With this design the wire layout exists once, generic code (`tow_valid()`, `time
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../../core/compiler.md)
-- [`castle/core/constants.hpp`](../../../../../core/constants.md) (`castle::math::pow10`)
+- [`castle/core/compiler.hpp`](../../../../../castle/core/compiler.md)
+- [`castle/core/constants.hpp`](../../../../../castle/core/constants.md) (`castle::math::pow10`)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../../ubx.md)
 - [`detail/fixed_message.hpp`](fixed_message.md)
 

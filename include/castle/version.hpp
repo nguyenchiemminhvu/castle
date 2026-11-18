@@ -33,19 +33,6 @@
 /// @brief Encoded Castle version for numeric comparisons.
 #define CASTLE_VERSION     CASTLE_VERSION_ENCODE(CASTLE_VERSION_MAJOR, CASTLE_VERSION_MINOR, CASTLE_VERSION_PATCH)
 
-/// @def CASTLE_STRINGIFY_IMPL
-/// @brief Converts a preprocessor token to a string literal without prior expansion.
-/// @param x Token to stringify.
-#define CASTLE_STRINGIFY_IMPL(x) #x
-/// @def CASTLE_STRINGIFY
-/// @brief Converts a preprocessor token to a fully expanded string literal.
-/// @param x Token to stringify.
-#define CASTLE_STRINGIFY(x)      CASTLE_STRINGIFY_IMPL(x)
-
-/// @def CASTLE_VERSION_STRING
-/// @brief Castle version rendered as a semantic-version string literal.
-#define CASTLE_VERSION_STRING               CASTLE_STRINGIFY(CASTLE_VERSION_MAJOR) "."     CASTLE_STRINGIFY(CASTLE_VERSION_MINOR) "."     CASTLE_STRINGIFY(CASTLE_VERSION_PATCH)
-
 /// @def CASTLE_VERSION_AT_LEAST
 /// @brief Tests whether the current Castle version is at least the requested version.
 /// @param major Required major version component.

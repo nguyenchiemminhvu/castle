@@ -7,8 +7,8 @@ Platform-neutral value and configuration types shared by every GPIO backend and 
 `#include "castle_ext/io/gpio/types.hpp"`
 
 ## Dependencies
-- [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../core/status.md`](../../../core/status.md)
+- [`../../../core/compiler.md`](../../../castle/core/compiler.md)
+- [`../../../core/status.md`](../../../castle/core/status.md)
 
 ## Public API
 | API | Description |

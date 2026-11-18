@@ -13,10 +13,10 @@ For the platform-neutral bus API and the Linux counterpart see [`can.md`](../can
 - [`../frame.md`](../frame.md)
 - [`../filter.md`](../filter.md)
 - [`../types.md`](../types.md)
-- [`../../../../dsa/mirrored_ring_buffer.md`](../../../../dsa/mirrored_ring_buffer.md)
-- [`../../../../sync/atomic.md`](../../../../sync/atomic.md)
-- [`../../../../core/status.md`](../../../../core/status.md)
-- [`../../../../core/config.md`](../../../../core/config.md)
+- [`../../../../dsa/mirrored_ring_buffer.md`](../../../../castle/dsa/mirrored_ring_buffer.md)
+- [`../../../../sync/atomic.md`](../../../../castle/sync/atomic.md)
+- [`../../../../core/status.md`](../../../../castle/core/status.md)
+- [`../../../../core/config.md`](../../../../castle/core/config.md)
 - Zephyr 3.2 or newer: `<zephyr/device.h>`, `<zephyr/drivers/can.h>`, `<zephyr/kernel.h>` when `CASTLE_USING_IO_CAN_VIA_ZEPHYR` is `1`.
 
 ## Public API

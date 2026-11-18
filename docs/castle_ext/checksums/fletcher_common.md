@@ -9,9 +9,9 @@
 Applications normally include a width-specific header instead.
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/traits.md`](../../core/traits.md)
-- [`../../core/types.md`](../../core/types.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/traits.md`](../../castle/core/traits.md)
+- [`../../core/types.md`](../../castle/core/types.md)
 
 ## Template Parameters
 | Parameter | Description |

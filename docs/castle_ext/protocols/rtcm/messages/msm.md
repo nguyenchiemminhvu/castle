@@ -58,14 +58,14 @@ Payload size in bits: `169 + nsat*nsig + nsat*S + ncell*C`, where `S` is 18 (MSM
 
 ## Dependencies
 
-* [`bit/bit_count.hpp`](../../../../bit/bit_count.md)
-* [`core/compiler.hpp`](../../../../core/compiler.md)
-* [`core/types.hpp`](../../../../core/types.md)
-* [`dsa/vector.hpp`](../../../../dsa/vector.md)
-* [`core/status.hpp`](../../../../core/status.md)
+* [`bit/bit_count.hpp`](../../../../castle/bit/bit_count.md)
+* [`core/compiler.hpp`](../../../../castle/core/compiler.md)
+* [`core/types.hpp`](../../../../castle/core/types.md)
+* [`dsa/vector.hpp`](../../../../castle/dsa/vector.md)
+* [`core/status.hpp`](../../../../castle/core/status.md)
 * [`bit_writer.hpp`](../bit_writer.md)
 * [`rtcm.hpp`](../rtcm.md)
-* [`math/round.hpp`](../../../../math/round.md)
+* [`math/round.hpp`](../../../../castle/math/round.md)
 * `stdint.h`
 
 ## Public API

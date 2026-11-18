@@ -8,14 +8,14 @@
 
 ## Dependencies
 - [`control.md`](control.md)
-- [`../../../core/config.md`](../../../core/config.md)
-- [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../core/types.md`](../../../core/types.md)
-- [`../../../core/status.md`](../../../core/status.md)
-- [`../../../callbacks/function.md`](../../../callbacks/function.md)
-- [`../../../sync/mutex.md`](../../../sync/mutex.md)
-- [`../../../sync/scoped_mutex.md`](../../../sync/scoped_mutex.md)
-- [`../../../utility/move.md`](../../../utility/move.md)
+- [`../../../core/config.md`](../../../castle/core/config.md)
+- [`../../../core/compiler.md`](../../../castle/core/compiler.md)
+- [`../../../core/types.md`](../../../castle/core/types.md)
+- [`../../../core/status.md`](../../../castle/core/status.md)
+- [`../../../callbacks/function.md`](../../../castle/callbacks/function.md)
+- [`../../../sync/mutex.md`](../../../castle/sync/mutex.md)
+- [`../../../sync/scoped_mutex.md`](../../../castle/sync/scoped_mutex.md)
+- [`../../../utility/move.md`](../../../castle/utility/move.md)
 
 ## Public API
 | API | Description |

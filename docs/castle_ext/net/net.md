@@ -19,7 +19,7 @@ This header adds no new types or functions. It includes the public declarations 
 - [`client.md`](client.md) — `basic_client`, `tcp_client`, `udp_client`.
 - [`server.md`](server.md) — `basic_server`, `tcp_server`, `udp_server`, generation-checked `client_handle`.
 
-The internal helper [`detail/native.hpp`](detail/native.md) (BSD calls as `castle::status`) is not part of the umbrella's public surface. The in-place callback dispatcher lives in core as [`castle/callbacks/callback_dispatcher.hpp`](../../callbacks/callback_dispatcher.md).
+The internal helper [`detail/native.hpp`](detail/native.md) (BSD calls as `castle::status`) is not part of the umbrella's public surface. The in-place callback dispatcher lives in core as [`castle/callbacks/callback_dispatcher.hpp`](../../castle/callbacks/callback_dispatcher.md).
 
 ## Usage Example
 See `samples/castle_ext/net/net.cpp`.

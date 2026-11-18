@@ -7,9 +7,9 @@
 `#include "castle_ext/io/gpio/port.hpp"`
 
 ## Dependencies
-- [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../core/traits.md`](../../../core/traits.md)
-- [`../../../core/status.md`](../../../core/status.md)
+- [`../../../core/compiler.md`](../../../castle/core/compiler.md)
+- [`../../../core/traits.md`](../../../castle/core/traits.md)
+- [`../../../core/status.md`](../../../castle/core/status.md)
 - [`types.md`](types.md)
 
 ## Public API

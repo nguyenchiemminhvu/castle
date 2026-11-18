@@ -9,10 +9,10 @@ This is an implementation detail in namespace `detail`: applications use filters
 `#include "castle_ext/io/can/detail/slot_table.hpp"`
 
 ## Dependencies
-- [`../../../../dsa/array.md`](../../../../dsa/array.md)
-- [`../../../../core/compiler.md`](../../../../core/compiler.md)
-- [`../../../../core/types.md`](../../../../core/types.md)
-- [`../../../../utility/bitset.md`](../../../../utility/bitset.md)
+- [`../../../../dsa/array.md`](../../../../castle/dsa/array.md)
+- [`../../../../core/compiler.md`](../../../../castle/core/compiler.md)
+- [`../../../../core/types.md`](../../../../castle/core/types.md)
+- [`../../../../utility/bitset.md`](../../../../castle/utility/bitset.md)
 - [`../filter.md`](../filter.md) (`filter_handle`, `invalid_filter`)
 
 ## Public API

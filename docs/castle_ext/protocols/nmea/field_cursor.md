@@ -12,9 +12,9 @@ Unlike `ubx::payload_reader`'s sticky-error model, NMEA sentence fields are rout
 
 ## Dependencies
 
-* [`core/compiler.hpp`](../../../core/compiler.md)
-* [`core/types.hpp`](../../../core/types.md)
-* [`dsa/string_view.hpp`](../../../dsa/string_view.md)
+* [`core/compiler.hpp`](../../../castle/core/compiler.md)
+* [`core/types.hpp`](../../../castle/core/types.md)
+* [`dsa/string_view.hpp`](../../../castle/dsa/string_view.md)
 * [`nmea.hpp`](nmea.md)
 
 ## Public API

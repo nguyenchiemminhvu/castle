@@ -7,8 +7,8 @@ Computes the byte-wise XOR of an input range, with an optional initial accumulat
 `#include "castle_ext/checksums/xor.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
 
 ## Public API
 | API | Description |

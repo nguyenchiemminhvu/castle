@@ -7,9 +7,9 @@ Platform-neutral CAN configuration, bus-state and timeout types shared by `basic
 `#include "castle_ext/io/can/types.hpp"`
 
 ## Dependencies
-- [`../../../chrono/duration.md`](../../../chrono/duration.md)
-- [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../core/status.md`](../../../core/status.md)
+- [`../../../chrono/duration.md`](../../../castle/chrono/duration.md)
+- [`../../../core/compiler.md`](../../../castle/core/compiler.md)
+- [`../../../core/status.md`](../../../castle/core/status.md)
 
 ## Public API
 All names live in `castle::io::can`.

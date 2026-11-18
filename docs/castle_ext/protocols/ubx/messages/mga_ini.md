@@ -10,8 +10,8 @@ Models the six UBX-MGA-INI (0x13 0x40) initial-assistance layouts sent by the ho
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/core/constants.hpp`](../../../../core/constants.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/core/constants.hpp`](../../../../castle/core/constants.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/typed_message.hpp`](detail/typed_message.md)
 - `stdint.h`

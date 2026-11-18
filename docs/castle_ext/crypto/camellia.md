@@ -7,9 +7,9 @@ Camellia is a 128-bit block cipher supporting 128-, 192-, and 256-bit keys. Cast
 `#include "castle_ext/crypto/camellia.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
-- [`../../core/status.md`](../../core/status.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
+- [`../../core/status.md`](../../castle/core/status.md)
 - [`../../../include/castle/utility/bytes.hpp`](../../../include/castle/utility/bytes.hpp)
 
 ## Public API

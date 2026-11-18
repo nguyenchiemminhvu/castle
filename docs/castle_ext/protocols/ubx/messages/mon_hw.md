@@ -10,12 +10,12 @@ Model of UBX-MON-HW (class `0x0A`, ID `0x09`), the 60-byte hardware status: PIO 
 
 ## Dependencies
 
-- [castle/core/compiler.hpp](../../../../core/compiler.md)
+- [castle/core/compiler.hpp](../../../../castle/core/compiler.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
 - [detail/fixed_message.hpp](detail/fixed_message.md)
-- [castle/dsa/array.hpp](../../../../dsa/array.md)
+- [castle/dsa/array.hpp](../../../../castle/dsa/array.md)
 - [mon_rf.hpp](mon_rf.md) (`mon_jamming_state`, `mon_antenna_status`, `mon_antenna_power`)
 
 ## Public API

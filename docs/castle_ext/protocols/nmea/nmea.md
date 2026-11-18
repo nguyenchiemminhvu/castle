@@ -7,11 +7,11 @@
 `#include "castle_ext/protocols/nmea/nmea.hpp"`
 
 ## Dependencies
-- [`core/compiler.hpp`](../../../core/compiler.md)
-- [`core/types.hpp`](../../../core/types.md)
-- [`core/status.hpp`](../../../core/status.md)
-- [`dsa/array_view.hpp`](../../../dsa/array_view.md)
-- [`dsa/string_view.hpp`](../../../dsa/string_view.md)
+- [`core/compiler.hpp`](../../../castle/core/compiler.md)
+- [`core/types.hpp`](../../../castle/core/types.md)
+- [`core/status.hpp`](../../../castle/core/status.md)
+- [`dsa/array_view.hpp`](../../../castle/dsa/array_view.md)
+- [`dsa/string_view.hpp`](../../../castle/dsa/string_view.md)
 
 ## Public API
 | API | Description |

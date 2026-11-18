@@ -10,7 +10,7 @@ Models the four UBX-MGA-GAL (0x13 0x02) Galileo assistance layouts sent by the h
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/typed_message.hpp`](detail/typed_message.md)
 - `stdint.h`

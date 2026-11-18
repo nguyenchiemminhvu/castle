@@ -10,9 +10,9 @@ Models UBX-MGA-ACK (0x13 0x60), the 8-byte output the receiver sends to acknowle
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/dsa/array.hpp`](../../../../dsa/array.md)
-- [`castle/utility/bytes.hpp`](../../../../utility/bytes.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/dsa/array.hpp`](../../../../castle/dsa/array.md)
+- [`castle/utility/bytes.hpp`](../../../../castle/utility/bytes.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/fixed_message.hpp`](detail/fixed_message.md)
 - `stdint.h`

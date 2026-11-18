@@ -10,7 +10,7 @@ Model of the periodic/polled UBX-NAV-TIMEUTC output (0x01 0x21): the UTC date an
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`detail/fixed_message.hpp`](detail/fixed_message.md) (supplies `matches()`, `decode()`, `encode()`; payloads are read/written through [`payload_reader`](../payload_reader.md) / [`payload_writer`](../payload_writer.md))
 

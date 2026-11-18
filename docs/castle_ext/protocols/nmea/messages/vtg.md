@@ -10,8 +10,8 @@ Represents an NMEA VTG course-and-speed sentence. It decodes true/magnetic cours
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
-- [`castle/dsa/string_view.hpp`](../../../../dsa/string_view.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`castle/dsa/string_view.hpp`](../../../../castle/dsa/string_view.md)
 - [`castle_ext/protocols/nmea/nmea.hpp`](../nmea.md)
 - [`castle_ext/protocols/nmea/field_cursor.hpp`](../field_cursor.md)
 

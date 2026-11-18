@@ -7,9 +7,9 @@ Provides allocation-free wrappers for common POSIX file-descriptor operations: r
 `#include "castle_ext/io/fd/control.hpp"`
 
 ## Dependencies
-- [`../../../core/config.md`](../../../core/config.md)
-- [`../../../core/compiler.md`](../../../core/compiler.md)
-- [`../../../core/status.md`](../../../core/status.md)
+- [`../../../core/config.md`](../../../castle/core/config.md)
+- [`../../../core/compiler.md`](../../../castle/core/compiler.md)
+- [`../../../core/status.md`](../../../castle/core/status.md)
 
 ## Public API
 | API | Description |

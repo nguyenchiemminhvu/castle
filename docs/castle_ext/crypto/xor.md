@@ -9,10 +9,10 @@ Repeating-key XOR cipher: each data byte is XORed with `key[offset % key_size]`.
 `#include "castle_ext/crypto/xor.hpp"`
 
 ## Dependencies
-- [`../../dsa/array.md`](../../dsa/array.md)
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
-- [`../../core/status.md`](../../core/status.md)
+- [`../../dsa/array.md`](../../castle/dsa/array.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
+- [`../../core/status.md`](../../castle/core/status.md)
 - [`../../../include/castle/utility/bytes.hpp`](../../../include/castle/utility/bytes.hpp) (`secure_zero`)
 
 ## Public API

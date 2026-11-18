@@ -7,9 +7,9 @@ Implements the RFC 4648 Base32 alphabet using caller-owned buffers. Encoding emi
 `#include "castle_ext/codecs/base32.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/types.md`](../../core/types.md)
-- [`../../core/status.md`](../../core/status.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/types.md`](../../castle/core/types.md)
+- [`../../core/status.md`](../../castle/core/status.md)
 
 ## Public API
 | API | Description |

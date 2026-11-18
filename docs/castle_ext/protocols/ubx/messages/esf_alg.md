@@ -13,8 +13,8 @@ the alignment error flags. Fixed 16-byte payload, decoded and encoded from one `
 
 ## Dependencies
 
-- [castle/core/compiler.hpp](../../../../core/compiler.md)
-- [castle/core/constants.hpp](../../../../core/constants.md)
+- [castle/core/compiler.hpp](../../../../castle/core/compiler.md)
+- [castle/core/constants.hpp](../../../../castle/core/constants.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [detail/fixed_message.hpp](detail/fixed_message.md)
 

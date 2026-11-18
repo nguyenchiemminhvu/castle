@@ -16,10 +16,10 @@ This design keeps the UBX API concise while allowing the same architecture to be
 
 ## Dependencies
 
-- [`core/compiler.hpp`](../../../core/compiler.md)
-- [`core/config.hpp`](../../../core/config.md)
-- [`core/traits.hpp`](../../../core/traits.md)
-- [`core/types.hpp`](../../../core/types.md)
+- [`core/compiler.hpp`](../../../castle/core/compiler.md)
+- [`core/config.hpp`](../../../castle/core/config.md)
+- [`core/traits.hpp`](../../../castle/core/traits.md)
+- [`core/types.hpp`](../../../castle/core/types.md)
 - [`parsers/decoder_registry.hpp`](../decoder_registry.md)
 - [`protocols/ubx/ubx.hpp`](../../protocols/ubx/ubx.md)
 

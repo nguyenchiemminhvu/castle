@@ -13,8 +13,8 @@ A value's wire width is never stored with the value; it always follows the key's
 `#include "castle_ext/protocols/ubx/ubx_config.hpp"`
 
 ## Dependencies
-- [`core/compiler.hpp`](../../../core/compiler.md)
-- [`core/types.hpp`](../../../core/types.md)
+- [`core/compiler.hpp`](../../../castle/core/compiler.md)
+- [`core/types.hpp`](../../../castle/core/types.md)
 - [`ubx.hpp`](ubx.md)
 
 ## Public API

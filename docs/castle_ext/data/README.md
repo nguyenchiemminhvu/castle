@@ -192,7 +192,7 @@ rectangle "Data pool: one copy, bit-set notifications" {
 | [`update_inbox.hpp`](update_inbox.md) | `update_inbox<Ts...>` | Thread-safe `observer<update_set>` that accumulates pending types for one consumer thread and wakes it. |
 | [`update_dispatcher.hpp`](update_dispatcher.md) | `update_dispatcher<Ts...>` | `observer<update_set>` that calls one bound callback per changed type, directly in the publisher's context. No pending state, no coalescing. |
 
-Propagation uses the core [`castle::patterns::observer` / `observable`](../../patterns/observer.md); the module adds no second publish/subscribe mechanism.
+Propagation uses the core [`castle::patterns::observer` / `observable`](../../castle/patterns/observer.md); the module adds no second publish/subscribe mechanism.
 
 Properties shared by all of them: no heap, no exceptions, no RTTI, no STL. The type set is fixed at compile time, so a slot is selected by the compiler rather than looked up at runtime, and using an unknown type does not compile.
 

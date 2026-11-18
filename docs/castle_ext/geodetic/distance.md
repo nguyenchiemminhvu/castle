@@ -7,14 +7,14 @@ Great-circle and ellipsoidal distance/bearing calculations over `geo_point<T>`. 
 `#include "castle_ext/geodetic/distance.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/constants.md`](../../core/constants.md)
-- [`../../core/traits.md`](../../core/traits.md)
-- [`../../core/types.md`](../../core/types.md)
-- [`../../core/status.md`](../../core/status.md)
-- [`../../math/abs.md`](../../math/abs.md)
-- [`../../math/sqrt_real.md`](../../math/sqrt_real.md)
-- [`../../math/linalg/trigonometry.md`](../../math/linalg/trigonometry.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/constants.md`](../../castle/core/constants.md)
+- [`../../core/traits.md`](../../castle/core/traits.md)
+- [`../../core/types.md`](../../castle/core/types.md)
+- [`../../core/status.md`](../../castle/core/status.md)
+- [`../../math/abs.md`](../../castle/math/abs.md)
+- [`../../math/sqrt_real.md`](../../castle/math/sqrt_real.md)
+- [`../../math/linalg/trigonometry.md`](../../castle/math/linalg/trigonometry.md)
 - [`coord.md`](coord.md)
 - [`geo_utils.md`](geo_utils.md)
 - [`datum.md`](datum.md)

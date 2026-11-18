@@ -7,12 +7,12 @@ Geographic coordinate representation and angle-format conversions. Use it for a 
 `#include "castle_ext/geodetic/coord.hpp"`
 
 ## Dependencies
-- [`../../core/compiler.md`](../../core/compiler.md)
-- [`../../core/error_handler.md`](../../core/error_handler.md)
-- [`../../core/traits.md`](../../core/traits.md)
-- [`../../core/types.md`](../../core/types.md)
-- [`../../math/math.md`](../../math/math.md)
-- [`../../utility/string_builder.md`](../../utility/string_builder.md)
+- [`../../core/compiler.md`](../../castle/core/compiler.md)
+- [`../../core/error_handler.md`](../../castle/core/error_handler.md)
+- [`../../core/traits.md`](../../castle/core/traits.md)
+- [`../../core/types.md`](../../castle/core/types.md)
+- [`../../math/math.md`](../../castle/math/math.md)
+- [`../../utility/string_builder.md`](../../castle/utility/string_builder.md)
 - [`geo_utils.md`](geo_utils.md)
 
 ## Public API

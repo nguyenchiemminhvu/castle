@@ -10,14 +10,14 @@ Model of UBX-MON-HW3 (class `0x0A`, ID `0x37`), the I/O pin status: a 22-byte he
 
 ## Dependencies
 
-- [castle/core/compiler.hpp](../../../../core/compiler.md)
-- [castle/core/types.hpp](../../../../core/types.md)
-- [castle/dsa/vector.hpp](../../../../dsa/vector.md)
+- [castle/core/compiler.hpp](../../../../castle/core/compiler.md)
+- [castle/core/types.hpp](../../../../castle/core/types.md)
+- [castle/dsa/vector.hpp](../../../../castle/dsa/vector.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
 - [detail/repeated_group.hpp](detail/repeated_group.md)
-- [castle/dsa/string.hpp](../../../../dsa/string.md)
+- [castle/dsa/string.hpp](../../../../castle/dsa/string.md)
 
 ## Public API
 

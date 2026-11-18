@@ -12,7 +12,7 @@ The payload is identical to UBX-NAV-TIMEGPS, so this header is a thin alias of `
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../core/compiler.md)
+- [`castle/core/compiler.hpp`](../../../../castle/core/compiler.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../ubx.md)
 - [`castle_ext/protocols/ubx/messages/nav_timegps.hpp`](nav_timegps.md) (`basic_nav_timegps`, built on [`detail/fixed_message.hpp`](detail/fixed_message.md))
 

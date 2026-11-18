@@ -19,12 +19,12 @@ This is an **encode-only** model: it produces the message payload for `encode_me
 
 ## Dependencies
 
-- [`core/compiler.hpp`](../../../../core/compiler.md)
-- [`core/types.hpp`](../../../../core/types.md)
-- [`core/status.hpp`](../../../../core/status.md)
+- [`core/compiler.hpp`](../../../../castle/core/compiler.md)
+- [`core/types.hpp`](../../../../castle/core/types.md)
+- [`core/status.hpp`](../../../../castle/core/status.md)
 - [`castle_ext/protocols/rtcm/bit_writer.hpp`](../bit_writer.md)
 - [`castle_ext/protocols/rtcm/rtcm.hpp`](../rtcm.md)
-- [`math/round.hpp`](../../../../math/round.md)
+- [`math/round.hpp`](../../../../castle/math/round.md)
 
 ## Public API
 

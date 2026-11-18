@@ -10,8 +10,8 @@ Some UBX class/ID pairs carry several payload layouts and tell them apart by the
 
 ## Dependencies
 
-- [`castle/core/compiler.hpp`](../../../../../core/compiler.md)
-- [`castle/core/types.hpp`](../../../../../core/types.md)
+- [`castle/core/compiler.hpp`](../../../../../castle/core/compiler.md)
+- [`castle/core/types.hpp`](../../../../../castle/core/types.md)
 - [`castle_ext/protocols/ubx/ubx.hpp`](../../ubx.md)
 - [`detail/fixed_message.hpp`](fixed_message.md)
 

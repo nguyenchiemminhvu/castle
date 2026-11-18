@@ -16,12 +16,12 @@ It uses the same sticky-error model as the UBX [`payload_writer`](../ubx/payload
 
 ## Dependencies
 
-* [`core/compiler.hpp`](../../../core/compiler.md)
-* [`core/traits.hpp`](../../../core/traits.md)
-* [`core/types.hpp`](../../../core/types.md)
-* [`dsa/array_view.hpp`](../../../dsa/array_view.md)
-* [`dsa/string.hpp`](../../../dsa/string.md)
-* [`core/status.hpp`](../../../core/status.md)
+* [`core/compiler.hpp`](../../../castle/core/compiler.md)
+* [`core/traits.hpp`](../../../castle/core/traits.md)
+* [`core/types.hpp`](../../../castle/core/types.md)
+* [`dsa/array_view.hpp`](../../../castle/dsa/array_view.md)
+* [`dsa/string.hpp`](../../../castle/dsa/string.md)
+* [`core/status.hpp`](../../../castle/core/status.md)
 * [`rtcm.hpp`](rtcm.md)
 
 ## Public API

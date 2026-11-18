@@ -10,10 +10,10 @@ Model of UBX-MON-SPAN (0x0a 0x31), a basic spectrum analyzer output (periodic/po
 
 ## Dependencies
 
-- [castle/core/compiler.hpp](../../../../core/compiler.md)
-- [castle/core/types.hpp](../../../../core/types.md)
-- [castle/dsa/array.hpp](../../../../dsa/array.md)
-- [castle/dsa/vector.hpp](../../../../dsa/vector.md)
+- [castle/core/compiler.hpp](../../../../castle/core/compiler.md)
+- [castle/core/types.hpp](../../../../castle/core/types.md)
+- [castle/dsa/array.hpp](../../../../castle/dsa/array.md)
+- [castle/dsa/vector.hpp](../../../../castle/dsa/vector.md)
 - [castle_ext/protocols/ubx/ubx.hpp](../ubx.md)
 - [castle_ext/protocols/ubx/payload_reader.hpp](../payload_reader.md)
 - [castle_ext/protocols/ubx/payload_writer.hpp](../payload_writer.md)
