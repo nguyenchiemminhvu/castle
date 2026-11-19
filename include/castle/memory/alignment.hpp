@@ -17,8 +17,8 @@
  * bool aligned = castle::memory::is_aligned<uint32_t>(pointer);
  * @endcode
  */
-#ifndef CASTLE_MEMORY_MEMORY_HPP
-#define CASTLE_MEMORY_MEMORY_HPP
+#ifndef CASTLE_MEMORY_ALIGNMENT_HPP
+#define CASTLE_MEMORY_ALIGNMENT_HPP
 
 #include "castle/core/compiler.hpp"
 #include "castle/core/traits.hpp"
@@ -307,4 +307,4 @@ using aligned_storage_as_t = memory::aligned_storage_as_t<Length, T>;
 
 }
 
-#endif // CASTLE_MEMORY_MEMORY_HPP
+#endif // CASTLE_MEMORY_ALIGNMENT_HPP
