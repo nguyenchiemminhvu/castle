@@ -48,6 +48,68 @@ static size_type hash_integral(CASTLE_CONST T& value) CASTLE_NOEXCEPT
     return static_cast<size_type>(hash_mix64(static_cast<uint64_t>(value)));
 }
 
+/**
+ * @brief Enhanced double hashing index sequence over `[0, Range)` (Dillinger and Manolios).
+ * @tparam Range Number of slots. Must be in `1 .. size_type(-1) / 2`.
+ * @note Built from one hash value `h1`: `x = h1 mod Range`, `y = hash_mix64(h1) mod Range`, then
+ * `x += y; y += i` for each next index. Both terms stay below `Range`, so each step needs one
+ * compare-and-subtract and no division. A power-of-two `Range` turns both initial reductions into
+ * masks. Shared by `dsa::bloom_filter` (bit positions) and `dsa::count_min_sketch` (row columns).
+ * @warning Call `advance()` at most `Range` times; later steps could leave `[0, Range)`.
+ */
+template <size_type Range>
+class double_hash_probe
+{
+    static_assert(Range > 0U, "detail::double_hash_probe requires a positive range");
+    static_assert(Range <= static_cast<size_type>(-1) / 2U, "detail::double_hash_probe range is too large");
+
+public:
+    explicit double_hash_probe(size_type hash_value) CASTLE_NOEXCEPT
+        : index_(reduce(hash_value))
+        , step_(reduce(static_cast<size_type>(hash_mix64(static_cast<uint64_t>(hash_value)))))
+        , round_(0U)
+    {
+    }
+
+    /** @brief Returns the current index, `0 .. Range - 1`. */
+    size_type index() CASTLE_CONST CASTLE_NOEXCEPT
+    {
+        return index_;
+    }
+
+    /** @brief Moves to the next index of the sequence. */
+    void advance() CASTLE_NOEXCEPT
+    {
+        ++round_;
+        index_ = add_mod(index_, step_);
+        step_ = add_mod(step_, round_);
+    }
+
+private:
+    static size_type reduce(size_type value) CASTLE_NOEXCEPT
+    {
+        CASTLE_IF_CONSTEXPR (meta::is_power_of_two<Range>::value)
+        {
+            return value & (Range - 1U);
+        }
+        else
+        {
+            return value % Range;
+        }
+    }
+
+    /** @brief Returns `(lhs + rhs) mod Range` for `lhs < Range` and `rhs <= Range`. */
+    static size_type add_mod(size_type lhs, size_type rhs) CASTLE_NOEXCEPT
+    {
+        CASTLE_CONST size_type sum = lhs + rhs;
+        return (sum >= Range) ? (sum - Range) : sum;
+    }
+
+    size_type index_;
+    size_type step_;
+    size_type round_;
+};
+
 } // namespace detail
 
 /**

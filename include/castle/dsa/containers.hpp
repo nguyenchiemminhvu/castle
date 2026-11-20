@@ -42,5 +42,11 @@
 #include "castle/dsa/graph.hpp"
 #include "castle/dsa/segment_tree.hpp"
 #include "castle/dsa/trie.hpp"
+#include "castle/dsa/bloom_filter.hpp"
+#include "castle/dsa/count_min_sketch.hpp"
+#include "castle/dsa/top_k.hpp"
+#include "castle/dsa/cuckoo_filter.hpp"
+#include "castle/dsa/hyper_log_log.hpp"
+#include "castle/dsa/t_digest.hpp"
 
 #endif
