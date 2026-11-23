@@ -25,10 +25,18 @@ TEST(HttpTypes, AsciiHelpersAndStatusMapping)
     EXPECT_EQ(to_status(error_code::ok), castle::status::ok);
     EXPECT_EQ(to_status(error_code::header_limit), castle::status::out_of_range);
     EXPECT_EQ(to_status(error_code::connection_closed), castle::status::data_loss);
-    EXPECT_EQ(to_status(error_code::request_in_progress), castle::status::invalid_config);
-    EXPECT_EQ(to_status(error_code::chunked_not_supported), castle::status::invalid_config);
-    EXPECT_EQ(to_status(error_code::protocol_error), castle::status::invalid_argument);
+    EXPECT_EQ(to_status(error_code::request_in_progress), castle::status::invalid_state);
+    EXPECT_EQ(to_status(error_code::chunked_not_supported), castle::status::unsupported);
+    EXPECT_EQ(to_status(error_code::protocol_error), castle::status::protocol_error);
     EXPECT_EQ(to_status(error_code::stream_reset), castle::status::data_loss);
+    EXPECT_EQ(to_status(error_code::stream_limit), castle::status::full);
+    EXPECT_EQ(to_status(error_code::output_full), castle::status::full);
+    EXPECT_EQ(to_status(error_code::goaway_received), castle::status::unavailable);
+    EXPECT_EQ(to_status(error_code::invalid_frame), castle::status::protocol_error);
+    EXPECT_EQ(to_status(error_code::compression_error), castle::status::protocol_error);
+    EXPECT_EQ(to_status(error_code::flow_control_error), castle::status::protocol_error);
+    EXPECT_EQ(to_status(error_code::malformed_message), castle::status::parse_error);
+    EXPECT_EQ(to_status(error_code::invalid_chunk), castle::status::parse_error);
 }
 
 TEST(HttpTypes, SharedValidationHelpers)

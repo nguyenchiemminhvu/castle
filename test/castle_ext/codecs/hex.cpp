@@ -17,8 +17,8 @@ TEST(CastleExtHex, EncodeDecodeCaseAndCapacity)
     EXPECT_EQ(castle::codecs::hex_decode("0001a5Ff", 8U, decoded, sizeof(decoded), decoded_size), castle::status::ok);
     expect_bytes(decoded, decoded_size, input, sizeof(input));
 
-    EXPECT_EQ(castle::codecs::hex_decode("00G1", 4U, decoded, sizeof(decoded), decoded_size), castle::status::invalid_argument);
-    EXPECT_EQ(castle::codecs::hex_decode("0", 1U, decoded, sizeof(decoded), decoded_size), castle::status::invalid_argument);
+    EXPECT_EQ(castle::codecs::hex_decode("00G1", 4U, decoded, sizeof(decoded), decoded_size), castle::status::parse_error);
+    EXPECT_EQ(castle::codecs::hex_decode("0", 1U, decoded, sizeof(decoded), decoded_size), castle::status::parse_error);
     EXPECT_EQ(castle::codecs::hex_decode("0011", 4U, decoded, 1U, decoded_size), castle::status::full);
     EXPECT_EQ(decoded_size, 0U);
     EXPECT_EQ(castle::codecs::hex_encode(nullptr, 1U, encoded, sizeof(encoded), encoded_size), castle::status::invalid_argument);

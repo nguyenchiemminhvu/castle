@@ -29,11 +29,11 @@ int main()
     // /dev/null opens but rejects I2C address-selection ioctls; no bus transaction occurs.
     const i2c_config invalid_device("/dev/null", 0x42U);
     const castle::status opened = bus.open(invalid_device);
-    assert(opened == castle::status::system_call_error || opened == castle::status::not_configured);
+    assert(opened == castle::status::system_call_error || opened == castle::status::unsupported);
     assert(!bus.is_open());
 #else
     assert(!i2c_available);
-    assert(bus.open(config) == castle::status::not_configured);
+    assert(bus.open(config) == castle::status::unsupported);
 #endif
     return 0;
 }

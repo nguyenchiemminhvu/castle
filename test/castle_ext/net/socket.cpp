@@ -22,7 +22,7 @@ using castle::size_type;
 castle::status complete_connect(tcp_socket& client, endpoint const& remote)
 {
     castle::status result = client.connect(remote);
-    if (result == castle::status::time_out)
+    if (result == castle::status::in_progress)
     {
         result = client.finish_connect(1000);
     }
@@ -36,7 +36,7 @@ TEST(NetSocket, CreatesTypedSocketsAndRejectsDuplicateOpen)
     EXPECT_FALSE(tcp.is_open());
     EXPECT_FALSE(udp.is_open());
     EXPECT_EQ(tcp.open(), castle::status::ok);
-    EXPECT_EQ(tcp.open(), castle::status::invalid_config);
+    EXPECT_EQ(tcp.open(), castle::status::invalid_state);
     EXPECT_TRUE(tcp.is_open());
     EXPECT_TRUE(tcp.is_nonblocking());
     EXPECT_EQ(tcp.close(), castle::status::ok);
@@ -75,15 +75,15 @@ TEST(NetSocket, RejectsInvalidBuffersAndProtocolSpecificOperations)
     endpoint remote;
     EXPECT_EQ(tcp.send_some(nullptr, 1U, transferred), castle::status::invalid_argument);
     EXPECT_EQ(tcp.receive_some(nullptr, 1U, transferred), castle::status::invalid_argument);
-    EXPECT_EQ(tcp.send_to("x", 1U, endpoint::loopback_ipv4(1U), transferred), castle::status::invalid_config);
+    EXPECT_EQ(tcp.send_to("x", 1U, endpoint::loopback_ipv4(1U), transferred), castle::status::unsupported);
     EXPECT_EQ(tcp.listen(1), castle::status::ok); // Empty TCP sockets may listen before bind; OS accepts or rejects.
     EXPECT_EQ(tcp.set_no_delay(), castle::status::ok);
     EXPECT_EQ(tcp.set_keep_alive(), castle::status::ok);
-    EXPECT_EQ(udp.set_no_delay(), castle::status::invalid_config);
-    EXPECT_EQ(udp.set_keep_alive(), castle::status::invalid_config);
-    EXPECT_EQ(udp.listen(), castle::status::invalid_config);
-    EXPECT_EQ(udp.finish_connect(0), castle::status::invalid_config);
-    EXPECT_EQ(udp.accept(tcp, remote), castle::status::invalid_config);
+    EXPECT_EQ(udp.set_no_delay(), castle::status::unsupported);
+    EXPECT_EQ(udp.set_keep_alive(), castle::status::unsupported);
+    EXPECT_EQ(udp.listen(), castle::status::unsupported);
+    EXPECT_EQ(udp.finish_connect(0), castle::status::unsupported);
+    EXPECT_EQ(udp.accept(tcp, remote), castle::status::unsupported);
     EXPECT_EQ(tcp.close(), castle::status::ok);
     EXPECT_EQ(udp.close(), castle::status::ok);
 }
@@ -129,7 +129,7 @@ TEST(NetSocket, TcpListenConnectAcceptAndExchange)
     EXPECT_EQ(bytes, sizeof(request));
     EXPECT_STREQ(buffer, request);
 
-    EXPECT_EQ(listener.accept(accepted, peer), castle::status::invalid_config); // output is already open
+    EXPECT_EQ(listener.accept(accepted, peer), castle::status::invalid_state); // output is already open
     EXPECT_EQ(client.set_nonblocking(false), castle::status::ok);
     EXPECT_FALSE(client.is_nonblocking());
     EXPECT_EQ(client.set_nonblocking(true), castle::status::ok);
@@ -378,7 +378,7 @@ TEST(NetSocket, NativeEndpointConversionRoundTripsAddressPortAndScope)
     endpoint restored;
     ASSERT_EQ(detail::from_native_endpoint(storage, length, restored), castle::status::ok);
     EXPECT_EQ(restored, original);
-    EXPECT_EQ(detail::from_native_endpoint(storage, length - 1, restored), castle::status::invalid_argument);
+    EXPECT_EQ(detail::from_native_endpoint(storage, length - 1, restored), castle::status::parse_error);
 
     const endpoint v4 = endpoint::ipv4(192U, 168U, 7U, 9U, 0x1234U);
     ASSERT_EQ(detail::to_native_endpoint(v4, storage, length), castle::status::ok);
@@ -449,7 +449,7 @@ TEST(NetSocket, ConnectToClosedPortReportsRefusal)
     ASSERT_EQ(client.open(), castle::status::ok);
     int system_error = 0;
     castle::status result = client.connect(refused, &system_error);
-    if (result == castle::status::time_out)
+    if (result == castle::status::in_progress)
     {
         EXPECT_TRUE(system_error == EINPROGRESS || system_error == EALREADY);
         result = client.finish_connect(1000, &system_error);
@@ -537,11 +537,11 @@ TEST(NetSocket, WaitReadableReportsTimeoutReadinessAndClosedSocket)
 
 #else
 
-TEST(NetSocket, UnsupportedTargetReportsNotConfigured)
+TEST(NetSocket, UnsupportedTargetReportsUnsupported)
 {
     tcp_socket socket;
     EXPECT_FALSE(sockets_available);
-    EXPECT_EQ(socket.open(), castle::status::not_configured);
+    EXPECT_EQ(socket.open(), castle::status::unsupported);
 }
 
 #endif

@@ -14,7 +14,7 @@ int main()
     CASTLE_SAMPLE_CHECK(converged.code == castle::status::ok);
 
     // Budget exhausted: best estimate is still present.
-    const castle::math::numeric_result<float> exhausted = {2.5F, 0.1F, 12U, castle::status::out_of_range};
+    const castle::math::numeric_result<float> exhausted = {2.5F, 0.1F, 12U, castle::status::not_converged};
     CASTLE_SAMPLE_CHECK(!exhausted.ok());
     CASTLE_SAMPLE_CHECK(castle::math::near_equal(exhausted.value, 2.5F, 1e-6F));
 

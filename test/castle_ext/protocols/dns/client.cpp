@@ -445,7 +445,7 @@ TEST(DnsClient, RejectsInvalidNameAndConcurrentStart)
     ASSERT_EQ(resolver.start_resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "example.com",
                                      castle::protocols::dns::record_type::a, 0U), status::ok);
     EXPECT_EQ(resolver.start_resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "other.com",
-                                     castle::protocols::dns::record_type::a, 1U), status::invalid_config);
+                                     castle::protocols::dns::record_type::a, 1U), status::invalid_state);
 }
 
 
@@ -462,9 +462,9 @@ TEST(DnsClient, CallbackCanClearOrReplaceItselfWithoutDestroyingRunningCallable)
     {
         ++first_calls;
         EXPECT_TRUE(resolver.busy());
-        EXPECT_EQ(resolver.poll(999U), status::invalid_config);
+        EXPECT_EQ(resolver.poll(999U), status::invalid_state);
         EXPECT_EQ(resolver.start_resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "reentrant.test",
-                                         castle::protocols::dns::record_type::a, 999U), status::invalid_config);
+                                         castle::protocols::dns::record_type::a, 999U), status::invalid_state);
         EXPECT_EQ(resolver.set_callback([&](status, test_client::response_type const&) { ++replacement_calls; }), status::ok);
     }), status::ok);
 
@@ -510,8 +510,18 @@ TEST(DnsClient, MapsDnsResponseCodesToCastleStatuses)
 
     state.udp_rcode = 5U; // REFUSED
     EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "refused.example",
-                               castle::protocols::dns::record_type::a, answer), status::unknown_error);
+                               castle::protocols::dns::record_type::a, answer), status::permission_denied);
     EXPECT_EQ(answer.rcode, castle::protocols::dns::response_code::refused);
+
+    state.udp_rcode = 1U; // FORMERR
+    EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "format.example",
+                               castle::protocols::dns::record_type::a, answer), status::protocol_error);
+    state.udp_rcode = 2U; // SERVFAIL
+    EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "server.example",
+                               castle::protocols::dns::record_type::a, answer), status::unavailable);
+    state.udp_rcode = 4U; // NOTIMP
+    EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "unsupported.example",
+                               castle::protocols::dns::record_type::a, answer), status::unsupported);
 }
 
 namespace
@@ -554,7 +564,7 @@ TEST(DnsClient, ResolveRejectsWhileAsyncRequestIsInFlight)
     castle::protocols::dns::response<4U> answer;
     ASSERT_EQ(resolver.start_resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "example.com", record_type::a, 0U), status::ok);
     EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "example.com", record_type::a, answer),
-              status::invalid_config);
+              status::invalid_state);
     EXPECT_EQ(resolver.poll(1U), status::ok);
 }
 
@@ -704,7 +714,7 @@ TEST(DnsClient, BlockingResolveRejectsMismatchedOrCorruptResponses)
         fake_tcp tcp(state);
         test_client resolver(udp, tcp);
         EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "example.com", record_type::a, answer),
-                  status::invalid_argument);
+                  status::protocol_error);
     }
     {
         fake_dns_state state;
@@ -714,7 +724,7 @@ TEST(DnsClient, BlockingResolveRejectsMismatchedOrCorruptResponses)
         fake_tcp tcp(state);
         test_client resolver(udp, tcp);
         EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "example.com", record_type::a, answer),
-                  status::invalid_argument);
+                  status::protocol_error);
     }
     {
         fake_dns_state state;
@@ -724,7 +734,7 @@ TEST(DnsClient, BlockingResolveRejectsMismatchedOrCorruptResponses)
         fake_tcp tcp(state);
         test_client resolver(udp, tcp);
         EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "example.com", record_type::a, answer),
-                  status::invalid_argument);
+                  status::protocol_error);
     }
     {
         fake_dns_state state;
@@ -734,7 +744,7 @@ TEST(DnsClient, BlockingResolveRejectsMismatchedOrCorruptResponses)
         fake_tcp tcp(state);
         test_client resolver(udp, tcp);
         EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "example.com", record_type::a, answer),
-                  status::invalid_argument);
+                  status::protocol_error);
     }
     {
         fake_dns_state state;
@@ -744,7 +754,7 @@ TEST(DnsClient, BlockingResolveRejectsMismatchedOrCorruptResponses)
         fake_tcp tcp(state);
         test_client resolver(udp, tcp);
         EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "example.com", record_type::a, answer),
-                  status::invalid_argument);
+                  status::protocol_error);
     }
 }
 
@@ -780,7 +790,7 @@ TEST(DnsClient, BlockingResolveReportsTruncatedAndFormatErrorResponses)
         fake_tcp tcp(state);
         test_client resolver(udp, tcp);
         EXPECT_EQ(resolver.resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "example.com", record_type::a, answer),
-                  status::invalid_argument);
+                  status::protocol_error);
     }
 }
 
@@ -1340,7 +1350,7 @@ TEST(DnsClient, AsyncTcpRejectsFramingTruncationAndCorruptReplies)
         test_client resolver(udp, tcp);
         ASSERT_EQ(resolver.start_resolve(endpoint::ipv4(1U, 1U, 1U, 1U, 53U), "example.com", record_type::a, 0U),
                   status::ok);
-        EXPECT_EQ(resolver.poll(1U), status::invalid_argument);
+        EXPECT_EQ(resolver.poll(1U), status::protocol_error);
         EXPECT_FALSE(resolver.busy());
     }
 }

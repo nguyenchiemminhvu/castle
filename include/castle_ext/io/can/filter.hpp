@@ -92,15 +92,17 @@ struct filter
 
 /**
  * @brief Checks that a filter's identifier and mask fit its format.
- * @return `ok`, or `invalid_argument` for an unknown format or an identifier/mask wider than the format allows.
+ * @return `ok`, `invalid_argument` for an unknown format, or `out_of_range` when its identifier/mask is too wide.
  */
 CASTLE_NODISCARD CASTLE_INLINE castle::status validate_filter(filter CASTLE_CONST& value) CASTLE_NOEXCEPT
 {
-    if ((value.format != id_format::standard && value.format != id_format::extended)
-        || value.id > max_id(value.format)
-        || value.mask > max_id(value.format))
+    if (value.format != id_format::standard && value.format != id_format::extended)
     {
         return castle::status::invalid_argument;
+    }
+    if (value.id > max_id(value.format) || value.mask > max_id(value.format))
+    {
+        return castle::status::out_of_range;
     }
     return castle::status::ok;
 }

@@ -25,7 +25,7 @@ Provides allocation-free wrappers for common POSIX file-descriptor operations: r
 | `is_valid_fd(fd)` | Returns whether `F_GETFD` succeeds for the descriptor. |
 | `close_fd(fd, system_error)` | Performs exactly one `close()` call. |
 
-All operations return `castle::status`. POSIX system-call failures return `system_call_error`; an optional `system_error` output receives `errno`. An invalid negative descriptor returns `invalid_argument`. When POSIX support is disabled, operations return `not_configured` (after validating negative descriptors).
+All operations return `castle::status`. POSIX system-call failures return `system_call_error`; an optional `system_error` output receives `errno`. An invalid negative descriptor returns `invalid_argument`. When POSIX support is disabled, operations return `unsupported` (after validating negative descriptors).
 
 ## Usage Example
 ```cpp

@@ -234,7 +234,7 @@ TEST(SlidingMomentsTest, ClearEmptiesEverything)
     double out = 0.0;
     EXPECT_EQ(sliding.mean(out), status::ok);
     EXPECT_EQ(out, 10.0);
-    EXPECT_EQ(sliding.sample_variance(out), status::empty);
+    EXPECT_EQ(sliding.sample_variance(out), status::insufficient_data);
 }
 
 TEST(SlidingMomentsTest, IntegralSamples)
@@ -288,7 +288,7 @@ TEST(SlidingMomentsTest, CapacityOne)
     EXPECT_EQ(out, 9.0);
     EXPECT_EQ(sliding.population_variance(out), status::ok);
     EXPECT_EQ(out, 0.0);
-    EXPECT_EQ(sliding.sample_variance(out), status::empty);
+    EXPECT_EQ(sliding.sample_variance(out), status::insufficient_data);
     EXPECT_EQ(sliding.minimum(out), status::ok);
     EXPECT_EQ(out, 9.0);
     EXPECT_EQ(sliding.range(out), status::ok);

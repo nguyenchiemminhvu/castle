@@ -19,7 +19,7 @@
  * - `endpoint_type` is the interface name (`"can0"`, `"vcan0"`); `"any"` binds to every CAN
  *   interface for receiving (sending then fails because the interface is unspecified).
  * - `can_mode::loopback` enables `CAN_RAW_RECV_OWN_MSGS`; `can_mode::listen_only` is an
- *   interface property (`ip link ... listen-only on`) and is rejected with `invalid_config`.
+ *   interface property (`ip link ... listen-only on`) and is rejected with `unsupported`.
  * - Filters are held in a fixed table and applied with `CAN_RAW_FILTER`. A freshly opened
  *   socket has an empty list and therefore receives nothing until a filter is added.
  * - `send()` returns `full` when the socket buffer (`EAGAIN`) or the interface queue (`ENOBUFS`)
@@ -29,8 +29,8 @@
  *   of the last `receive()` call.
  *
  * One thread may send while another receives; concurrent calls of the same kind and filter
- * changes during I/O need external synchronization. On other targets every operation returns
- * `status::not_configured`.
+ * changes during I/O need external synchronization. On other targets `open()` and every operation on
+ * an adopted descriptor return `status::unsupported`; a closed backend still reports `not_configured`.
  */
 #ifndef CASTLE_EXT_IO_CAN_BACKENDS_SOCKET_CAN_HPP
 #define CASTLE_EXT_IO_CAN_BACKENDS_SOCKET_CAN_HPP
@@ -219,9 +219,9 @@ public:
 
     /**
      * @brief Creates the socket, binds it to the interface and starts with an empty filter list.
-     * @return `ok`; `invalid_argument` for a null, empty or over-long name; `invalid_config` if already
-     *         open or for `listen_only`; `system_call_error` (errno in `system_error`, e.g. `ENODEV` for an
-     *         unknown interface); `not_configured` when SocketCAN is unavailable.
+     * @return `ok`; `invalid_argument` for a null or empty name; `out_of_range` for an over-long name;
+     *         `invalid_state` if already open; `unsupported` for `listen_only` or when SocketCAN is
+     *         unavailable; `system_call_error` (errno in `system_error`, e.g. `ENODEV` for an unknown interface).
      */
     castle::status open(endpoint_type endpoint, can_config CASTLE_CONST& config, int* system_error) CASTLE_NOEXCEPT
     {
@@ -233,11 +233,15 @@ public:
 #if CASTLE_USING_IO_CAN_VIA_SOCKET_CAN
         if (strnlen(endpoint, IFNAMSIZ) >= static_cast<size_t>(IFNAMSIZ))
         {
-            return castle::status::invalid_argument;
+            return castle::status::out_of_range;
         }
-        if (descriptor_.is_open() || config.mode == can_mode::listen_only)
+        if (descriptor_.is_open())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
+        }
+        if (config.mode == can_mode::listen_only)
+        {
+            return castle::status::unsupported;
         }
 
         CASTLE_CONST int raw_socket = ::socket(PF_CAN, SOCK_RAW, CAN_RAW);
@@ -277,14 +281,14 @@ public:
         return castle::status::ok;
 #else
         (void)config;
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
     /**
      * @brief Takes ownership of an already created and bound CAN_RAW socket.
      * @param descriptor_value Socket descriptor; ownership transfers to the backend even on failure.
-     * @return `ok`, `invalid_argument` for a negative descriptor, `invalid_config` if already open,
+     * @return `ok`, `invalid_argument` for a negative descriptor, `invalid_state` if already open,
      *         or the `fcntl()` failure. Filters and options set by the caller stay untouched.
      * @note The adopted socket starts with an empty tracked filter table; options such as filters
      *       installed earlier on the descriptor itself remain in force.
@@ -299,7 +303,7 @@ public:
         }
         if (descriptor_.is_open())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
 
         CASTLE_CONST castle::status result = prepare_descriptor(next, system_error);
@@ -354,7 +358,7 @@ public:
 #else
         (void)value;
         (void)timeout;
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -414,7 +418,7 @@ public:
 #else
         (void)out;
         (void)timeout;
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -613,7 +617,7 @@ private:
 
 #else
 
-    castle::status apply_filters(int*) CASTLE_NOEXCEPT { return castle::status::not_configured; }
+    castle::status apply_filters(int*) CASTLE_NOEXCEPT { return castle::status::unsupported; }
 
 #endif // CASTLE_USING_IO_CAN_VIA_SOCKET_CAN
 

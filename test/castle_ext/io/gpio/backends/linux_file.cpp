@@ -23,7 +23,7 @@ TEST(GpioLinuxFileBackend, LogicalRawAndActiveLowOperations)
 
     const linux_file::pin_handle handle(path, true);
     level value = level::low;
-    EXPECT_EQ(linux_file::backend::configure(handle, pin_config()), castle::status::not_configured);
+    EXPECT_EQ(linux_file::backend::configure(handle, pin_config()), castle::status::unsupported);
     EXPECT_EQ(linux_file::backend::read(handle, value), castle::status::ok);
     EXPECT_EQ(value, level::high);
     EXPECT_EQ(linux_file::backend::write(handle, level::low), castle::status::ok);
@@ -48,6 +48,22 @@ TEST(GpioLinuxFileBackend, InvalidAndUnavailablePaths)
     const linux_file::pin_handle missing("/castle/no/such/gpio-value", false);
     EXPECT_EQ(linux_file::backend::read(missing, value), castle::status::system_call_error);
     EXPECT_EQ(linux_file::backend::write(missing, level::high), castle::status::system_call_error);
+}
+
+TEST(GpioLinuxFileBackend, MalformedValueReportsParseError)
+{
+    using namespace castle::io::gpio;
+    const char* path = "/tmp/castle_gpio_value_backend_malformed";
+    const int descriptor = ::open(path, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    ASSERT_GE(descriptor, 0);
+    ASSERT_EQ(::write(descriptor, "2\n", 2U), 2);
+    ASSERT_EQ(::close(descriptor), 0);
+
+    const linux_file::pin_handle handle(path, false);
+    level value = level::low;
+    EXPECT_EQ(linux_file::backend::read(handle, value), castle::status::parse_error);
+    EXPECT_EQ(value, level::low);
+    EXPECT_EQ(::unlink(path), 0);
 }
 
 #else

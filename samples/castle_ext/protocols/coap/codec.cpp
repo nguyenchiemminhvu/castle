@@ -19,5 +19,8 @@ int main()
     CASTLE_SAMPLE_CHECK(parsed.message_id == request.message_id);
     CASTLE_SAMPLE_CHECK(parsed.token_length == 2U && parsed.token[1U] == 0x55U);
     CASTLE_SAMPLE_CHECK(uri_path_matches(parsed, "well-known/core"));
+
+    const uint8_t short_header[] = {0x40U, 0x01U, 0x00U};
+    CASTLE_SAMPLE_CHECK(decode_message(short_header, sizeof(short_header), parsed) == castle::status::parse_error);
     return 0;
 }

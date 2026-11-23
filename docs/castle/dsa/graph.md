@@ -90,10 +90,10 @@ Edges are stored as adjacency lists threaded through fixed arrays, so memory is 
 | `component_set<G> connected_components(g)` | all | Union-find. Directed graphs give weakly connected components. O(V + E α). |
 | `component_set<G> strongly_connected_components(g)` | directed | Iterative Tarjan. O(V + E). |
 | `bool has_cycle(g)` | all | Undirected: union-find. Directed: Kahn. A self-loop counts as a cycle. |
-| `status topological_sort(g, node_list&)` | directed | Kahn, non-recursive. Returns `invalid_argument` on a cycle. O(V + E). |
+| `status topological_sort(g, node_list&)` | directed | Kahn, non-recursive. Returns `cycle_detected` on a cycle. O(V + E). |
 | `status shortest_paths(g, source, tree)` | all | BFS when unweighted, Dijkstra with an indexed heap when weighted. Returns `invalid_argument` on a negative arc. O((V + E) log V). |
-| `status bellman_ford(g, source, tree)` | all | Allows negative weights. Returns `invalid_argument` on a reachable negative cycle. O(VE). |
-| `status floyd_warshall(g, distance_matrix&)` | all | All pairs. Returns `invalid_argument` on a negative cycle. O(V³). |
+| `status bellman_ford(g, source, tree)` | all | Allows negative weights. Returns `cycle_detected` on a reachable negative cycle. O(VE). |
+| `status floyd_warshall(g, distance_matrix&)` | all | All pairs. Returns `cycle_detected` on a negative cycle. O(V³). |
 | `weight_type distance(g, from, to)` | all | Shortest distance (hop count when unweighted) with early stop. Returns `infinity<G>` when there is no answer. |
 | `status shortest_path(g, from, to, node_list&)` | all | One shortest path, ends included. Returns `out_of_range`, `not_found`, or `invalid_argument`. |
 | `weight_type minimum_spanning_tree(g, edge_list&)` | undirected | Kruskal with union-find. Returns the total weight. A disconnected graph gives a spanning forest. O(E log E). |
@@ -432,12 +432,12 @@ Two more details:
 This is the textbook round-based relaxation, with two changes:
 
 - **Early exit.** If a full round changes nothing, every distance is final and the function returns at once. Typical inputs need far fewer than V rounds.
-- **Negative-cycle proof.** Without a negative cycle, every shortest path has at most V - 1 edges, so V - 1 rounds suffice. If round V still improves something, a negative cycle is reachable and the result is `invalid_argument`. In an undirected graph, a negative edge `u - v` is itself such a cycle (`u -> v -> u`).
+- **Negative-cycle proof.** Without a negative cycle, every shortest path has at most V - 1 edges, so V - 1 rounds suffice. If round V still improves something, a negative cycle is reachable and the result is `cycle_detected`. In an undirected graph, a negative edge `u - v` is itself such a cycle (`u -> v -> u`).
 
 Nodes still at infinity are skipped. This saves work and also prevents `infinity + weight` from overflowing.
 
 #### Floyd-Warshall (`floyd_warshall`)
-This is the textbook triple loop `dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])` over a caller-owned `grid<weight, N, N>`. Like Bellman-Ford it skips infinite legs: when `dist[i][k]` is infinite the whole inner loop is skipped. That speeds up sparse graphs and avoids overflow, because infinity is the type's maximum value. A negative diagonal entry afterwards means a negative cycle.
+This is the textbook triple loop `dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])` over a caller-owned `grid<weight, N, N>`. Like Bellman-Ford it skips infinite legs: when `dist[i][k]` is infinite the whole inner loop is skipped. That speeds up sparse graphs and avoids overflow, because infinity is the type's maximum value. A negative diagonal entry afterwards means a negative cycle and returns `cycle_detected`.
 
 #### Union-find (`connected_components`, undirected `has_cycle`, `minimum_spanning_tree`)
 A `disjoint_set<N>` (union by rank, path compression, near-O(1) per operation) answers "are these two nodes already in the same group?".

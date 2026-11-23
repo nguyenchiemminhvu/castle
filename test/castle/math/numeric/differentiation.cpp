@@ -253,8 +253,8 @@ TEST(MathNumericDifferentiation, SamplesStatusPaths)
     double out[3] = {-1.0, -1.0, -1.0};
     EXPECT_EQ(castle::math::derivative_samples<double>(nullptr, 3U, 1.0, out), castle::status::invalid_argument);
     EXPECT_EQ(castle::math::derivative_samples<double>(y, 3U, 1.0, nullptr), castle::status::invalid_argument);
-    EXPECT_EQ(castle::math::derivative_samples(y, 0U, 1.0, out), castle::status::invalid_argument);
-    EXPECT_EQ(castle::math::derivative_samples(y, 1U, 1.0, out), castle::status::invalid_argument);
+    EXPECT_EQ(castle::math::derivative_samples(y, 0U, 1.0, out), castle::status::empty);
+    EXPECT_EQ(castle::math::derivative_samples(y, 1U, 1.0, out), castle::status::insufficient_data);
     EXPECT_EQ(castle::math::derivative_samples(y, 3U, 0.0, out), castle::status::invalid_argument);
     EXPECT_EQ(castle::math::derivative_samples(y, 3U, 1.0, out), castle::status::ok);
     EXPECT_NEAR(out[1], 2.0, 1e-12);
@@ -265,7 +265,7 @@ TEST(MathNumericDifferentiation, SamplesFailureLeavesOutputUntouched)
     const double y[] = {0.0, 1.0, 4.0};
     double out[3] = {-1.0, -1.0, -1.0};
     EXPECT_EQ(castle::math::derivative_samples(y, 3U, 0.0, out), castle::status::invalid_argument);
-    EXPECT_EQ(castle::math::derivative_samples(y, 1U, 1.0, out), castle::status::invalid_argument);
+    EXPECT_EQ(castle::math::derivative_samples(y, 1U, 1.0, out), castle::status::insufficient_data);
     EXPECT_DOUBLE_EQ(out[0], -1.0);
     EXPECT_DOUBLE_EQ(out[1], -1.0);
     EXPECT_DOUBLE_EQ(out[2], -1.0);

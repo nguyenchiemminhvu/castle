@@ -29,8 +29,8 @@ void check_validate()
     EXPECT_EQ(detail::validate_knots(negative, 4U), status::ok);
 
     // Fewer than two knots or a null array.
-    EXPECT_EQ(detail::validate_knots(good, 1U), status::invalid_argument);
-    EXPECT_EQ(detail::validate_knots(good, 0U), status::invalid_argument);
+    EXPECT_EQ(detail::validate_knots(good, 1U), status::insufficient_data);
+    EXPECT_EQ(detail::validate_knots(good, 0U), status::empty);
     EXPECT_EQ(detail::validate_knots<T>(nullptr, 4U), status::invalid_argument);
     EXPECT_EQ(detail::validate_knots<T>(nullptr, 0U), status::invalid_argument);
 

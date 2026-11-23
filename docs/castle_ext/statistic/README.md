@@ -251,8 +251,10 @@ Status codes you meet most often:
 | Status | Meaning here |
 |---|---|
 | `ok` | The out-parameter was written. |
-| `empty` | Not enough samples (`sample_variance` and `correlation` need at least 2; `mean` needs 1). |
+| `empty` | No samples at all (every query needs at least 1 sample). |
+| `insufficient_data` | At least one sample exists but too few for the statistic (`sample_variance`, `sample_stddev`, `sample_covariance`, `correlation`, `fit` and `normal_reference_bandwidth` need at least 2). |
 | `invalid_argument` | NaN/infinity sample, probability outside [0, 1], zero variance for `skewness` / `excess_kurtosis` / `correlation`, identical x for `fit`. |
+| `invalid_config` | Invalid `configure()` input (`alpha`, probability or histogram range). |
 | `not_configured` | Range, probability or `alpha` not set yet. |
 | `full` | An integral counter would overflow. |
 
@@ -965,7 +967,7 @@ Notes on the design:
 
 | Pitfall | What to do |
 |---|---|
-| Reading a value before enough samples exist | Always check the returned `status`. `sample_variance`, `sample_stddev` and `correlation` need at least two samples; with one sample the output stays untouched and `status::empty` is returned. |
+| Reading a value before enough samples exist | Always check the returned `status`. `sample_variance`, `sample_stddev` and `correlation` need at least two samples; with one sample the output stays untouched and `status::insufficient_data` is returned (`status::empty` with none). |
 | `skewness`, `excess_kurtosis`, `correlation` on constant data | Zero variance returns `status::invalid_argument`. A constant signal has no shape; handle this as a normal case (for example a stopped vehicle). |
 | `histogram`/`sliding_histogram` used without a range | `push()` returns `status::not_configured`. Pass the range to the constructor or call `configure()`. Calling `configure()` discards the collected data. |
 | Radius or value at the upper bound of a histogram | The range is `[lower, upper)`; a value exactly at `upper` is counted as overflow. Leave headroom above the largest expected value. |

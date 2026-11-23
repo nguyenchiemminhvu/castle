@@ -31,7 +31,7 @@ Retraction cancels digits, so two safeguards keep results accurate:
 | `mean(out)`, `rms(out)` | `ok` or `empty`. | O(1) |
 | `sum()`, `sum_squares()` | Window sum and sum of squares; zero when empty. | O(1) |
 | `population_variance(out)`, `population_stddev(out)` | `ok` or `empty`. | O(1) |
-| `sample_variance(out)`, `sample_stddev(out)` | `ok`, or `empty` with fewer than two samples. | O(1) |
+| `sample_variance(out)`, `sample_stddev(out)` | `ok`, `empty` without samples, or `insufficient_data` with one sample. | O(1) |
 | `skewness(out)` (`Order >= 3`) | `ok`, `empty`, or `invalid_argument` for zero variance. | O(1) |
 | `excess_kurtosis(out)` (`Order >= 4`) | `ok`, `empty`, or `invalid_argument` for zero variance. | O(1) |
 | `minimum(out)`, `maximum(out)`, `range(out)` | `ok` or `empty`; scan the window. | O(Capacity) |

@@ -154,9 +154,9 @@ void check_assign_failures()
 
     // Too few knots.
     ASSERT_EQ(table.assign(xs, ys, 3U), status::ok);
-    EXPECT_EQ(table.assign(xs, ys, 1U), status::invalid_argument);
+    EXPECT_EQ(table.assign(xs, ys, 1U), status::insufficient_data);
     EXPECT_FALSE(table.valid());
-    EXPECT_EQ(table.assign(xs, ys, 0U), status::invalid_argument);
+    EXPECT_EQ(table.assign(xs, ys, 0U), status::empty);
     EXPECT_FALSE(table.valid());
 
     // Non-monotone abscissas.

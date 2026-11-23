@@ -398,16 +398,16 @@ TEST(CoapClient, ProcessOnceRoutesResponsesAcknowledgementsAndResets)
     // Malformed and oversized datagrams are rejected; a malformed confirmable gets a reset.
     const uint8_t three[] = {0x40U, 0x01U, 0x00U};
     peer_send_raw(peer, three, sizeof(three), client_endpoint);
-    EXPECT_EQ(client.process_once(240U, 1000), castle::status::invalid_argument);
+    EXPECT_EQ(client.process_once(240U, 1000), castle::status::parse_error);
     const uint8_t empty_confirmable[] = {0x40U, 0x00U, 0x00U, 0x07U};
     peer_send_raw(peer, empty_confirmable, sizeof(empty_confirmable), client_endpoint);
-    EXPECT_EQ(client.process_once(250U, 1000), castle::status::invalid_argument);
+    EXPECT_EQ(client.process_once(250U, 1000), castle::status::protocol_error);
     ASSERT_TRUE(peer_receive(peer, seen, client_endpoint));
     EXPECT_EQ(seen.type, message_type::reset);
     EXPECT_EQ(seen.message_id, 7U);
     const uint8_t empty_non_confirmable[] = {0x50U, 0x00U, 0x00U, 0x08U};
     peer_send_raw(peer, empty_non_confirmable, sizeof(empty_non_confirmable), client_endpoint);
-    EXPECT_EQ(client.process_once(260U, 1000), castle::status::invalid_argument);
+    EXPECT_EQ(client.process_once(260U, 1000), castle::status::protocol_error);
     EXPECT_FALSE(peer_has_datagram(peer));
     uint8_t oversized[200]{};
     peer_send_raw(peer, oversized, sizeof(oversized), client_endpoint);

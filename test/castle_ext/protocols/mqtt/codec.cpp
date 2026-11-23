@@ -28,7 +28,7 @@ TEST(MqttCodec, RejectsMalformedAndIncompleteLengths)
     uint8_t continuation[] = {0x80U};
     EXPECT_EQ(decode_remaining_length(continuation, 1U, value, consumed), castle::status::empty);
     uint8_t malformed[] = {0x80U, 0x80U, 0x80U, 0x80U};
-    EXPECT_EQ(decode_remaining_length(malformed, sizeof(malformed), value, consumed), castle::status::invalid_argument);
+    EXPECT_EQ(decode_remaining_length(malformed, sizeof(malformed), value, consumed), castle::status::parse_error);
     EXPECT_EQ(decode_remaining_length(nullptr, 1U, value, consumed), castle::status::invalid_argument);
 }
 
@@ -47,7 +47,7 @@ TEST(MqttCodec, FixedHeadersAndStreamInspection)
     EXPECT_EQ(packet.type, packet_type::pingreq);
     EXPECT_EQ(packet.packet_size, 2U);
     uint8_t malformed[] = {0xC1U, 0U};
-    EXPECT_EQ(inspect_packet(malformed, sizeof(malformed), 32U, packet), castle::status::invalid_argument);
+    EXPECT_EQ(inspect_packet(malformed, sizeof(malformed), 32U, packet), castle::status::parse_error);
     uint8_t too_large[] = {0x30U, 0x7FU};
     EXPECT_EQ(inspect_packet(too_large, sizeof(too_large), 16U, packet), castle::status::out_of_range);
 }
@@ -65,7 +65,7 @@ TEST(MqttCodec, PacketReaderWriterAndProperties)
     EXPECT_EQ(reader.get_u16(two), castle::status::ok);
     EXPECT_EQ(reader.get_utf8(text, sizeof(text), text_size), castle::status::ok);
     EXPECT_EQ(one, 7U); EXPECT_EQ(two, 0x1234U); EXPECT_STREQ(text, "ab");
-    EXPECT_EQ(reader.get_u8(one), castle::status::invalid_argument);
+    EXPECT_EQ(reader.get_u8(one), castle::status::parse_error);
 
     property_list<3U, 16U, 8U> properties;
     ASSERT_EQ(properties.add_integer(property_id::session_expiry_interval, 60U), castle::status::ok);
@@ -92,7 +92,7 @@ TEST(MqttCodec, CapacityErrorsAndUnknownPropertyPolicy)
     uint8_t unknown_property[] = {0x02U, 0x55U, 0x00U};
     packet_reader reader(unknown_property, sizeof(unknown_property));
     property_list<2U, 8U, 8U> props;
-    EXPECT_EQ(decode_properties(reader, props, false), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(reader, props, false), castle::status::parse_error);
     packet_reader ignore_reader(unknown_property, sizeof(unknown_property));
     EXPECT_EQ(decode_properties(ignore_reader, props, true), castle::status::ok);
 }
@@ -145,10 +145,10 @@ TEST(MqttCodec, ReaderBoundsAndNullInputs)
     uint8_t one_byte[1U]{0x00U};
     packet_reader short_reader(one_byte, 1U);
     uint16_t u16 = 0U; uint32_t u32 = 0U; uint8_t u8 = 0U;
-    EXPECT_EQ(short_reader.get_u16(u16), castle::status::invalid_argument);
+    EXPECT_EQ(short_reader.get_u16(u16), castle::status::parse_error);
     uint8_t three[3U]{0x01U, 0x02U, 0x03U};
     packet_reader three_reader(three, sizeof(three));
-    EXPECT_EQ(three_reader.get_u32(u32), castle::status::invalid_argument);
+    EXPECT_EQ(three_reader.get_u32(u32), castle::status::parse_error);
     packet_reader fresh_reader(three, sizeof(three));
     EXPECT_EQ(fresh_reader.get_u8(u8), castle::status::ok);
     EXPECT_EQ(u8, 0x01U);
@@ -156,10 +156,10 @@ TEST(MqttCodec, ReaderBoundsAndNullInputs)
     char text[4U]{};
     castle::size_type length = 0U;
     packet_reader length_reader(one_byte, 1U);
-    EXPECT_EQ(length_reader.get_utf8(text, sizeof(text), length), castle::status::invalid_argument);
+    EXPECT_EQ(length_reader.get_utf8(text, sizeof(text), length), castle::status::parse_error);
     uint8_t short_text[] = {0x00U, 0x03U, 'a'};
     packet_reader short_text_reader(short_text, sizeof(short_text));
-    EXPECT_EQ(short_text_reader.get_utf8(text, sizeof(text), length), castle::status::invalid_argument);
+    EXPECT_EQ(short_text_reader.get_utf8(text, sizeof(text), length), castle::status::parse_error);
     uint8_t long_text[] = {0x00U, 0x04U, 'a', 'b', 'c', 'd'};
     packet_reader long_text_reader(long_text, sizeof(long_text));
     EXPECT_EQ(long_text_reader.get_utf8(text, sizeof(text), length), castle::status::out_of_range);
@@ -173,13 +173,13 @@ TEST(MqttCodec, ReaderBoundsAndNullInputs)
 
     uint8_t bytes[8U]{};
     packet_reader binary_short(one_byte, 1U);
-    EXPECT_EQ(binary_short.get_binary(bytes, sizeof(bytes), length), castle::status::invalid_argument);
+    EXPECT_EQ(binary_short.get_binary(bytes, sizeof(bytes), length), castle::status::parse_error);
     uint8_t big_binary[] = {0x00U, 0x05U, 1U, 2U, 3U, 4U, 5U};
     packet_reader big_binary_reader(big_binary, sizeof(big_binary));
     EXPECT_EQ(big_binary_reader.get_binary(bytes, 4U, length), castle::status::out_of_range);
     uint8_t truncated_binary[] = {0x00U, 0x03U, 1U};
     packet_reader truncated_binary_reader(truncated_binary, sizeof(truncated_binary));
-    EXPECT_EQ(truncated_binary_reader.get_binary(bytes, sizeof(bytes), length), castle::status::invalid_argument);
+    EXPECT_EQ(truncated_binary_reader.get_binary(bytes, sizeof(bytes), length), castle::status::parse_error);
     uint8_t binary_no_output[] = {0x00U, 0x01U, 9U};
     packet_reader binary_no_output_reader(binary_no_output, sizeof(binary_no_output));
     EXPECT_EQ(binary_no_output_reader.get_binary(nullptr, sizeof(bytes), length), castle::status::invalid_argument);
@@ -198,8 +198,8 @@ TEST(MqttCodec, ReaderBoundsAndNullInputs)
     uint8_t continuation[] = {0x80U};
     packet_reader continuation_reader(continuation, sizeof(continuation));
     EXPECT_EQ(continuation_reader.get_varint(varint), castle::status::empty);
-    EXPECT_EQ(continuation_reader.skip(2U), castle::status::invalid_argument);
-    EXPECT_EQ(continuation_reader.skip(1U), castle::status::invalid_argument);
+    EXPECT_EQ(continuation_reader.skip(2U), castle::status::parse_error);
+    EXPECT_EQ(continuation_reader.skip(1U), castle::status::parse_error);
 }
 
 TEST(MqttCodec, PropertyPredicatesClassifyEveryIdentifier)
@@ -288,17 +288,17 @@ TEST(MqttCodec, DecodeRejectsMalformedPropertySections)
 
     uint8_t overrun[] = {0x05U, 0x01U};
     packet_reader overrun_reader(overrun, sizeof(overrun));
-    EXPECT_EQ(decode_properties(overrun_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(overrun_reader, out), castle::status::parse_error);
 
     uint8_t incomplete_id[] = {0x01U, 0x80U};
     packet_reader incomplete_reader(incomplete_id, sizeof(incomplete_id));
-    EXPECT_EQ(decode_properties(incomplete_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(incomplete_reader, out), castle::status::parse_error);
     packet_reader incomplete_ignored(incomplete_id, sizeof(incomplete_id));
     EXPECT_EQ(decode_properties(incomplete_ignored, out, true), castle::status::ok);
 
     uint8_t unknown[] = {0x01U, 0x7FU};
     packet_reader unknown_reader(unknown, sizeof(unknown));
-    EXPECT_EQ(decode_properties(unknown_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(unknown_reader, out), castle::status::parse_error);
     packet_reader unknown_ignored(unknown, sizeof(unknown));
     EXPECT_EQ(decode_properties(unknown_ignored, out, true), castle::status::ok);
 
@@ -310,18 +310,18 @@ TEST(MqttCodec, DecodeRejectsMalformedPropertySections)
         EXPECT_EQ(decode_properties(accepted_reader, out), castle::status::ok) << static_cast<int>(id);
         uint8_t rejected[] = {0x02U, id, 0x02U};
         packet_reader rejected_reader(rejected, sizeof(rejected));
-        EXPECT_EQ(decode_properties(rejected_reader, out), castle::status::invalid_argument) << static_cast<int>(id);
+        EXPECT_EQ(decode_properties(rejected_reader, out), castle::status::protocol_error) << static_cast<int>(id);
     }
     uint8_t truncated_byte[] = {0x01U, 0x01U};
     packet_reader truncated_byte_reader(truncated_byte, sizeof(truncated_byte));
-    EXPECT_EQ(decode_properties(truncated_byte_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(truncated_byte_reader, out), castle::status::parse_error);
 
     uint8_t zero_receive[] = {0x03U, 0x21U, 0x00U, 0x00U};
     packet_reader zero_receive_reader(zero_receive, sizeof(zero_receive));
-    EXPECT_EQ(decode_properties(zero_receive_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(zero_receive_reader, out), castle::status::protocol_error);
     uint8_t zero_alias[] = {0x03U, 0x23U, 0x00U, 0x00U};
     packet_reader zero_alias_reader(zero_alias, sizeof(zero_alias));
-    EXPECT_EQ(decode_properties(zero_alias_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(zero_alias_reader, out), castle::status::protocol_error);
     uint8_t zero_keep_alive[] = {0x03U, 0x13U, 0x00U, 0x00U};
     packet_reader zero_keep_alive_reader(zero_keep_alive, sizeof(zero_keep_alive));
     EXPECT_EQ(decode_properties(zero_keep_alive_reader, out), castle::status::ok);
@@ -330,11 +330,11 @@ TEST(MqttCodec, DecodeRejectsMalformedPropertySections)
     EXPECT_EQ(decode_properties(receive_ok_reader, out), castle::status::ok);
     uint8_t truncated_u16[] = {0x01U, 0x21U};
     packet_reader truncated_u16_reader(truncated_u16, sizeof(truncated_u16));
-    EXPECT_EQ(decode_properties(truncated_u16_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(truncated_u16_reader, out), castle::status::parse_error);
 
     uint8_t zero_subscription[] = {0x02U, 0x0BU, 0x00U};
     packet_reader zero_subscription_reader(zero_subscription, sizeof(zero_subscription));
-    EXPECT_EQ(decode_properties(zero_subscription_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(zero_subscription_reader, out), castle::status::protocol_error);
     uint8_t subscription[] = {0x02U, 0x0BU, 0x05U};
     packet_reader subscription_reader(subscription, sizeof(subscription));
     EXPECT_EQ(decode_properties(subscription_reader, out), castle::status::ok);
@@ -350,7 +350,7 @@ TEST(MqttCodec, DecodeRejectsMalformedPropertySections)
     EXPECT_EQ(decode_properties(binary_too_big_reader, out), castle::status::out_of_range);
     uint8_t truncated_binary[] = {0x02U, 0x09U, 0x00U};
     packet_reader truncated_binary_reader(truncated_binary, sizeof(truncated_binary));
-    EXPECT_EQ(decode_properties(truncated_binary_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(truncated_binary_reader, out), castle::status::parse_error);
 
     property_list<4U, 4U, 8U> narrow_out;
     uint8_t text_ok[] = {0x05U, 0x03U, 0x00U, 0x02U, 'a', 'b'};
@@ -361,17 +361,17 @@ TEST(MqttCodec, DecodeRejectsMalformedPropertySections)
     EXPECT_EQ(decode_properties(text_too_long_reader, narrow_out), castle::status::out_of_range);
     uint8_t truncated_text[] = {0x04U, 0x03U, 0x00U, 0x02U, 'a'};
     packet_reader truncated_text_reader(truncated_text, sizeof(truncated_text));
-    EXPECT_EQ(decode_properties(truncated_text_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(truncated_text_reader, out), castle::status::parse_error);
 
     uint8_t user_ok[] = {0x07U, 0x26U, 0x00U, 0x01U, 'k', 0x00U, 0x01U, 'v'};
     packet_reader user_ok_reader(user_ok, sizeof(user_ok));
     EXPECT_EQ(decode_properties(user_ok_reader, out), castle::status::ok);
     uint8_t user_key_truncated[] = {0x03U, 0x26U, 0x00U, 0x05U};
     packet_reader user_key_reader(user_key_truncated, sizeof(user_key_truncated));
-    EXPECT_EQ(decode_properties(user_key_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(user_key_reader, out), castle::status::parse_error);
     uint8_t user_value_truncated[] = {0x05U, 0x26U, 0x00U, 0x01U, 'k', 0x00U};
     packet_reader user_value_reader(user_value_truncated, sizeof(user_value_truncated));
-    EXPECT_EQ(decode_properties(user_value_reader, out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_properties(user_value_reader, out), castle::status::parse_error);
 
     property_list<1U, 8U, 8U> one_slot;
     uint8_t two_users[] = {0x0EU, 0x26U, 0x00U, 0x01U, 'a', 0x00U, 0x01U, 'b',
@@ -413,14 +413,14 @@ TEST(MqttCodec, InspectPacketReportsStreamAndHeaderErrors)
     EXPECT_EQ(inspect_packet(ping, sizeof(ping), 1U, packet), castle::status::invalid_argument);
 
     uint8_t reserved[] = {0x00U, 0x00U};
-    EXPECT_EQ(inspect_packet(reserved, sizeof(reserved), 32U, packet), castle::status::invalid_argument);
+    EXPECT_EQ(inspect_packet(reserved, sizeof(reserved), 32U, packet), castle::status::parse_error);
     uint8_t connect_bad_flags[] = {0x11U, 0x00U};
-    EXPECT_EQ(inspect_packet(connect_bad_flags, sizeof(connect_bad_flags), 32U, packet), castle::status::invalid_argument);
+    EXPECT_EQ(inspect_packet(connect_bad_flags, sizeof(connect_bad_flags), 32U, packet), castle::status::parse_error);
 
     uint8_t truncated_length[] = {0x10U, 0x80U};
     EXPECT_EQ(inspect_packet(truncated_length, sizeof(truncated_length), 32U, packet), castle::status::empty);
     uint8_t bad_length[] = {0x10U, 0x80U, 0x80U, 0x80U, 0x80U};
-    EXPECT_EQ(inspect_packet(bad_length, sizeof(bad_length), 32U, packet), castle::status::invalid_argument);
+    EXPECT_EQ(inspect_packet(bad_length, sizeof(bad_length), 32U, packet), castle::status::parse_error);
 
     uint8_t header_over[] = {0x30U, 0x04U, 0x00U, 0x00U, 0x00U, 0x00U};
     EXPECT_EQ(inspect_packet(header_over, sizeof(header_over), 4U, packet), castle::status::out_of_range);
@@ -441,7 +441,7 @@ TEST(MqttCodec, RemainingLengthRejectsOverlongEncodings)
 {
     uint32_t value = 0U; castle::size_type consumed = 0U;
     uint8_t overlong_two_bytes[] = {0x80U, 0x00U};
-    EXPECT_EQ(decode_remaining_length(overlong_two_bytes, sizeof(overlong_two_bytes), value, consumed), castle::status::invalid_argument);
+    EXPECT_EQ(decode_remaining_length(overlong_two_bytes, sizeof(overlong_two_bytes), value, consumed), castle::status::parse_error);
     uint8_t canonical_two_bytes[] = {0x80U, 0x01U};
     EXPECT_EQ(decode_remaining_length(canonical_two_bytes, sizeof(canonical_two_bytes), value, consumed), castle::status::ok);
     EXPECT_EQ(value, 128U);

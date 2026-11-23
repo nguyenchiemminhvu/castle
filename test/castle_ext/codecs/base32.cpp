@@ -26,9 +26,9 @@ TEST(CastleExtBase32, EncodeDecodePaddedAndUnpadded)
 
     encoded[0] = 'm';
     EXPECT_EQ(castle::codecs::base32_decode("MZXW6YTBOI======", 16U, decoded, sizeof(decoded), decoded_size), castle::status::ok);
-    EXPECT_EQ(castle::codecs::base32_decode("MZXW6Y!BOI======", 16U, decoded, sizeof(decoded), decoded_size), castle::status::invalid_argument);
-    EXPECT_EQ(castle::codecs::base32_decode("A", 1U, decoded, sizeof(decoded), decoded_size), castle::status::invalid_argument);
-    EXPECT_EQ(castle::codecs::base32_decode("MZXW6YTB=", 9U, decoded, sizeof(decoded), decoded_size), castle::status::invalid_argument);
+    EXPECT_EQ(castle::codecs::base32_decode("MZXW6Y!BOI======", 16U, decoded, sizeof(decoded), decoded_size), castle::status::parse_error);
+    EXPECT_EQ(castle::codecs::base32_decode("A", 1U, decoded, sizeof(decoded), decoded_size), castle::status::parse_error);
+    EXPECT_EQ(castle::codecs::base32_decode("MZXW6YTB=", 9U, decoded, sizeof(decoded), decoded_size), castle::status::parse_error);
 }
 
 TEST(CastleExtBase32, CapacityAndNullArguments)

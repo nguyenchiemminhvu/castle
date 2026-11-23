@@ -12,7 +12,7 @@
  *
  * POSIX declarations and headers are enabled only when
  * `CASTLE_USING_POSIX_APIS` is true. On other targets the same API is available
- * and reports `castle::status::not_configured`.
+ * and reports `castle::status::unsupported`.
  *
  * @code
  * #include "castle_ext/io/fd/control.hpp"
@@ -83,7 +83,7 @@ CASTLE_INLINE bool would_block(int error) CASTLE_NOEXCEPT
  * @param fd Descriptor to query; must be non-negative.
  * @param flags Receives the flags on success, otherwise reset to zero.
  * @param system_error Optional output receiving `errno` when the system call fails.
- * @return `ok`, `invalid_argument`, `system_call_error`, or `not_configured`.
+ * @return `ok`, `invalid_argument`, `system_call_error`, or `unsupported`.
  */
 CASTLE_INLINE castle::status get_status_flags(int fd, int& flags, int* system_error = nullptr) CASTLE_NOEXCEPT
 {
@@ -104,7 +104,7 @@ CASTLE_INLINE castle::status get_status_flags(int fd, int& flags, int* system_er
     return castle::status::ok;
 #else
     (void)fd;
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 #endif
 }
 
@@ -113,7 +113,7 @@ CASTLE_INLINE castle::status get_status_flags(int fd, int& flags, int* system_er
  * @param fd Descriptor to update; must be non-negative.
  * @param flags Complete status-flag value supplied to `F_SETFL`.
  * @param system_error Optional output receiving `errno` when the system call fails.
- * @return `ok`, `invalid_argument`, `system_call_error`, or `not_configured`.
+ * @return `ok`, `invalid_argument`, `system_call_error`, or `unsupported`.
  * @note Callers should normally use `set_nonblocking()` to preserve unrelated bits.
  */
 CASTLE_INLINE castle::status set_status_flags(int fd, int flags, int* system_error = nullptr) CASTLE_NOEXCEPT
@@ -133,7 +133,7 @@ CASTLE_INLINE castle::status set_status_flags(int fd, int flags, int* system_err
 #else
     (void)fd;
     (void)flags;
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 #endif
 }
 
@@ -164,7 +164,7 @@ CASTLE_INLINE castle::status set_nonblocking(int fd, bool enabled = true, int* s
         return castle::status::invalid_argument;
     }
     (void)enabled;
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 #endif
 }
 
@@ -179,7 +179,7 @@ CASTLE_INLINE castle::status set_blocking(int fd, int* system_error = nullptr) C
  * @param fd Descriptor to query.
  * @param flags Receives descriptor flags on success, otherwise reset to zero.
  * @param system_error Optional output receiving `errno` on a failed `fcntl()`.
- * @return `ok`, `invalid_argument`, `system_call_error`, or `not_configured`.
+ * @return `ok`, `invalid_argument`, `system_call_error`, or `unsupported`.
  */
 CASTLE_INLINE castle::status get_descriptor_flags(int fd, int& flags, int* system_error = nullptr) CASTLE_NOEXCEPT
 {
@@ -200,7 +200,7 @@ CASTLE_INLINE castle::status get_descriptor_flags(int fd, int& flags, int* syste
     return castle::status::ok;
 #else
     (void)fd;
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 #endif
 }
 
@@ -209,7 +209,7 @@ CASTLE_INLINE castle::status get_descriptor_flags(int fd, int& flags, int* syste
  * @param fd Descriptor to update.
  * @param flags Complete descriptor-flag value supplied to `F_SETFD`.
  * @param system_error Optional output receiving `errno` on a failed `fcntl()`.
- * @return `ok`, `invalid_argument`, `system_call_error`, or `not_configured`.
+ * @return `ok`, `invalid_argument`, `system_call_error`, or `unsupported`.
  */
 CASTLE_INLINE castle::status set_descriptor_flags(int fd, int flags, int* system_error = nullptr) CASTLE_NOEXCEPT
 {
@@ -228,7 +228,7 @@ CASTLE_INLINE castle::status set_descriptor_flags(int fd, int flags, int* system
 #else
     (void)fd;
     (void)flags;
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 #endif
 }
 
@@ -257,7 +257,7 @@ CASTLE_INLINE castle::status set_close_on_exec(int fd, bool enabled = true, int*
         return castle::status::invalid_argument;
     }
     (void)enabled;
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 #endif
 }
 
@@ -276,7 +276,7 @@ CASTLE_INLINE bool is_valid_fd(int fd) CASTLE_NOEXCEPT
  * @brief Closes a descriptor using one POSIX `close()` call.
  * @param fd Descriptor to close; must be non-negative.
  * @param system_error Optional output receiving `errno` when `close()` fails.
- * @return `ok`, `invalid_argument`, `system_call_error`, or `not_configured`.
+ * @return `ok`, `invalid_argument`, `system_call_error`, or `unsupported`.
  * @warning The descriptor is not retried after `EINTR`: on some systems its state
  *          is unspecified, and retrying can close a newly reused descriptor.
  */
@@ -295,7 +295,7 @@ CASTLE_INLINE castle::status close_fd(int fd, int* system_error = nullptr) CASTL
     }
     return castle::status::ok;
 #else
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 #endif
 }
 

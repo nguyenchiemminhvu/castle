@@ -45,7 +45,7 @@ int main()
     assert(writer.close() == castle::status::ok);
     assert(reader.close() == castle::status::ok);
 #else
-    assert(castle::io::fd::set_nonblocking(3) == castle::status::not_configured);
+    assert(castle::io::fd::set_nonblocking(3) == castle::status::unsupported);
 #endif
     return 0;
 }

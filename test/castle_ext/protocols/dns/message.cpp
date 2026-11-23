@@ -84,7 +84,7 @@ TEST(DnsMessage, ParsesCompressedAAnswerAndChecksTransaction)
     EXPECT_EQ(parsed.records[0U].ttl, 60U);
     EXPECT_EQ(parsed.records[0U].address.address_bytes()[0U], 192U);
     EXPECT_EQ(parsed.records[0U].address.address_bytes()[3U], 34U);
-    EXPECT_EQ(message::parse_response(packet, size, 0x9999U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, size, 0x9999U, parsed), status::protocol_error);
 }
 
 TEST(DnsMessage, DecodesCompressedCnameNsAndMxRdata)
@@ -170,7 +170,7 @@ TEST(DnsMessage, ReportsRecordCapacityAndMalformedLengths)
     at = append_a(packet, at, 1U);
     packet[at - 5U] = 3U; // A RDLENGTH becomes 3
     response<2U> malformed;
-    EXPECT_EQ(message::parse_response(packet, at, 0x1234U, malformed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, at, 0x1234U, malformed), status::parse_error);
 }
 
 TEST(DnsMessage, RejectsMalformedHeadersNamesPointersAndTrailingBytes)
@@ -178,28 +178,28 @@ TEST(DnsMessage, RejectsMalformedHeadersNamesPointersAndTrailingBytes)
     uint8_t packet[128U]{};
     size_type size = make_question(packet);
     response<4U> parsed;
-    EXPECT_EQ(message::parse_response(packet, 11U, 0x1234U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, 11U, 0x1234U, parsed), status::parse_error);
     packet[2U] = 0x01U; // QR clear
-    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::protocol_error);
     packet[2U] = 0x89U; packet[3U] = 0x80U; // Opcode 1
-    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::unsupported);
     packet[2U] = 0x81U; packet[3U] = 0x80U; packet[5U] = 2U;
-    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::unsupported);
     packet[5U] = 1U;
-    packet[2U] = 0xF1U; // reserved Z flags must be zero
-    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::invalid_argument);
-    packet[2U] = 0x81U;
+    packet[2U] = 0x81U; packet[3U] = 0x90U; // reserved Z flags must be zero
+    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::protocol_error);
+    packet[2U] = 0x81U; packet[3U] = 0x80U;
     packet[size] = 0xFFU;
-    EXPECT_EQ(message::parse_response(packet, size + 1U, 0x1234U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, size + 1U, 0x1234U, parsed), status::parse_error);
 
     uint8_t names[] = {0xC0U, 0x00U};
     char name[16U]{};
     size_type consumed = 0U;
-    EXPECT_EQ(message::decode_name(names, sizeof(names), 0U, name, sizeof(name), consumed), status::invalid_argument); // self pointer
+    EXPECT_EQ(message::decode_name(names, sizeof(names), 0U, name, sizeof(name), consumed), status::parse_error); // self pointer
     uint8_t reserved[] = {0x40U};
-    EXPECT_EQ(message::decode_name(reserved, sizeof(reserved), 0U, name, sizeof(name), consumed), status::invalid_argument);
+    EXPECT_EQ(message::decode_name(reserved, sizeof(reserved), 0U, name, sizeof(name), consumed), status::parse_error);
     uint8_t label[] = {3U, 'a'};
-    EXPECT_EQ(message::decode_name(label, sizeof(label), 0U, name, sizeof(name), consumed), status::invalid_argument);
+    EXPECT_EQ(message::decode_name(label, sizeof(label), 0U, name, sizeof(name), consumed), status::parse_error);
     uint8_t long_label[] = {3U, 'a', 'b', 'c', 0U};
     char tiny[2U]{};
     EXPECT_EQ(message::decode_name(long_label, sizeof(long_label), 0U, tiny, sizeof(tiny), consumed), status::full);
@@ -305,7 +305,7 @@ TEST(DnsMessage, RejectsNullAndOversizedResponses)
     uint8_t packet[512U]{};
     response<4U> parsed;
     EXPECT_EQ(message::parse_response(nullptr, 64U, 0x1234U, parsed), status::invalid_argument);
-    EXPECT_EQ(message::parse_response(packet, 65536U, 0x1234U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, 65536U, 0x1234U, parsed), status::out_of_range);
 }
 
 TEST(DnsMessage, RejectsReservedFlagsAndMalformedQuestions)
@@ -314,9 +314,9 @@ TEST(DnsMessage, RejectsReservedFlagsAndMalformedQuestions)
     size_type size = make_question(packet);
     response<4U> parsed;
     packet[3U] = 0x90U; // response with Z bit 0x10 set
-    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::protocol_error);
     packet[3U] = 0xC0U; // response with Z bit 0x40 set
-    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::protocol_error);
     packet[3U] = 0x80U;
     EXPECT_EQ(message::parse_response(packet, size, 0x1234U, parsed), status::ok);
 
@@ -325,7 +325,7 @@ TEST(DnsMessage, RejectsReservedFlagsAndMalformedQuestions)
     bad_question[3U] = 0x80U;
     bad_question[5U] = 1U;
     bad_question[12U] = 0x40U; // reserved label-length bits
-    EXPECT_EQ(message::parse_response(bad_question, sizeof(bad_question), 0x0000U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(bad_question, sizeof(bad_question), 0x0000U, parsed), status::parse_error);
 
     uint8_t short_question[17U]{};
     short_question[2U] = 0x81U;
@@ -334,7 +334,7 @@ TEST(DnsMessage, RejectsReservedFlagsAndMalformedQuestions)
     short_question[12U] = 1U;
     short_question[13U] = 'a';
     short_question[14U] = 0U;
-    EXPECT_EQ(message::parse_response(short_question, sizeof(short_question), 0x0000U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(short_question, sizeof(short_question), 0x0000U, parsed), status::parse_error);
 }
 
 TEST(DnsMessage, RejectsMalformedOwnersAndTruncatedResourceRecords)
@@ -343,15 +343,15 @@ TEST(DnsMessage, RejectsMalformedOwnersAndTruncatedResourceRecords)
     response<4U> parsed;
     uint8_t bad_owner[] = {0x40U};
     size_type size = make_single_record(packet, bad_owner, sizeof(bad_owner));
-    EXPECT_EQ(message::parse_response(packet, size, 0x0000U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, size, 0x0000U, parsed), status::parse_error);
 
     uint8_t owner_only[] = {0xC0U, 0x0CU};
     size = make_single_record(packet, owner_only, sizeof(owner_only));
-    EXPECT_EQ(message::parse_response(packet, size, 0x0000U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, size, 0x0000U, parsed), status::parse_error);
 
     uint8_t rdlength_overflow[] = {0xC0U, 0x0CU, 0U, 1U, 0U, 1U, 0U, 0U, 0U, 45U, 0U, 100U};
     size = make_single_record(packet, rdlength_overflow, sizeof(rdlength_overflow));
-    EXPECT_EQ(message::parse_response(packet, size, 0x0000U, parsed), status::invalid_argument);
+    EXPECT_EQ(message::parse_response(packet, size, 0x0000U, parsed), status::parse_error);
 }
 
 TEST(DnsMessage, RejectsWrongRdataLengthsAndMalformedRdataNames)
@@ -361,27 +361,27 @@ TEST(DnsMessage, RejectsWrongRdataLengthsAndMalformedRdataNames)
 
     uint8_t aaaa_bad[12U + 15U] = {0xC0U, 0x0CU, 0U, 28U, 0U, 1U, 0U, 0U, 0U, 5U, 0U, 15U};
     EXPECT_EQ(message::parse_response(packet, make_single_record(packet, aaaa_bad, sizeof(aaaa_bad)), 0x0000U, parsed),
-              status::invalid_argument);
+              status::parse_error);
 
     uint8_t mx_short[12U + 2U] = {0xC0U, 0x0CU, 0U, 15U, 0U, 1U, 0U, 0U, 0U, 5U, 0U, 2U, 0U, 10U};
     EXPECT_EQ(message::parse_response(packet, make_single_record(packet, mx_short, sizeof(mx_short)), 0x0000U, parsed),
-              status::invalid_argument);
+              status::parse_error);
 
     uint8_t mx_bad_name[12U + 3U] = {0xC0U, 0x0CU, 0U, 15U, 0U, 1U, 0U, 0U, 0U, 5U, 0U, 3U, 0U, 10U, 0x40U};
     EXPECT_EQ(message::parse_response(packet, make_single_record(packet, mx_bad_name, sizeof(mx_bad_name)), 0x0000U, parsed),
-              status::invalid_argument);
+              status::parse_error);
 
     uint8_t mx_trailing[12U + 5U] = {0xC0U, 0x0CU, 0U, 15U, 0U, 1U, 0U, 0U, 0U, 5U, 0U, 5U, 0U, 10U, 0U, 0xAAU, 0xBBU};
     EXPECT_EQ(message::parse_response(packet, make_single_record(packet, mx_trailing, sizeof(mx_trailing)), 0x0000U, parsed),
-              status::invalid_argument);
+              status::parse_error);
 
     uint8_t ns_bad_name[12U + 1U] = {0xC0U, 0x0CU, 0U, 2U, 0U, 1U, 0U, 0U, 0U, 5U, 0U, 1U, 0x40U};
     EXPECT_EQ(message::parse_response(packet, make_single_record(packet, ns_bad_name, sizeof(ns_bad_name)), 0x0000U, parsed),
-              status::invalid_argument);
+              status::parse_error);
 
     uint8_t ns_trailing[12U + 2U] = {0xC0U, 0x0CU, 0U, 2U, 0U, 1U, 0U, 0U, 0U, 5U, 0U, 2U, 0U, 0U};
     EXPECT_EQ(message::parse_response(packet, make_single_record(packet, ns_trailing, sizeof(ns_trailing)), 0x0000U, parsed),
-              status::invalid_argument);
+              status::parse_error);
 }
 
 TEST(DnsMessage, DecodeNameRejectsBadBuffersPointersAndLimits)
@@ -389,20 +389,20 @@ TEST(DnsMessage, DecodeNameRejectsBadBuffersPointersAndLimits)
     uint8_t data[8U]{};
     char name[512U]{};
     size_type consumed = 0U;
-    EXPECT_EQ(message::decode_name(data, 3U, 3U, name, sizeof(name), consumed), status::invalid_argument);
+    EXPECT_EQ(message::decode_name(data, 3U, 3U, name, sizeof(name), consumed), status::parse_error);
     EXPECT_EQ(message::decode_name(data, 3U, 0U, nullptr, sizeof(name), consumed), status::invalid_argument);
     EXPECT_EQ(message::decode_name(data, 3U, 0U, name, 0U, consumed), status::invalid_argument);
 
     uint8_t unterminated[] = {0x01U, 'a'};
     EXPECT_EQ(message::decode_name(unterminated, sizeof(unterminated), 0U, name, sizeof(name), consumed),
-              status::invalid_argument);
+              status::parse_error);
 
     uint8_t truncated_pointer[] = {0xC0U};
     EXPECT_EQ(message::decode_name(truncated_pointer, sizeof(truncated_pointer), 0U, name, sizeof(name), consumed),
-              status::invalid_argument);
+              status::parse_error);
     uint8_t out_of_range_pointer[] = {0xC0U, 0x7FU};
     EXPECT_EQ(message::decode_name(out_of_range_pointer, sizeof(out_of_range_pointer), 0U, name, sizeof(name), consumed),
-              status::invalid_argument);
+              status::parse_error);
 
     // Offset 5 -> pointer to 3 -> pointer to 0 -> "a"; only the first pointer consumes stream octets.
     uint8_t pointer_chain[] = {0x01U, 'a', 0x00U, 0xC0U, 0x00U, 0xC0U, 0x03U};
@@ -417,7 +417,7 @@ TEST(DnsMessage, DecodeNameRejectsBadBuffersPointersAndLimits)
         hops[2U * k] = 0xC0U;
         hops[2U * k + 1U] = static_cast<uint8_t>(2U * (k - 1U));
     }
-    EXPECT_EQ(message::decode_name(hops, sizeof(hops), 256U, name, sizeof(name), consumed), status::invalid_argument);
+    EXPECT_EQ(message::decode_name(hops, sizeof(hops), 256U, name, sizeof(name), consumed), status::parse_error);
 
     // Four labels expand to exactly 255 octets, so the following length octet is rejected.
     uint8_t expanded[300U]{};
@@ -432,7 +432,7 @@ TEST(DnsMessage, DecodeNameRejectsBadBuffersPointersAndLimits)
     expanded[at++] = 1U;
     expanded[at++] = 'z';
     expanded[at++] = 0U;
-    EXPECT_EQ(message::decode_name(expanded, at, 0U, name, sizeof(name), consumed), status::invalid_argument);
+    EXPECT_EQ(message::decode_name(expanded, at, 0U, name, sizeof(name), consumed), status::parse_error);
 
     // 128 one-octet labels would expand past 255 octets.
     uint8_t singles[257U]{};
@@ -441,15 +441,15 @@ TEST(DnsMessage, DecodeNameRejectsBadBuffersPointersAndLimits)
         singles[2U * i] = 1U;
         singles[2U * i + 1U] = 'a';
     }
-    EXPECT_EQ(message::decode_name(singles, sizeof(singles), 0U, name, sizeof(name), consumed), status::invalid_argument);
+    EXPECT_EQ(message::decode_name(singles, sizeof(singles), 0U, name, sizeof(name), consumed), status::parse_error);
 
     uint8_t two_labels[] = {1U, 'a', 1U, 'b', 0U};
     char tiny[2U]{};
     EXPECT_EQ(message::decode_name(two_labels, sizeof(two_labels), 0U, tiny, sizeof(tiny), consumed), status::full);
 
     uint8_t nul_octet[] = {1U, 0U, 0U};
-    EXPECT_EQ(message::decode_name(nul_octet, sizeof(nul_octet), 0U, name, sizeof(name), consumed), status::invalid_argument);
+    EXPECT_EQ(message::decode_name(nul_octet, sizeof(nul_octet), 0U, name, sizeof(name), consumed), status::parse_error);
     uint8_t high_octet[] = {1U, 0x80U, 0U};
-    EXPECT_EQ(message::decode_name(high_octet, sizeof(high_octet), 0U, name, sizeof(name), consumed), status::invalid_argument);
+    EXPECT_EQ(message::decode_name(high_octet, sizeof(high_octet), 0U, name, sizeof(name), consumed), status::parse_error);
 }
 

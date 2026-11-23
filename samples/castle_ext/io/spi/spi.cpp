@@ -28,11 +28,11 @@ int main()
     // /dev/null opens but rejects the spidev ioctl, exercising the failure path.
     const spi_config invalid_device("/dev/null", mode::mode0, 8U, 1000000U);
     const castle::status opened = bus.open(invalid_device);
-    assert(opened == castle::status::system_call_error || opened == castle::status::not_configured);
+    assert(opened == castle::status::system_call_error || opened == castle::status::unsupported);
     assert(!bus.is_open());
 #else
     assert(!spi_available);
-    assert(bus.open(config) == castle::status::not_configured);
+    assert(bus.open(config) == castle::status::unsupported);
 #endif
     return 0;
 }

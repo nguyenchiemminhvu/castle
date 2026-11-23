@@ -51,4 +51,4 @@ See `samples/castle_ext/io/fd/descriptor.cpp` for a standalone sample.
 - The owner is move-only. `release()` transfers ownership without closing.
 - A single read/write may be partial. Exact/all helpers stop on the first reported error and never spin on `EAGAIN`.
 - `close()` clears ownership before calling `close(2)` and does not retry an interrupted close.
-- POSIX calls and headers are guarded by `CASTLE_USING_POSIX_APIS`; non-POSIX operations return `not_configured`.
+- POSIX calls and headers are guarded by `CASTLE_USING_POSIX_APIS`; non-POSIX operations return `unsupported`.

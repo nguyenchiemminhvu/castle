@@ -10,7 +10,8 @@ int main()
     // validate_knots: ok and every failure class.
     CASTLE_SAMPLE_CHECK(castle::math::detail::validate_knots(xs, 3U) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(castle::math::detail::validate_knots(bad, 3U) == castle::status::invalid_argument);
-    CASTLE_SAMPLE_CHECK(castle::math::detail::validate_knots(xs, 1U) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(castle::math::detail::validate_knots(xs, 0U) == castle::status::empty);
+    CASTLE_SAMPLE_CHECK(castle::math::detail::validate_knots(xs, 1U) == castle::status::insufficient_data);
     CASTLE_SAMPLE_CHECK(castle::math::detail::validate_knots<float>(nullptr, 3U) == castle::status::invalid_argument);
 
     // find_segment: below, at first knot, interior, at last knot, above.

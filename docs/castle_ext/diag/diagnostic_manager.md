@@ -46,7 +46,7 @@ The uploaded simplified core snapshot referenced `castle/math/{gcd,lcm,ratio}.hp
 | `clear_recovery<Tag>()` | Removes a recovery callback without changing diagnostic state. |
 | `pause<Tag>()`, `resume<Tag>()` | Pause or resume one monitor. Existing confirmed state is held while paused; qualification progress is discarded. |
 | `pause()`, `resume()` | Pause or resume the entire manager. Raw reports are still accepted while globally paused. |
-| `rearm<Tag>()` | Re-arm a `one_shot` recovery action. Returns `status::invalid_argument` while that diagnostic is active. |
+| `rearm<Tag>()` | Re-arm a `one_shot` recovery action. Returns `status::invalid_state` while that diagnostic is active. |
 | `is_active<Tag>()`, `is_pending<Tag>()`, `is_enabled<Tag>()` | Query the qualified state, qualification progress, and effective enabled state. |
 | `get_state<Tag>()` | Returns a `diagnostic_snapshot` containing raw/qualified state and counters. |
 | `update()` | Evaluate rules using `castle::chrono::steady_clock::now()`. |

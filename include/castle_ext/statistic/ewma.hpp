@@ -78,7 +78,7 @@ public:
     /**
      * @brief Sets the smoothing factor and discards the state.
      * @param alpha Weight of the newest sample, in (0, 1]; 1 tracks the input exactly.
-     * @return `status::ok`, or `status::invalid_argument` (the filter becomes unconfigured).
+     * @return `status::ok`, or `status::invalid_config` (the filter becomes unconfigured).
      */
     castle::status configure(result_type alpha) CASTLE_NOEXCEPT
     {
@@ -87,7 +87,7 @@ public:
         {
             alpha_ = static_cast<result_type>(0);
             configured_ = false;
-            return castle::status::invalid_argument;
+            return castle::status::invalid_config;
         }
         alpha_ = alpha;
         configured_ = true;

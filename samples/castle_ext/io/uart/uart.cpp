@@ -53,7 +53,7 @@ int main()
     assert(::close(master) == 0);
 #else
     basic_uart serial;
-    assert(serial.open(config) == castle::status::not_configured);
+    assert(serial.open(config) == castle::status::unsupported);
 #endif
     return 0;
 }

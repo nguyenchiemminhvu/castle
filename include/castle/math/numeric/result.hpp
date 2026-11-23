@@ -51,7 +51,8 @@ struct numeric_result
      * @brief Completion status.
      * @details `status::ok` when the tolerance was met; `status::invalid_argument`
      *          for unusable input (e.g. a root bracket without a sign change);
-     *          `status::out_of_range` when the iteration budget ran out first.
+     *          `status::not_converged` when an iteration stalls or the iteration
+     *          budget ran out first.
      */
     castle::status code;
 

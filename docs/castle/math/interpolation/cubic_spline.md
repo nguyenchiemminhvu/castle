@@ -27,7 +27,7 @@
 | `using index_type = meta::smallest_uint_t<Capacity>` | Compact storage type for the knot count. |
 | `cubic_spline()` | Constructs an empty spline; `valid()` is `false`. |
 | `static size_type capacity()` | Returns `Capacity`, the maximum number of knots. |
-| `status build(const T* xs, const T* ys, size_type count, spline_kind kind = spline_kind::natural, T start_slope = 0, T end_slope = 0)` | Copies the knots and computes the tangents. `count` is in `[2, Capacity]`; `xs` strictly increasing. `start_slope` / `end_slope` are used by `spline_kind::clamped` only. Returns `status::ok`; `status::invalid_argument` for null pointers, `count < 2`, or non-increasing/NaN abscissas; `status::full` when `count > Capacity`. On any failure the spline is left empty (`valid() == false`), even if it previously held a fit. `O(count)`. |
+| `status build(const T* xs, const T* ys, size_type count, spline_kind kind = spline_kind::natural, T start_slope = 0, T end_slope = 0)` | Copies the knots and computes the tangents. `count` is in `[2, Capacity]`; `xs` strictly increasing. `start_slope` / `end_slope` are used by `spline_kind::clamped` only. Returns `status::ok`; `status::invalid_argument` for null pointers or non-increasing/NaN abscissas; `status::empty` for `count == 0`; `status::insufficient_data` for `count == 1`; and `status::full` when `count > Capacity`. On any failure the spline is left empty (`valid() == false`), even if it previously held a fit. `O(count)`. |
 | `bool valid() const` | `true` when the spline holds fitted knots. |
 | `size_type size() const` | Number of knots, or `0` when empty. |
 | `T x_min() const` | Smallest abscissa. Spline must be valid. |

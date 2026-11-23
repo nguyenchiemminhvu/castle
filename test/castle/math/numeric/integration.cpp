@@ -289,23 +289,23 @@ TEST(MathNumericIntegration, RombergLargeMagnitudeUsesRelativeTolerance)
     EXPECT_NEAR(result.value, 9.0e6, 1e-3);
 }
 
-TEST(MathNumericIntegration, RombergNotConvergedReportsOutOfRangeWithBestEstimate)
+TEST(MathNumericIntegration, RombergIterationBudgetReportsNotConvergedWithBestEstimate)
 {
     const auto minimal = castle::math::integrate_romberg<2U>(lorentz, 0.0, 1.0, 1e-14);
     EXPECT_FALSE(minimal.ok());
-    EXPECT_EQ(minimal.code, castle::status::out_of_range);
+    EXPECT_EQ(minimal.code, castle::status::not_converged);
     EXPECT_EQ(minimal.iterations, 2U);
     EXPECT_GT(minimal.error, 1e-14);
     EXPECT_NEAR(minimal.value, kAtanOne, 5e-3);
 
     const auto small = castle::math::integrate_romberg<3U>(lorentz, 0.0, 1.0, 1e-14);
     EXPECT_FALSE(small.ok());
-    EXPECT_EQ(small.code, castle::status::out_of_range);
+    EXPECT_EQ(small.code, castle::status::not_converged);
     EXPECT_EQ(small.iterations, 3U);
     EXPECT_NEAR(small.value, kAtanOne, 1e-3);
 
     const auto exhausted = castle::math::integrate_romberg<5U>(exp_fn, 0.0, 3.0, 1e-15);
-    EXPECT_EQ(exhausted.code, castle::status::out_of_range);
+    EXPECT_EQ(exhausted.code, castle::status::not_converged);
     EXPECT_EQ(exhausted.iterations, 5U);
     EXPECT_NEAR(exhausted.value, castle::math::exp(3.0) - 1.0, 1e-3);
 }
@@ -325,7 +325,7 @@ TEST(MathNumericIntegration, RombergFloat)
     EXPECT_NEAR(ok.value, 9.0F, 1e-4F);
 
     const auto limited = castle::math::integrate_romberg<2U>([](float x) { return 1.0F / (1.0F + x * x); }, 0.0F, 1.0F, 1e-9F);
-    EXPECT_EQ(limited.code, castle::status::out_of_range);
+    EXPECT_EQ(limited.code, castle::status::not_converged);
     EXPECT_NEAR(limited.value, 0.785398F, 5e-3F);
 }
 

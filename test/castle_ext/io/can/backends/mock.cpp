@@ -96,7 +96,7 @@ TEST(CanMockBackend, SecondOpenFailsWithInvalidConfigAndKeepsExistingState)
     ASSERT_EQ(backend.send(make_frame(0x10U), no_wait, nullptr), status::ok);
 
     int error = 123;
-    EXPECT_EQ(backend.open("can1", can_config(bitrate_1m, can_mode::loopback), &error), status::invalid_config);
+    EXPECT_EQ(backend.open("can1", can_config(bitrate_1m, can_mode::loopback), &error), status::invalid_state);
     EXPECT_EQ(error, 0);
 
     EXPECT_TRUE(backend.is_open());
@@ -333,7 +333,7 @@ TEST(CanMockBackend, ListenOnlyRejectsSendButStillReceives)
     install(backend, filter::any());
 
     int error = 123;
-    EXPECT_EQ(backend.send(make_frame(0x10U), no_wait, &error), status::invalid_config);
+    EXPECT_EQ(backend.send(make_frame(0x10U), no_wait, &error), status::invalid_state);
     EXPECT_EQ(error, 0);
     EXPECT_EQ(backend.sent_count(), 0U);
 
@@ -807,7 +807,7 @@ TEST(CanMockBackend, BusFacadeOpenValidatesEndpointThroughBackend)
     EXPECT_TRUE(bus.is_open());
     EXPECT_EQ(bus.backend().configuration().bitrate, bitrate_125k);
     EXPECT_EQ(bus.backend().configuration().mode, can_mode::loopback);
-    EXPECT_EQ(bus.open("vcan0", can_config(), nullptr), status::invalid_config);
+    EXPECT_EQ(bus.open("vcan0", can_config(), nullptr), status::invalid_state);
 
     EXPECT_EQ(bus.close(nullptr), status::ok);
     EXPECT_FALSE(bus.is_open());

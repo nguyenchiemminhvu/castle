@@ -386,7 +386,7 @@ private:
         }
         if (state_ == state::complete)
         {
-            return size == 0U ? castle::status::ok : castle::status::invalid_config;
+            return size == 0U ? castle::status::ok : castle::status::invalid_state;
         }
         if (data == nullptr && size != 0U)
         {

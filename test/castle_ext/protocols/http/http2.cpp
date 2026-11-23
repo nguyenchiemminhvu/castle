@@ -77,7 +77,7 @@ TEST(Http2FrameParser, RejectsOversizedAndStructurallyInvalidFrames)
 
     parser.reset();
     uint8_t bad_ping[9U] = {0U, 0U, 7U, 0x06U, 0U, 0U, 0U, 0U, 0U};
-    EXPECT_EQ(parser.feed(bad_ping, sizeof(bad_ping), [](http2_frame_view const&) { return castle::status::ok; }), castle::status::invalid_argument);
+    EXPECT_EQ(parser.feed(bad_ping, sizeof(bad_ping), [](http2_frame_view const&) { return castle::status::ok; }), castle::status::protocol_error);
     EXPECT_EQ(parser.last_error(), error_code::invalid_frame);
 }
 
@@ -108,7 +108,7 @@ TEST(Http2Session, MultiplexesOddClientStreamsAndEnforcesCompileTimeLimit)
     EXPECT_EQ(session.active_stream_count(), 2U);
     typename decltype(session)::headers_type headers;
     uint32_t third = 0U;
-    EXPECT_EQ(session.open_stream(method::get, "/", "peer.test", headers, string_view(), third), castle::status::out_of_range);
+    EXPECT_EQ(session.open_stream(method::get, "/", "peer.test", headers, string_view(), third), castle::status::full);
     EXPECT_EQ(session.last_error(), error_code::stream_limit);
 
     http2_session<1U, 512U, 16384U, 128U> te_session;
@@ -203,7 +203,7 @@ TEST(Http2Session, RejectsContentLengthMismatchAndInformationalEndStream)
     ASSERT_EQ(mismatch.feed(frame, size), castle::status::ok);
     const uint8_t one_byte[] = {'x'};
     size = make_frame(frame, 0U, 0x01U, stream, one_byte, sizeof(one_byte));
-    EXPECT_EQ(mismatch.feed(frame, size), castle::status::invalid_argument);
+    EXPECT_EQ(mismatch.feed(frame, size), castle::status::protocol_error);
     EXPECT_EQ(mismatch.last_error(), error_code::protocol_error);
 
     http2_session<1U, 256U, 16384U, 32U> informational;
@@ -211,7 +211,7 @@ TEST(Http2Session, RejectsContentLengthMismatchAndInformationalEndStream)
     uint32_t info_stream = open_get(informational);
     const uint8_t status_100[] = {0x08U, 0x03U, '1', '0', '0'}; // Literal :status = 100.
     size = make_frame(frame, 1U, 0x05U, info_stream, status_100, sizeof(status_100));
-    EXPECT_EQ(informational.feed(frame, size), castle::status::invalid_argument);
+    EXPECT_EQ(informational.feed(frame, size), castle::status::protocol_error);
     EXPECT_EQ(informational.last_error(), error_code::protocol_error);
 
     http2_session<1U, 256U, 16384U, 32U> switching_protocols;
@@ -219,7 +219,7 @@ TEST(Http2Session, RejectsContentLengthMismatchAndInformationalEndStream)
     uint32_t switch_stream = open_get(switching_protocols);
     const uint8_t status_101[] = {0x08U, 0x03U, '1', '0', '1'};
     size = make_frame(frame, 1U, 0x04U, switch_stream, status_101, sizeof(status_101));
-    EXPECT_EQ(switching_protocols.feed(frame, size), castle::status::invalid_argument);
+    EXPECT_EQ(switching_protocols.feed(frame, size), castle::status::protocol_error);
     EXPECT_EQ(switching_protocols.last_error(), error_code::protocol_error);
 }
 
@@ -234,7 +234,7 @@ TEST(Http2Session, RejectsBodyForNoBodyResponseAndNonTerminalTrailers)
     ASSERT_EQ(no_body.feed(frame, size), castle::status::ok);
     const uint8_t body[] = {'x'};
     size = make_frame(frame, 0U, 0x01U, no_body_stream, body, sizeof(body));
-    EXPECT_EQ(no_body.feed(frame, size), castle::status::invalid_argument);
+    EXPECT_EQ(no_body.feed(frame, size), castle::status::protocol_error);
     EXPECT_EQ(no_body.last_error(), error_code::protocol_error);
 
     http2_session<1U, 256U, 16384U, 32U> trailers;
@@ -245,7 +245,7 @@ TEST(Http2Session, RejectsBodyForNoBodyResponseAndNonTerminalTrailers)
     ASSERT_EQ(trailers.feed(frame, size), castle::status::ok);
     const uint8_t trailer[] = {0x00U, 0x01U, 'x', 0x01U, 'y'};
     size = make_frame(frame, 1U, 0x04U, trailer_stream, trailer, sizeof(trailer));
-    EXPECT_EQ(trailers.feed(frame, size), castle::status::invalid_argument);
+    EXPECT_EQ(trailers.feed(frame, size), castle::status::protocol_error);
     EXPECT_EQ(trailers.last_error(), error_code::protocol_error);
 }
 
@@ -310,7 +310,7 @@ TEST(Http2Session, HandlesWindowUpdatesAndRejectsZeroCredit)
     EXPECT_EQ(session.feed(frame, size), castle::status::ok);
     increment[3U] = 0U;
     size = make_frame(frame, 8U, 0U, 0U, increment, sizeof(increment));
-    EXPECT_EQ(session.feed(frame, size), castle::status::invalid_argument);
+    EXPECT_EQ(session.feed(frame, size), castle::status::protocol_error);
     EXPECT_EQ(session.last_error(), error_code::flow_control_error);
 }
 
@@ -335,10 +335,10 @@ TEST(Http2Session, ResetsStreamsAndProcessesGoaway)
     EXPECT_EQ(session.feed(frame, size), castle::status::ok);
     EXPECT_TRUE(session.goaway_received());
     EXPECT_EQ(session.last_error(), error_code::goaway_received);
-    EXPECT_EQ(callback_status, castle::status::data_loss);
+    EXPECT_EQ(callback_status, castle::status::unavailable);
     typename decltype(session)::headers_type headers;
     uint32_t rejected = 0U;
-    EXPECT_EQ(session.open_stream(method::get, "/", "peer.test", headers, string_view(), rejected), castle::status::data_loss);
+    EXPECT_EQ(session.open_stream(method::get, "/", "peer.test", headers, string_view(), rejected), castle::status::unavailable);
     EXPECT_EQ(later, 3U);
 }
 
@@ -350,7 +350,7 @@ TEST(Http2Session, ReportsCompressionErrorsAndPrematurePeerClosure)
     const uint8_t invalid_index[] = {0x80U};
     uint8_t frame[16U]{};
     size_type size = make_frame(frame, 1U, 0x04U, stream, invalid_index, sizeof(invalid_index));
-    EXPECT_EQ(compression.feed(frame, size), castle::status::invalid_argument);
+    EXPECT_EQ(compression.feed(frame, size), castle::status::protocol_error);
     EXPECT_EQ(compression.last_error(), error_code::compression_error);
 
     http2_session<1U, 256U, 16384U, 128U> closed;
@@ -366,14 +366,14 @@ TEST(Http2Session, RejectsInvalidPeerSettingsAndHeaderBlocks)
     uint8_t setting[6U] = {0U, 4U, 0x80U, 0U, 0U, 0U}; // INITIAL_WINDOW_SIZE > 2^31-1
     uint8_t frame[24U]{};
     size_type size = make_frame(frame, 4U, 0U, 0U, setting, sizeof(setting));
-    EXPECT_EQ(session.feed(frame, size), castle::status::invalid_argument);
+    EXPECT_EQ(session.feed(frame, size), castle::status::protocol_error);
     EXPECT_EQ(session.last_error(), error_code::flow_control_error);
 
     http2_session<1U, 256U, 16384U, 128U> push;
     ASSERT_EQ(push.start(), castle::status::ok);
     const uint8_t push_payload[] = {0U, 0U, 0U, 1U};
     size = make_frame(frame, 5U, 0U, 1U, push_payload, sizeof(push_payload));
-    EXPECT_EQ(push.feed(frame, size), castle::status::invalid_argument);
+    EXPECT_EQ(push.feed(frame, size), castle::status::protocol_error);
     EXPECT_EQ(push.last_error(), error_code::protocol_error);
 }
 
@@ -419,7 +419,7 @@ TEST(Http2Session, AcceptsServerEnablePushZeroOnly)
 
     setting[5U] = 1U;
     size = make_frame(frame, 4U, 0U, 0U, setting, sizeof(setting));
-    EXPECT_EQ(session.feed(frame, size), castle::status::invalid_argument);
+    EXPECT_EQ(session.feed(frame, size), castle::status::protocol_error);
     EXPECT_EQ(session.last_error(), error_code::protocol_error);
 }
 
@@ -478,7 +478,7 @@ TEST(Http2Session, StreamErrorDoesNotMaskLaterFrameError)
     ASSERT_EQ(session.last_error(), error_code::stream_reset);
 
     const uint8_t bad_ping[9U] = {0U, 0U, 7U, 0x06U, 0U, 0U, 0U, 0U, 0U};
-    EXPECT_EQ(session.feed(bad_ping, sizeof(bad_ping)), castle::status::invalid_argument);
+    EXPECT_EQ(session.feed(bad_ping, sizeof(bad_ping)), castle::status::protocol_error);
     EXPECT_EQ(session.last_error(), error_code::invalid_frame);
 }
 
@@ -594,7 +594,7 @@ TEST(Http2FrameParser, RejectsEveryFrameTypeOutsideItsStreamAndLengthRules)
                               static_cast<uint8_t>(value.length), value.type, value.flags, 0U, 0U, 0U, 0U};
         detail::write_u32(header + 5U, value.stream_id);
         http2_frame_parser<> parser;
-        EXPECT_EQ(parser.feed(header, sizeof(header), accept), castle::status::invalid_argument) << static_cast<int>(value.type);
+        EXPECT_EQ(parser.feed(header, sizeof(header), accept), castle::status::protocol_error) << static_cast<int>(value.type);
         EXPECT_EQ(parser.last_error(), error_code::invalid_frame) << static_cast<int>(value.type);
     }
 
@@ -658,9 +658,9 @@ TEST(Http2Session, ParserErrorsLatchAndOpenStreamFailsAfterwards)
     uint32_t stream = 0U;
     ASSERT_EQ(session.start(), castle::status::ok);
     uint8_t bad[9U] = {};
-    EXPECT_EQ(session.feed(bad, sizeof(bad)), castle::status::invalid_argument); // DATA on stream 0
-    EXPECT_EQ(session.feed(bad, sizeof(bad)), castle::status::invalid_argument);
-    EXPECT_EQ(session.open_stream(method::get, "/", "h", headers, string_view(), stream), castle::status::not_configured);
+    EXPECT_EQ(session.feed(bad, sizeof(bad)), castle::status::protocol_error); // DATA on stream 0
+    EXPECT_EQ(session.feed(bad, sizeof(bad)), castle::status::protocol_error);
+    EXPECT_EQ(session.open_stream(method::get, "/", "h", headers, string_view(), stream), castle::status::invalid_state);
 }
 
 TEST(Http2Session, ReportsHeaderBlockAndOutputCapacityFailures)
@@ -757,7 +757,7 @@ TEST(Http2Session, ReleasesStreamsAndLooksUpUnknownOnes)
     http2_session<1U, 256U, 16384U, 64U> session;
     uint32_t stream = start_get(session);
     EXPECT_EQ(session.release_stream(99U), castle::status::not_found);
-    EXPECT_EQ(session.release_stream(stream), castle::status::invalid_config);
+    EXPECT_EQ(session.release_stream(stream), castle::status::invalid_state);
     EXPECT_EQ(session.response(99U).status_code, 0U);
     uint8_t reset_code[4U] = {};
     EXPECT_EQ(respond(session, stream, 0U, reset_code, sizeof(reset_code), http2_frame_type::rst_stream), castle::status::ok);
@@ -848,7 +848,7 @@ TEST(Http2Session, KeepsCreditWhenWindowUpdateCannotBeQueued)
         EXPECT_EQ(session.feed(frame, total), castle::status::ok) << i;
     }
     size_type total = make_frame(frame, 0U, 0U, stream, payload, sizeof(payload));
-    EXPECT_EQ(session.feed(frame, total), castle::status::invalid_argument);
+    EXPECT_EQ(session.feed(frame, total), castle::status::protocol_error);
     EXPECT_EQ(session.last_error(), error_code::flow_control_error);
 }
 
@@ -871,11 +871,11 @@ TEST(Http2Session, DiscardsFramesOfReleasedAndResetStreams)
     http2_session<2U, 256U, 16384U, 64U> even;
     uint32_t even_stream = start_get(even);
     (void)even_stream;
-    EXPECT_EQ(respond(even, 2U, 0x01U, data, sizeof(data), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(even, 2U, 0x01U, data, sizeof(data), http2_frame_type::data), castle::status::protocol_error);
 
     http2_session<2U, 256U, 16384U, 64U> unissued;
     ASSERT_EQ(unissued.start(), castle::status::ok);
-    EXPECT_EQ(respond(unissued, 3U, 0x01U, data, sizeof(data), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(unissued, 3U, 0x01U, data, sizeof(data), http2_frame_type::data), castle::status::protocol_error);
 }
 
 TEST(Http2Session, ValidatesDataFramingAndBodyLength)
@@ -883,19 +883,19 @@ TEST(Http2Session, ValidatesDataFramingAndBodyLength)
     http2_session<1U, 256U, 16384U, 64U> early;
     uint32_t early_stream = start_get(early);
     const uint8_t data[] = {'o', 'k'};
-    EXPECT_EQ(respond(early, early_stream, 0x01U, data, sizeof(data), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(early, early_stream, 0x01U, data, sizeof(data), http2_frame_type::data), castle::status::protocol_error);
 
     const uint8_t headers_only[] = {0x88U};
     http2_session<1U, 256U, 16384U, 64U> padded_empty;
     uint32_t padded_stream = start_get(padded_empty);
     ASSERT_EQ(respond(padded_empty, padded_stream, 0x04U, headers_only, sizeof(headers_only)), castle::status::ok);
-    EXPECT_EQ(respond(padded_empty, padded_stream, 0x08U, nullptr, 0U, http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(padded_empty, padded_stream, 0x08U, nullptr, 0U, http2_frame_type::data), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> padding_overrun;
     uint32_t overrun_stream = start_get(padding_overrun);
     ASSERT_EQ(respond(padding_overrun, overrun_stream, 0x04U, headers_only, sizeof(headers_only)), castle::status::ok);
     const uint8_t overrun[] = {5U, 'a'};
-    EXPECT_EQ(respond(padding_overrun, overrun_stream, 0x08U, overrun, sizeof(overrun), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(padding_overrun, overrun_stream, 0x08U, overrun, sizeof(overrun), http2_frame_type::data), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> padded;
     uint32_t padded_ok = start_get(padded);
@@ -917,7 +917,7 @@ TEST(Http2Session, ValidatesDataFramingAndBodyLength)
     size_type at = put_literal(length_two, 1U, "content-length", "2");
     ASSERT_EQ(respond(excess, excess_stream, 0x04U, length_two, at), castle::status::ok);
     const uint8_t three[] = {'a', 'b', 'c'};
-    EXPECT_EQ(respond(excess, excess_stream, 0x01U, three, sizeof(three), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(excess, excess_stream, 0x01U, three, sizeof(three), http2_frame_type::data), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> chunks;
     uint32_t chunk_stream = start_get(chunks);
@@ -926,14 +926,14 @@ TEST(Http2Session, ValidatesDataFramingAndBodyLength)
     at = put_literal(length_five, 1U, "content-length", "5");
     ASSERT_EQ(respond(chunks, chunk_stream, 0x04U, length_five, at), castle::status::ok);
     EXPECT_EQ(respond(chunks, chunk_stream, 0x00U, three, sizeof(three), http2_frame_type::data), castle::status::ok);
-    EXPECT_EQ(respond(chunks, chunk_stream, 0x00U, three, sizeof(three), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(chunks, chunk_stream, 0x00U, three, sizeof(three), http2_frame_type::data), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> mismatch_end;
     uint32_t mismatch_stream = start_get(mismatch_end);
     uint8_t length_mismatch[256U]{};
     length_mismatch[0U] = 0x88U;
     at = put_literal(length_mismatch, 1U, "content-length", "5");
-    EXPECT_EQ(respond(mismatch_end, mismatch_stream, 0x05U, length_mismatch, at), castle::status::invalid_argument);
+    EXPECT_EQ(respond(mismatch_end, mismatch_stream, 0x05U, length_mismatch, at), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> head;
     http2_session<1U, 256U, 16384U, 64U>::headers_type none;
@@ -952,7 +952,7 @@ TEST(Http2Session, ValidatesDataFramingAndBodyLength)
     uint32_t head_body_stream = 0U;
     ASSERT_EQ(head_body.open_stream(method::head, "/", "h", none_body, string_view(), head_body_stream), castle::status::ok);
     ASSERT_EQ(respond(head_body, head_body_stream, 0x04U, headers_only, sizeof(headers_only)), castle::status::ok);
-    EXPECT_EQ(respond(head_body, head_body_stream, 0x01U, data, sizeof(data), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(head_body, head_body_stream, 0x01U, data, sizeof(data), http2_frame_type::data), castle::status::protocol_error);
 }
 
 TEST(Http2Session, ValidatesResponseHeaderBlocks)
@@ -984,7 +984,7 @@ TEST(Http2Session, ValidatesResponseHeaderBlocks)
         http2_session<1U, 256U, 16384U, 64U> session;
         uint32_t id = start_get(session);
         at = put_literal(block, 0U, value_case.name, value_case.value);
-        EXPECT_EQ(respond(session, id, 0x05U, block, at), castle::status::invalid_argument) << value_case.value;
+        EXPECT_EQ(respond(session, id, 0x05U, block, at), castle::status::protocol_error) << value_case.value;
         EXPECT_EQ(session.last_error(), error_code::protocol_error) << value_case.value;
     }
 
@@ -992,24 +992,24 @@ TEST(Http2Session, ValidatesResponseHeaderBlocks)
     uint32_t after = start_get(pseudo_after);
     at = put_literal(block, 0U, "x-a", "1");
     block[at++] = 0x88U;
-    EXPECT_EQ(respond(pseudo_after, after, 0x05U, block, at), castle::status::invalid_argument);
+    EXPECT_EQ(respond(pseudo_after, after, 0x05U, block, at), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> other_pseudo;
     uint32_t other = start_get(other_pseudo);
     at = put_literal(block, 0U, ":foo", "1");
     block[at++] = 0x88U;
-    EXPECT_EQ(respond(other_pseudo, other, 0x05U, block, at), castle::status::invalid_argument);
+    EXPECT_EQ(respond(other_pseudo, other, 0x05U, block, at), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> duplicate;
     uint32_t dup = start_get(duplicate);
     const uint8_t twice[] = {0x88U, 0x88U};
-    EXPECT_EQ(respond(duplicate, dup, 0x05U, twice, sizeof(twice)), castle::status::invalid_argument);
+    EXPECT_EQ(respond(duplicate, dup, 0x05U, twice, sizeof(twice)), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> uppercase;
     uint32_t upper = start_get(uppercase);
     block[0U] = 0x88U;
     at = put_literal(block, 1U, "X-Up", "1");
-    EXPECT_EQ(respond(uppercase, upper, 0x05U, block, at), castle::status::invalid_argument);
+    EXPECT_EQ(respond(uppercase, upper, 0x05U, block, at), castle::status::protocol_error);
 
     char const* connection_fields[] = {"connection", "proxy-connection", "keep-alive", "transfer-encoding", "upgrade"};
     for (char const* name : connection_fields)
@@ -1018,38 +1018,38 @@ TEST(Http2Session, ValidatesResponseHeaderBlocks)
         uint32_t id = start_get(session);
         block[0U] = 0x88U;
         at = put_literal(block, 1U, name, "x");
-        EXPECT_EQ(respond(session, id, 0x05U, block, at), castle::status::invalid_argument) << name;
+        EXPECT_EQ(respond(session, id, 0x05U, block, at), castle::status::protocol_error) << name;
     }
 
     http2_session<1U, 256U, 16384U, 64U> bad_length;
     uint32_t bad_length_stream = start_get(bad_length);
     block[0U] = 0x88U;
     at = put_literal(block, 1U, "content-length", "abc");
-    EXPECT_EQ(respond(bad_length, bad_length_stream, 0x05U, block, at), castle::status::invalid_argument);
+    EXPECT_EQ(respond(bad_length, bad_length_stream, 0x05U, block, at), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> trailer_length;
     uint32_t trailer_stream = start_get(trailer_length);
     ASSERT_EQ(respond(trailer_length, trailer_stream, 0x04U, status_200, sizeof(status_200)), castle::status::ok);
     at = put_literal(block, 0U, "content-length", "1");
-    EXPECT_EQ(respond(trailer_length, trailer_stream, 0x05U, block, at), castle::status::invalid_argument);
+    EXPECT_EQ(respond(trailer_length, trailer_stream, 0x05U, block, at), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> trailer_pseudo;
     uint32_t trailer_pseudo_stream = start_get(trailer_pseudo);
     ASSERT_EQ(respond(trailer_pseudo, trailer_pseudo_stream, 0x04U, status_200, sizeof(status_200)), castle::status::ok);
-    EXPECT_EQ(respond(trailer_pseudo, trailer_pseudo_stream, 0x05U, status_200, sizeof(status_200)), castle::status::invalid_argument);
+    EXPECT_EQ(respond(trailer_pseudo, trailer_pseudo_stream, 0x05U, status_200, sizeof(status_200)), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> trailer_open;
     uint32_t trailer_open_stream = start_get(trailer_open);
     ASSERT_EQ(respond(trailer_open, trailer_open_stream, 0x04U, status_200, sizeof(status_200)), castle::status::ok);
     at = put_literal(block, 0U, "x-trailer", "1");
-    EXPECT_EQ(respond(trailer_open, trailer_open_stream, 0x04U, block, at), castle::status::invalid_argument);
+    EXPECT_EQ(respond(trailer_open, trailer_open_stream, 0x04U, block, at), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> mismatch;
     uint32_t mismatch_stream = start_get(mismatch);
     block[0U] = 0x88U;
     at = put_literal(block, 1U, "content-length", "1");
     at = put_literal(block, at, "content-length", "2");
-    EXPECT_EQ(respond(mismatch, mismatch_stream, 0x04U, block, at), castle::status::invalid_argument);
+    EXPECT_EQ(respond(mismatch, mismatch_stream, 0x04U, block, at), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> repeated;
     uint32_t repeated_stream = start_get(repeated);
@@ -1063,7 +1063,7 @@ TEST(Http2Session, ValidatesResponseHeaderBlocks)
     http2_session<1U, 256U, 16384U, 64U> no_status;
     uint32_t no_status_stream = start_get(no_status);
     at = put_literal(block, 0U, "x-a", "1");
-    EXPECT_EQ(respond(no_status, no_status_stream, 0x05U, block, at), castle::status::invalid_argument);
+    EXPECT_EQ(respond(no_status, no_status_stream, 0x05U, block, at), castle::status::protocol_error);
 
     http2_session<1U, 256U, 16384U, 64U> interim;
     uint32_t interim_stream = start_get(interim);
@@ -1093,16 +1093,16 @@ TEST(Http2Session, HandlesSettingsWindowsAndAcknowledgements)
     const uint8_t unpaced[6U] = {0U, 5U, 0U, 0U, 3U, 232U};
     http2_session<1U, 256U, 16384U, 64U> bad_size;
     ASSERT_EQ(bad_size.start(), castle::status::ok);
-    EXPECT_EQ(respond(bad_size, 0U, 0U, unpaced, sizeof(unpaced), http2_frame_type::settings), castle::status::invalid_argument);
+    EXPECT_EQ(respond(bad_size, 0U, 0U, unpaced, sizeof(unpaced), http2_frame_type::settings), castle::status::protocol_error);
     const uint8_t oversized_frame[6U] = {0U, 5U, 0x01U, 0U, 0U, 0U};
     http2_session<1U, 256U, 16384U, 64U> too_big;
     ASSERT_EQ(too_big.start(), castle::status::ok);
-    EXPECT_EQ(respond(too_big, 0U, 0U, oversized_frame, sizeof(oversized_frame), http2_frame_type::settings), castle::status::invalid_argument);
+    EXPECT_EQ(respond(too_big, 0U, 0U, oversized_frame, sizeof(oversized_frame), http2_frame_type::settings), castle::status::protocol_error);
 
     const uint8_t push_on[6U] = {0U, 2U, 0U, 0U, 0U, 1U};
     http2_session<1U, 256U, 16384U, 64U> push;
     ASSERT_EQ(push.start(), castle::status::ok);
-    EXPECT_EQ(respond(push, 0U, 0U, push_on, sizeof(push_on), http2_frame_type::settings), castle::status::invalid_argument);
+    EXPECT_EQ(respond(push, 0U, 0U, push_on, sizeof(push_on), http2_frame_type::settings), castle::status::protocol_error);
 
     http2_session<2U, 256U, 16384U, 64U> window;
     uint32_t window_stream = start_get(window);
@@ -1111,13 +1111,13 @@ TEST(Http2Session, HandlesSettingsWindowsAndAcknowledgements)
     const uint8_t grow[4U] = {0x7FU, 0xFFU, 0xFCU, 0x17U};
     ASSERT_EQ(respond(window, window_stream, 0U, grow, sizeof(grow), http2_frame_type::window_update), castle::status::ok);
     const uint8_t window_5000[6U] = {0U, 4U, 0U, 0U, 0x13U, 0x88U};
-    EXPECT_EQ(respond(window, 0U, 0U, window_5000, sizeof(window_5000), http2_frame_type::settings), castle::status::invalid_argument);
+    EXPECT_EQ(respond(window, 0U, 0U, window_5000, sizeof(window_5000), http2_frame_type::settings), castle::status::protocol_error);
     EXPECT_EQ(window.last_error(), error_code::flow_control_error);
 
     http2_session<2U, 256U, 16384U, 64U> huge_window;
     start_get(huge_window);
     const uint8_t huge[6U] = {0U, 4U, 0x80U, 0U, 0U, 0U};
-    EXPECT_EQ(respond(huge_window, 0U, 0U, huge, sizeof(huge), http2_frame_type::settings), castle::status::invalid_argument);
+    EXPECT_EQ(respond(huge_window, 0U, 0U, huge, sizeof(huge), http2_frame_type::settings), castle::status::protocol_error);
 
     http2_session<2U, 256U, 16384U, 64U> limited;
     ASSERT_EQ(limited.start(), castle::status::ok);
@@ -1127,17 +1127,17 @@ TEST(Http2Session, HandlesSettingsWindowsAndAcknowledgements)
     EXPECT_EQ(first, 1U);
     http2_session<2U, 256U, 16384U, 64U>::headers_type headers;
     uint32_t second = 0U;
-    EXPECT_EQ(limited.open_stream(method::get, "/", "peer.test", headers, string_view(), second), castle::status::out_of_range);
+    EXPECT_EQ(limited.open_stream(method::get, "/", "peer.test", headers, string_view(), second), castle::status::full);
 
     http2_session<2U, 256U, 16384U, 64U> window_limit;
     uint32_t limit_stream = start_get(window_limit);
     (void)limit_stream;
     const uint8_t maximum[4U] = {0x7FU, 0xFFU, 0xFFU, 0xFFU};
-    EXPECT_EQ(respond(window_limit, 0U, 0U, maximum, sizeof(maximum), http2_frame_type::window_update), castle::status::invalid_argument);
+    EXPECT_EQ(respond(window_limit, 0U, 0U, maximum, sizeof(maximum), http2_frame_type::window_update), castle::status::protocol_error);
 
     http2_session<2U, 256U, 16384U, 64U> stream_limit;
     uint32_t stream_limit_id = start_get(stream_limit);
-    EXPECT_EQ(respond(stream_limit, stream_limit_id, 0U, maximum, sizeof(maximum), http2_frame_type::window_update), castle::status::invalid_argument);
+    EXPECT_EQ(respond(stream_limit, stream_limit_id, 0U, maximum, sizeof(maximum), http2_frame_type::window_update), castle::status::protocol_error);
     EXPECT_EQ(stream_limit.last_error(), error_code::flow_control_error);
 
     http2_session<2U, 256U, 16384U, 64U> unknown_window;
@@ -1157,7 +1157,7 @@ TEST(Http2Session, HandlesControlFramesAndHeaderBlockSequencing)
     http2_session<2U, 256U, 16384U, 64U> pushed;
     uint32_t pushed_stream = start_get(pushed);
     const uint8_t promised[4U] = {0U, 0U, 0U, 1U};
-    EXPECT_EQ(respond(pushed, pushed_stream, 0U, promised, sizeof(promised), http2_frame_type::push_promise), castle::status::invalid_argument);
+    EXPECT_EQ(respond(pushed, pushed_stream, 0U, promised, sizeof(promised), http2_frame_type::push_promise), castle::status::protocol_error);
 
     http2_session<2U, 256U, 16384U, 64U> priority;
     uint32_t priority_stream = start_get(priority);
@@ -1169,21 +1169,21 @@ TEST(Http2Session, HandlesControlFramesAndHeaderBlockSequencing)
     uint8_t reset_code[4U] = {};
     EXPECT_EQ(respond(unknown_reset, 7U, 0U, reset_code, sizeof(reset_code), http2_frame_type::rst_stream), castle::status::ok);
     const uint8_t status_200[] = {0x88U};
-    EXPECT_EQ(respond(unknown_reset, 5U, 0x05U, status_200, sizeof(status_200)), castle::status::invalid_argument);
+    EXPECT_EQ(respond(unknown_reset, 5U, 0x05U, status_200, sizeof(status_200)), castle::status::protocol_error);
 
     http2_session<2U, 256U, 16384U, 64U> bad_continuation;
     ASSERT_EQ(bad_continuation.start(), castle::status::ok);
-    EXPECT_EQ(respond(bad_continuation, 1U, 0x05U, status_200, sizeof(status_200), http2_frame_type::continuation), castle::status::invalid_argument);
+    EXPECT_EQ(respond(bad_continuation, 1U, 0x05U, status_200, sizeof(status_200), http2_frame_type::continuation), castle::status::protocol_error);
 
     http2_session<2U, 256U, 16384U, 64U> pending;
     uint32_t pending_stream = start_get(pending);
     EXPECT_EQ(respond(pending, pending_stream, 0x00U, status_200, sizeof(status_200)), castle::status::ok);
-    EXPECT_EQ(respond(pending, pending_stream, 0x01U, status_200, sizeof(status_200), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(pending, pending_stream, 0x01U, status_200, sizeof(status_200), http2_frame_type::data), castle::status::protocol_error);
 
     http2_session<2U, 256U, 16384U, 64U> mismatch;
     uint32_t mismatch_stream = start_get(mismatch);
     ASSERT_EQ(respond(mismatch, mismatch_stream, 0x00U, status_200, sizeof(status_200)), castle::status::ok);
-    EXPECT_EQ(respond(mismatch, 3U, 0x04U, status_200, sizeof(status_200), http2_frame_type::continuation), castle::status::invalid_argument);
+    EXPECT_EQ(respond(mismatch, 3U, 0x04U, status_200, sizeof(status_200), http2_frame_type::continuation), castle::status::protocol_error);
 
     http2_session<4U, 6U, 16384U, 64U> small_block;
     ASSERT_EQ(small_block.start(), castle::status::ok);
@@ -1202,15 +1202,15 @@ TEST(Http2Session, HandlesControlFramesAndHeaderBlockSequencing)
 
     http2_session<2U, 256U, 16384U, 64U> padding;
     uint32_t padding_stream = start_get(padding);
-    EXPECT_EQ(respond(padding, padding_stream, 0x08U, nullptr, 0U), castle::status::invalid_argument);
+    EXPECT_EQ(respond(padding, padding_stream, 0x08U, nullptr, 0U), castle::status::protocol_error);
     http2_session<2U, 256U, 16384U, 64U> overrun;
     uint32_t overrun_stream = start_get(overrun);
     const uint8_t pad_too_big[] = {5U, 0x88U};
-    EXPECT_EQ(respond(overrun, overrun_stream, 0x08U, pad_too_big, sizeof(pad_too_big)), castle::status::invalid_argument);
+    EXPECT_EQ(respond(overrun, overrun_stream, 0x08U, pad_too_big, sizeof(pad_too_big)), castle::status::protocol_error);
     http2_session<2U, 256U, 16384U, 64U> priority_short;
     uint32_t priority_short_stream = start_get(priority_short);
     const uint8_t short_priority[] = {0x88U, 0U, 0U, 0U};
-    EXPECT_EQ(respond(priority_short, priority_short_stream, 0x24U, short_priority, sizeof(short_priority)), castle::status::invalid_argument);
+    EXPECT_EQ(respond(priority_short, priority_short_stream, 0x24U, short_priority, sizeof(short_priority)), castle::status::protocol_error);
     http2_session<2U, 256U, 16384U, 64U> padded_ok;
     uint32_t padded_ok_stream = start_get(padded_ok);
     const uint8_t padded_block[] = {1U, 0x88U, 0U};
@@ -1226,7 +1226,7 @@ TEST(Http2Session, HandlesControlFramesAndHeaderBlockSequencing)
     castle::status callback_status = castle::status::ok;
     ASSERT_EQ(goaway.set_response_callback([&callback_status](castle::status result, response_view const&) { callback_status = result; }), castle::status::ok);
     ASSERT_EQ(respond(goaway, 0U, 0U, goaway_payload, sizeof(goaway_payload), http2_frame_type::goaway), castle::status::ok);
-    EXPECT_EQ(callback_status, castle::status::data_loss);
+    EXPECT_EQ(callback_status, castle::status::unavailable);
     (void)goaway_stream;
 }
 
@@ -1242,7 +1242,7 @@ TEST(Http2Session, FailsConnectionWhenOutputIsFull)
     const uint8_t status_200[] = {0x88U};
     ASSERT_EQ(respond(body_limit, stream, 0x04U, status_200, sizeof(status_200)), castle::status::ok);
     const uint8_t three[] = {'a', 'b', 'c'};
-    EXPECT_EQ(respond(body_limit, stream, 0x00U, three, sizeof(three), http2_frame_type::data), castle::status::out_of_range);
+    EXPECT_EQ(respond(body_limit, stream, 0x00U, three, sizeof(three), http2_frame_type::data), castle::status::full);
     EXPECT_EQ(body_limit.last_error(), error_code::output_full);
 
     full settings;
@@ -1251,14 +1251,14 @@ TEST(Http2Session, FailsConnectionWhenOutputIsFull)
     ASSERT_EQ(settings.open_stream(method::get, string_view(long_path.data(), long_path.size()), "h", headers, string_view(), stream), castle::status::ok);
     const uint8_t ack[] = {0U};
     (void)ack;
-    EXPECT_EQ(respond(settings, 0U, 0U, nullptr, 0U, http2_frame_type::settings), castle::status::out_of_range);
+    EXPECT_EQ(respond(settings, 0U, 0U, nullptr, 0U, http2_frame_type::settings), castle::status::full);
     EXPECT_EQ(settings.last_error(), error_code::output_full);
 
     full ping;
     ASSERT_EQ(ping.start(), castle::status::ok);
     ASSERT_EQ(ping.open_stream(method::get, string_view(long_path.data(), long_path.size()), "h", headers, string_view(), stream), castle::status::ok);
     const uint8_t payload[8U] = {};
-    EXPECT_EQ(respond(ping, 0U, 0U, payload, sizeof(payload), http2_frame_type::ping), castle::status::out_of_range);
+    EXPECT_EQ(respond(ping, 0U, 0U, payload, sizeof(payload), http2_frame_type::ping), castle::status::full);
     EXPECT_EQ(ping.last_error(), error_code::output_full);
 }
 
@@ -1274,7 +1274,7 @@ TEST(Http2Session, SettlesRequestWindowsAndRejectsOverflows)
     ASSERT_EQ(session.consume_output(session.output_size()), castle::status::ok);
     EXPECT_EQ(session.output_size(), 0U);
     const uint8_t overflow[4U] = {0x7FU, 0xFFU, 0xFFU, 0xFFU};
-    EXPECT_EQ(respond(session, stream, 0U, overflow, sizeof(overflow), http2_frame_type::window_update), castle::status::invalid_argument);
+    EXPECT_EQ(respond(session, stream, 0U, overflow, sizeof(overflow), http2_frame_type::window_update), castle::status::protocol_error);
     EXPECT_EQ(session.last_error(), error_code::flow_control_error);
 }
 
@@ -1284,7 +1284,7 @@ TEST(Http2Session, UsesStreamHeaderNamesOnlyForKnownStreams)
     uint32_t stream = start_get(session);
     (void)stream;
     const uint8_t status_200[] = {0x88U};
-    EXPECT_EQ(respond(session, 5U, 0x05U, status_200, sizeof(status_200)), castle::status::invalid_argument);
+    EXPECT_EQ(respond(session, 5U, 0x05U, status_200, sizeof(status_200)), castle::status::protocol_error);
     EXPECT_EQ(session.last_error(), error_code::protocol_error);
 }
 
@@ -1303,7 +1303,7 @@ TEST(Http2Session, ExhaustedStreamSlotsAndCompletedStreamRelease)
     uint32_t stream = start_get(session);
     http2_session<1U, 256U, 16384U, 64U>::headers_type headers;
     uint32_t next = 0U;
-    EXPECT_EQ(session.open_stream(method::get, "/", "h", headers, string_view(), next), castle::status::out_of_range);
+    EXPECT_EQ(session.open_stream(method::get, "/", "h", headers, string_view(), next), castle::status::full);
     const uint8_t status_200[] = {0x88U};
     ASSERT_EQ(respond(session, stream, 0x05U, status_200, sizeof(status_200)), castle::status::ok);
     EXPECT_EQ(session.open_stream(method::get, "/", "h", headers, string_view(), next), castle::status::full);
@@ -1346,7 +1346,7 @@ TEST(Http2Session, HeadersOnFinishedStreamIsProtocolError)
     uint32_t stream = start_get(session);
     const uint8_t status_200[] = {0x88U};
     ASSERT_EQ(respond(session, stream, 0x05U, status_200, sizeof(status_200)), castle::status::ok);
-    EXPECT_EQ(respond(session, stream, 0x05U, status_200, sizeof(status_200)), castle::status::invalid_argument);
+    EXPECT_EQ(respond(session, stream, 0x05U, status_200, sizeof(status_200)), castle::status::protocol_error);
     EXPECT_EQ(session.last_error(), error_code::protocol_error);
 }
 
@@ -1369,7 +1369,7 @@ TEST(Http2Session, GoawayFailsOnlyUnprocessedOpenStreams)
     size_type failed = 0U;
     ASSERT_EQ(session.set_response_callback([&failed](castle::status result, response_view const&)
     {
-        if (result == castle::status::data_loss) { ++failed; }
+        if (result == castle::status::unavailable) { ++failed; }
     }), castle::status::ok);
     (void)start_get(session);
     (void)open_get(session);
@@ -1450,7 +1450,7 @@ TEST(Http2Session, NoContentRejectsData)
     const uint8_t status_204[] = {0x89U};
     ASSERT_EQ(respond(session, stream, 0x04U, status_204, sizeof(status_204)), castle::status::ok);
     const uint8_t data[] = {'x'};
-    EXPECT_EQ(respond(session, stream, 0U, data, sizeof(data), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(session, stream, 0U, data, sizeof(data), http2_frame_type::data), castle::status::protocol_error);
     EXPECT_EQ(session.last_error(), error_code::protocol_error);
 }
 
@@ -1461,7 +1461,7 @@ TEST(Http2Session, NotModifiedRejectsDataAndAcceptsContentLengthFinish)
     const uint8_t status_304[] = {0x8BU};
     ASSERT_EQ(respond(rejecting, first, 0x04U, status_304, sizeof(status_304)), castle::status::ok);
     const uint8_t data[] = {'x'};
-    EXPECT_EQ(respond(rejecting, first, 0U, data, sizeof(data), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(rejecting, first, 0U, data, sizeof(data), http2_frame_type::data), castle::status::protocol_error);
 
     http2_session<2U, 256U, 16384U, 64U> finishing;
     uint32_t stream = start_get(finishing);
@@ -1479,7 +1479,7 @@ TEST(Http2Session, DataAfterCompletedResponseIsProtocolError)
     const uint8_t status_200[] = {0x88U};
     ASSERT_EQ(respond(session, stream, 0x05U, status_200, sizeof(status_200)), castle::status::ok);
     const uint8_t data[] = {'x'};
-    EXPECT_EQ(respond(session, stream, 0U, data, sizeof(data), http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(session, stream, 0U, data, sizeof(data), http2_frame_type::data), castle::status::protocol_error);
     EXPECT_EQ(session.last_error(), error_code::protocol_error);
 }
 
@@ -1504,7 +1504,7 @@ TEST(Http2Session, RejectsNonDigitStatusValues)
         uint32_t stream = start_get(session);
         uint8_t block[64U]{};
         size_type end = put_literal(block, 0U, ":status", value);
-        EXPECT_EQ(respond(session, stream, 0x04U, block, end), castle::status::invalid_argument) << value;
+        EXPECT_EQ(respond(session, stream, 0x04U, block, end), castle::status::protocol_error) << value;
         EXPECT_EQ(session.last_error(), error_code::protocol_error) << value;
     }
 }
@@ -1516,6 +1516,6 @@ TEST(Http2Session, UnknownStreamHasNoResponseAndFailedConnectionKeepsResponses)
     const uint8_t status_200[] = {0x88U};
     ASSERT_EQ(respond(session, stream, 0x05U, status_200, sizeof(status_200)), castle::status::ok);
     EXPECT_EQ(session.response(99U).status_code, 0U);
-    EXPECT_EQ(respond(session, 0U, 0U, status_200, 0U, http2_frame_type::data), castle::status::invalid_argument);
+    EXPECT_EQ(respond(session, 0U, 0U, status_200, 0U, http2_frame_type::data), castle::status::protocol_error);
     EXPECT_FALSE(session.response(stream).keep_alive);
 }

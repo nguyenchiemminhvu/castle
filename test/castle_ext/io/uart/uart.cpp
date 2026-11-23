@@ -191,10 +191,10 @@ TEST(Uart, FailedOpenAndNonBlockingRead)
 
 #else
 
-TEST(Uart, PosixDisabledReturnsNotConfigured)
+TEST(Uart, PosixDisabledReturnsUnsupported)
 {
     basic_uart serial;
-    EXPECT_EQ(serial.open(uart_config("/dev/ttyS0")), castle::status::not_configured);
+    EXPECT_EQ(serial.open(uart_config("/dev/ttyS0")), castle::status::unsupported);
 }
 
 #endif

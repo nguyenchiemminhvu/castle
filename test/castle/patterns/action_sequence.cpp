@@ -188,15 +188,15 @@ TEST(ActionSequenceTest, EditingIsRejectedWhileRunning)
     ASSERT_EQ(other.add_delay(ms(1)), castle::status::ok);
     ASSERT_EQ(sequence.start(), castle::status::ok);
 
-    EXPECT_EQ(sequence.add_call([]() noexcept {}), castle::status::invalid_config);
-    EXPECT_EQ(sequence.add_delay(ms(1)), castle::status::invalid_config);
-    EXPECT_EQ(sequence.append(other), castle::status::invalid_config);
+    EXPECT_EQ(sequence.add_call([]() noexcept {}), castle::status::invalid_state);
+    EXPECT_EQ(sequence.add_delay(ms(1)), castle::status::invalid_state);
+    EXPECT_EQ(sequence.append(other), castle::status::invalid_state);
     EXPECT_EQ(sequence.size(), 1U);
 
     // A running source cannot be appended either.
     dp::action_sequence<4U> destination;
     ASSERT_EQ(other.start(), castle::status::ok);
-    EXPECT_EQ(destination.append(other), castle::status::invalid_config);
+    EXPECT_EQ(destination.append(other), castle::status::invalid_state);
     EXPECT_TRUE(destination.empty());
 }
 
@@ -330,11 +330,11 @@ TEST(ActionSequenceTest, StepsCannotRestructureTheSequenceThatRunsThem)
 
     ASSERT_EQ(sequence.start(), castle::status::ok);
     EXPECT_EQ(sequence.update(), state::completed);
-    EXPECT_EQ(results[0], castle::status::invalid_config);
-    EXPECT_EQ(results[1], castle::status::invalid_config);
-    EXPECT_EQ(results[2], castle::status::invalid_config);
-    EXPECT_EQ(results[3], castle::status::invalid_config);
-    EXPECT_EQ(results[4], castle::status::invalid_config);
+    EXPECT_EQ(results[0], castle::status::invalid_state);
+    EXPECT_EQ(results[1], castle::status::invalid_state);
+    EXPECT_EQ(results[2], castle::status::invalid_state);
+    EXPECT_EQ(results[3], castle::status::invalid_state);
+    EXPECT_EQ(results[4], castle::status::invalid_state);
     EXPECT_EQ(update_state_inside, state::running);
     EXPECT_EQ(sequence.size(), 1U);
 }

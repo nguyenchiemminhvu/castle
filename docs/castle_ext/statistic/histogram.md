@@ -43,7 +43,7 @@ On failure, every `out` parameter is left unchanged.
 |---|---|---|---|---|
 | `histogram()` | Unconfigured histogram. | | O(BinCount) | O(1) |
 | `histogram(lower, upper)` | Constructs and configures. Invalid bounds leave it unconfigured; check `configured()`. | | O(BinCount) | O(1) |
-| `configure(lower, upper)` | Sets the range and discards all weight. | `ok`; `invalid_argument` for a non-finite bound, `lower >= upper`, or a width that overflows (the histogram becomes unconfigured) | O(BinCount) | O(1) |
+| `configure(lower, upper)` | Sets the range and discards all weight. | `ok`; `invalid_config` for a non-finite bound, `lower >= upper`, or a width that overflows (the histogram becomes unconfigured) | O(BinCount) | O(1) |
 | `configured()`, `lower()`, `upper()`, `bin_width()` | Range queries. `bin_width()` is 0 when unconfigured. In `expanding` mode the bounds grow. | | O(1) | O(1) |
 | `static bin_count()`, `range_policy` | Compile-time bin count and policy. | | O(1) | O(1) |
 | `count()`, `empty()`, `underflow()`, `overflow()` | Total weight including underflow and overflow; no weight; weight below `lower()`; weight at or above `upper()`. | | O(1) | O(1) |

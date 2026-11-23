@@ -127,8 +127,8 @@ TEST(CanTypes, ValidateConfigBitrateBoundaries)
     EXPECT_EQ(validate_config(can_config(0U)), castle::status::ok);
     EXPECT_EQ(validate_config(can_config(1U)), castle::status::ok);
     EXPECT_EQ(validate_config(can_config(1000000U)), castle::status::ok);
-    EXPECT_EQ(validate_config(can_config(1000001U)), castle::status::invalid_config);
-    EXPECT_EQ(validate_config(can_config(0xFFFFFFFFU)), castle::status::invalid_config);
+    EXPECT_EQ(validate_config(can_config(1000001U)), castle::status::out_of_range);
+    EXPECT_EQ(validate_config(can_config(0xFFFFFFFFU)), castle::status::out_of_range);
 }
 
 TEST(CanTypes, ValidateConfigAcceptsEveryKnownMode)

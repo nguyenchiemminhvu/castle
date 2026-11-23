@@ -124,7 +124,7 @@ public:
         detail::clear_system_error(system_error);
         if (listener_.is_open())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
 
         castle::status result = listener_.open(local.family(), nonblocking, system_error);
@@ -231,7 +231,7 @@ public:
      * @brief Accepts one TCP connection into the first available fixed slot.
      * @param timeout_ms Readiness wait in milliseconds; zero polls, negative waits forever.
      * @return `ok`, `full` when all client slots are occupied (checked first, so it never waits), `empty` when
-     *         no connection arrived in time, `invalid_config` for a UDP server, `not_configured`, or a socket error.
+     *         no connection arrived in time, `unsupported` for a UDP server, `not_configured`, or a socket error.
      *         A pending connection that found no free slot stays in the OS accept queue.
      */
     castle::status accept_client(client_handle& out, int timeout_ms = 0,
@@ -241,7 +241,7 @@ public:
         detail::clear_system_error(system_error);
         CASTLE_IF_CONSTEXPR (Protocol != socket_protocol::tcp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         else
         {
@@ -311,7 +311,7 @@ public:
      * @param handle Generation-checked client handle returned by `accept_client()`.
      * @param timeout_ms Readiness wait in milliseconds; zero polls, negative waits forever.
      * @return `ok` after data is consumed, `empty` when no data is ready, `not_configured` after peer EOF,
-     *         `not_found` for a stale handle, `invalid_config` for a UDP server or a call from a callback,
+     *         `not_found` for a stale handle, `unsupported` for a UDP server, `invalid_state` for a call from a callback,
      *         or a socket error status. EOF and fatal receive errors such as a connection reset close the
      *         connection and free its slot.
      */
@@ -319,9 +319,13 @@ public:
                                   int* system_error = nullptr) CASTLE_NOEXCEPT
     {
         detail::clear_system_error(system_error);
-        if (Protocol != socket_protocol::tcp || dispatcher_.is_dispatching())
+        if (Protocol != socket_protocol::tcp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
+        }
+        if (dispatcher_.is_dispatching())
+        {
+            return castle::status::invalid_state;
         }
         slot* target = find_slot(handle);
         if (target == nullptr) // LCOV_EXCL_BR_LINE
@@ -367,7 +371,7 @@ public:
      * @param source Optional; receives the datagram's source endpoint when the result is `ok` or `full`.
      * @return `ok`, `empty` on timeout/would-block, `full` when a new peer arrives at capacity (the datagram is
      *         dropped and no callback runs; `source` tells who it came from), `data_loss` for a datagram larger
-     *         than the receive buffer (dropped), `invalid_config` for a TCP server or a call from a callback,
+     *         than the receive buffer (dropped), `unsupported` for a TCP server, `invalid_state` for a call from a callback,
      *         or the underlying socket error status.
      */
     castle::status process_datagram(client_handle& out, int timeout_ms = 0,
@@ -379,9 +383,13 @@ public:
             *source = endpoint();
         }
         detail::clear_system_error(system_error);
-        if (Protocol != socket_protocol::udp || dispatcher_.is_dispatching())
+        if (Protocol != socket_protocol::udp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
+        }
+        if (dispatcher_.is_dispatching())
+        {
+            return castle::status::invalid_state;
         }
         if (!listener_.is_open())
         {
@@ -451,7 +459,7 @@ public:
         detail::clear_system_error(system_error);
         if (Protocol != socket_protocol::tcp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         slot* target = find_slot(handle);
         if (target == nullptr)
@@ -581,7 +589,7 @@ private:
         if (Protocol == socket_protocol::tcp)
         {
             result = target.socket.close(system_error);
-            if (result == castle::status::not_configured) // LCOV_EXCL_BR_LINE
+            if (result == castle::status::not_configured || result == castle::status::unsupported) // LCOV_EXCL_BR_LINE
             {
                 result = castle::status::ok;
             }

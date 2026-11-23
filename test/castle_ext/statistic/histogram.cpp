@@ -82,15 +82,15 @@ TEST(HistogramTest, ConfigureRejectsInvalidRanges)
 {
     constexpr double kMax = std::numeric_limits<double>::max();
     fixed4 h;
-    EXPECT_EQ(h.configure(kNaN, 1.0), status::invalid_argument);
+    EXPECT_EQ(h.configure(kNaN, 1.0), status::invalid_config);
     EXPECT_FALSE(h.configured());
-    EXPECT_EQ(h.configure(0.0, kNaN), status::invalid_argument);
-    EXPECT_EQ(h.configure(0.0, kInf), status::invalid_argument);
-    EXPECT_EQ(h.configure(-kInf, 0.0), status::invalid_argument);
-    EXPECT_EQ(h.configure(1.0, 0.0), status::invalid_argument);
-    EXPECT_EQ(h.configure(1.0, 1.0), status::invalid_argument);
+    EXPECT_EQ(h.configure(0.0, kNaN), status::invalid_config);
+    EXPECT_EQ(h.configure(0.0, kInf), status::invalid_config);
+    EXPECT_EQ(h.configure(-kInf, 0.0), status::invalid_config);
+    EXPECT_EQ(h.configure(1.0, 0.0), status::invalid_config);
+    EXPECT_EQ(h.configure(1.0, 1.0), status::invalid_config);
     // Width overflows although both bounds are finite.
-    EXPECT_EQ(h.configure(-kMax, kMax), status::invalid_argument);
+    EXPECT_EQ(h.configure(-kMax, kMax), status::invalid_config);
     EXPECT_FALSE(h.configured());
     EXPECT_DOUBLE_EQ(h.lower(), 0.0);
     EXPECT_DOUBLE_EQ(h.upper(), 0.0);
@@ -115,7 +115,7 @@ TEST(HistogramTest, ConfigureSuccessAndReconfigure)
 
     // An invalid range after a valid one unconfigures the histogram.
     EXPECT_EQ(h.push(1.0), status::ok);
-    EXPECT_EQ(h.configure(1.0, 0.0), status::invalid_argument);
+    EXPECT_EQ(h.configure(1.0, 0.0), status::invalid_config);
     EXPECT_FALSE(h.configured());
     EXPECT_TRUE(h.empty());
     EXPECT_EQ(h.push(1.0), status::not_configured);

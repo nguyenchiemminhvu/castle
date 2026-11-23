@@ -55,9 +55,9 @@ int main()
     CASTLE_SAMPLE_CHECK(no_sign_change.code == castle::status::invalid_argument);
     CASTLE_SAMPLE_CHECK(!no_sign_change.ok());
 
-    // A tiny iteration budget reports out_of_range but still returns the best estimate.
+    // A tiny iteration budget reports not_converged but still returns the best estimate.
     const auto exhausted = castle::math::find_root_bisection(f, 0.0, 2.0, 1.0e-12, 3U);
-    CASTLE_SAMPLE_CHECK(exhausted.code == castle::status::out_of_range);
+    CASTLE_SAMPLE_CHECK(exhausted.code == castle::status::not_converged);
     CASTLE_SAMPLE_CHECK(exhausted.iterations == 3U);
     CASTLE_SAMPLE_CHECK(castle::math::near_equal(exhausted.value, root2, 0.25));
 
@@ -70,10 +70,10 @@ int main()
 
     // A vanishing derivative is rejected: f'(0) == 0.
     const auto flat_newton = castle::math::find_root_newton(f, df, 0.0, 1.0e-12);
-    CASTLE_SAMPLE_CHECK(flat_newton.code == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(flat_newton.code == castle::status::not_converged);
 
     const auto newton_budget = castle::math::find_root_newton(f, df, 100.0, 1.0e-12, 2U);
-    CASTLE_SAMPLE_CHECK(newton_budget.code == castle::status::out_of_range);
+    CASTLE_SAMPLE_CHECK(newton_budget.code == castle::status::not_converged);
 
     // The secant method is derivative-free.
     const auto secant = castle::math::find_root_secant(f, 1.0, 2.0, 1.0e-12);
@@ -82,10 +82,10 @@ int main()
 
     // Equal function values at both starting points give a flat secant.
     const auto flat_secant = castle::math::find_root_secant(f, -1.0, 1.0, 1.0e-12);
-    CASTLE_SAMPLE_CHECK(flat_secant.code == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(flat_secant.code == castle::status::not_converged);
 
     const auto secant_budget = castle::math::find_root_secant(f, 100.0, 200.0, 1.0e-12, 2U);
-    CASTLE_SAMPLE_CHECK(secant_budget.code == castle::status::out_of_range);
+    CASTLE_SAMPLE_CHECK(secant_budget.code == castle::status::not_converged);
 
     // Single precision works as well.
     const auto ff = [](float x) { return (x * x) - 2.0F; };

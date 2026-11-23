@@ -28,16 +28,16 @@ All names are in `castle::net`.
 | `sockets_available` | Compile-time boolean reflecting `CASTLE_USING_POSIX_APIS`. |
 | `basic_socket<Protocol>` | Move-only RAII socket; copy is deleted. Exposes `protocol` and owns one `castle::io::fd::basic_fd`. |
 | `tcp_socket`, `udp_socket` | Aliases for TCP and UDP `basic_socket` specializations. |
-| `open(family = ipv4, nonblocking = true, system_error)` | Creates a socket with close-on-exec set atomically where the target supports it. Reopening an open socket returns `invalid_config`. |
+| `open(family = ipv4, nonblocking = true, system_error)` | Creates a socket with close-on-exec set atomically where the target supports it. Reopening an open socket returns `invalid_state`. |
 | `close(system_error)`, `is_open()`, `native_handle()`, `family()`, `is_nonblocking()` | Lifetime and descriptor-state operations. |
 | `set_nonblocking(enabled, system_error)` | Changes `O_NONBLOCK` without replacing the descriptor. |
 | `set_reuse_address(enabled, system_error)` | Sets `SO_REUSEADDR`. |
 | `set_keep_alive(enabled, system_error)` | Sets `SO_KEEPALIVE`; TCP only. |
 | `set_no_delay(enabled, system_error)` | Sets `TCP_NODELAY`; TCP only. |
 | `bind(local, system_error)` | Binds to a numeric local endpoint matching the socket family. |
-| `connect(remote, system_error)` | Initiates a connection. A pending non-blocking connect (`EINPROGRESS`/`EALREADY`) returns `time_out`; call `finish_connect()`. Any other error is a failure. |
-| `finish_connect(timeout_ms = 0, system_error)` | TCP only; waits for writability, then checks `SO_ERROR` and `getpeername()` so a connect that never completed is not reported as success. Zero only checks readiness (`time_out` while pending); negative waits indefinitely. UDP returns `invalid_config`. |
-| `listen(backlog = 8, system_error)` | Starts a TCP listener; UDP returns `invalid_config`, and a negative backlog returns `invalid_argument`. |
+| `connect(remote, system_error)` | Initiates a connection. A pending non-blocking connect (`EINPROGRESS`/`EALREADY`) returns `in_progress`; call `finish_connect()`. Any other error is a failure. |
+| `finish_connect(timeout_ms = 0, system_error)` | TCP only; waits for writability, then checks `SO_ERROR` and `getpeername()` so a connect that never completed is not reported as success. Zero only checks readiness (`time_out` while pending); negative waits indefinitely. UDP returns `unsupported`. |
+| `listen(backlog = 8, system_error)` | Starts a TCP listener; UDP returns `unsupported`, and a negative backlog returns `out_of_range`. |
 | `accept(out, remote, system_error)` | Accepts one TCP connection into a closed output socket that inherits the listener's blocking mode. Would-block returns `empty`. |
 | `send_some(data, size, bytes_sent, system_error)` | Sends a partial stream write or one UDP datagram on a connected socket. A stream that cannot accept data returns `full`; a short datagram write returns `data_loss`. |
 | `send_all(data, size, bytes_sent, system_error)` | TCP only; loops until all bytes are sent or a blocked/error status occurs. It does not wait/retry on `full`. |
@@ -72,7 +72,7 @@ int main()
 ```
 
 ## Constraints & Notes
-- Uses POSIX/BSD socket calls when `CASTLE_USING_POSIX_APIS` is enabled; methods remain declared on unsupported targets and report `not_configured`.
+- Uses POSIX/BSD socket calls when `CASTLE_USING_POSIX_APIS` is enabled; methods remain declared on unsupported targets and report `unsupported`.
 - No internal heap allocation. The descriptor is owned by CASTLE `basic_fd`; destruction closes it.
 - Sockets default to non-blocking mode. Set `nonblocking = false` in `open()` for blocking socket calls.
 - Sends never raise `SIGPIPE`: `MSG_NOSIGNAL` is used where defined, otherwise `SO_NOSIGPIPE` is set on every new socket. A send to a reset connection returns `system_call_error` (`EPIPE`/`ECONNRESET`).

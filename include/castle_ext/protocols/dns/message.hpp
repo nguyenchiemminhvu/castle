@@ -163,7 +163,10 @@ public:
      * @param size Message size.
      * @param expected_id Transaction ID that must match.
      * @param output Fixed-capacity response destination; cleared before parsing.
-     * @return `ok`, `invalid_argument` for malformed/mismatched packets, or `full` when record capacity is exceeded.
+     * @return `ok`; `invalid_argument` for null input; `parse_error` for truncated or malformed
+     *         wire data; `protocol_error` for a mismatched transaction ID or invalid response flags;
+     *         `unsupported` for unsupported opcodes/question counts; `out_of_range` for oversized
+     *         messages; or `full` when record capacity is exceeded.
      */
     template <size_type MaxRecords>
     static castle::status parse_response(CASTLE_CONST uint8_t* data,
@@ -172,21 +175,32 @@ public:
                                          response<MaxRecords>& output) CASTLE_NOEXCEPT
     {
         output.clear();
-        if (data == nullptr || size < header_size || size > max_message_size)
+        if (data == nullptr)
         {
             return castle::status::invalid_argument;
+        }
+        if (size < header_size)
+        {
+            return castle::status::parse_error;
+        }
+        if (size > max_message_size)
+        {
+            return castle::status::out_of_range;
         }
         output.transaction_id = read_be16(data);
         if (output.transaction_id != expected_id)
         {
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
         }
 
         output.flags = read_be16(data + 2U);
-        if ((output.flags & 0x8000U) == 0U || (output.flags & 0x7800U) != 0U ||
-            (output.flags & 0x0070U) != 0U)
+        if ((output.flags & 0x7800U) != 0U)
         {
-            return castle::status::invalid_argument; // not a response, unsupported opcode, or reserved Z bits set
+            return castle::status::unsupported; // Unsupported DNS opcode.
+        }
+        if ((output.flags & 0x8000U) == 0U || (output.flags & 0x0070U) != 0U)
+        {
+            return castle::status::protocol_error; // Not a response or reserved Z bits set.
         }
         output.authoritative = (output.flags & 0x0400U) != 0U;
         output.truncated = (output.flags & 0x0200U) != 0U;
@@ -200,7 +214,7 @@ public:
         output.additional_count = read_be16(data + 10U);
         if (output.question_count != 1U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::unsupported;
         }
 
         size_type at = header_size;
@@ -214,7 +228,7 @@ public:
         at += consumed;
         if (at > size || size - at < 4U) // LCOV_EXCL_BR_LINE
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         uint16_t question_type_value = read_be16(data + at); at += 2U;
         uint16_t question_class_value = read_be16(data + at); at += 2U;
@@ -245,7 +259,7 @@ public:
             at += consumed;
             if (at > size || size - at < 10U) // LCOV_EXCL_BR_LINE
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             uint16_t type_value = read_be16(data + at); at += 2U;
             uint16_t class_value = read_be16(data + at); at += 2U;
@@ -253,7 +267,7 @@ public:
             uint16_t rdlength = read_be16(data + at); at += 2U;
             if (at > size || static_cast<size_type>(rdlength) > size - at) // LCOV_EXCL_BR_LINE
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             size_type rdata = at;
             at += rdlength;
@@ -292,7 +306,7 @@ public:
             {
                 if (rdlength != 4U)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
                 record.address = net::endpoint::ipv4(data[rdata], data[rdata + 1U],
                                                       data[rdata + 2U], data[rdata + 3U], 0U);
@@ -301,7 +315,7 @@ public:
             {
                 if (rdlength != 16U)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
                 record.address = net::endpoint::ipv6(data + rdata, 0U);
             }
@@ -309,28 +323,36 @@ public:
             {
                 if (rdlength < 3U)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
                 record.preference = read_be16(data + rdata);
                 result = decode_name(data, size, rdata + 2U, record.target,
                                      sizeof(record.target), consumed);
-                if (!castle::succeeded(result) || consumed + 2U != rdlength)
+                if (!castle::succeeded(result))
                 {
-                    return castle::status::invalid_argument;
+                    return result;
+                }
+                if (consumed + 2U != rdlength)
+                {
+                    return castle::status::parse_error;
                 }
             }
             else
             {
                 result = decode_name(data, size, rdata, record.target,
                                      sizeof(record.target), consumed);
-                if (!castle::succeeded(result) || consumed != rdlength)
+                if (!castle::succeeded(result))
                 {
-                    return castle::status::invalid_argument;
+                    return result;
+                }
+                if (consumed != rdlength)
+                {
+                    return castle::status::parse_error;
                 }
             }
             ++output.record_count;
         }
-        return at == size ? castle::status::ok : castle::status::invalid_argument;
+        return at == size ? castle::status::ok : castle::status::parse_error;
     }
 
     /**
@@ -341,7 +363,8 @@ public:
      * @param output Null-terminated output buffer.
      * @param output_capacity Output buffer capacity, including terminator.
      * @param consumed Number of original-stream octets consumed (pointer targets are not counted).
-     * @return `ok`, `invalid_argument` for malformed pointers/labels, or `full` for insufficient output capacity.
+     * @return `ok`, `invalid_argument` for invalid buffer arguments, `parse_error` for malformed
+     *         or truncated encoded names, or `full` for insufficient output capacity.
      */
     static castle::status decode_name(CASTLE_CONST uint8_t* data,
                                       size_type size,
@@ -351,9 +374,13 @@ public:
                                       size_type& consumed) CASTLE_NOEXCEPT
     {
         consumed = 0U;
-        if (data == nullptr || output == nullptr || output_capacity == 0U || offset >= size)
+        if (data == nullptr || output == nullptr || output_capacity == 0U)
         {
             return castle::status::invalid_argument;
+        }
+        if (offset >= size)
+        {
+            return castle::status::parse_error;
         }
         size_type cursor = offset;
         size_type output_size = 0U;
@@ -365,19 +392,19 @@ public:
         {
             if (cursor >= size || ++hops > 128U)
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             uint8_t length = data[cursor];
             if ((length & 0xC0U) == 0xC0U)
             {
                 if (cursor + 1U >= size)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
                 uint16_t pointer = static_cast<uint16_t>(((length & 0x3FU) << 8U) | data[cursor + 1U]);
                 if (pointer >= size || pointer >= cursor)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
                 if (!jumped)
                 {
@@ -389,7 +416,7 @@ public:
             }
             if ((length & 0xC0U) != 0U || length > 63U) // LCOV_EXCL_BR_LINE
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             ++cursor;
             if (!jumped)
@@ -398,7 +425,7 @@ public:
             }
             if (expanded_wire_size >= 255U)
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             ++expanded_wire_size;
             if (length == 0U)
@@ -409,7 +436,7 @@ public:
             if (cursor > size || static_cast<size_type>(length) > size - cursor || // LCOV_EXCL_BR_LINE
                 expanded_wire_size + static_cast<size_type>(length) > 255U)
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             expanded_wire_size += length;
             if (output_size != 0U)
@@ -429,7 +456,7 @@ public:
                 uint8_t c = data[cursor + i];
                 if (c == 0U || c > 127U)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
                 output[output_size++] = static_cast<char>(c);
             }

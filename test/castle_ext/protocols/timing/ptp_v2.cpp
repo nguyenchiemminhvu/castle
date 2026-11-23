@@ -155,6 +155,10 @@ TEST(PtpV2, DecodeRejectsMalformedFrames)
 
     EXPECT_FALSE(castle::timing::ptp::decode_message(
         array_view<const uint8_t>(packet, 33U), message));
+    port_identity local{};
+    castle::timing::ptp::slave engine(local);
+    castle::timing::ptp::slave_action action{};
+    EXPECT_EQ(engine.receive(array_view<const uint8_t>(packet, 33U), timestamp(1U, 0U), action), status::parse_error);
 
     packet[1U] = 1U;
     write_be16(&packet[2U], 34U);
@@ -297,6 +301,11 @@ TEST(PtpV2, FiltersDomainTransportIdentityAndSequence)
         engine.receive(array_view<const uint8_t>(packet, 44U), timestamp(1U, 1U), action),
         status::ok);
     EXPECT_TRUE(engine.pending());
+    write_header(packet, message_type::pdelay_request, 44U, 0U, master, 1U, 1U, 4U);
+    EXPECT_EQ(
+        engine.receive(array_view<const uint8_t>(packet, 44U), timestamp(1U, 2U), action),
+        status::unsupported);
+    EXPECT_TRUE(engine.pending());
 
     write_header(packet, message_type::delay_response, 54U, 0U, other,
                  action.delay_request_sequence, 1U, 4U);
@@ -314,7 +323,7 @@ TEST(PtpV2, FiltersDomainTransportIdentityAndSequence)
     EXPECT_EQ(engine.delay_request_transmitted(timestamp(1U, 2U)), status::ok);
     EXPECT_EQ(
         engine.receive(array_view<const uint8_t>(packet, 53U), timestamp(1U, 3U), action),
-        status::invalid_argument);
+        status::parse_error);
 }
 
 TEST(PtpV2, RejectsInvalidTimestampsAndMismatchedFollowUp)
@@ -333,7 +342,7 @@ TEST(PtpV2, RejectsInvalidTimestampsAndMismatchedFollowUp)
                  castle::timing::ptp::PTP_FLAG_TWO_STEP, master, 22U);
     EXPECT_EQ(
         engine.receive(array_view<const uint8_t>(packet, 44U), timestamp(1U, 1000000000U), action),
-        status::invalid_argument);
+        status::out_of_range);
 
     write_timestamp(&packet[34U], 1U, 0U);
     port_identity other = master;
@@ -360,11 +369,11 @@ TEST(PtpV2, RejectsInvalidTimestampsAndMismatchedFollowUp)
     write_timestamp(&packet[34U], 1U, 1000000000U);
     EXPECT_EQ(
         engine.receive(array_view<const uint8_t>(packet, 44U), timestamp(1U, 3U), action),
-        status::invalid_argument);
+        status::parse_error);
 
     engine.reset();
     EXPECT_FALSE(engine.pending());
-    EXPECT_EQ(engine.delay_request_transmitted(timestamp(1U, 1U)), status::not_configured);
+    EXPECT_EQ(engine.delay_request_transmitted(timestamp(1U, 1U)), status::invalid_state);
 }
 
 TEST(PtpV2, HandlesDelayResponseIdentityLengthAndSignedCorrection)
@@ -401,7 +410,7 @@ TEST(PtpV2, HandlesDelayResponseIdentityLengthAndSignedCorrection)
     write_be16(&packet[2U], 53U);
     EXPECT_EQ(
         engine.receive(array_view<const uint8_t>(packet, 53U), timestamp(10U, 300U), action),
-        status::invalid_argument);
+        status::parse_error);
 
     write_be16(&packet[2U], 54U);
     write_be64(&packet[8U], static_cast<uint64_t>(-65536LL));

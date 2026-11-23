@@ -21,7 +21,7 @@ Deterministic, allocation-free, in-memory backend intended for host-side samples
 ## `castle::io::gpio::linux_file`
 POSIX file-descriptor backend for BSPs that expose a single GPIO as a user-space value file (the common sysfs-style `.../gpioNN/value` convention). Uses `open`/`read`/`write`/`close` directly — no `<string>`, streams, or filesystem classes. Each `read`/`write` call opens and closes the file; there is no persistent file descriptor, so this backend does not assume the BSP keeps one open.
 
-`configure()` always returns `castle::status::not_configured`: direction/pull/drive configuration is BSP-owned (set up once, outside this backend, typically by the kernel driver or a device tree overlay), and a generic value file has no portable way to change that electrical configuration.
+`configure()` always returns `castle::status::unsupported`: direction/pull/drive configuration is BSP-owned (set up once, outside this backend, typically by the kernel driver or a device tree overlay), and a generic value file has no portable way to change that electrical configuration.
 
 `native_handle_type` is `pin_handle { const char* path; bool active_low; }`.
 

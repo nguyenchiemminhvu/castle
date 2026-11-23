@@ -72,19 +72,19 @@ TEST(PtpServo, HandlesNoCorrectionAndInvalidConfiguration)
     castle::timing::ptp::servo_config config = servo.config();
     config.gain_denominator = 0U;
     servo.configure(config);
-    EXPECT_EQ(servo.update(1LL, 1000U, adjustment), castle::status::invalid_argument);
+    EXPECT_EQ(servo.update(1LL, 1000U, adjustment), castle::status::invalid_config);
 
     config = servo.config();
     config.gain_denominator = 1U;
     config.max_slew_ppb = -1;
     servo.configure(config);
-    EXPECT_EQ(servo.update(1LL, 1000U, adjustment), castle::status::invalid_argument);
+    EXPECT_EQ(servo.update(1LL, 1000U, adjustment), castle::status::invalid_config);
 
     config = servo.config();
     config.max_slew_ppb = 100;
     config.step_threshold_nanoseconds = -1LL;
     servo.configure(config);
-    EXPECT_EQ(servo.update(1LL, 1000U, adjustment), castle::status::invalid_argument);
+    EXPECT_EQ(servo.update(1LL, 1000U, adjustment), castle::status::invalid_config);
 
     config = servo.config();
     config.step_threshold_nanoseconds = 100;

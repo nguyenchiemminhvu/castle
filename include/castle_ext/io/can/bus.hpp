@@ -125,7 +125,8 @@ public:
      * @param endpoint Platform name of the controller (`backend_type::endpoint_type`).
      * @param config Bit rate and operating mode.
      * @param system_error Optional output receiving the platform error number on failure.
-     * @return `ok`, `invalid_config`, `invalid_argument`, `system_call_error` or `not_configured`.
+     * @return `ok`, `invalid_config`, `invalid_argument`, `out_of_range` (bit rate above the maximum),
+     *         `invalid_state` (already open), `unsupported`, `system_call_error` or `not_configured`.
      */
     CASTLE_NODISCARD castle::status open(endpoint_type endpoint,
                         can_config CASTLE_CONST& config = can_config(),
@@ -159,6 +160,7 @@ public:
      * @param timeout How long to wait for transmit space; non-negative.
      * @param system_error Optional output receiving the platform error number on failure.
      * @return `ok` once queued; `full` if no space became available in time; `invalid_argument`;
+     *         `out_of_range` for a negative timeout, DLC above 8 or identifier too wide;
      *         `not_configured` when closed; `system_call_error` otherwise.
      */
     CASTLE_NODISCARD castle::status send(frame CASTLE_CONST& value,
@@ -166,9 +168,14 @@ public:
                         int* system_error = nullptr) CASTLE_NOEXCEPT
     {
         castle::io::fd::detail::clear_system_error(system_error);
-        if (!castle::succeeded(validate_frame(value)) || timeout.count() < 0)
+        CASTLE_CONST castle::status valid = validate_frame(value);
+        if (!castle::succeeded(valid))
         {
-            return castle::status::invalid_argument;
+            return valid;
+        }
+        if (timeout.count() < 0)
+        {
+            return castle::status::out_of_range;
         }
         return backend_.send(value, timeout, system_error);
     }
@@ -202,8 +209,8 @@ public:
      * @brief Takes the oldest received frame that passed an installed filter.
      * @param out Receives the frame; unchanged unless `ok` is returned.
      * @param timeout How long to wait for a frame; non-negative.
-     * @return `ok`; `empty` when nothing arrived in time; `invalid_argument`; `not_configured`
-     *         when closed; `system_call_error`; `data_loss` for a truncated kernel frame.
+     * @return `ok`; `empty` when nothing arrived in time; `out_of_range` for a negative timeout;
+     *         `not_configured` when closed; `system_call_error`; `data_loss` for a truncated kernel frame.
      */
     CASTLE_NODISCARD castle::status receive(frame& out,
                            timeout_type timeout = no_wait,
@@ -212,7 +219,7 @@ public:
         castle::io::fd::detail::clear_system_error(system_error);
         if (timeout.count() < 0)
         {
-            return castle::status::invalid_argument;
+            return castle::status::out_of_range;
         }
         return backend_.receive(out, timeout, system_error);
     }
@@ -221,8 +228,8 @@ public:
      * @brief Installs a receive filter.
      * @param value Filter to install; checked with `validate_filter()`.
      * @param handle Optional output receiving the handle for `remove_filter()`.
-     * @return `ok`; `full` when the backend has no free filter slot; `invalid_argument`;
-     *         `not_configured` when closed; `invalid_config` when the hardware rejects the filter.
+     * @return `ok`; `full` when the backend has no free filter slot; `invalid_argument`; `out_of_range`;
+     *         `not_configured` when closed; `unsupported` or `out_of_range` when the hardware rejects the filter.
      */
     CASTLE_NODISCARD castle::status add_filter(filter CASTLE_CONST& value,
                               filter_handle* handle = nullptr,

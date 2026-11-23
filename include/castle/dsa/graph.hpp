@@ -1326,7 +1326,7 @@ struct graph_search
             }
         }
         tree.reset(0U, 0U);
-        return status::invalid_argument;
+        return status::cycle_detected;
     }
 
     /** @brief Lowers the distance of `next` through `node` when shorter. */
@@ -1485,7 +1485,7 @@ component_set<Graph> strongly_connected_components(CASTLE_CONST Graph& graph) CA
  * @param graph Directed graph.
  * @param order Cleared, then filled with the order. Sources are released in ascending node order,
  * later nodes in the order their last incoming edge is consumed.
- * @return `status::ok`, or `status::invalid_argument` when the graph has a cycle (then `order`
+ * @return `status::ok`, or `status::cycle_detected` when the graph has a cycle (then `order`
  * holds only the nodes that do not depend on any cycle).
  * @note Complexity: O(V + E). Stack: N node indices.
  */
@@ -1530,7 +1530,7 @@ status topological_sort(CASTLE_CONST Graph& graph, node_list<Graph>& order) CAST
             }
         }
     }
-    return order.size() == nodes ? status::ok : status::invalid_argument;
+    return order.size() == nodes ? status::ok : status::cycle_detected;
 }
 
 /**
@@ -1582,7 +1582,7 @@ status shortest_paths(CASTLE_CONST Graph& graph, size_type source, shortest_path
 
 /**
  * @brief Single-source shortest paths that allow negative weights (Bellman-Ford).
- * @return `status::ok`; `status::out_of_range` for an invalid source; `status::invalid_argument`
+ * @return `status::ok`; `status::out_of_range` for an invalid source; `status::cycle_detected`
  * when a negative cycle is reachable from `source` (an undirected negative edge is such a cycle).
  * On failure `tree` is empty.
  * @note Complexity: O(V E), early exit once a round changes nothing. No scratch storage.
@@ -1598,7 +1598,7 @@ status bellman_ford(CASTLE_CONST Graph& graph, size_type source, shortest_path_t
  * @param graph Graph to search.
  * @param distances Receives `distances(from, to)` for `from, to < graph.size()`; unreachable pairs
  * hold `infinity<Graph>`. Entries outside that block are not touched.
- * @return `status::ok`, or `status::invalid_argument` when a negative cycle exists (some
+ * @return `status::ok`, or `status::cycle_detected` when a negative cycle exists (some
  * `distances(v, v) < 0`; the matrix is then not meaningful).
  * @note Complexity: O(V^3). The matrix holds N * N weights; place it where that fits.
  */
@@ -1652,7 +1652,7 @@ status floyd_warshall(CASTLE_CONST Graph& graph, distance_matrix<Graph>& distanc
         {
             if (distances(node, node) < static_cast<weight_type>(0))
             {
-                return status::invalid_argument;
+                return status::cycle_detected;
             }
         }
     }

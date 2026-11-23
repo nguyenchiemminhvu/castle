@@ -200,7 +200,8 @@ second_derivative(F&& f, T x, meta::type_identity_t<T> h) CASTLE_NOEXCEPT
  * @param dx Non-zero spacing between consecutive samples.
  * @param out Destination with room for `count` values; may alias `y`.
  * @return `status::ok` on success; `status::invalid_argument` for null
- *         pointers, fewer than two samples or a zero spacing.
+ *         pointers or zero spacing, `status::empty` when `count` is zero,
+ *         and `status::insufficient_data` when only one sample is supplied.
  * @details Interior points use the central difference; the two end points use
  *          the one-sided three-point formulas, so all points are second-order
  *          accurate when `count >= 3`. With exactly two samples the result is
@@ -211,9 +212,17 @@ CASTLE_CONSTEXPR
 typename meta::enable_if<meta::is_floating_point<T>::value, status>::type
 derivative_samples(CASTLE_CONST T* y, size_type count, meta::type_identity_t<T> dx, T* out) CASTLE_NOEXCEPT
 {
-    if ((y == nullptr) || (out == nullptr) || (count < 2U) || (dx == static_cast<T>(0)))
+    if ((y == nullptr) || (out == nullptr) || (dx == static_cast<T>(0)))
     {
         return status::invalid_argument;
+    }
+    if (count == 0U)
+    {
+        return status::empty;
+    }
+    if (count < 2U)
+    {
+        return status::insufficient_data;
     }
 
     if (count == 2U)

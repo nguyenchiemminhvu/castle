@@ -241,7 +241,7 @@ public:
     {
         if (!can_connect())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         authority_.assign(remote);
         return connect_transport(remote, timeout_ms, system_error);
@@ -253,7 +253,7 @@ public:
     {
         if (!can_connect())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         castle::status named = authority_.assign(authority);
         return castle::succeeded(named) ? connect_transport(remote, timeout_ms, system_error) : named;
@@ -263,7 +263,7 @@ public:
      * @brief Queues a request on the open connection; `poll()` sends it and receives the response.
      *
      * @param keep_alive Sent as the Connection header unless `headers` already has one.
-     * @return `ok`, `not_configured` when not connected or busy, or the `http1_request::build()` failure.
+     * @return `ok`, `not_configured` when not connected, `invalid_state` while a request is in flight, or the `http1_request::build()` failure.
      */
     castle::status request(method verb, string_view path, headers_type CASTLE_CONST& headers,
                            string_view body = string_view(), string_view custom_method = string_view(),
@@ -271,7 +271,7 @@ public:
     {
         if (!connected_ || state_ != state::ready)
         {
-            return castle::status::not_configured;
+            return !connected_ ? castle::status::not_configured : castle::status::invalid_state;
         }
         castle::status result = request_.build(verb, path, authority_.view(), headers,
                                                body, custom_method, keep_alive);

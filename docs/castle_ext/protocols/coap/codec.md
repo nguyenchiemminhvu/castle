@@ -18,10 +18,10 @@ Encodes and decodes complete CoAP datagrams using the RFC 7252 four-byte base he
 | API | Description |
 |---|---|
 | `encode_message(message, output, capacity, written)` | Encodes a complete message; returns `full` when the output buffer is too small. |
-| `decode_message(input, size, message, decode_error*)` | Parses one datagram; skips unknown elective options and reports unknown critical options. |
+| `decode_message(input, size, message, decode_error*)` | Parses one datagram; returns `parse_error` for malformed/truncated wire data, `unsupported` for an unknown critical option or unsupported version, `protocol_error` for structurally invalid message semantics, and `full` when bounded storage is exhausted. Unknown elective options are skipped. |
 | `decode_uint_option(value, length, output)` | Decodes an unsigned integer option (zero to four bytes). |
 | `valid_option_length`, `is_repeatable_option` | Basic RFC option length and repetition checks for implemented options. |
-| `decode_error` | Distinguishes malformed headers/options, unsupported version, unknown critical option, and capacity exhaustion. |
+| `decode_error` | Distinguishes malformed headers/options, unsupported versions/options, and capacity exhaustion. |
 
 ## Usage Example
 

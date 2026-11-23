@@ -17,11 +17,11 @@ int main()
     CASTLE_SAMPLE_CHECK(listener.local_endpoint(server_address) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(server_address.port() != 0U);
 
-    // A non-blocking connect is `time_out` while pending; finish_connect() waits for it to complete.
+    // A non-blocking connect is `in_progress` while pending; finish_connect() waits for it to complete.
     tcp_socket client;
     CASTLE_SAMPLE_CHECK(client.open(address_family::ipv4, true) == castle::status::ok);
     castle::status connected = client.connect(server_address);
-    if (connected == castle::status::time_out)
+    if (connected == castle::status::in_progress)
     {
         connected = client.finish_connect(1000);
     }
@@ -91,7 +91,7 @@ int main()
     CASTLE_SAMPLE_CHECK(listener.close() == castle::status::ok);
 #else
     tcp_socket socket;
-    CASTLE_SAMPLE_CHECK(socket.open() == castle::status::not_configured);
+    CASTLE_SAMPLE_CHECK(socket.open() == castle::status::unsupported);
 #endif
     return 0;
 }

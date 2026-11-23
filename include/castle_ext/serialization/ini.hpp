@@ -383,7 +383,7 @@ result decode_value(
         {
             if (is_line_end(raw[i]))
             {
-                result_value.status = castle::status::invalid_argument;
+                result_value.status = castle::status::parse_error;
                 result_value.code = error_code::invalid_assignment;
                 result_value.column = column + i;
                 return result_value;
@@ -403,7 +403,7 @@ result decode_value(
     CASTLE_CONST char quote = raw.front();
     if (raw.size() < 2U || raw.back() != quote)
     {
-        result_value.status = castle::status::invalid_argument;
+        result_value.status = castle::status::parse_error;
         result_value.code = error_code::invalid_quote;
         result_value.column = column;
         return result_value;
@@ -416,7 +416,7 @@ result decode_value(
         {
             if (i + 1U >= raw.size() - 1U)
             {
-                result_value.status = castle::status::invalid_argument;
+                result_value.status = castle::status::parse_error;
                 result_value.code = error_code::invalid_escape;
                 result_value.column = column + i;
                 return result_value;
@@ -425,7 +425,7 @@ result decode_value(
             CASTLE_CONST char escaped = raw[++i];
             if (!valid_escape(escaped))
             {
-                result_value.status = castle::status::invalid_argument;
+                result_value.status = castle::status::parse_error;
                 result_value.code = error_code::invalid_escape;
                 result_value.column = column + i;
                 return result_value;
@@ -443,7 +443,7 @@ result decode_value(
 
         if (c == quote)
         {
-            result_value.status = castle::status::invalid_argument;
+            result_value.status = castle::status::parse_error;
             result_value.code = error_code::invalid_quote;
             result_value.column = column + i;
             return result_value;
@@ -559,7 +559,11 @@ castle::status parse_integer_value(string_view text, T& output) CASTLE_NOEXCEPT
         negative = text[0U] == '-';
         index = 1U;
     }
-    if (index == text.size() || (negative && !meta::is_signed<T>::value))
+    if (index == text.size())
+    {
+        return castle::status::parse_error;
+    }
+    if (negative && !meta::is_signed<T>::value)
     {
         return castle::status::invalid_argument;
     }
@@ -570,7 +574,7 @@ castle::status parse_integer_value(string_view text, T& output) CASTLE_NOEXCEPT
         CASTLE_CONST char c = text[index];
         if (c < '0' || c > '9')
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
 
         CASTLE_CONST uint64_t digit = static_cast<uint64_t>(c - '0');
@@ -711,7 +715,7 @@ parse_floating_value(string_view text, T& output) CASTLE_NOEXCEPT
 
     if (!has_digit)
     {
-        return castle::status::invalid_argument;
+        return castle::status::parse_error;
     }
 
     int exponent = 0;
@@ -727,7 +731,7 @@ parse_floating_value(string_view text, T& output) CASTLE_NOEXCEPT
 
         if (index == text.size() || text[index] < '0' || text[index] > '9')
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
 
         while (index < text.size() && text[index] >= '0' && text[index] <= '9')
@@ -747,7 +751,7 @@ parse_floating_value(string_view text, T& output) CASTLE_NOEXCEPT
 
     if (index != text.size())
     {
-        return castle::status::invalid_argument;
+        return castle::status::parse_error;
     }
 
     for (int i = 0; i < exponent; ++i)
@@ -1090,7 +1094,7 @@ public:
      * @param section Section name, or an empty view for the global scope.
      * @param key Key name to read.
      * @param output Receives the decoded boolean on success.
-     * @return `castle::status::ok` on success, `not_found` when absent, or `invalid_argument` for unsupported text.
+     * @return `castle::status::ok` on success, `not_found` when absent, `invalid_argument` for empty text, or `parse_error` for unsupported nonempty text.
      */
     CASTLE_NODISCARD castle::status get_bool(view_type section, view_type key, bool& output) CASTLE_CONST CASTLE_NOEXCEPT
     {
@@ -1117,7 +1121,7 @@ public:
             output = false;
             return castle::status::ok;
         }
-        return castle::status::invalid_argument;
+        return value.empty() ? castle::status::invalid_argument : castle::status::parse_error;
     }
 
     CASTLE_NODISCARD castle::status get_bool(view_type key, bool& output) CASTLE_CONST CASTLE_NOEXCEPT
@@ -1357,7 +1361,7 @@ namespace detail
  * @param output The document object to populate with the parsed entries.
  * @param input The input string containing the INI document to parse.
  * @return A `result` object indicating the success or failure of the parsing operation.
- * @note The parsing is performed in a line-by-line manner, and any syntax errors will result in an invalid argument status.
+ * @note The parsing is performed in a line-by-line manner, and any syntax errors will result in a parse error status.
  */
 template <castle::size_type MaxEntries,
           castle::size_type MaxSectionLength,
@@ -1395,7 +1399,7 @@ result parse_document(
                 CASTLE_CONST castle::size_type close = trimmed.find(']');
                 if (close == string_view::npos)
                 {
-                    result_value.status = castle::status::invalid_argument;
+                    result_value.status = castle::status::parse_error;
                     result_value.code = error_code::invalid_section;
                     result_value.line = line_number;
                     result_value.column = 1U;
@@ -1406,7 +1410,7 @@ result parse_document(
                 CASTLE_CONST string_view suffix = trim(trimmed.substr(close + 1U));
                 if (!suffix.empty() && !starts_with_comment(suffix))
                 {
-                    result_value.status = castle::status::invalid_argument;
+                    result_value.status = castle::status::parse_error;
                     result_value.code = error_code::invalid_section;
                     result_value.line = line_number;
                     result_value.column = close + 2U;
@@ -1420,7 +1424,7 @@ result parse_document(
                 {
                     result_value.status = section_name.size() > MaxSectionLength
                                           ? castle::status::full
-                                          : castle::status::invalid_argument;
+                                          : castle::status::parse_error;
                     result_value.code = section_name.size() > MaxSectionLength
                                         ? error_code::capacity
                                         : error_code::invalid_section;
@@ -1446,7 +1450,7 @@ result parse_document(
                 CASTLE_CONST castle::size_type separator = find_separator(trimmed);
                 if (separator == string_view::npos)
                 {
-                    result_value.status = castle::status::invalid_argument;
+                    result_value.status = castle::status::parse_error;
                     result_value.code = error_code::invalid_assignment;
                     result_value.line = line_number;
                     result_value.column = 1U;
@@ -1459,7 +1463,7 @@ result parse_document(
                 {
                     result_value.status = key.size() > MaxKeyLength
                                           ? castle::status::full
-                                          : castle::status::invalid_argument;
+                                          : castle::status::parse_error;
                     result_value.code = key.size() > MaxKeyLength
                                         ? error_code::capacity
                                         : error_code::invalid_key;

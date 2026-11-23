@@ -95,7 +95,7 @@ TEST(Http1Parser, RejectsChunkedUnlessEnabledAndCanDecodeWhenEnabled)
 {
     const char response[] = "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n2\r\nhi\r\n0\r\n\r\n";
     http1_response_parser<32U> disabled;
-    EXPECT_EQ(disabled.feed(response, sizeof(response) - 1U), castle::status::invalid_config);
+    EXPECT_EQ(disabled.feed(response, sizeof(response) - 1U), castle::status::unsupported);
     EXPECT_EQ(disabled.last_error(), error_code::chunked_not_supported);
 
     http1_response_parser<32U, 8U, 32U, 64U, 128U, true> enabled;
@@ -113,7 +113,7 @@ TEST(Http1Parser, RejectsChunkedUnlessEnabledAndCanDecodeWhenEnabled)
 
     const char forbidden_trailer[] = "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n0\r\nContent-Length: 2\r\n\r\n";
     http1_response_parser<32U, 8U, 32U, 64U, 128U, true> bad_trailer;
-    EXPECT_EQ(bad_trailer.feed(forbidden_trailer, sizeof(forbidden_trailer) - 1U), castle::status::invalid_argument);
+    EXPECT_EQ(bad_trailer.feed(forbidden_trailer, sizeof(forbidden_trailer) - 1U), castle::status::parse_error);
     EXPECT_EQ(bad_trailer.last_error(), error_code::invalid_chunk);
 }
 
@@ -121,7 +121,7 @@ TEST(Http1Parser, RejectsProtocolUpgradeResponse)
 {
     http1_response_parser<16U> parser;
     const char response[] = "HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\n";
-    EXPECT_EQ(parser.feed(response, sizeof(response) - 1U), castle::status::invalid_config);
+    EXPECT_EQ(parser.feed(response, sizeof(response) - 1U), castle::status::unsupported);
     EXPECT_EQ(parser.last_error(), error_code::unsupported_feature);
 }
 
@@ -147,11 +147,11 @@ TEST(Http1Parser, DetectsMalformedStatusHeadersAndPrematureClose)
 {
     http1_response_parser<32U> parser;
     const char bad_status[] = "HTP/1.1 200 OK\r\n\r\n";
-    EXPECT_EQ(parser.feed(bad_status, sizeof(bad_status) - 1U), castle::status::invalid_argument);
+    EXPECT_EQ(parser.feed(bad_status, sizeof(bad_status) - 1U), castle::status::parse_error);
     EXPECT_EQ(parser.last_error(), error_code::malformed_status_line);
     parser.reset();
     const char bad_header[] = "HTTP/1.1 200 OK\r\nnot-a-header\r\n\r\n";
-    EXPECT_EQ(parser.feed(bad_header, sizeof(bad_header) - 1U), castle::status::invalid_argument);
+    EXPECT_EQ(parser.feed(bad_header, sizeof(bad_header) - 1U), castle::status::parse_error);
     EXPECT_EQ(parser.last_error(), error_code::invalid_header);
     parser.reset();
     const char partial[] = "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\nabc";
@@ -163,7 +163,7 @@ TEST(Http1Parser, RejectsMalformedChunkAndLineOverflow)
 {
     http1_response_parser<32U, 8U, 32U, 64U, 128U, true> chunked;
     const char bad_chunk[] = "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n2\r\nx!\n0\r\n\r\n";
-    EXPECT_EQ(chunked.feed(bad_chunk, sizeof(bad_chunk) - 1U), castle::status::invalid_argument);
+    EXPECT_EQ(chunked.feed(bad_chunk, sizeof(bad_chunk) - 1U), castle::status::parse_error);
     EXPECT_EQ(chunked.last_error(), error_code::invalid_chunk);
     http1_response_parser<32U, 8U, 32U, 64U, 16U> line_limited;
     const char long_line[] = "HTTP/1.1 204\r\nX-Long: 12345678901234567890\r\n\r\n";
@@ -181,12 +181,12 @@ TEST(Http1Parser, ValidatesFeedArgumentsAndTerminalStates)
     EXPECT_EQ(parser.feed(response, sizeof(response) - 1U, false, &consumed), castle::status::ok);
     EXPECT_EQ(consumed, sizeof(response) - 1U);
     EXPECT_EQ(parser.feed(nullptr, 0U), castle::status::ok);
-    EXPECT_EQ(parser.feed("x", 1U), castle::status::invalid_config);
+    EXPECT_EQ(parser.feed("x", 1U), castle::status::invalid_state);
 
     http1_response_parser<16U> failing;
     const char garbage[] = "HTP/1.1 200 OK\r\n";
-    EXPECT_EQ(failing.feed(garbage, sizeof(garbage) - 1U), castle::status::invalid_argument);
-    EXPECT_EQ(failing.feed("x", 1U), castle::status::invalid_argument);
+    EXPECT_EQ(failing.feed(garbage, sizeof(garbage) - 1U), castle::status::parse_error);
+    EXPECT_EQ(failing.feed("x", 1U), castle::status::parse_error);
 }
 
 TEST(Http1Parser, RejectsMalformedLinesAndStatusCodes)
@@ -195,7 +195,7 @@ TEST(Http1Parser, RejectsMalformedLinesAndStatusCodes)
     for (char const* text : bare_lf)
     {
         http1_response_parser<16U> parser;
-        EXPECT_EQ(parser.feed(text, std::strlen(text)), castle::status::invalid_argument) << text;
+        EXPECT_EQ(parser.feed(text, std::strlen(text)), castle::status::parse_error) << text;
         EXPECT_EQ(parser.last_error(), error_code::malformed_message) << text;
     }
     char const* bad_status[] = {"HTTP/1.1 x00 OK\r\n", "HTTP/1.1 2x0 OK\r\n", "HTTP/1.1 20x OK\r\n",
@@ -204,7 +204,7 @@ TEST(Http1Parser, RejectsMalformedLinesAndStatusCodes)
     for (char const* text : bad_status)
     {
         http1_response_parser<16U> parser;
-        EXPECT_EQ(parser.feed(text, std::strlen(text)), castle::status::invalid_argument) << text;
+        EXPECT_EQ(parser.feed(text, std::strlen(text)), castle::status::parse_error) << text;
         EXPECT_EQ(parser.last_error(), error_code::malformed_status_line) << text;
     }
 }
@@ -223,12 +223,12 @@ TEST(Http1Parser, ValidatesHeaderFieldsAndCapacity)
 {
     const char bad_name[] = "HTTP/1.1 200 OK\r\nbad name: x\r\n\r\n";
     http1_response_parser<16U> bad_name_parser;
-    EXPECT_EQ(bad_name_parser.feed(bad_name, sizeof(bad_name) - 1U), castle::status::invalid_argument);
+    EXPECT_EQ(bad_name_parser.feed(bad_name, sizeof(bad_name) - 1U), castle::status::parse_error);
     EXPECT_EQ(bad_name_parser.last_error(), error_code::invalid_header);
 
     const char control[] = "HTTP/1.1 200 OK\r\nX-A: a\x01" "b\r\n\r\n";
     http1_response_parser<16U> control_parser;
-    EXPECT_EQ(control_parser.feed(control, sizeof(control) - 1U), castle::status::invalid_argument);
+    EXPECT_EQ(control_parser.feed(control, sizeof(control) - 1U), castle::status::parse_error);
     EXPECT_EQ(control_parser.last_error(), error_code::invalid_header);
 
     std::string long_value = "HTTP/1.1 200 OK\r\nX-Long: " + std::string(300U, 'a') + "\r\n\r\n";
@@ -246,12 +246,12 @@ TEST(Http1Parser, ValidatesContentLengthTransferEncodingAndConnectionTokens)
 {
     const char bad_length[] = "HTTP/1.1 200 OK\r\nContent-Length: abc\r\n\r\n";
     http1_response_parser<16U> bad_length_parser;
-    EXPECT_EQ(bad_length_parser.feed(bad_length, sizeof(bad_length) - 1U), castle::status::invalid_argument);
+    EXPECT_EQ(bad_length_parser.feed(bad_length, sizeof(bad_length) - 1U), castle::status::parse_error);
     EXPECT_EQ(bad_length_parser.last_error(), error_code::malformed_message);
 
     const char mismatch[] = "HTTP/1.1 200 OK\r\nContent-Length: 1\r\nContent-Length: 2\r\n\r\n";
     http1_response_parser<16U> mismatch_parser;
-    EXPECT_EQ(mismatch_parser.feed(mismatch, sizeof(mismatch) - 1U), castle::status::invalid_argument);
+    EXPECT_EQ(mismatch_parser.feed(mismatch, sizeof(mismatch) - 1U), castle::status::parse_error);
 
     const char repeated[] = "HTTP/1.1 200 OK\r\nContent-Length: 1\r\nContent-Length: 1\r\n\r\nx";
     http1_response_parser<16U> repeated_parser;
@@ -260,12 +260,12 @@ TEST(Http1Parser, ValidatesContentLengthTransferEncodingAndConnectionTokens)
 
     const char gzip[] = "HTTP/1.1 200 OK\r\nTransfer-Encoding: gzip\r\n\r\n";
     http1_response_parser<16U> gzip_parser;
-    EXPECT_EQ(gzip_parser.feed(gzip, sizeof(gzip) - 1U), castle::status::invalid_config);
+    EXPECT_EQ(gzip_parser.feed(gzip, sizeof(gzip) - 1U), castle::status::unsupported);
     EXPECT_EQ(gzip_parser.last_error(), error_code::unsupported_feature);
 
     const char both[] = "HTTP/1.1 200 OK\r\nContent-Length: 2\r\nTransfer-Encoding: chunked\r\n\r\n";
     http1_response_parser<16U, 8U, 32U, 64U, 128U, true> both_parser;
-    EXPECT_EQ(both_parser.feed(both, sizeof(both) - 1U), castle::status::invalid_argument);
+    EXPECT_EQ(both_parser.feed(both, sizeof(both) - 1U), castle::status::parse_error);
     EXPECT_EQ(both_parser.last_error(), error_code::malformed_message);
 
     const char tokens[] = "HTTP/1.0 200 OK\r\nConnection: Upgrade\r\nConnection: keep-alive\r\nContent-Length: 0\r\n\r\n";
@@ -319,7 +319,7 @@ TEST(Http1Parser, RejectsMalformedChunkFraming)
     {
         std::string response = std::string("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n") + chunks;
         http1_response_parser<64U, 8U, 32U, 64U, 128U, true> parser;
-        EXPECT_EQ(parser.feed(response.data(), response.size()), castle::status::invalid_argument) << chunks;
+        EXPECT_EQ(parser.feed(response.data(), response.size()), castle::status::parse_error) << chunks;
         EXPECT_EQ(parser.last_error(), error_code::invalid_chunk) << chunks;
     }
 }
@@ -334,7 +334,7 @@ TEST(Http1Parser, ValidatesTrailersAndTheirCapacity)
     {
         std::string response = std::string("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n") + trailers;
         http1_response_parser<64U, 8U, 32U, 64U, 128U, true> parser;
-        EXPECT_EQ(parser.feed(response.data(), response.size()), castle::status::invalid_argument) << trailers;
+        EXPECT_EQ(parser.feed(response.data(), response.size()), castle::status::parse_error) << trailers;
         EXPECT_EQ(parser.last_error(), error_code::invalid_chunk) << trailers;
     }
 
@@ -463,6 +463,6 @@ TEST(Http1Parser, RejectsOutOfRangeStatusDigits)
     for (char const* text : lines)
     {
         http1_response_parser<16U> parser;
-        EXPECT_EQ(parser.feed(text, std::strlen(text)), castle::status::invalid_argument) << text;
+        EXPECT_EQ(parser.feed(text, std::strlen(text)), castle::status::parse_error) << text;
     }
 }

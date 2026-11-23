@@ -81,7 +81,7 @@ int main()
     CASTLE_SAMPLE_CHECK(udp.close() == castle::status::ok);
 #else
     tcp_client<> client;
-    CASTLE_SAMPLE_CHECK(client.open() == castle::status::not_configured);
+    CASTLE_SAMPLE_CHECK(client.open() == castle::status::unsupported);
 #endif
     return 0;
 }

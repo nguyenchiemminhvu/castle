@@ -85,7 +85,7 @@ public:
     {
         if (transport_.is_open())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         castle::status result = transport_.set_default_callback(
             [this](client_handle peer, castle::net::endpoint CASTLE_CONST& source,

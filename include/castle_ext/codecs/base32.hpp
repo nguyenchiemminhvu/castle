@@ -179,7 +179,7 @@ CASTLE_INLINE status base32_encode(CASTLE_CONST uint8_t* input,
  * @param output_capacity Destination capacity in bytes.
  * @param[out] output_size Number of bytes written, zero on failure.
  * @param allow_unpadded  When false, a final partial group must carry `=` padding.
- * @return `status::ok`, `status::full`, or `status::invalid_argument`.
+ * @return `status::ok`, `status::full`, `status::parse_error`, or `status::invalid_argument`.
  */
 CASTLE_INLINE status base32_decode(CASTLE_CONST char* input,
                             size_type input_size,
@@ -213,16 +213,16 @@ CASTLE_INLINE status base32_decode(CASTLE_CONST char* input,
     {
         if (input[i] == '=')
         {
-            return status::invalid_argument;
+            return status::parse_error;
         }
     }
     if (padding_count > 6U)
     {
-        return status::invalid_argument;
+        return status::parse_error;
     }
     if (padding_count != 0U && (input_size % 8U) != 0U)
     {
-        return status::invalid_argument;
+        return status::parse_error;
     }
 
     CASTLE_CONST size_type data_chars = input_size - padding_count;
@@ -230,11 +230,11 @@ CASTLE_INLINE status base32_decode(CASTLE_CONST char* input,
     // LCOV_EXCL_START
     if (padding_count == 0U && !allow_unpadded && rem != 0U)
     {
-        return status::invalid_argument;
+        return status::parse_error;
     }
     if (rem == 1U || rem == 3U || rem == 6U)
     {
-        return status::invalid_argument;
+        return status::parse_error;
     }
     // LCOV_EXCL_STOP
 
@@ -245,7 +245,7 @@ CASTLE_INLINE status base32_decode(CASTLE_CONST char* input,
     }
     if (padding_count != 0U && padding_count != expected_padding)
     {
-        return status::invalid_argument;
+        return status::parse_error;
     }
 
     // LCOV_EXCL_START
@@ -272,7 +272,7 @@ CASTLE_INLINE status base32_decode(CASTLE_CONST char* input,
             int value = detail::base32_value(static_cast<uint8_t>(input[in + i]));
             if (value < 0)
             {
-                return status::invalid_argument;
+                return status::parse_error;
             }
             buffer = (buffer << 5U) | static_cast<uint32_t>(value);
         }
@@ -285,7 +285,7 @@ CASTLE_INLINE status base32_decode(CASTLE_CONST char* input,
             CASTLE_CONST size_type unused_bits = chunk * 5U - bytes * 8U;
             if (unused_bits != 0U && (buffer & ((static_cast<uint64_t>(1U) << unused_bits) - 1U)) != 0U) // LCOV_EXCL_BR_LINE
             {
-                return status::invalid_argument;
+                return status::parse_error;
             }
             buffer <<= (8U - chunk) * 5U;
         }

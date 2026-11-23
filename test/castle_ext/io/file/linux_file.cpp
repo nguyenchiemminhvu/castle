@@ -44,7 +44,7 @@ TEST(LinuxFile, OpensReadsWritesSeeksAndTruncates)
     ASSERT_EQ(file.open(cfg), castle::status::ok);
     EXPECT_TRUE(file.is_open());
     EXPECT_GE(file.native_handle(), 0);
-    EXPECT_EQ(file.open(cfg), castle::status::invalid_config);
+    EXPECT_EQ(file.open(cfg), castle::status::invalid_state);
 
     const unsigned char tx[] = {1U, 2U, 3U, 4U, 5U};
     castle::size_type count = 0U;
@@ -66,7 +66,7 @@ TEST(LinuxFile, OpensReadsWritesSeeksAndTruncates)
     EXPECT_EQ(rx[0], 1U);
     EXPECT_EQ(rx[4], 5U);
     EXPECT_EQ(file.seek(0, static_cast<seek_origin>(99U), position), castle::status::invalid_argument);
-    EXPECT_EQ(file.truncate(-1), castle::status::invalid_argument);
+    EXPECT_EQ(file.truncate(-1), castle::status::out_of_range);
     EXPECT_EQ(file.truncate(2), castle::status::ok);
     ASSERT_EQ(file.size(size), castle::status::ok);
     EXPECT_EQ(size, 2);
@@ -86,7 +86,7 @@ TEST(LinuxFile, ReadOnlyAndWriteOnlyRestrictions)
     ASSERT_EQ(writer.open(file_config(path, false, true, true, true)), castle::status::ok);
     castle::size_type count = 77U;
     const char value = 'a';
-    EXPECT_EQ(writer.read_some(nullptr, 1U, count), castle::status::invalid_config);
+    EXPECT_EQ(writer.read_some(nullptr, 1U, count), castle::status::invalid_state);
     EXPECT_EQ(count, 0U);
     EXPECT_EQ(writer.write_some(&value, 1U, count), castle::status::ok);
     EXPECT_EQ(count, 1U);
@@ -95,12 +95,12 @@ TEST(LinuxFile, ReadOnlyAndWriteOnlyRestrictions)
     castle::io::file::basic_file reader;
     ASSERT_EQ(reader.open(file_config(path, true, false)), castle::status::ok);
     count = 77U;
-    EXPECT_EQ(reader.write_all(&value, 1U, count), castle::status::invalid_config);
+    EXPECT_EQ(reader.write_all(&value, 1U, count), castle::status::invalid_state);
     EXPECT_EQ(count, 0U);
     char received = 0;
     EXPECT_EQ(reader.read_some(&received, 1U, count), castle::status::ok);
     EXPECT_EQ(received, value);
-    EXPECT_EQ(reader.truncate(0), castle::status::invalid_config);
+    EXPECT_EQ(reader.truncate(0), castle::status::invalid_state);
     EXPECT_EQ(reader.close(), castle::status::ok);
     (void)::unlink(path);
 }
@@ -127,10 +127,10 @@ TEST(LinuxFile, ExclusiveCreateAndSystemErrors)
 
 #else
 
-TEST(LinuxFile, PosixDisabledReturnsNotConfigured)
+TEST(LinuxFile, PosixDisabledReturnsUnsupported)
 {
     castle::io::file::basic_file file;
-    EXPECT_EQ(file.open(file_config("/tmp/file")), castle::status::not_configured);
+    EXPECT_EQ(file.open(file_config("/tmp/file")), castle::status::unsupported);
 }
 
 #endif

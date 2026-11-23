@@ -57,7 +57,7 @@ struct i2c_config
     }
 };
 
-/** @brief Validates the path and I2C address range without opening hardware. */
+/** @brief Validates the path and I2C address range without opening hardware; an address beyond the 7-/10-bit range is `out_of_range`. */
 CASTLE_INLINE castle::status validate_config(i2c_config CASTLE_CONST& config) CASTLE_NOEXCEPT
 {
     if (config.device_path == nullptr || config.device_path[0] == '\0')
@@ -66,9 +66,9 @@ CASTLE_INLINE castle::status validate_config(i2c_config CASTLE_CONST& config) CA
     }
     if (config.ten_bit_address)
     {
-        return (config.address <= 0x03FFU) ? castle::status::ok : castle::status::invalid_config;
+        return (config.address <= 0x03FFU) ? castle::status::ok : castle::status::out_of_range;
     }
-    return (config.address <= 0x007FU) ? castle::status::ok : castle::status::invalid_config;
+    return (config.address <= 0x007FU) ? castle::status::ok : castle::status::out_of_range;
 }
 
 /** @brief True when the Linux i2c-dev UAPI is available in this build. */
@@ -121,7 +121,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         // LCOV_EXCL_STOP
 #if CASTLE_USING_IO_I2C_VIA_I2CDEV
@@ -156,7 +156,7 @@ public:
 #else
         (void)config;
         if (system_error != nullptr) { *system_error = 0; }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -196,7 +196,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -258,8 +258,9 @@ public:
      * @param transmit_size Number of transmit bytes; must be non-zero.
      * @param receive_buffer Destination for the read phase.
      * @param receive_size Number of bytes to receive; must be non-zero.
-     * @return `ok` on the complete two-message transaction, `data_loss` if the
-     *         adapter reports an incomplete message count, or an error status.
+     * @return `ok` on the complete two-message transaction, `invalid_argument` for a null buffer or zero size,
+     *         `out_of_range` when a size exceeds 0xFFFF, `data_loss` if the adapter reports an incomplete
+     *         message count, `unsupported` without i2c-dev, or another error status.
      */
     castle::status write_read(CASTLE_CONST void* transmit_buffer,
                               size_type transmit_size,
@@ -268,8 +269,7 @@ public:
                               int* system_error = nullptr) CASTLE_NOEXCEPT
     {
         if (transmit_buffer == nullptr || receive_buffer == nullptr
-            || transmit_size == 0U || receive_size == 0U
-            || transmit_size > 0xFFFFU || receive_size > 0xFFFFU)
+            || transmit_size == 0U || receive_size == 0U)
         {
             // LCOV_EXCL_START
             if (system_error != nullptr)
@@ -277,6 +277,15 @@ public:
                 *system_error = 0;
             }
             return castle::status::invalid_argument;
+        }
+        if (transmit_size > 0xFFFFU || receive_size > 0xFFFFU)
+        {
+            // size above the 16-bit i2c_msg length field
+            if (system_error != nullptr)
+            {
+                *system_error = 0;
+            }
+            return castle::status::out_of_range;
         }
         if (!is_configured())
         {
@@ -328,7 +337,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -367,7 +376,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 

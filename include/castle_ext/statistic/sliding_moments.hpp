@@ -154,7 +154,7 @@ public:
         return current_.population_variance(out);
     }
 
-    /** @brief Sample variance; `status::empty` with fewer than two samples. */
+    /** @brief Sample variance; `status::empty` without samples, `status::insufficient_data` with one sample. */
     castle::status sample_variance(result_type& out) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return current_.sample_variance(out);
@@ -166,7 +166,7 @@ public:
         return current_.population_stddev(out);
     }
 
-    /** @brief Sample standard deviation; `status::empty` with fewer than two samples. */
+    /** @brief Sample standard deviation; `status::empty` without samples, `status::insufficient_data` with one sample. */
     castle::status sample_stddev(result_type& out) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return current_.sample_stddev(out);

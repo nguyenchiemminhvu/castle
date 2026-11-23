@@ -103,7 +103,7 @@ TEST(NetServer, TcpServerRejectsUdpOnlyOperationsAndCanOverrideCallback)
     tcp_server<2U>::client_handle handle;
     EXPECT_EQ(server.accept_client(handle), castle::status::not_configured);
     ASSERT_EQ(server.open(endpoint::loopback_ipv4(0U)), castle::status::ok);
-    EXPECT_EQ(server.process_datagram(handle), castle::status::invalid_config);
+    EXPECT_EQ(server.process_datagram(handle), castle::status::unsupported);
     EXPECT_EQ(server.close(), castle::status::ok);
 }
 
@@ -162,7 +162,7 @@ TEST(NetServer, UdpServerLearnsPeersAndUsesPerPeerCallbacks)
     ASSERT_EQ(first.process_once(1000), castle::status::ok);
     EXPECT_EQ(received, 4U);
 
-    EXPECT_EQ(server.send_all(first_peer, "x", 1U, bytes), castle::status::invalid_config);
+    EXPECT_EQ(server.send_all(first_peer, "x", 1U, bytes), castle::status::unsupported);
     EXPECT_EQ(server.close_client(first_peer), castle::status::ok);
     EXPECT_EQ(server.close_client(first_peer), castle::status::not_found);
     EXPECT_EQ(server.client_count(), 1U);
@@ -175,7 +175,7 @@ TEST(NetServer, UdpCapacityOverflowAndInvalidConfiguration)
     server_type server;
     ASSERT_EQ(server.open(endpoint::loopback_ipv4(0U)), castle::status::ok);
     server_type::client_handle rejected_accept;
-    EXPECT_EQ(server.accept_client(rejected_accept), castle::status::invalid_config);
+    EXPECT_EQ(server.accept_client(rejected_accept), castle::status::unsupported);
     endpoint local;
     ASSERT_EQ(server.socket().local_endpoint(local), castle::status::ok);
     udp_client<16U> first;
@@ -361,7 +361,7 @@ TEST(NetServer, CallbackCannotReenterProcessingButMayCloseServer)
     ASSERT_EQ(first.send_all("a", 1U, bytes), castle::status::ok);
     ASSERT_EQ(second.send_all("b", 1U, bytes), castle::status::ok);
     EXPECT_EQ(server.process_client(first_handle, 1000), castle::status::ok);
-    EXPECT_EQ(nested, castle::status::invalid_config);
+    EXPECT_EQ(nested, castle::status::invalid_state);
     EXPECT_FALSE(server.is_open());
     EXPECT_EQ(server.client_count(), 0U);
 }
@@ -466,7 +466,7 @@ TEST(NetServer, UdpServersDoNotSilentlyShareAPort)
     EXPECT_EQ(second.open(local, 8, true, &system_error), castle::status::system_call_error);
     EXPECT_EQ(system_error, EADDRINUSE);
     EXPECT_FALSE(second.is_open());
-    EXPECT_EQ(first.open(local), castle::status::invalid_config);
+    EXPECT_EQ(first.open(local), castle::status::invalid_state);
 }
 
 TEST(NetServer, AcceptOnFullServerReportsFullInsteadOfWaiting)
@@ -606,7 +606,7 @@ TEST(NetServer, FailedOpenLeavesServerClosedAndReusable)
 TEST(NetServer, UnsupportedTargetKeepsApiAvailable)
 {
     tcp_server<2U> server;
-    EXPECT_EQ(server.open(endpoint::loopback_ipv4(0U)), castle::status::not_configured);
+    EXPECT_EQ(server.open(endpoint::loopback_ipv4(0U)), castle::status::unsupported);
     tcp_server<2U>::client_handle handle;
     EXPECT_EQ(server.accept_client(handle), castle::status::not_configured);
 }

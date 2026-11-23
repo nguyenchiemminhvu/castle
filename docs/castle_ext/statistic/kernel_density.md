@@ -37,7 +37,7 @@ Outside the support the compact kernels return 0.
 |Signature|Description|Status returns|Time / stack|
 |---|---|---|---|
 |`template <typename TKernel = gaussian_kernel, typename TIterator, typename R> status kernel_density(TIterator first, TIterator last, R x, R bandwidth, R& out)`|Density estimate at `x`.|`ok`, `invalid_argument` (non-finite `x`, or `bandwidth` not finite and positive), `empty` (empty range)|O(N) / O(1)|
-|`template <typename TIterator, typename R> status normal_reference_bandwidth(TIterator first, TIterator last, R& out)`|Silverman rule `h = 1.06 * s * n^(-1/5)` with `s` the sample standard deviation.|`ok`, `empty` (fewer than 2 samples), `invalid_argument` (non-finite sample or zero spread)|O(N) / O(1)|
+|`template <typename TIterator, typename R> status normal_reference_bandwidth(TIterator first, TIterator last, R& out)`|Silverman rule `h = 1.06 * s * n^(-1/5)` with `s` the sample standard deviation.|`ok`, `empty` (no samples), `insufficient_data` (one sample), `invalid_argument` (non-finite sample or zero spread)|O(N) / O(1)|
 
 `out` is unchanged on every failure.
 

@@ -169,18 +169,18 @@ TEST(CanFilter, ValidateAcceptsInRangeFilters)
 
 TEST(CanFilter, ValidateRejectsIdentifierWiderThanFormat)
 {
-    EXPECT_EQ(validate_filter(filter(0x800U, 0x7FFU)), castle::status::invalid_argument);
+    EXPECT_EQ(validate_filter(filter(0x800U, 0x7FFU)), castle::status::out_of_range);
     EXPECT_EQ(validate_filter(filter(0x800U, 0x7FFU, id_format::extended)), castle::status::ok);
-    EXPECT_EQ(validate_filter(filter(0x20000000U, 0U, id_format::extended)), castle::status::invalid_argument);
-    EXPECT_EQ(validate_filter(filter(0xFFFFFFFFU, 0U)), castle::status::invalid_argument);
+    EXPECT_EQ(validate_filter(filter(0x20000000U, 0U, id_format::extended)), castle::status::out_of_range);
+    EXPECT_EQ(validate_filter(filter(0xFFFFFFFFU, 0U)), castle::status::out_of_range);
 }
 
 TEST(CanFilter, ValidateRejectsMaskWiderThanFormat)
 {
-    EXPECT_EQ(validate_filter(filter(0x1U, 0x800U)), castle::status::invalid_argument);
+    EXPECT_EQ(validate_filter(filter(0x1U, 0x800U)), castle::status::out_of_range);
     EXPECT_EQ(validate_filter(filter(0x1U, 0x800U, id_format::extended)), castle::status::ok);
-    EXPECT_EQ(validate_filter(filter(0x1U, 0x20000000U, id_format::extended)), castle::status::invalid_argument);
-    EXPECT_EQ(validate_filter(filter(0x1U, 0xFFFFFFFFU)), castle::status::invalid_argument);
+    EXPECT_EQ(validate_filter(filter(0x1U, 0x20000000U, id_format::extended)), castle::status::out_of_range);
+    EXPECT_EQ(validate_filter(filter(0x1U, 0xFFFFFFFFU)), castle::status::out_of_range);
 }
 
 TEST(CanFilter, ValidateRejectsUnknownFormat)

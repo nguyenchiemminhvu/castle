@@ -28,9 +28,9 @@
 |`status mean_x(result_type& out) const`|Mean of x.|`ok`, `empty` (needs 1)|O(1) / O(1)|
 |`status mean_y(result_type& out) const`|Mean of y.|`ok`, `empty` (needs 1)|O(1) / O(1)|
 |`status population_covariance(result_type& out) const`|`Sxy / n`.|`ok`, `empty` (needs 1)|O(1) / O(1)|
-|`status sample_covariance(result_type& out) const`|`Sxy / (n - 1)`.|`ok`, `empty` (needs 2)|O(1) / O(1)|
-|`status correlation(result_type& out) const`|Pearson `r = Sxy / sqrt(Sxx * Syy)`, clamped to [-1, 1].|`ok`, `empty` (needs 2), `invalid_argument` (x or y has zero variance)|O(1) / O(1)|
-|`status fit(result_type& slope, result_type& intercept) const`|Least-squares line: `slope = Sxy / Sxx`, `intercept = mean_y - slope * mean_x`.|`ok`, `empty` (needs 1), `invalid_argument` (every x identical)|O(1) / O(1)|
+|`status sample_covariance(result_type& out) const`|`Sxy / (n - 1)`.|`ok`, `empty` (no observations), `insufficient_data` (one observation)|O(1) / O(1)|
+|`status correlation(result_type& out) const`|Pearson `r = Sxy / sqrt(Sxx * Syy)`, clamped to [-1, 1].|`ok`, `empty` (no observations), `insufficient_data` (one observation), `invalid_argument` (x or y has zero variance)|O(1) / O(1)|
+|`status fit(result_type& slope, result_type& intercept) const`|Least-squares line: `slope = Sxy / Sxx`, `intercept = mean_y - slope * mean_x`.|`ok`, `empty` (no observations), `insufficient_data` (one observation), `invalid_argument` (every x identical with enough observations)|O(1) / O(1)|
 |`void clear()`|Discards every observation.|-|O(1) / O(1)|
 
 Outputs are left unchanged whenever a status other than `ok` is returned.

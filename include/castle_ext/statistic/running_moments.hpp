@@ -220,13 +220,18 @@ public:
 
     /**
      * @brief Unbiased sample variance, `M2 / (n - 1)`.
-     * @return `status::ok`, or `status::empty` with fewer than two samples.
+     * @return `status::ok`, `status::empty` without samples, or
+     *         `status::insufficient_data` with exactly one sample.
      */
     castle::status sample_variance(R& out) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        if (count_ < 2U)
+        if (count_ == 0U)
         {
             return castle::status::empty;
+        }
+        if (count_ < 2U)
+        {
+            return castle::status::insufficient_data;
         }
         out = second_moment() / static_cast<R>(count_ - 1U);
         return castle::status::ok;

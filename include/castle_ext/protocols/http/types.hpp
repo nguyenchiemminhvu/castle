@@ -247,17 +247,21 @@ CASTLE_INLINE castle::status to_status(error_code value) CASTLE_NOEXCEPT
         case error_code::header_line_limit:
         case error_code::body_limit:
         case error_code::frame_size_limit:
-        case error_code::dynamic_table_limit:
+        case error_code::dynamic_table_limit: return castle::status::out_of_range;
         case error_code::stream_limit:
-        case error_code::output_full: return castle::status::out_of_range;
+        case error_code::output_full: return castle::status::full;
         case error_code::connection_closed: return castle::status::data_loss;
-        case error_code::request_in_progress: return castle::status::invalid_config;
+        case error_code::request_in_progress: return castle::status::invalid_state;
         case error_code::unsupported_feature:
-        case error_code::chunked_not_supported: return castle::status::invalid_config;
-        case error_code::goaway_received:
+        case error_code::chunked_not_supported: return castle::status::unsupported;
+        case error_code::goaway_received: return castle::status::unavailable;
         case error_code::stream_reset:
         case error_code::stream_closed: return castle::status::data_loss;
-        default: return castle::status::invalid_argument;
+        case error_code::flow_control_error:
+        case error_code::protocol_error:
+        case error_code::invalid_frame:
+        case error_code::compression_error: return castle::status::protocol_error;
+        default: return castle::status::parse_error;
     }
 }
 

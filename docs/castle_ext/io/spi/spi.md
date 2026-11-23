@@ -49,7 +49,7 @@ int main()
 See `samples/castle_ext/io/spi/spi.cpp` for a standalone sample.
 
 ## Constraints & Notes
-- Requires Linux spidev UAPI headers and a kernel driver exposing `/dev/spidev*`; otherwise `spi_available` is false and hardware methods return `not_configured`.
+- Requires Linux spidev UAPI headers and a kernel driver exposing `/dev/spidev*`; otherwise `spi_available` is false and hardware methods return `unsupported`.
 - `transfer()` is synchronous and uses one stack-allocated `spi_ioc_transfer`; length is bounded by the Linux ioctl result and transfer structure.
 - The driver/controller may reject unsupported mode flags or word widths; such failures return `system_call_error` and expose `errno` when requested.
 - `read_some` and `write_some` produce separate single-direction SPI operations. Use `transfer()` for clocked full-duplex exchanges and chip-select control.

@@ -26,7 +26,7 @@ All names live in `castle::io::can`.
 | `static filter::exact(uint32_t identifier, id_format id_kind = id_format::standard)` | `constexpr`. Accepts exactly one identifier: mask is `max_id(id_kind)` (all identifier bits). |
 | `static filter::any(id_format id_kind = id_format::standard)` | `constexpr`. Accepts every frame of that format: identifier `0`, mask `0`. |
 | `matches(frame const&) const` | `constexpr bool`. True when `candidate.format == format && ((candidate.id ^ id) & mask) == 0`. `noexcept`, O(1). |
-| `validate_filter(filter const&)` | Returns `ok`, or `invalid_argument` for an unknown `format` enumerator or an `id` or `mask` above `max_id(format)`. `basic_bus::add_filter()` calls it first. |
+| `validate_filter(filter const&)` | Returns `ok`, `invalid_argument` for an unknown `format` enumerator, or `out_of_range` for an `id` or `mask` above `max_id(format)`. `basic_bus::add_filter()` calls it first. |
 
 ## Usage Example
 See `samples/castle_ext/io/can/filter.cpp`.
@@ -58,7 +58,7 @@ int main()
     assert(request.set_remote(8U) == castle::status::ok);
     assert(one_id.matches(request));
 
-    assert(validate_filter(filter(0x800U, 0x7FFU)) == castle::status::invalid_argument);
+    assert(validate_filter(filter(0x800U, 0x7FFU)) == castle::status::out_of_range);
     assert(validate_filter(filter(0x800U, 0x7FFU, id_format::extended)) == castle::status::ok);
     return 0;
 }

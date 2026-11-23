@@ -196,10 +196,10 @@ TEST(NormalReferenceBandwidthTest, FailureStatuses)
     // Non-finite sample: push_range failure is propagated.
     EXPECT_EQ(normal_reference_bandwidth(bad, bad + 3, h), castle::status::invalid_argument);
 
-    // Empty and single-sample ranges: sample_stddev needs two.
+    // Empty range is empty; a single sample is insufficient (sample_stddev needs two).
     const double one[] = {1.0};
     EXPECT_EQ(normal_reference_bandwidth(one, one, h), castle::status::empty);
-    EXPECT_EQ(normal_reference_bandwidth(one, one + 1, h), castle::status::empty);
+    EXPECT_EQ(normal_reference_bandwidth(one, one + 1, h), castle::status::insufficient_data);
 
     // Zero spread.
     const double flat[] = {3.0, 3.0, 3.0};

@@ -26,8 +26,8 @@ Great-circle and ellipsoidal distance/bearing calculations over `geo_point<T>`. 
 | `initial_bearing<T>(from, to)` | Initial (forward) great-circle bearing from `from` to `to`, in decimal degrees normalized to `[0, 360)`. |
 | `final_bearing<T>(from, to)` | Final (arrival) great-circle bearing from `from` to `to`, in decimal degrees normalized to `[0, 360)`. |
 | `vincenty_result<T>` | Bundles the outputs of `vincenty_inverse()`: `distance`, `initial_bearing_deg`, `final_bearing_deg`. |
-| `vincenty_inverse<T, Ellipsoid = wgs84_ellipsoid<T>>(from, to, result, max_iterations = 200)` | Solves the geodetic inverse problem (distance and bearings between two points) on a reference ellipsoid; returns `castle::status::ok` on convergence, `castle::status::unknown_error` otherwise. |
-| `vincenty_direct<T, Ellipsoid = wgs84_ellipsoid<T>>(start, initial_bearing_deg, distance_m, destination, final_bearing_deg, max_iterations = 200)` | Solves the geodetic direct problem (destination point and arrival bearing given a start point, bearing, and distance); returns `castle::status::ok` on convergence, `castle::status::unknown_error` otherwise. |
+| `vincenty_inverse<T, Ellipsoid = wgs84_ellipsoid<T>>(from, to, result, max_iterations = 200)` | Solves the geodetic inverse problem (distance and bearings between two points) on a reference ellipsoid; returns `castle::status::ok` on convergence, `castle::status::not_converged` otherwise. |
+| `vincenty_direct<T, Ellipsoid = wgs84_ellipsoid<T>>(start, initial_bearing_deg, distance_m, destination, final_bearing_deg, max_iterations = 200)` | Solves the geodetic direct problem (destination point and arrival bearing given a start point, bearing, and distance); returns `castle::status::ok` on convergence, `castle::status::not_converged` otherwise. |
 
 ## Usage Example
 See `samples/castle_ext/geodetic/distance.cpp`.

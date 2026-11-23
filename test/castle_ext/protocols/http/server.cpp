@@ -641,7 +641,7 @@ TEST(HttpServerModel, LifecycleRejectsCallsOutsideRunningState)
     EXPECT_EQ(server.poll(0), status::not_configured);
     EXPECT_EQ(server.stop(), status::not_configured);
     ASSERT_EQ(server.start(net::endpoint::loopback_ipv4(0U)), status::ok);
-    EXPECT_EQ(server.start(net::endpoint::loopback_ipv4(0U)), status::invalid_config);
+    EXPECT_EQ(server.start(net::endpoint::loopback_ipv4(0U)), status::invalid_state);
     EXPECT_EQ(server.stop(), status::ok);
 }
 

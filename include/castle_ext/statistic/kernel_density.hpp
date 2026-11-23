@@ -144,8 +144,8 @@ castle::status kernel_density(TIterator first,
  * @tparam TIterator Input iterator over arithmetic samples.
  * @tparam R Floating-point result type (deduced from `out`).
  * @param out Receives the bandwidth on success; unchanged on failure.
- * @return `status::ok`, `status::empty` with fewer than two samples, or
- *         `status::invalid_argument` for a non-finite sample or zero spread.
+ * @return `status::ok`, `status::empty` without samples, `status::insufficient_data` with one
+ *         sample, or `status::invalid_argument` for a non-finite sample or zero spread.
  * @note Complexity: O(N) time, O(1) stack.
  */
 template <typename TIterator, typename R>

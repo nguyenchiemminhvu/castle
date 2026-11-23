@@ -402,7 +402,7 @@ public:
      * @param timeout_ms Timeout in milliseconds; a negative value means no timeout.
      * @param ready_count Receives the number of still-current ready registrations.
      * @param system_error Optional output receiving `errno` when `poll()` fails.
-     * @return `ok` for readiness or timeout, `invalid_config` when a previous
+     * @return `ok` for readiness or timeout, `invalid_state` when a previous
      *         ready batch is pending or another wait is active, or `system_call_error`.
      * @note With no enabled descriptors this returns immediately with zero events.
      */
@@ -418,7 +418,7 @@ public:
         // A blocking wait must never make a second waiter spin on a held mutex.
         if (!wait_mutex_.try_lock())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         // LCOV_EXCL_STOP
 
@@ -434,7 +434,7 @@ public:
             castle::scoped_mutex guard(state_mutex_);
             if (pending_count_ != 0U)
             {
-                return castle::status::invalid_config;
+                return castle::status::invalid_state;
             }
             for (size_type i = 0U; i < Capacity; ++i)
             {

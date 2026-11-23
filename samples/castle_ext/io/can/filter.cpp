@@ -58,10 +58,10 @@ int main()
     // validate_filter() checks that id and mask fit the format.
     CASTLE_SAMPLE_CHECK(validate_filter(one_id) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(validate_filter(any_extended) == castle::status::ok);
-    CASTLE_SAMPLE_CHECK(validate_filter(filter(max_standard_id + 1U, 0U)) == castle::status::invalid_argument);
-    CASTLE_SAMPLE_CHECK(validate_filter(filter(0U, max_standard_id + 1U)) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(validate_filter(filter(max_standard_id + 1U, 0U)) == castle::status::out_of_range);
+    CASTLE_SAMPLE_CHECK(validate_filter(filter(0U, max_standard_id + 1U)) == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(validate_filter(filter(max_extended_id + 1U, 0U, id_format::extended))
-                        == castle::status::invalid_argument);
+                        == castle::status::out_of_range);
     filter bad_format;
     bad_format.format = static_cast<id_format>(9U);
     CASTLE_SAMPLE_CHECK(validate_filter(bad_format) == castle::status::invalid_argument);

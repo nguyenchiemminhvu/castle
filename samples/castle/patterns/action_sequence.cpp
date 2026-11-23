@@ -25,17 +25,25 @@ int main()
 
     // Equivalent of cocos2d-x: Sequence::create(CallFunc(open), DelayTime(0.1f), CallFunc(close), nullptr)
     // The default resolution is milliseconds; coarser units such as seconds convert exactly.
-    dp::action_sequence<6U> close_door;
+    dp::action_sequence<7U> close_door;
     CASTLE_SAMPLE_CHECK(close_door.add_call([&log]() noexcept { ++log.opened; }) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(close_door.add_delay(milliseconds(100)) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(close_door.add_call([&log]() noexcept { ++log.closed; }) == castle::status::ok);
+
+    // Editing from inside a step is rejected because the sequence is currently executing.
+    castle::status edit_while_running = castle::status::ok;
+    CASTLE_SAMPLE_CHECK(close_door.add_call(
+        [&close_door, &edit_while_running]() noexcept
+        {
+            edit_while_running = close_door.clear();
+        }) == castle::status::ok);
 
     // Composition: a second sequence is copied (flattened) after the first.
     dp::action_sequence<2U> lock_step;
     CASTLE_SAMPLE_CHECK(lock_step.add_delay(milliseconds(50)) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(lock_step.add_call([&log]() noexcept { ++log.locked; }) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(close_door.append(lock_step) == castle::status::ok);
-    CASTLE_SAMPLE_CHECK(close_door.size() == 5U);
+    CASTLE_SAMPLE_CHECK(close_door.size() == 6U);
 
     // The capacity is a compile-time bound: a sixth step is rejected.
     CASTLE_SAMPLE_CHECK(close_door.add_delay(milliseconds(1)) == castle::status::ok);
@@ -58,11 +66,13 @@ int main()
     CASTLE_SAMPLE_CHECK(log.locked == 1U);
     CASTLE_SAMPLE_CHECK(close_door.update(milliseconds(1)) == dp::action_sequence_state::completed);
     CASTLE_SAMPLE_CHECK(close_door.is_completed());
+    CASTLE_SAMPLE_CHECK(edit_while_running == castle::status::invalid_state);
 
     // The sequence owns its steps, so it can run again after start().
     CASTLE_SAMPLE_CHECK(close_door.start() == castle::status::ok);
     CASTLE_SAMPLE_CHECK(close_door.update(seconds(1)) == dp::action_sequence_state::completed);
     CASTLE_SAMPLE_CHECK(log.opened == 2U && log.closed == 2U && log.locked == 2U);
+    CASTLE_SAMPLE_CHECK(edit_while_running == castle::status::invalid_state);
 
     return 0;
 }

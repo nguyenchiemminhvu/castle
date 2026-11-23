@@ -87,7 +87,8 @@ int main()
     // Error paths.
     CASTLE_SAMPLE_CHECK(derivative_samples<double>(nullptr, 5U, 1.0, dy) == castle::status::invalid_argument);
     CASTLE_SAMPLE_CHECK(derivative_samples<double>(y, 5U, 1.0, nullptr) == castle::status::invalid_argument);
-    CASTLE_SAMPLE_CHECK(derivative_samples(y, 1U, 1.0, dy) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(derivative_samples(y, 0U, 1.0, dy) == castle::status::empty);
+    CASTLE_SAMPLE_CHECK(derivative_samples(y, 1U, 1.0, dy) == castle::status::insufficient_data);
     CASTLE_SAMPLE_CHECK(derivative_samples(y, 5U, 0.0, dy) == castle::status::invalid_argument);
 
     return 0;

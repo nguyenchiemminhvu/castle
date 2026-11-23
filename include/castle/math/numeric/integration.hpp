@@ -171,7 +171,7 @@ integrate_gauss_legendre(F&& f, T a, meta::type_identity_t<T> b, size_type panel
  * @return `numeric_result` whose `value` is the integral, `error` the change
  *         between the last two diagonal estimates, and `iterations` the number
  *         of levels used. `code` is `status::ok` on convergence or
- *         `status::out_of_range` when `MaxLevels` was exhausted first (the
+ *         `status::not_converged` when `MaxLevels` was exhausted first (the
  *         best estimate is still returned).
  */
 template <size_type MaxLevels = 12U, typename F, typename T>
@@ -187,7 +187,7 @@ integrate_romberg(F&& f, T a, meta::type_identity_t<T> b, meta::type_identity_t<
     T h = b - a;
     previous[0] = static_cast<T>(0.5) * h * (f(a) + f(b));
 
-    numeric_result<T> result = {previous[0], static_cast<T>(0), 1U, status::out_of_range};
+    numeric_result<T> result = {previous[0], static_cast<T>(0), 1U, status::not_converged};
     for (size_type level = 1U; level < MaxLevels; ++level)
     {
         h *= static_cast<T>(0.5);

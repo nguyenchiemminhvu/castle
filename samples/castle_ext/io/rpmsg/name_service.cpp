@@ -19,8 +19,8 @@ int main()
     CASTLE_SAMPLE_CHECK(encode_name_service_message(decoded, wire, sizeof(wire)) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(decode_name_service_message(wire, sizeof(wire), event) == castle::status::ok);
     wire[rpmsg_name_size + 7U] = 9U;
-    CASTLE_SAMPLE_CHECK(decode_name_service_message(wire, sizeof(wire), event) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(decode_name_service_message(wire, sizeof(wire), event) == castle::status::protocol_error);
     CASTLE_SAMPLE_CHECK(decode_name_service_message(nullptr, sizeof(wire), event) == castle::status::invalid_argument);
-    CASTLE_SAMPLE_CHECK(decode_name_service_message(wire, sizeof(wire) - 1U, event) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(decode_name_service_message(wire, sizeof(wire) - 1U, event) == castle::status::protocol_error);
     return 0;
 }

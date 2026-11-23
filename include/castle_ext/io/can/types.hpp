@@ -80,12 +80,15 @@ struct can_config
 /** @brief Validates a configuration without touching hardware: known mode and a bit rate of at most 1 Mbit/s. */
 CASTLE_NODISCARD CASTLE_INLINE castle::status validate_config(can_config CASTLE_CONST& config) CASTLE_NOEXCEPT
 {
-    if (config.bitrate > max_bitrate
-        || (config.mode != can_mode::normal
-            && config.mode != can_mode::loopback
-            && config.mode != can_mode::listen_only))
+    if (config.mode != can_mode::normal
+        && config.mode != can_mode::loopback
+        && config.mode != can_mode::listen_only)
     {
         return castle::status::invalid_config;
+    }
+    if (config.bitrate > max_bitrate)
+    {
+        return castle::status::out_of_range;
     }
     return castle::status::ok;
 }

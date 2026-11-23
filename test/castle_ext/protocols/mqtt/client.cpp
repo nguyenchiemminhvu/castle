@@ -350,9 +350,9 @@ TEST(MqttClient, ConnackReturnCodesMapToStatuses)
         castle::status expected;
     };
     const return_code_case cases[] = {
-        {1U, castle::status::invalid_config}, {2U, castle::status::invalid_argument},
-        {3U, castle::status::time_out},       {4U, castle::status::not_configured},
-        {5U, castle::status::not_configured}, {6U, castle::status::invalid_argument},
+        {1U, castle::status::unsupported}, {2U, castle::status::invalid_argument},
+        {3U, castle::status::unavailable}, {4U, castle::status::permission_denied},
+        {5U, castle::status::permission_denied}, {6U, castle::status::parse_error},
     };
     for (return_code_case const& item : cases)
     {
@@ -387,15 +387,15 @@ TEST(MqttClient, RejectsMalformedHandshakeTraffic)
         castle::status expected;
     };
     const handshake_case cases[] = {
-        {reserved_flags, sizeof(reserved_flags), version::v3_1_1, castle::status::invalid_argument},
-        {extra_bytes, sizeof(extra_bytes), version::v3_1_1, castle::status::invalid_argument},
-        {short_body, sizeof(short_body), version::v3_1_1, castle::status::invalid_argument},
-        {v5_without_properties, sizeof(v5_without_properties), version::v5_0, castle::status::invalid_argument},
-        {v5_bad_properties, sizeof(v5_bad_properties), version::v5_0, castle::status::invalid_argument},
-        {v5_unsupported, sizeof(v5_unsupported), version::v5_0, castle::status::invalid_config},
-        {v5_unknown, sizeof(v5_unknown), version::v5_0, castle::status::unknown_error},
-        {pingresp_first, sizeof(pingresp_first), version::v3_1_1, castle::status::invalid_argument},
-        {disconnect_first, sizeof(disconnect_first), version::v3_1_1, castle::status::invalid_argument},
+        {reserved_flags, sizeof(reserved_flags), version::v3_1_1, castle::status::parse_error},
+        {extra_bytes, sizeof(extra_bytes), version::v3_1_1, castle::status::parse_error},
+        {short_body, sizeof(short_body), version::v3_1_1, castle::status::parse_error},
+        {v5_without_properties, sizeof(v5_without_properties), version::v5_0, castle::status::parse_error},
+        {v5_bad_properties, sizeof(v5_bad_properties), version::v5_0, castle::status::parse_error},
+        {v5_unsupported, sizeof(v5_unsupported), version::v5_0, castle::status::unsupported},
+        {v5_unknown, sizeof(v5_unknown), version::v5_0, castle::status::permission_denied},
+        {pingresp_first, sizeof(pingresp_first), version::v3_1_1, castle::status::protocol_error},
+        {disconnect_first, sizeof(disconnect_first), version::v3_1_1, castle::status::protocol_error},
     };
     for (handshake_case const& item : cases)
     {
@@ -440,7 +440,7 @@ TEST(MqttClient, ConnectFailureModesReleaseTheTransport)
     ASSERT_TRUE(accepted.open());
     client_type twice;
     ASSERT_EQ(connect_to(twice, accepted, options, kConnackOk, sizeof(kConnackOk)), castle::status::ok);
-    EXPECT_EQ(twice.connect(castle::net::endpoint::loopback_ipv4(accepted.port()), options, 1), castle::status::invalid_config);
+    EXPECT_EQ(twice.connect(castle::net::endpoint::loopback_ipv4(accepted.port()), options, 1), castle::status::invalid_state);
     EXPECT_EQ(twice.disconnect(), castle::status::ok);
 }
 
@@ -720,12 +720,12 @@ TEST(MqttClient, SubscriptionAcknowledgementsAreValidatedAgainstRequests)
     };
     const ack_case cases[] = {
         {failure_code, sizeof(failure_code), version::v3_1_1, castle::status::ok, true},
-        {unknown_id, sizeof(unknown_id), version::v3_1_1, castle::status::invalid_argument, false},
-        {no_codes, sizeof(no_codes), version::v3_1_1, castle::status::invalid_argument, false},
-        {zero_id, sizeof(zero_id), version::v3_1_1, castle::status::invalid_argument, false},
-        {invalid_code, sizeof(invalid_code), version::v3_1_1, castle::status::invalid_argument, false},
+        {unknown_id, sizeof(unknown_id), version::v3_1_1, castle::status::protocol_error, false},
+        {no_codes, sizeof(no_codes), version::v3_1_1, castle::status::parse_error, false},
+        {zero_id, sizeof(zero_id), version::v3_1_1, castle::status::parse_error, false},
+        {invalid_code, sizeof(invalid_code), version::v3_1_1, castle::status::parse_error, false},
         {v5_suback, sizeof(v5_suback), version::v5_0, castle::status::ok, true},
-        {v5_bad_properties, sizeof(v5_bad_properties), version::v5_0, castle::status::invalid_argument, false},
+        {v5_bad_properties, sizeof(v5_bad_properties), version::v5_0, castle::status::parse_error, false},
     };
     for (ack_case const& item : cases)
     {
@@ -753,12 +753,12 @@ TEST(MqttClient, UnsubscribeAcknowledgementsAreValidatedAgainstRequests)
     };
     const ack_case cases[] = {
         {unsuback, sizeof(unsuback), version::v3_1_1, castle::status::ok},
-        {unknown_id, sizeof(unknown_id), version::v3_1_1, castle::status::invalid_argument},
-        {extra_bytes, sizeof(extra_bytes), version::v3_1_1, castle::status::invalid_argument},
-        {zero_id, sizeof(zero_id), version::v3_1_1, castle::status::invalid_argument},
-        {suback_for_unsubscribe, sizeof(suback_for_unsubscribe), version::v3_1_1, castle::status::invalid_argument},
+        {unknown_id, sizeof(unknown_id), version::v3_1_1, castle::status::protocol_error},
+        {extra_bytes, sizeof(extra_bytes), version::v3_1_1, castle::status::parse_error},
+        {zero_id, sizeof(zero_id), version::v3_1_1, castle::status::parse_error},
+        {suback_for_unsubscribe, sizeof(suback_for_unsubscribe), version::v3_1_1, castle::status::protocol_error},
         {v5_unsuback, sizeof(v5_unsuback), version::v5_0, castle::status::ok},
-        {v5_bad_properties, sizeof(v5_bad_properties), version::v5_0, castle::status::invalid_argument},
+        {v5_bad_properties, sizeof(v5_bad_properties), version::v5_0, castle::status::parse_error},
     };
     for (ack_case const& item : cases)
     {
@@ -790,15 +790,15 @@ TEST(MqttClient, PublishAcknowledgementsAreValidatedAgainstOutgoingState)
     };
     const ack_case cases[] = {
         {puback, sizeof(puback), version::v3_1_1, qos::at_least_once, castle::status::ok, true},
-        {unknown_puback, sizeof(unknown_puback), version::v3_1_1, qos::at_least_once, castle::status::invalid_argument, false},
-        {zero_puback, sizeof(zero_puback), version::v3_1_1, qos::at_least_once, castle::status::invalid_argument, false},
-        {wrong_state, sizeof(wrong_state), version::v3_1_1, qos::at_least_once, castle::status::invalid_argument, false},
-        {v5_rejected, sizeof(v5_rejected), version::v5_0, qos::at_least_once, castle::status::full, false},
+        {unknown_puback, sizeof(unknown_puback), version::v3_1_1, qos::at_least_once, castle::status::protocol_error, false},
+        {zero_puback, sizeof(zero_puback), version::v3_1_1, qos::at_least_once, castle::status::parse_error, false},
+        {wrong_state, sizeof(wrong_state), version::v3_1_1, qos::at_least_once, castle::status::protocol_error, false},
+        {v5_rejected, sizeof(v5_rejected), version::v5_0, qos::at_least_once, castle::status::already_exists, false},
         {v5_success, sizeof(v5_success), version::v5_0, qos::at_least_once, castle::status::ok, true},
         {v5_without_properties, sizeof(v5_without_properties), version::v5_0, qos::at_least_once, castle::status::ok, true},
         {v5_reason_only, sizeof(v5_reason_only), version::v5_0, qos::at_least_once, castle::status::ok, true},
-        {pubcomp_early, sizeof(pubcomp_early), version::v3_1_1, qos::exactly_once, castle::status::invalid_argument, false},
-        {v5_pubrec_rejected, sizeof(v5_pubrec_rejected), version::v5_0, qos::exactly_once, castle::status::full, false},
+        {pubcomp_early, sizeof(pubcomp_early), version::v3_1_1, qos::exactly_once, castle::status::protocol_error, false},
+        {v5_pubrec_rejected, sizeof(v5_pubrec_rejected), version::v5_0, qos::exactly_once, castle::status::already_exists, false},
     };
     for (ack_case const& item : cases)
     {
@@ -846,10 +846,10 @@ TEST(MqttClient, RejectsMalformedInboundPublishes)
         bool keep_open;
     };
     const inbound_case cases[] = {
-        {qos3, sizeof(qos3), version::v3_1_1, castle::status::invalid_argument, false},
-        {wildcard_topic, sizeof(wildcard_topic), version::v3_1_1, castle::status::invalid_argument, false},
-        {zero_identifier, sizeof(zero_identifier), version::v3_1_1, castle::status::invalid_argument, false},
-        {v5_bad_properties, sizeof(v5_bad_properties), version::v5_0, castle::status::invalid_argument, false},
+        {qos3, sizeof(qos3), version::v3_1_1, castle::status::parse_error, false},
+        {wildcard_topic, sizeof(wildcard_topic), version::v3_1_1, castle::status::parse_error, false},
+        {zero_identifier, sizeof(zero_identifier), version::v3_1_1, castle::status::parse_error, false},
+        {v5_bad_properties, sizeof(v5_bad_properties), version::v5_0, castle::status::parse_error, false},
         {oversized, sizeof(oversized), version::v3_1_1, castle::status::out_of_range, false},
         {kIncomingQos0, sizeof(kIncomingQos0), version::v3_1_1, castle::status::ok, true},
     };
@@ -919,7 +919,7 @@ TEST(MqttClient, UnsolicitedPingResponseIsRejected)
     options.keep_alive_seconds = 0U;
     ASSERT_EQ(connect_to(client, peer, options, kConnackOk, sizeof(kConnackOk)), castle::status::ok);
     peer.inject(kPingresp, sizeof(kPingresp));
-    EXPECT_EQ(client.poll(10U, 100), castle::status::invalid_argument);
+    EXPECT_EQ(client.poll(10U, 100), castle::status::protocol_error);
     EXPECT_FALSE(client.is_open());
 }
 
@@ -1210,19 +1210,19 @@ TEST(MqttClient, UnexpectedAndMalformedPacketsCloseTheSession)
         castle::status expected;
     };
     const inbound_case cases[] = {
-        {auth_packet, sizeof(auth_packet), castle::status::invalid_config},
-        {connect_packet, sizeof(connect_packet), castle::status::invalid_argument},
-        {pingresp_with_body, sizeof(pingresp_with_body), castle::status::invalid_argument},
-        {second_connack, sizeof(second_connack), castle::status::invalid_argument},
-        {empty_puback, sizeof(empty_puback), castle::status::invalid_argument},
-        {empty_pubrel, sizeof(empty_pubrel), castle::status::invalid_argument},
-        {zero_pubrel, sizeof(zero_pubrel), castle::status::invalid_argument},
-        {v3_pubrel_extra, sizeof(v3_pubrel_extra), castle::status::invalid_argument},
-        {v3_puback_extra, sizeof(v3_puback_extra), castle::status::invalid_argument},
-        {empty_suback, sizeof(empty_suback), castle::status::invalid_argument},
-        {empty_unsuback, sizeof(empty_unsuback), castle::status::invalid_argument},
-        {qos1_without_identifier, sizeof(qos1_without_identifier), castle::status::invalid_argument},
-        {truncated_topic, sizeof(truncated_topic), castle::status::invalid_argument},
+        {auth_packet, sizeof(auth_packet), castle::status::unsupported},
+        {connect_packet, sizeof(connect_packet), castle::status::protocol_error},
+        {pingresp_with_body, sizeof(pingresp_with_body), castle::status::parse_error},
+        {second_connack, sizeof(second_connack), castle::status::protocol_error},
+        {empty_puback, sizeof(empty_puback), castle::status::parse_error},
+        {empty_pubrel, sizeof(empty_pubrel), castle::status::parse_error},
+        {zero_pubrel, sizeof(zero_pubrel), castle::status::parse_error},
+        {v3_pubrel_extra, sizeof(v3_pubrel_extra), castle::status::parse_error},
+        {v3_puback_extra, sizeof(v3_puback_extra), castle::status::parse_error},
+        {empty_suback, sizeof(empty_suback), castle::status::parse_error},
+        {empty_unsuback, sizeof(empty_unsuback), castle::status::parse_error},
+        {qos1_without_identifier, sizeof(qos1_without_identifier), castle::status::parse_error},
+        {truncated_topic, sizeof(truncated_topic), castle::status::parse_error},
     };
     for (inbound_case const& item : cases)
     {

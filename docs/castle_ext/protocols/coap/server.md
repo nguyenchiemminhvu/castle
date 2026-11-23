@@ -20,7 +20,7 @@ A bounded, polling CoAP-over-UDP resource server built on CASTLE's UDP server pe
 | API | Description |
 |---|---|
 | `basic_server<...>` / `server` | Server with compile-time peer/resource/recent-ID/retransmit/path/buffer capacities. |
-| `open(endpoint)`, `close()`, `is_open()` | Binds/closes the UDP server socket. |
+| `open(endpoint)`, `close()`, `is_open()` | Binds/closes the UDP server socket. Reopening an already-open server returns `status::invalid_state`. |
 | `register_resource(path, methods, callback)` | Registers an exact URI path and allowed method bitmask; handler receives request and mutable response. A handler may re-register or unregister its own path; the callable change takes effect when the handler returns (via `callback_dispatcher`). |
 | `unregister_resource(path)` | Removes a registered resource. |
 | `set_resource_max_age(path, seconds)` | Sets the default Max-Age option added to that resource's responses unless the handler supplies one. |

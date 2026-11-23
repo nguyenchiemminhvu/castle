@@ -52,6 +52,7 @@ TEST(JsonParseTest, RejectsMalformedInput)
         document<32U, 256U, 8U> doc;
         auto r = parse(doc, string_view(text));
         EXPECT_FALSE(r.succeeded());
+        EXPECT_EQ(r.status, castle::status::parse_error);
         EXPECT_TRUE(doc.empty());
     }
     document<8U, 64U, 4U> doc;
@@ -83,7 +84,7 @@ TEST(JsonDocumentTest, ProgrammaticConstructionAndTypedAccess)
     EXPECT_EQ(doc.set_integer(value, -42, root, "integer"), castle::status::ok);
     EXPECT_EQ(doc.set_bool(value, true, root, "flag"), castle::status::ok);
     EXPECT_EQ(doc.set_number(value, "3.14", root, "pi"), castle::status::ok);
-    EXPECT_EQ(doc.set_number(value, "01", root, "bad"), castle::status::invalid_argument);
+    EXPECT_EQ(doc.set_number(value, "01", root, "bad"), castle::status::parse_error);
     int integer = 0; EXPECT_EQ(doc.get_integer(doc.find(root, "integer"), integer), castle::status::ok); EXPECT_EQ(integer, -42);
     EXPECT_EQ(doc.get_integer(doc.find(root, "pi"), integer), castle::status::invalid_argument);
     string_view text; EXPECT_EQ(doc.get_string(doc.find(root, "text"), text), castle::status::ok); EXPECT_EQ(text, string_view("hello"));
@@ -160,21 +161,35 @@ TEST(JsonParseTest, StringDecoderEscapesErrorsAndCapacity)
     position = 0U;
     EXPECT_EQ(detail::decode_string(string_view("x"), position, output).code, error_code::invalid_string);
     position = 0U;
+    EXPECT_EQ(detail::decode_string(string_view("x"), position, output).status, castle::status::parse_error);
+    position = 0U;
     EXPECT_EQ(detail::decode_string(string_view("\"abc"), position, output).code, error_code::unexpected_end);
+    position = 0U;
+    EXPECT_EQ(detail::decode_string(string_view("\"abc"), position, output).status, castle::status::parse_error);
     position = 0U;
     EXPECT_EQ(detail::decode_string(string_view("\"abc\\"), position, output).code, error_code::unexpected_end);
     position = 0U;
+    EXPECT_EQ(detail::decode_string(string_view("\"abc\\"), position, output).status, castle::status::parse_error);
+    position = 0U;
     EXPECT_EQ(detail::decode_string(string_view("\"abc\\q\""), position, output).code, error_code::invalid_escape);
+    position = 0U;
+    EXPECT_EQ(detail::decode_string(string_view("\"abc\\q\""), position, output).status, castle::status::parse_error);
     position = 0U;
     EXPECT_EQ(detail::decode_string(string_view("\"abc\\u12x4\""), position, output).code, error_code::invalid_unicode_escape);
     position = 0U;
+    EXPECT_EQ(detail::decode_string(string_view("\"abc\\u12x4\""), position, output).status, castle::status::parse_error);
+    position = 0U;
     EXPECT_EQ(detail::decode_string(string_view("\"\\uD800\""), position, output).code, error_code::invalid_unicode_escape);
+    position = 0U;
+    EXPECT_EQ(detail::decode_string(string_view("\"\\uD800\""), position, output).status, castle::status::parse_error);
 
     string<2U> tight;
     position = 0U;
     EXPECT_EQ(detail::decode_string(string_view("\"abc\""), position, tight).status, castle::status::full);
     position = 0U;
     EXPECT_EQ(detail::decode_string(string_view("\"\\n\""), position, tight).status, castle::status::ok);
+    position = 0U;
+    EXPECT_EQ(detail::decode_string(string_view("\"\\u20AC\""), position, tight).status, castle::status::full);
     position = 0U;
 }
 
@@ -206,7 +221,7 @@ TEST(JsonParseTest, NumberHelpersAndDocumentInvalidHandles)
     EXPECT_EQ(doc.kind(doc.npos), type::null_value);
     EXPECT_EQ(doc.find(doc.npos, "x"), doc.npos);
     EXPECT_EQ(doc.at(doc.npos, 0U), doc.npos);
-    EXPECT_EQ(doc.set_number(node, "bad"), castle::status::invalid_argument);
+    EXPECT_EQ(doc.set_number(node, "bad"), castle::status::parse_error);
     ASSERT_EQ(doc.make_object(node), castle::status::ok);
     EXPECT_EQ(doc.set_string(node, "v", doc.npos), castle::status::already_exists);
     EXPECT_EQ(doc.append(doc.npos, node, type::string, "x"), castle::status::invalid_argument);
@@ -230,6 +245,7 @@ TEST(JsonParseTest, ParserCapacityDepthAndLiteralBranches)
 
     document<16U, 64U, 1U> depth;
     r = parse(depth, string_view("[[0]]"));
+    EXPECT_EQ(r.status, castle::status::out_of_range);
     EXPECT_EQ(r.code, error_code::depth_exceeded);
 
     const char* invalid[] = {
@@ -243,6 +259,7 @@ TEST(JsonParseTest, ParserCapacityDepthAndLiteralBranches)
         if (text[0U] == '{' || text[0U] == '[' || text[0U] == 't' || text[0U] == 'f' || text[0U] == 'n')
         {
             EXPECT_FALSE(r.succeeded());
+            EXPECT_EQ(r.status, castle::status::parse_error);
         }
     }
 
@@ -294,6 +311,7 @@ TEST(JsonParseTest, RootScalarsTrailingTokensAndStringStorageEdges)
     EXPECT_TRUE(parse(scalar, string_view("null")).succeeded());
     EXPECT_TRUE(parse(scalar, string_view("123")).succeeded());
     EXPECT_TRUE(parse(scalar, string_view("\"text\"")).succeeded());
+    EXPECT_EQ(parse(scalar, string_view("1 2")).status, castle::status::parse_error);
     EXPECT_EQ(parse(scalar, string_view("1 2")).code, error_code::unexpected_token);
 
     string<8U> invalid_control;

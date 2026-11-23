@@ -74,6 +74,20 @@ TEST(GeodeticDistance, VincentyInverseCoincidentPoints)
     EXPECT_NEAR(result.distance, 0.0, 1e-6);
 }
 
+TEST(GeodeticDistance, VincentyInverseReportsNotConvergedWithoutIterations)
+{
+    castle::geodetic::vincenty_result<double> result{};
+    result.distance = 7.0;
+    result.initial_bearing_deg = 8.0;
+    result.final_bearing_deg = 9.0;
+
+    EXPECT_EQ(castle::geodetic::vincenty_inverse(new_york, los_angeles, result, 0U),
+              castle::status::not_converged);
+    EXPECT_EQ(result.distance, 7.0);
+    EXPECT_EQ(result.initial_bearing_deg, 8.0);
+    EXPECT_EQ(result.final_bearing_deg, 9.0);
+}
+
 TEST(GeodeticDistance, VincentyDirectReversesInverse)
 {
     castle::geodetic::vincenty_result<double> inverse{};
@@ -88,6 +102,18 @@ TEST(GeodeticDistance, VincentyDirectReversesInverse)
     EXPECT_NEAR(destination.latitude(), los_angeles.latitude(), 1e-4);
     EXPECT_NEAR(destination.longitude(), los_angeles.longitude(), 1e-4);
     EXPECT_NEAR(final_bearing_deg, inverse.final_bearing_deg, 1e-3);
+}
+
+TEST(GeodeticDistance, VincentyDirectReportsNotConvergedWithoutIterations)
+{
+    geo_point<double> destination(1.0, 2.0);
+    double final_bearing_deg = 3.0;
+
+    EXPECT_EQ(castle::geodetic::vincenty_direct(new_york, 90.0, 1000.0, destination, final_bearing_deg, 0U),
+              castle::status::not_converged);
+    EXPECT_EQ(destination.latitude(), 1.0);
+    EXPECT_EQ(destination.longitude(), 2.0);
+    EXPECT_EQ(final_bearing_deg, 3.0);
 }
 
 TEST(GeodeticDistance, VincentyAndHaversineAgreeClosely)

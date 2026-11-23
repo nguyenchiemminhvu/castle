@@ -598,7 +598,7 @@ public:
     /**
      * @brief Manually re-arms a recovery action configured with one_shot.
      * @param Tag Diagnostic tag to re-arm.
-     * @return status::ok on success, or status::invalid_argument while the
+     * @return `status::ok` on success, or `status::invalid_state` while the
      *         diagnostic is still active.
      */
     template <typename Tag>
@@ -609,7 +609,7 @@ public:
         auto& target = this->template state<Tag>();
         if (target.active)
         {
-            return castle::status::invalid_argument;
+            return castle::status::invalid_state;
         }
         target.recovery_armed = true;
         return castle::status::ok;

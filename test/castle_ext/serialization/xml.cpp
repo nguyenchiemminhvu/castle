@@ -166,7 +166,7 @@ TEST(XmlDocumentTest, ParseErrorsExposeOffsetLineColumnAndClearDocument)
 {
     document doc;
     const xml::result r = xml::parse(doc, string_view("<root>\n  <child>"));
-    EXPECT_EQ(r.status, castle::status::invalid_argument);
+    EXPECT_EQ(r.status, castle::status::parse_error);
     EXPECT_EQ(r.code, xml::error_code::unexpected_end);
     EXPECT_EQ(r.line, 2U);
     EXPECT_EQ(r.column, 10U);
@@ -194,28 +194,49 @@ TEST(XmlDocumentTest, InvalidRootAndTagSyntax)
         document doc;
         const xml::result r = xml::parse(doc, string_view(input));
         EXPECT_FALSE(r.succeeded());
+        EXPECT_EQ(r.status, castle::status::parse_error);
     }
 }
 
 TEST(XmlDocumentTest, DuplicateAndMalformedAttributes)
 {
     document doc;
-    EXPECT_EQ(xml::parse(doc, string_view("<root a=\"1\" a=\"2\"/>")).code, xml::error_code::duplicate_attribute);
-    EXPECT_EQ(xml::parse(doc, string_view("<root a=\"1\"b=\"2\"/>")).code, xml::error_code::invalid_attribute);
-    EXPECT_EQ(xml::parse(doc, string_view("<root a\"1\"/>")).code, xml::error_code::invalid_attribute);
-    EXPECT_EQ(xml::parse(doc, string_view("<root a=1/>")).code, xml::error_code::invalid_attribute);
-    EXPECT_EQ(xml::parse(doc, string_view("<root a=\"1></root>")).code, xml::error_code::unexpected_end);
+    xml::result r = xml::parse(doc, string_view("<root a=\"1\" a=\"2\"/>"));
+    EXPECT_EQ(r.status, castle::status::parse_error);
+    EXPECT_EQ(r.code, xml::error_code::duplicate_attribute);
+    r = xml::parse(doc, string_view("<root a=\"1\"b=\"2\"/>"));
+    EXPECT_EQ(r.status, castle::status::parse_error);
+    EXPECT_EQ(r.code, xml::error_code::invalid_attribute);
+    r = xml::parse(doc, string_view("<root a\"1\"/>"));
+    EXPECT_EQ(r.status, castle::status::parse_error);
+    EXPECT_EQ(r.code, xml::error_code::invalid_attribute);
+    r = xml::parse(doc, string_view("<root a=1/>"));
+    EXPECT_EQ(r.status, castle::status::parse_error);
+    EXPECT_EQ(r.code, xml::error_code::invalid_attribute);
+    r = xml::parse(doc, string_view("<root a=\"1></root>"));
+    EXPECT_EQ(r.status, castle::status::parse_error);
+    EXPECT_EQ(r.code, xml::error_code::unexpected_end);
 }
 
 TEST(XmlDocumentTest, InvalidEntitiesAndCharacters)
 {
     document doc;
-    EXPECT_EQ(xml::parse(doc, string_view("<root>&unknown;</root>")).code, xml::error_code::invalid_entity);
-    EXPECT_EQ(xml::parse(doc, string_view("<root>&#0;</root>")).code, xml::error_code::invalid_entity);
-    EXPECT_EQ(xml::parse(doc, string_view("<root>&amp</root>")).code, xml::error_code::invalid_entity);
-    EXPECT_EQ(xml::parse(doc, string_view("<root>\x01</root>")).code, xml::error_code::invalid_character);
+    xml::result r = xml::parse(doc, string_view("<root>&unknown;</root>"));
+    EXPECT_EQ(r.status, castle::status::parse_error);
+    EXPECT_EQ(r.code, xml::error_code::invalid_entity);
+    r = xml::parse(doc, string_view("<root>&#0;</root>"));
+    EXPECT_EQ(r.status, castle::status::parse_error);
+    EXPECT_EQ(r.code, xml::error_code::invalid_entity);
+    r = xml::parse(doc, string_view("<root>&amp</root>"));
+    EXPECT_EQ(r.status, castle::status::parse_error);
+    EXPECT_EQ(r.code, xml::error_code::invalid_entity);
+    r = xml::parse(doc, string_view("<root>\x01</root>"));
+    EXPECT_EQ(r.status, castle::status::parse_error);
+    EXPECT_EQ(r.code, xml::error_code::invalid_character);
     const char invalid_utf8[] = "<root>\xF0\x28\x8C\x28</root>";
-    EXPECT_EQ(xml::parse(doc, string_view(invalid_utf8)).code, xml::error_code::invalid_character);
+    r = xml::parse(doc, string_view(invalid_utf8));
+    EXPECT_EQ(r.status, castle::status::parse_error);
+    EXPECT_EQ(r.code, xml::error_code::invalid_character);
 }
 
 TEST(XmlDocumentTest, CommentCdataProcessingInstructionAndDeclarationErrors)
@@ -234,7 +255,9 @@ TEST(XmlDocumentTest, DepthAndCapacity)
 {
     using tiny_depth = xml::document<16U, 16U, 256U, 2U>;
     tiny_depth depth_doc;
-    EXPECT_EQ(xml::parse(depth_doc, string_view("<a><b><c/></b></a>")).code, xml::error_code::depth_exceeded);
+    const xml::result depth = xml::parse(depth_doc, string_view("<a><b><c/></b></a>"));
+    EXPECT_EQ(depth.status, castle::status::out_of_range);
+    EXPECT_EQ(depth.code, xml::error_code::depth_exceeded);
 
     using tiny_strings = xml::document<16U, 16U, 8U, 4U>;
     tiny_strings string_doc;
@@ -306,7 +329,7 @@ TEST(XmlDocumentTest, MutationAndTypedAccessWithoutHeap)
     EXPECT_EQ(selected, mode::on);
 
     EXPECT_EQ(doc.get_attribute(root, string_view("missing"), gain), castle::status::not_found);
-    EXPECT_EQ(doc.get_attribute(root, string_view("enabled"), id), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_attribute(root, string_view("enabled"), id), castle::status::parse_error);
 
     document::node_id cdata = document::npos;
     document::node_id comment = document::npos;
@@ -573,13 +596,17 @@ TEST(XmlCoverageTest, ParserStateAndMarkupFailureFamilies)
     for (const char* input : invalid_inputs)
     {
         document doc;
-        EXPECT_FALSE(xml::parse(doc, string_view(input)).succeeded());
+        EXPECT_EQ(xml::parse(doc, string_view(input)).status, castle::status::parse_error);
     }
 
     document rootless;
-    EXPECT_EQ(xml::parse(rootless, string_view("<!--comment-->" )).code, xml::error_code::unexpected_token);
+    const xml::result rootless_result = xml::parse(rootless, string_view("<!--comment-->" ));
+    EXPECT_EQ(rootless_result.status, castle::status::parse_error);
+    EXPECT_EQ(rootless_result.code, xml::error_code::unexpected_token);
     document whitespace_only;
-    EXPECT_EQ(xml::parse(whitespace_only, string_view(" \n\t")).code, xml::error_code::unexpected_token);
+    const xml::result whitespace_result = xml::parse(whitespace_only, string_view(" \n\t"));
+    EXPECT_EQ(whitespace_result.status, castle::status::parse_error);
+    EXPECT_EQ(whitespace_result.code, xml::error_code::unexpected_token);
 
     document valid_doctype;
     EXPECT_TRUE(xml::parse(valid_doctype, string_view("<!DOCTYPE root [ <!ELEMENT root ANY> ]><root/>")).succeeded());
@@ -658,9 +685,9 @@ TEST(XmlCoverageTest, DetailCharacterAndNumericBoundaryPaths)
 
     int32_t integer = 0;
     EXPECT_EQ(detail::parse_integer(string_view(), integer), castle::status::invalid_argument);
-    EXPECT_EQ(detail::parse_integer(string_view("+1"), integer), castle::status::invalid_argument);
-    EXPECT_EQ(detail::parse_integer(string_view("-"), integer), castle::status::invalid_argument);
-    EXPECT_EQ(detail::parse_integer(string_view("12x"), integer), castle::status::invalid_argument);
+    EXPECT_EQ(detail::parse_integer(string_view("+1"), integer), castle::status::parse_error);
+    EXPECT_EQ(detail::parse_integer(string_view("-"), integer), castle::status::parse_error);
+    EXPECT_EQ(detail::parse_integer(string_view("12x"), integer), castle::status::parse_error);
     uint32_t unsigned_value = 0U;
     EXPECT_EQ(detail::parse_integer(string_view("-1"), unsigned_value), castle::status::invalid_argument);
     EXPECT_EQ(detail::parse_integer(string_view("2147483648"), integer), castle::status::out_of_range);
@@ -745,19 +772,29 @@ TEST(XmlCoverageTest, ParserAttributeNodeAndStorageCapacityFailures)
     EXPECT_EQ(xml::parse(pi_capacity, string_view("<r><?p?></r>")).status, castle::status::full);
 
     one_node_document short_end;
-    EXPECT_EQ(xml::parse(short_end, string_view("<r></r")).code, xml::error_code::unexpected_end);
+    xml::result short_end_result = xml::parse(short_end, string_view("<r></r"));
+    EXPECT_EQ(short_end_result.status, castle::status::parse_error);
+    EXPECT_EQ(short_end_result.code, xml::error_code::unexpected_end);
     one_node_document bad_pi;
-    EXPECT_EQ(xml::parse(bad_pi, string_view("<?p/bad?>")).code, xml::error_code::invalid_processing_instruction);
+    xml::result bad_pi_result = xml::parse(bad_pi, string_view("<?p/bad?>"));
+    EXPECT_EQ(bad_pi_result.status, castle::status::parse_error);
+    EXPECT_EQ(bad_pi_result.code, xml::error_code::invalid_processing_instruction);
     one_node_document bad_pi_data;
     const char nul_pi[] = {'<','?','p',' ','x','\0','?','>'};
-    EXPECT_EQ(xml::parse(bad_pi_data, string_view(nul_pi, sizeof(nul_pi))).code, xml::error_code::invalid_processing_instruction);
+    xml::result bad_pi_data_result = xml::parse(bad_pi_data, string_view(nul_pi, sizeof(nul_pi)));
+    EXPECT_EQ(bad_pi_data_result.status, castle::status::parse_error);
+    EXPECT_EQ(bad_pi_data_result.code, xml::error_code::invalid_processing_instruction);
 
     one_node_document bad_cdata;
     const char nul_cdata[] = {'<','r','>','<','!','[','C','D','A','T','A','[','x','\0',']',']','>','<','/','r','>'};
-    EXPECT_EQ(xml::parse(bad_cdata, string_view(nul_cdata, sizeof(nul_cdata))).code, xml::error_code::invalid_cdata);
+    xml::result bad_cdata_result = xml::parse(bad_cdata, string_view(nul_cdata, sizeof(nul_cdata)));
+    EXPECT_EQ(bad_cdata_result.status, castle::status::parse_error);
+    EXPECT_EQ(bad_cdata_result.code, xml::error_code::invalid_cdata);
 
     one_node_document declaration_bad;
-    EXPECT_EQ(xml::parse(declaration_bad, string_view("<?xml?><r/>")).code, xml::error_code::invalid_declaration);
+    xml::result declaration_bad_result = xml::parse(declaration_bad, string_view("<?xml?><r/>"));
+    EXPECT_EQ(declaration_bad_result.status, castle::status::parse_error);
+    EXPECT_EQ(declaration_bad_result.code, xml::error_code::invalid_declaration);
 }
 
 } // namespace

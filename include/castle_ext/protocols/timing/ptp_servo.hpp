@@ -95,7 +95,7 @@ public:
      * @param correction_interval_nanoseconds Time from the previous correction
      *        to this correction. It must be non-zero for slew mode.
      * @param[out] output Selected action.
-     * @return `ok` on success, `invalid_argument` for an invalid policy/input.
+     * @return `ok` on success, `invalid_config` for invalid configured fields, or `invalid_argument` for a zero correction interval.
      */
     CASTLE_NODISCARD castle::status update(
         int64_t offset_nanoseconds,
@@ -109,7 +109,9 @@ public:
          || (config_.step_threshold_nanoseconds < 0LL)
          || (correction_interval_nanoseconds == 0U))
         {
-            return castle::status::invalid_argument;
+            return ((config_.gain_denominator == 0U) || (config_.max_slew_ppb < 0)
+                 || (config_.step_threshold_nanoseconds < 0LL))
+                ? castle::status::invalid_config : castle::status::invalid_argument;
         }
 
         CASTLE_CONST uint64_t magnitude = unsigned_magnitude(offset_nanoseconds);

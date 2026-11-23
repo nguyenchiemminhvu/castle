@@ -107,8 +107,8 @@ CASTLE_INLINE status hex_encode(CASTLE_CONST uint8_t* input,
  * @param output          Destination byte buffer.
  * @param output_capacity Destination capacity in bytes.
  * @param[out] output_size Number of bytes written, zero on failure.
- * @return `status::ok`, `status::full`, or `status::invalid_argument`
- *         (odd length, non-hex character or null pointer).
+ * @return `status::ok`, `status::full`, `status::parse_error`, or
+ *         `status::invalid_argument` (null pointer).
  */
 CASTLE_INLINE status hex_decode(CASTLE_CONST char* input,
                          size_type input_size,
@@ -128,7 +128,7 @@ CASTLE_INLINE status hex_decode(CASTLE_CONST char* input,
     }
     if ((input_size & 1U) != 0U)
     {
-        return status::invalid_argument;
+        return status::parse_error;
     }
     CASTLE_CONST size_type required = input_size / 2U;
     if (required > output_capacity)
@@ -147,7 +147,7 @@ CASTLE_INLINE status hex_decode(CASTLE_CONST char* input,
         CASTLE_CONST uint8_t low = detail::hex_value(static_cast<uint8_t>(input[2U * i + 1U]));
         if (high == 0xFFU || low == 0xFFU) // LCOV_EXCL_BR_LINE
         {
-            return status::invalid_argument;
+            return status::parse_error;
         }
         output[i] = static_cast<uint8_t>((high << 4U) | low);
     }

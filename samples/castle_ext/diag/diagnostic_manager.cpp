@@ -172,7 +172,7 @@ int main()
     assert(one_shot_diagnostics.report<thermal_trip_tag>(true) == castle::status::ok);
     one_shot_diagnostics.update(start);
     assert(thermal_recoveries == 1U);
-    assert(one_shot_diagnostics.rearm<thermal_trip_tag>() == castle::status::invalid_argument);
+    assert(one_shot_diagnostics.rearm<thermal_trip_tag>() == castle::status::invalid_state);
     one_shot_diagnostics.report<thermal_trip_tag>(false);
     one_shot_diagnostics.update(start + clock_duration(1LL));
     assert(one_shot_diagnostics.rearm<thermal_trip_tag>() == castle::status::ok);

@@ -137,7 +137,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         // LCOV_EXCL_STOP
 
@@ -187,7 +187,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::not_configured;
+            return castle::status::unsupported;
         }
 #endif
         result = descriptor_.open(config.path, flags, config.permissions, system_error);
@@ -211,7 +211,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -250,7 +250,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         return descriptor_.read_some(buffer, capacity, bytes_read, system_error);
     }
@@ -276,7 +276,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         // LCOV_EXCL_STOP
         return descriptor_.read_exact(buffer, size, bytes_read, system_error);
@@ -303,7 +303,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         // LCOV_EXCL_STOP
         return descriptor_.write_some(buffer, size, bytes_written, system_error);
@@ -330,7 +330,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         // LCOV_EXCL_STOP
         return descriptor_.write_all(buffer, size, bytes_written, system_error);
@@ -413,7 +413,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -453,7 +453,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::data_loss;
+            return castle::status::out_of_range;
         }
         out_size = static_cast<int64_t>(info.st_size);
         if (system_error != nullptr)
@@ -467,7 +467,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -489,7 +489,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         if (length < 0)
         {
@@ -497,7 +497,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_argument;
+            return castle::status::out_of_range;
         }
 #if CASTLE_USING_POSIX_APIS
         CASTLE_CONST off_t native_length = static_cast<off_t>(length);
@@ -528,7 +528,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -564,7 +564,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 

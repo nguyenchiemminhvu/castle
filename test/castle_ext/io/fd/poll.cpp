@@ -129,7 +129,7 @@ TEST(FdPoll, QueuesAndDispatchesReadyCallbacks)
     EXPECT_EQ(manager.pending_event_count(), 1U);
 
     castle::size_type ignored = 0U;
-    EXPECT_EQ(manager.wait(0, ignored), castle::status::invalid_config);
+    EXPECT_EQ(manager.wait(0, ignored), castle::status::invalid_state);
 
     castle::size_type processed = 0U;
     ASSERT_EQ(manager.process_events(processed), castle::status::ok);

@@ -213,7 +213,7 @@ CASTLE_INLINE status base64_encode(CASTLE_CONST uint8_t* input,
  * @param[out] output_size Number of bytes written, zero on failure.
  * @param url_safe        When true, `-` and `_` are used instead of `+` and `/`.
  * @param allow_unpadded  When false, a final partial group must carry `=` padding.
- * @return `status::ok`, `status::full`, or `status::invalid_argument`.
+ * @return `status::ok`, `status::full`, `status::parse_error`, or `status::invalid_argument`.
  */
 CASTLE_INLINE status base64_decode(CASTLE_CONST char* input,
                             size_type input_size,
@@ -247,7 +247,7 @@ CASTLE_INLINE status base64_decode(CASTLE_CONST char* input,
     {
         if (!allow_unpadded || remainder == 1U)
         {
-            return status::invalid_argument;
+            return status::parse_error;
         }
         ++padded_groups;
     }
@@ -286,7 +286,7 @@ CASTLE_INLINE status base64_decode(CASTLE_CONST char* input,
 
         if (remaining < 2U)
         {
-            return status::invalid_argument;
+            return status::parse_error;
         }
         c0 = static_cast<uint8_t>(input[input_index++]);
         c1 = static_cast<uint8_t>(input[input_index++]);
@@ -294,7 +294,7 @@ CASTLE_INLINE status base64_decode(CASTLE_CONST char* input,
         int v1 = detail::base64_value(c1, url_safe);
         if (v0 < 0 || v1 < 0)
         {
-            return status::invalid_argument;
+            return status::parse_error;
         }
 
         if (remaining > 2U)
@@ -306,7 +306,7 @@ CASTLE_INLINE status base64_decode(CASTLE_CONST char* input,
                 int v2 = detail::base64_value(c2, url_safe);
                 if (v2 < 0)
                 {
-                    return status::invalid_argument;
+                    return status::parse_error;
                 }
 
                 if (remaining > 3U)
@@ -318,7 +318,7 @@ CASTLE_INLINE status base64_decode(CASTLE_CONST char* input,
                         int v3 = detail::base64_value(c3, url_safe);
                         if (v3 < 0)
                         {
-                            return status::invalid_argument;
+                            return status::parse_error;
                         }
                         if (output_index + 3U > output_capacity)
                         {
@@ -336,7 +336,7 @@ CASTLE_INLINE status base64_decode(CASTLE_CONST char* input,
                 {
                     if ((v2 & 0x03) != 0)
                     {
-                        return status::invalid_argument;
+                        return status::parse_error;
                     }
                     if (output_index + 2U > output_capacity)
                     {
@@ -348,7 +348,7 @@ CASTLE_INLINE status base64_decode(CASTLE_CONST char* input,
                     {
                         if (input_index < input_size)
                         {
-                            return status::invalid_argument;
+                            return status::parse_error;
                         }
                     }
                     continue;
@@ -359,11 +359,11 @@ CASTLE_INLINE status base64_decode(CASTLE_CONST char* input,
             {
                 if (remaining != 4U || input_index >= input_size || input[input_index++] != '=') // LCOV_EXCL_BR_LINE
                 {
-                    return status::invalid_argument;
+                    return status::parse_error;
                 }
                 if ((v1 & 0x0F) != 0)
                 {
-                    return status::invalid_argument;
+                    return status::parse_error;
                 }
                 if (output_index + 1U > output_capacity)
                 {
@@ -378,11 +378,11 @@ CASTLE_INLINE status base64_decode(CASTLE_CONST char* input,
         // Only possible for an unpadded final group of two characters.
         if (remaining != 2U || group + 1U != padded_groups || !has_partial || !allow_unpadded)
         {
-            return status::invalid_argument;
+            return status::parse_error;
         }
         if ((v1 & 0x0F) != 0)
         {
-            return status::invalid_argument;
+            return status::parse_error;
         }
         if (output_index + 1U > output_capacity)
         {

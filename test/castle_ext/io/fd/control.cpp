@@ -124,17 +124,17 @@ TEST(FdControl, SystemCallFailureReportsErrno)
     EXPECT_EQ(castle::io::fd::close_fd(descriptors[1]), castle::status::ok);
 }
 #else
-TEST(FdControl, NonPosixCallsReportNotConfigured)
+TEST(FdControl, NonPosixCallsReportUnsupported)
 {
     int flags = 0;
-    EXPECT_EQ(castle::io::fd::get_status_flags(4, flags), castle::status::not_configured);
-    EXPECT_EQ(castle::io::fd::set_status_flags(4, 0), castle::status::not_configured);
-    EXPECT_EQ(castle::io::fd::get_descriptor_flags(4, flags), castle::status::not_configured);
-    EXPECT_EQ(castle::io::fd::set_descriptor_flags(4, 0), castle::status::not_configured);
-    EXPECT_EQ(castle::io::fd::set_nonblocking(4), castle::status::not_configured);
-    EXPECT_EQ(castle::io::fd::set_blocking(4), castle::status::not_configured);
-    EXPECT_EQ(castle::io::fd::set_close_on_exec(4), castle::status::not_configured);
-    EXPECT_EQ(castle::io::fd::close_fd(4), castle::status::not_configured);
+    EXPECT_EQ(castle::io::fd::get_status_flags(4, flags), castle::status::unsupported);
+    EXPECT_EQ(castle::io::fd::set_status_flags(4, 0), castle::status::unsupported);
+    EXPECT_EQ(castle::io::fd::get_descriptor_flags(4, flags), castle::status::unsupported);
+    EXPECT_EQ(castle::io::fd::set_descriptor_flags(4, 0), castle::status::unsupported);
+    EXPECT_EQ(castle::io::fd::set_nonblocking(4), castle::status::unsupported);
+    EXPECT_EQ(castle::io::fd::set_blocking(4), castle::status::unsupported);
+    EXPECT_EQ(castle::io::fd::set_close_on_exec(4), castle::status::unsupported);
+    EXPECT_EQ(castle::io::fd::close_fd(4), castle::status::unsupported);
     EXPECT_FALSE(castle::io::fd::is_valid_fd(4));
 }
 #endif

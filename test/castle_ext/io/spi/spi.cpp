@@ -13,7 +13,7 @@ TEST(Spi, ValidatesConfiguration)
     EXPECT_EQ(validate_config(spi_config("/dev/spidev0.0")), castle::status::ok);
     EXPECT_EQ(validate_config(spi_config("/dev/spidev0.0", static_cast<mode>(4U))), castle::status::invalid_config);
     EXPECT_EQ(validate_config(spi_config("/dev/spidev0.0", mode::mode0, 0U)), castle::status::invalid_config);
-    EXPECT_EQ(validate_config(spi_config("/dev/spidev0.0", mode::mode0, 33U)), castle::status::invalid_config);
+    EXPECT_EQ(validate_config(spi_config("/dev/spidev0.0", mode::mode0, 33U)), castle::status::out_of_range);
     EXPECT_EQ(validate_config(spi_config("/dev/spidev0.0", mode::mode0, 8U, 0U)), castle::status::invalid_config);
 }
 
@@ -52,7 +52,7 @@ TEST(Spi, LinuxSupportUnavailable)
 {
     basic_spi bus;
     EXPECT_FALSE(spi_available);
-    EXPECT_EQ(bus.open(spi_config("/dev/spidev0.0")), castle::status::not_configured);
+    EXPECT_EQ(bus.open(spi_config("/dev/spidev0.0")), castle::status::unsupported);
 }
 
 #endif

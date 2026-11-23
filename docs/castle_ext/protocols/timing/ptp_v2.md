@@ -56,7 +56,7 @@ Both one-step Sync and two-step Sync are supported. Announce/BMCA, peer-to-peer 
 
 ### Status behavior
 
-`castle::status::ok` means the operation was accepted. `not_found` is used for packets that are valid PTP but do not belong to the current configured exchange. `invalid_argument` indicates malformed timestamps, unsupported payload shape, or invalid API input. `out_of_range` indicates arithmetic overflow during timestamp/correction calculations. `not_configured` means `delay_request_transmitted()` was called without an outstanding exchange.
+`castle::status::ok` means the operation was accepted. `not_found` is used for valid PTP messages that do not belong to the current configured exchange. `unsupported` indicates a valid PTP message type that the slave does not handle. `parse_error` indicates a malformed complete packet, timestamp, or payload. `out_of_range` indicates an invalid caller timestamp range or arithmetic overflow. `invalid_state` means `delay_request_transmitted()` was called without an outstanding exchange. A negative computed path delay returns `protocol_error`. The public `decode_message()` API remains `bool`; `receive()` reports its decoding failures as `parse_error`.
 
 ## Usage Example
 

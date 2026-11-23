@@ -36,12 +36,12 @@ TEST(CastleExtBase64, InvalidFormsAndCapacity)
 {
     uint8_t decoded[8];
     size_t decoded_size = 77U;
-    EXPECT_EQ(castle::codecs::base64_decode("A", 1U, decoded, sizeof(decoded), decoded_size), castle::status::invalid_argument);
-    EXPECT_EQ(castle::codecs::base64_decode("AA=A", 4U, decoded, sizeof(decoded), decoded_size), castle::status::invalid_argument);
-    EXPECT_EQ(castle::codecs::base64_decode("AB==", 4U, decoded, sizeof(decoded), decoded_size), castle::status::invalid_argument);
+    EXPECT_EQ(castle::codecs::base64_decode("A", 1U, decoded, sizeof(decoded), decoded_size), castle::status::parse_error);
+    EXPECT_EQ(castle::codecs::base64_decode("AA=A", 4U, decoded, sizeof(decoded), decoded_size), castle::status::parse_error);
+    EXPECT_EQ(castle::codecs::base64_decode("AB==", 4U, decoded, sizeof(decoded), decoded_size), castle::status::parse_error);
     EXPECT_EQ(castle::codecs::base64_decode("AAA=", 4U, decoded, 1U, decoded_size), castle::status::full);
     EXPECT_EQ(decoded_size, 0U);
-    EXPECT_EQ(castle::codecs::base64_decode("AA", 2U, decoded, sizeof(decoded), decoded_size, false, false), castle::status::invalid_argument);
+    EXPECT_EQ(castle::codecs::base64_decode("AA", 2U, decoded, sizeof(decoded), decoded_size, false, false), castle::status::parse_error);
     EXPECT_EQ(castle::codecs::base64_decode(nullptr, 1U, decoded, sizeof(decoded), decoded_size), castle::status::invalid_argument);
     EXPECT_EQ(castle::codecs::base64_encode(nullptr, 1U, reinterpret_cast<char*>(decoded), sizeof(decoded), decoded_size), castle::status::invalid_argument);
 

@@ -69,11 +69,11 @@ TEST(P2QuantileTest, ConstructorValidAndInvalidProbability)
 TEST(P2QuantileTest, ConfigureValidatesProbability)
 {
     estimator e;
-    EXPECT_EQ(e.configure(0.0), status::invalid_argument);
-    EXPECT_EQ(e.configure(1.0), status::invalid_argument);
-    EXPECT_EQ(e.configure(std::numeric_limits<double>::quiet_NaN()), status::invalid_argument);
-    EXPECT_EQ(e.configure(-1.0), status::invalid_argument);
-    EXPECT_EQ(e.configure(1.5), status::invalid_argument);
+    EXPECT_EQ(e.configure(0.0), status::invalid_config);
+    EXPECT_EQ(e.configure(1.0), status::invalid_config);
+    EXPECT_EQ(e.configure(std::numeric_limits<double>::quiet_NaN()), status::invalid_config);
+    EXPECT_EQ(e.configure(-1.0), status::invalid_config);
+    EXPECT_EQ(e.configure(1.5), status::invalid_config);
     EXPECT_FALSE(e.configured());
 
     EXPECT_EQ(e.configure(0.5), status::ok);
@@ -85,7 +85,7 @@ TEST(P2QuantileTest, ConfigureValidatesProbability)
     EXPECT_EQ(e.configure(0.25), status::ok);
     EXPECT_TRUE(e.empty());
     EXPECT_EQ(e.push(1.0), status::ok);
-    EXPECT_EQ(e.configure(0.0), status::invalid_argument);
+    EXPECT_EQ(e.configure(0.0), status::invalid_config);
     EXPECT_FALSE(e.configured());
     EXPECT_TRUE(e.empty());
     EXPECT_EQ(e.probability(), 0.0);

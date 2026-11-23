@@ -699,7 +699,7 @@ CASTLE_INLINE bool valid_number(string_view text) CASTLE_NOEXCEPT
  * @brief Parses a string as an integer according to XML standards.
  * @param text The string to parse as an integer.
  * @param output The variable to store the parsed integer value.
- * @return A status indicating the result of the parsing operation. It can be castle::status::ok if parsing was successful, castle::status::invalid_argument if the input is not a valid integer, or castle::status::out_of_range if the integer is out of the representable range for the type T.
+ * @return A status indicating the result of the parsing operation. It can be castle::status::ok if parsing was successful, castle::status::parse_error if the nonempty input is not a valid integer, castle::status::invalid_argument if the input is empty or negative for an unsigned type, or castle::status::out_of_range if the integer is out of the representable range for the type T.
  * @note The function follows the XML specification for integer formats, including optional leading minus sign and digits.
  */
 template <typename T>
@@ -712,7 +712,7 @@ castle::status parse_integer(string_view text, T& output) CASTLE_NOEXCEPT
 
     if (text[0U] == '+')
     {
-        return castle::status::invalid_argument;
+        return castle::status::parse_error;
     }
 
     using U = meta::make_unsigned_t<T>;
@@ -724,7 +724,12 @@ castle::status parse_integer(string_view text, T& output) CASTLE_NOEXCEPT
         i = 1U;
     }
 
-    if (i == text.size() || (negative && !meta::is_signed<T>::value))
+    if (i == text.size())
+    {
+        return castle::status::parse_error;
+    }
+
+    if (negative && !meta::is_signed<T>::value)
     {
         return castle::status::invalid_argument;
     }
@@ -734,7 +739,7 @@ castle::status parse_integer(string_view text, T& output) CASTLE_NOEXCEPT
     {
         if (!is_decimal(text[i]))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
 
         CASTLE_CONST uint64_t digit = static_cast<uint64_t>(text[i] - '0');
@@ -773,16 +778,20 @@ castle::status parse_integer(string_view text, T& output) CASTLE_NOEXCEPT
  * @brief Parses a string as a floating-point number according to XML standards.
  * @param text The string to parse as a floating-point number.
  * @param output The variable to store the parsed floating-point value.
- * @return A status indicating the result of the parsing operation. It can be castle::status::ok if parsing was successful, castle::status::invalid_argument if the input is not a valid floating-point number, or castle::status::out_of_range if the number is out of the representable range for the type T.
+ * @return A status indicating the result of the parsing operation. It can be castle::status::ok if parsing was successful, castle::status::parse_error if the nonempty input is not a valid floating-point number, castle::status::invalid_argument if the input is empty, or castle::status::out_of_range if the number is out of the representable range for the type T.
  * @note The function follows the XML specification for floating-point number formats, including optional leading minus sign, integer part, optional fractional part, and optional exponent part.
  */
 template <typename T>
 enable_float_t<T>
 parse_floating(string_view text, T& output) CASTLE_NOEXCEPT
 {
-    if (!valid_number(text))
+    if (text.empty())
     {
         return castle::status::invalid_argument;
+    }
+    if (!valid_number(text))
+    {
+        return castle::status::parse_error;
     }
 
     castle::size_type i = 0U;
@@ -1523,7 +1532,7 @@ public:
             return castle::status::ok;
         }
 
-        return castle::status::invalid_argument;
+        return text.empty() ? castle::status::invalid_argument : castle::status::parse_error;
     }
 
     /**
@@ -1581,7 +1590,7 @@ public:
             output = false;
             return castle::status::ok;
         }
-        return castle::status::invalid_argument;
+        return text.empty() ? castle::status::invalid_argument : castle::status::parse_error;
     }
 
     /**
@@ -2048,7 +2057,7 @@ private:
     result fail(error_code code, size_type offset) CASTLE_CONST CASTLE_NOEXCEPT
     {
         result r;
-        r.status = castle::status::invalid_argument;
+        r.status = code == error_code::depth_exceeded ? castle::status::out_of_range : castle::status::parse_error;
         r.code = code;
         r.offset = offset;
         r.line = 1U;
@@ -2347,7 +2356,7 @@ private:
         CASTLE_CONST castle::status s = decode_into_storage(start, length, offset, used);
         if (s != castle::status::ok)
         {
-            if (s == castle::status::invalid_argument)
+            if (s == castle::status::parse_error)
             {
                 return fail(decode_error_, start);
             }
@@ -2637,7 +2646,7 @@ private:
         CASTLE_CONST castle::status s = decode_into_storage(value_start, value_length, value_offset, value_size);
         if (s != castle::status::ok)
         {
-            if (s == castle::status::invalid_argument)
+            if (s == castle::status::parse_error)
             {
                 return fail(decode_error_, value_start);
             }
@@ -2659,7 +2668,7 @@ private:
      * @param length The length of the portion to decode in the source view.
      * @param offset The offset in the document's storage where the decoded portion will be written.
      * @param used The number of bytes used in the document's storage after decoding the portion.
-     * @return The status of the decoding operation. Returns `castle::status::ok` if successful, `castle::status::invalid_argument` if the input is invalid, or `castle::status::full` if the document's storage is full.
+     * @return The status of the decoding operation. Returns `castle::status::ok` if successful, `castle::status::parse_error` if the input is invalid, or `castle::status::full` if the document's storage is full.
      */
     castle::status decode_into_storage(size_type start, size_type length,
                                        size_type& offset, size_type& used) CASTLE_NOEXCEPT
@@ -2679,7 +2688,7 @@ private:
                 {
                     doc_.used_ = old_used;
                     decode_error_ = error_code::invalid_entity;
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
                 position = entity_position;
                 if (doc_.append_codepoint(codepoint) != castle::status::ok)
@@ -2709,7 +2718,7 @@ private:
             {
                 doc_.used_ = old_used;
                 decode_error_ = error_code::invalid_character;
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             if (doc_.used_ + utf8_length > Document::static_string_capacity)
             {

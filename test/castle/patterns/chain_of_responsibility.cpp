@@ -426,8 +426,8 @@ TEST(BoundedChainTest, ConfigurationIsRejectedWhileProcessing)
     EXPECT_FALSE(chain.is_processing());
     EXPECT_EQ(chain.process(req, log), dp::chain_result::completed);
     EXPECT_TRUE(processing);
-    EXPECT_EQ(add_result, castle::status::invalid_config);
-    EXPECT_EQ(clear_result, castle::status::invalid_config);
+    EXPECT_EQ(add_result, castle::status::invalid_state);
+    EXPECT_EQ(clear_result, castle::status::invalid_state);
     EXPECT_FALSE(chain.is_processing());
     EXPECT_EQ(chain.size(), 1U);
 }

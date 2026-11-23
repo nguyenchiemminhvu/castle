@@ -122,7 +122,7 @@ public:
         return covariance(0U, out);
     }
 
-    /** @brief Sample covariance `Sxy / (n - 1)`; `status::empty` with fewer than two observations. */
+    /** @brief Sample covariance `Sxy / (n - 1)`; `status::empty` without observations, `status::insufficient_data` with one. */
     castle::status sample_covariance(result_type& out) CASTLE_CONST CASTLE_NOEXCEPT
     {
         return covariance(1U, out);
@@ -130,14 +130,19 @@ public:
 
     /**
      * @brief Pearson correlation coefficient in [-1, 1].
-     * @return `status::ok`, `status::empty` with fewer than two observations, or
+     * @return `status::ok`, `status::empty` without observations,
+     *         `status::insufficient_data` with one observation, or
      *         `status::invalid_argument` when x or y has zero variance.
      */
     castle::status correlation(result_type& out) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        if (count_ < 2U)
+        if (count_ == 0U)
         {
             return castle::status::empty;
+        }
+        if (count_ < 2U)
+        {
+            return castle::status::insufficient_data;
         }
         if (!((sxx_ > static_cast<result_type>(0)) && (syy_ > static_cast<result_type>(0))))
         {
@@ -151,8 +156,9 @@ public:
 
     /**
      * @brief Least-squares line `y = intercept + slope * x`.
-     * @return `status::ok`, `status::empty` without observations, or
-     *         `status::invalid_argument` when every x is identical. Outputs are
+     * @return `status::ok`, `status::empty` without observations,
+     *         `status::insufficient_data` with one observation, or
+     *         `status::invalid_argument` when every x is identical with enough observations. Outputs are
      *         unchanged on failure.
      */
     castle::status fit(result_type& slope, result_type& intercept) CASTLE_CONST CASTLE_NOEXCEPT
@@ -160,6 +166,10 @@ public:
         if (count_ == 0U)
         {
             return castle::status::empty;
+        }
+        if (count_ < 2U)
+        {
+            return castle::status::insufficient_data;
         }
         if (!(sxx_ > static_cast<result_type>(0)))
         {
@@ -196,9 +206,13 @@ private:
     /** `Sxy / (n - bias)`; needs more than `bias` observations. */
     castle::status covariance(size_type bias, result_type& out) CASTLE_CONST CASTLE_NOEXCEPT
     {
-        if (count_ <= bias)
+        if (count_ == 0U)
         {
             return castle::status::empty;
+        }
+        if (count_ <= bias)
+        {
+            return castle::status::insufficient_data;
         }
         out = sxy_ / static_cast<result_type>(count_ - bias);
         return castle::status::ok;

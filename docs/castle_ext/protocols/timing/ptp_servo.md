@@ -167,7 +167,9 @@ activate Servo
 Servo -> Out: output = clock_adjustment{}
 Servo -> Servo: validate gain_denominator\nmax_slew_ppb\nstep_threshold\ninterval
 
-alt invalid configuration/input
+alt invalid configured fields
+    Servo --> App: status::invalid_config
+else zero correction interval
     Servo --> App: status::invalid_argument
 else |offset| >= step threshold
     Servo -> Servo: unsigned_magnitude(offset)
@@ -219,12 +221,17 @@ Deactivate Apply
 start
 :proportional_servo::update();
 :output = clock_adjustment{};
-if (configuration and interval valid?) then (no)
-  :return status::invalid_argument;
+if (configured fields valid?) then (no)
+  :return status::invalid_config;
   stop
 else (yes)
-  :unsigned_magnitude(offset);
 endif
+
+if (correction interval non-zero?) then (no)
+  :return status::invalid_argument;
+  stop
+endif
+:unsigned_magnitude(offset);
 
 if (|offset| >= step_threshold\nand offset != 0?) then (yes)
   :mode = step;

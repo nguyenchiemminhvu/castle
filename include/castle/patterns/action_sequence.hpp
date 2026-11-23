@@ -101,7 +101,7 @@ struct is_chrono_duration<chrono::duration<Rep, Period>> : meta::true_type
  *
  * Steps can only be added while the sequence is not running. Callables must not modify, restart, or
  * destroy the sequence that is executing them; `start()`, `reset()`, `clear()`, `add_*()` and
- * `append()` report `status::invalid_config` when called from inside a step.
+ * `append()` report `status::invalid_state` when called from inside a step.
  *
  * @note No internal synchronization; drive one sequence from one execution context.
  */
@@ -133,7 +133,7 @@ public:
     /**
      * @brief Appends a one-shot call step.
      * @param callable Callable invocable as `void()`; copied or moved into the sequence.
-     * @return `status::ok`; `status::full` when `MaxActions` steps exist; `status::invalid_config`
+     * @return `status::ok`; `status::full` when `MaxActions` steps exist; `status::invalid_state`
      *         while running or executing; `status::invalid_callback` for a null function pointer or an
      *         empty `castle::callbacks::function`.
      * @warning The callable must be copy-constructible, fit the inline storage, and not throw.
@@ -148,7 +148,7 @@ public:
 
         if (!is_editable())
         {
-            return status::invalid_config;
+            return status::invalid_state;
         }
 
         if (size_ >= MaxActions)
@@ -174,7 +174,7 @@ public:
      * @brief Appends a delay step.
      * @param delay Any `castle::chrono::duration` whose unit is a whole multiple of `Duration`'s
      *        unit; zero is allowed and completes immediately.
-     * @return `status::ok`; `status::full`; `status::invalid_config` while running or executing;
+     * @return `status::ok`; `status::full`; `status::invalid_state` while running or executing;
      *         `status::invalid_argument` for a negative delay; `status::out_of_range` when the delay
      *         does not fit `Duration`.
      */
@@ -183,7 +183,7 @@ public:
     {
         if (!is_editable())
         {
-            return status::invalid_config;
+            return status::invalid_state;
         }
 
         if (size_ >= MaxActions)
@@ -211,14 +211,14 @@ public:
      * @tparam OtherCapacity Capacity of the source sequence.
      * @param other Source with the same duration type and callable storage configuration.
      * @return `status::ok`; `status::full` (leaving this sequence unchanged) when the steps do not
-     *         fit; `status::invalid_config` when either sequence is running or executing.
+     *         fit; `status::invalid_state` when either sequence is running or executing.
      */
     template <size_type OtherCapacity>
     status append(action_sequence<OtherCapacity, Duration, CallbackStorageSize, CallbackStorageAlignment> CASTLE_CONST& other)
     {
         if (!is_editable() || !other.is_editable())
         {
-            return status::invalid_config;
+            return status::invalid_state;
         }
 
         if (other.size_ > (MaxActions - size_))
@@ -240,14 +240,14 @@ public:
 
     /**
      * @brief Starts, or restarts, the sequence from its first step without executing any step.
-     * @return `status::ok`, or `status::invalid_config` when called from inside a step.
+     * @return `status::ok`, or `status::invalid_state` when called from inside a step.
      * @note An empty sequence becomes `completed`. Steps execute on the next `update()`.
      */
     status start() CASTLE_NOEXCEPT
     {
         if (updating_)
         {
-            return status::invalid_config;
+            return status::invalid_state;
         }
 
         rewind();
@@ -285,13 +285,13 @@ public:
 
     /**
      * @brief Returns to `idle` and rewinds the run; steps are kept.
-     * @return `status::ok`, or `status::invalid_config` when called from inside a step.
+     * @return `status::ok`, or `status::invalid_state` when called from inside a step.
      */
     status reset() CASTLE_NOEXCEPT
     {
         if (updating_)
         {
-            return status::invalid_config;
+            return status::invalid_state;
         }
 
         rewind();
@@ -300,13 +300,13 @@ public:
 
     /**
      * @brief Removes every step and returns to `idle`.
-     * @return `status::ok`, or `status::invalid_config` when called from inside a step.
+     * @return `status::ok`, or `status::invalid_state` when called from inside a step.
      */
     status clear() CASTLE_NOEXCEPT
     {
         if (updating_)
         {
-            return status::invalid_config;
+            return status::invalid_state;
         }
 
         for (size_type i = 0U; i < size_; ++i)

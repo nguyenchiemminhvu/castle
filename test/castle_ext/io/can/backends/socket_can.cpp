@@ -698,7 +698,7 @@ TEST(CanSocketCan, AdoptWhileOpenFailsAndClosesTheDescriptorItWasGiven)
     int other[2] = {-1, -1};
     ASSERT_EQ(::socketpair(AF_UNIX, SOCK_DGRAM, 0, other), 0);
     int system_error = sentinel_errno;
-    EXPECT_EQ(socket.backend.adopt(other[0], &system_error), castle::status::invalid_config);
+    EXPECT_EQ(socket.backend.adopt(other[0], &system_error), castle::status::invalid_state);
     EXPECT_EQ(system_error, 0);
     EXPECT_EQ(socket.backend.native_handle(), original);
 
@@ -1337,10 +1337,10 @@ TEST(CanSocketCan, OpenRejectsNullEmptyAndOverlongNames)
 
     // IFNAMSIZ (16) includes the terminating NUL, so 16 visible characters never fit.
     system_error = sentinel_errno;
-    EXPECT_EQ(backend.open("abcdefghijklmnop", can_config(), &system_error), castle::status::invalid_argument);
+    EXPECT_EQ(backend.open("abcdefghijklmnop", can_config(), &system_error), castle::status::out_of_range);
     EXPECT_EQ(system_error, 0);
     EXPECT_EQ(backend.open("a_very_long_interface_name_that_is_rejected", can_config(), nullptr),
-              castle::status::invalid_argument);
+              castle::status::out_of_range);
     EXPECT_FALSE(backend.is_open());
     EXPECT_EQ(backend.native_handle(), -1);
 }
@@ -1349,7 +1349,7 @@ TEST(CanSocketCan, OpenRejectsListenOnlyMode)
 {
     socket_can::backend backend;
     int system_error = sentinel_errno;
-    EXPECT_EQ(backend.open("any", can_config(0U, can_mode::listen_only), &system_error), castle::status::invalid_config);
+    EXPECT_EQ(backend.open("any", can_config(0U, can_mode::listen_only), &system_error), castle::status::unsupported);
     EXPECT_EQ(system_error, 0);
     EXPECT_FALSE(backend.is_open());
     // The name is validated before the mode.
@@ -1362,7 +1362,7 @@ TEST(CanSocketCan, OpenRejectsSecondOpenOfAnAdoptedBackend)
     ASSERT_TRUE(socket.connect());
     const int handle = socket.backend.native_handle();
     int system_error = sentinel_errno;
-    EXPECT_EQ(socket.backend.open("any", can_config(), &system_error), castle::status::invalid_config);
+    EXPECT_EQ(socket.backend.open("any", can_config(), &system_error), castle::status::invalid_state);
     EXPECT_EQ(system_error, 0);
     EXPECT_EQ(socket.backend.native_handle(), handle);
 }
@@ -1462,13 +1462,13 @@ TEST(CanSocketCan, OpenTwiceFailsAndKeepsTheFirstSocket)
     const int handle = backend.native_handle();
 
     int system_error = sentinel_errno;
-    EXPECT_EQ(backend.open("any", can_config(), &system_error), castle::status::invalid_config);
+    EXPECT_EQ(backend.open("any", can_config(), &system_error), castle::status::invalid_state);
     EXPECT_EQ(system_error, 0);
     EXPECT_EQ(backend.native_handle(), handle);
     // adopt() on an open backend is rejected the same way (and consumes the given descriptor).
     int pair[2] = {-1, -1};
     ASSERT_EQ(::socketpair(AF_UNIX, SOCK_DGRAM, 0, pair), 0);
-    EXPECT_EQ(backend.adopt(pair[0], nullptr), castle::status::invalid_config);
+    EXPECT_EQ(backend.adopt(pair[0], nullptr), castle::status::invalid_state);
     (void)::close(pair[1]);
     EXPECT_EQ(backend.native_handle(), handle);
 }
@@ -1483,7 +1483,7 @@ TEST(CanSocketCan, OpenUnknownInterfaceFailsWithNoDeviceAndDoesNotLeakTheSocket)
     socket_can::backend backend;
     int system_error = 0;
     // 19 characters do not fit IFNAMSIZ: rejected before any socket is created.
-    EXPECT_EQ(backend.open("definitely_missing0", can_config(), &system_error), castle::status::invalid_argument);
+    EXPECT_EQ(backend.open("definitely_missing0", can_config(), &system_error), castle::status::out_of_range);
     EXPECT_EQ(system_error, 0);
     EXPECT_EQ(backend.open("missing_can0", can_config(), &system_error), castle::status::system_call_error);
     EXPECT_EQ(system_error, ENODEV);
@@ -1750,13 +1750,13 @@ TEST(CanSocketCan, BusFacadeOpensAcceptsAllAndCloses)
 
 #else // !CASTLE_USING_IO_CAN_VIA_SOCKET_CAN
 
-TEST(CanSocketCan, StubReturnsNotConfiguredForEveryCall)
+TEST(CanSocketCan, StubOpenIsUnsupportedAndOperationsOnClosedBackendAreNotConfigured)
 {
     EXPECT_FALSE(socket_can::socket_can_available);
 
     socket_can::backend backend;
     int system_error = 77;
-    EXPECT_EQ(backend.open("can0", can_config(), &system_error), castle::status::not_configured);
+    EXPECT_EQ(backend.open("can0", can_config(), &system_error), castle::status::unsupported);
     EXPECT_EQ(system_error, 0);
     EXPECT_EQ(backend.open(nullptr, can_config(), nullptr), castle::status::invalid_argument);
     EXPECT_FALSE(backend.is_open());

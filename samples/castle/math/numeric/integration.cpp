@@ -70,10 +70,10 @@ int main()
     CASTLE_SAMPLE_CHECK(smooth.ok());
     CASTLE_SAMPLE_CHECK(abs_diff(smooth.value, 1.718281828459045) < 1e-9);
 
-    // Tiny budget: out_of_range, best estimate still returned.
+    // Tiny budget: not_converged, best estimate still returned.
     const auto limited = integrate_romberg<3U>(lorentz, 0.0, 1.0, 1e-14);
     CASTLE_SAMPLE_CHECK(!limited.ok());
-    CASTLE_SAMPLE_CHECK(limited.code == castle::status::out_of_range);
+    CASTLE_SAMPLE_CHECK(limited.code == castle::status::not_converged);
     CASTLE_SAMPLE_CHECK(limited.iterations == 3U);
     CASTLE_SAMPLE_CHECK(abs_diff(limited.value, 0.7853981633974483) < 1e-3);
 

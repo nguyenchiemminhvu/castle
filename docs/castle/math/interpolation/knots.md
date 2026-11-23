@@ -16,7 +16,7 @@ Shared knot-table helpers for the table-based interpolators ([`linear_table`](li
 | Signature | Description |
 | --- | --- |
 | `enum class extrapolation : uint8_t { clamp, linear }` | Behaviour of an interpolator outside its knot range. `clamp` holds the nearest end value (slope zero); `linear` continues along the tangent line at the nearest end knot. |
-| `template <typename T> status detail::validate_knots(const T* xs, size_type count) noexcept` | Returns `status::ok` when `xs` is non-null, `count >= 2` and `xs` is strictly increasing; otherwise `status::invalid_argument`. NaN entries fail the strict-increase test and are rejected. `O(count)`. |
+| `template <typename T> status detail::validate_knots(const T* xs, size_type count) noexcept` | Returns `status::ok` when `xs` contains at least two strictly increasing knots; `status::invalid_argument` for a null pointer or non-increasing/NaN knots, `status::empty` for `count == 0`, and `status::insufficient_data` for `count == 1`. NaN entries fail the strict-increase test and are rejected. `O(count)`. |
 | `template <typename T> size_type detail::find_segment(const T* xs, size_type count, T x) noexcept` | Returns the index `i` in `[0, count - 2]` with `xs[i] <= x < xs[i + 1]`. Queries below the table map to `0`; queries at or beyond the last knot map to `count - 2`. `xs` must be strictly increasing and `count >= 2`. `O(log count)`. |
 
 ## Usage Example

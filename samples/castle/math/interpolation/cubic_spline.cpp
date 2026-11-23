@@ -62,7 +62,7 @@ int main()
     CASTLE_SAMPLE_CHECK(spline.build(xs, nullptr, 4U) == castle::status::invalid_argument);
     CASTLE_SAMPLE_CHECK(!spline.valid());
     CASTLE_SAMPLE_CHECK(spline.build(nullptr, cubic_ys, 4U) == castle::status::invalid_argument);
-    CASTLE_SAMPLE_CHECK(spline.build(xs, cubic_ys, 1U) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(spline.build(xs, cubic_ys, 1U) == castle::status::insufficient_data);
     const double unsorted[] = {0.0, 2.0, 1.0, 3.0};
     CASTLE_SAMPLE_CHECK(spline.build(unsorted, cubic_ys, 4U) == castle::status::invalid_argument);
     castle::math::cubic_spline<double, 3U> small;

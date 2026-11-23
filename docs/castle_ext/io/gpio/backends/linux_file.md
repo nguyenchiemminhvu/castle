@@ -15,8 +15,8 @@ Adapts a BSP-exposed GPIO value file (for example a sysfs-style `.../value` node
 | API | Description |
 |---|---|
 | `pin_handle` | Borrowed value-file path and active-low flag. |
-| `backend::configure(handle, config)` | Returns `not_configured`; electrical configuration is external to the value file. |
-| `backend::write/read` | Writes or reads one logical value, applying active-low conversion. |
+| `backend::configure(handle, config)` | Returns `unsupported`; electrical configuration is external to the value file. |
+| `backend::write/read` | Writes or reads one logical value, applying active-low conversion. A read with no `0` or `1` byte returns `parse_error`; file-operation failures return `system_call_error`. |
 | `backend::write_raw/read_raw` | Writes or reads physical level without active-low conversion. |
 | `backend::toggle(handle)` | Reads the logical value and writes its opposite. |
 

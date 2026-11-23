@@ -30,7 +30,7 @@ int main()
     CASTLE_SAMPLE_CHECK(node.open("mock0", can_config(bitrate_500k), nullptr) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(node.is_open());
     CASTLE_SAMPLE_CHECK(node.configuration().bitrate == bitrate_500k);
-    CASTLE_SAMPLE_CHECK(node.open("mock0", can_config(), nullptr) == castle::status::invalid_config);
+    CASTLE_SAMPLE_CHECK(node.open("mock0", can_config(), nullptr) == castle::status::invalid_state);
     CASTLE_SAMPLE_CHECK(node.query_status(status, nullptr) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(status.state == bus_state::error_active);
 
@@ -109,7 +109,7 @@ int main()
     CASTLE_SAMPLE_CHECK(node.close(nullptr) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(node.open("mock0", can_config(bitrate_500k, can_mode::listen_only), nullptr)
                         == castle::status::ok);
-    CASTLE_SAMPLE_CHECK(node.send(out, no_wait, nullptr) == castle::status::invalid_config);
+    CASTLE_SAMPLE_CHECK(node.send(out, no_wait, nullptr) == castle::status::invalid_state);
     CASTLE_SAMPLE_CHECK(node.close(nullptr) == castle::status::ok);
 
     // loopback delivers transmitted frames straight to the node's own filters.

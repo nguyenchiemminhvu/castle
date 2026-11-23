@@ -249,7 +249,8 @@ CASTLE_INLINE bool contains_nul(string_view value) CASTLE_NOEXCEPT
  * @param[out] output A reference to the variable where the successfully parsed value will be stored.
  * @return castle::status The execution outcome:
  *         - `castle::status::ok` on success.
- *         - `castle::status::invalid_argument` if the input is empty, malformed, or contains a negative sign when parsing an unsigned type.
+ *         - `castle::status::invalid_argument` if the input is empty or contains a negative sign when parsing an unsigned type.
+ *         - `castle::status::parse_error` if the nonempty input is malformed.
  *         - `castle::status::out_of_range` if the parsed number exceeds the limits of type T or a 64-bit unsigned magnitude accumulator.
  * 
  * @note This function is marked `CASTLE_NOEXCEPT` and does not throw exceptions.
@@ -272,7 +273,11 @@ enable_integer_t<T> parse_integer(string_view text, T& output) CASTLE_NOEXCEPT
         index = 1U;
     }
 
-    if (index == text.size() || (negative && !meta::is_signed<T>::value))
+    if (index == text.size())
+    {
+        return castle::status::parse_error;
+    }
+    if (negative && !meta::is_signed<T>::value)
     {
         return castle::status::invalid_argument;
     }
@@ -283,7 +288,7 @@ enable_integer_t<T> parse_integer(string_view text, T& output) CASTLE_NOEXCEPT
         CASTLE_CONST char c = text[index];
         if (c < '0' || c > '9') // LCOV_EXCL_BR_LINE
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
 
         CASTLE_CONST uint64_t digit = static_cast<uint64_t>(c - '0');
@@ -418,13 +423,15 @@ enable_integer_t<T> format_integer(T value, castle::dsa::string<MaxValueLength>&
 * @return castle::status::ok
 * if parsing completed successfully.
 * @return castle::status::invalid_argument
-* if the input is empty, malformed, or contains unsupported characters.
+* if the input is empty.
+* @return castle::status::parse_error
+* if the nonempty input is malformed or contains unsupported characters.
 * @return castle::status::out_of_range
 * if the parsed value exceeds the numeric limits of @p T or the
 * exponent exceeds the supported range.
 *
 * @note The input string must be fully consumed by the parser. Any trailing
-* non-numeric characters result in an invalid_argument error.
+* non-numeric characters result in a parse_error status.
 * @note Exponent values are limited by
 * serialization::max_floating_exponent.
 */
@@ -482,7 +489,7 @@ enable_float_t<T> parse_floating(string_view text, T& output) CASTLE_NOEXCEPT
 
     if (!has_digit)
     {
-        return castle::status::invalid_argument;
+        return castle::status::parse_error;
     }
 
     if (index < text.size() && (text[index] == 'e' || text[index] == 'E'))
@@ -497,7 +504,7 @@ enable_float_t<T> parse_floating(string_view text, T& output) CASTLE_NOEXCEPT
 
         if (index == text.size())
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
 
         int exponent = 0;
@@ -520,7 +527,7 @@ enable_float_t<T> parse_floating(string_view text, T& output) CASTLE_NOEXCEPT
         // LCOV_EXCL_START
         if (index != text.size())
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         // LCOV_EXCL_STOP
 
@@ -545,7 +552,7 @@ enable_float_t<T> parse_floating(string_view text, T& output) CASTLE_NOEXCEPT
     }
     else if (index != text.size())
     {
-        return castle::status::invalid_argument;
+        return castle::status::parse_error;
     }
 
     if (value > castle::numeric_limits<T>::max())
@@ -1227,7 +1234,9 @@ public:
     * @return castle::status::out_of_range
     * if @p row or @p column does not identify an existing field.
     * @return castle::status::invalid_argument
-    * if the field value does not represent a supported boolean value.
+    * if the field value is empty.
+    * @return castle::status::parse_error
+    * if the nonempty field value does not represent a supported boolean value.
     *
     * @note Textual boolean values are matched case-insensitively.
     * @note Valid values are "true", "false", "1", and "0".
@@ -1252,7 +1261,7 @@ public:
             output = false;
             return castle::status::ok;
         }
-        return castle::status::invalid_argument;
+        return text.empty() ? castle::status::invalid_argument : castle::status::parse_error;
     }
 
     /**
@@ -1272,7 +1281,9 @@ public:
     * @return castle::status::out_of_range
     * if @p row or @p column does not identify an existing field.
     * @return castle::status::invalid_argument
-    * if the field does not contain a valid integer representation.
+    * if the field is empty or contains a negative value for an unsigned type.
+    * @return castle::status::parse_error
+    * if the nonempty field does not contain a valid integer representation.
     * @return castle::status::out_of_range
     * if the parsed value cannot be represented by type @p T.
     *
@@ -1312,7 +1323,10 @@ public:
     * the parsed integer value is outside the representable range of the
     * enumeration's underlying type.
     * @return castle::status::invalid_argument
-    * if the field does not contain a valid integer representation.
+    * if the field is empty or contains a negative value for an unsigned
+    * underlying type.
+    * @return castle::status::parse_error
+    * if the nonempty field does not contain a valid integer representation.
     *
     * @note The field value is interpreted as the underlying integral value of
     * the enumeration.
@@ -1356,7 +1370,9 @@ public:
     * if @p row or @p column does not identify an existing field, or if
     * the parsed value exceeds the representable range of type @p T.
     * @return castle::status::invalid_argument
-    * if the field does not contain a valid floating-point representation.
+    * if the field is empty.
+    * @return castle::status::parse_error
+    * if the nonempty field does not contain a valid floating-point representation.
     *
     * @note Floating-point parsing follows the rules implemented by
     * detail::parse_floating().
@@ -1744,7 +1760,7 @@ private:
     * @return castle::status::ok
     * if the character was appended successfully.
     * @return castle::status::invalid_argument
-    * if @p value is a null character.
+    * if @p value is a null character; the parser reports it as parse_error.
     * @return castle::status::out_of_range
     * if no active field exists in the current row.
     * @return castle::status::full
@@ -1820,7 +1836,7 @@ private:
     {
         result result_value = fail(error_code::capacity);
         result_value.status = status_value == castle::status::invalid_argument
-                              ? castle::status::invalid_argument
+                              ? castle::status::parse_error
                               : castle::status::full;
         result_value.code = status_value == castle::status::invalid_argument
                             ? error_code::invalid_character
@@ -1854,9 +1870,11 @@ private:
         result result_value;
         result_value.status = (code == error_code::capacity || code == error_code::output_full)
                               ? castle::status::full
-                              : (code == error_code::invalid_argument || code == error_code::invalid_delimiter)
-                                ? castle::status::invalid_argument
-                                : castle::status::invalid_argument;
+                              : (code == error_code::invalid_delimiter)
+                                ? castle::status::invalid_config
+                                : (code == error_code::invalid_argument)
+                                  ? castle::status::invalid_argument
+                                  : castle::status::parse_error;
         result_value.code = code;
         result_value.offset = offset_;
         result_value.line = line_;
@@ -2030,8 +2048,10 @@ castle::status append_serialized_field(
 * @retval castle::status::ok
 * Parsing completed successfully and @p output contains the parsed
 * CSV data.
-* @retval castle::status::invalid_argument
-* The input contains invalid CSV syntax or an unsupported delimiter.
+* @retval castle::status::parse_error
+* The input contains invalid CSV syntax or an embedded null character.
+* @retval castle::status::invalid_config
+* The configured delimiter is unsupported.
 * @retval castle::status::full
 * The parsed data exceeds one or more document capacity limits.
 *
@@ -2080,9 +2100,10 @@ CASTLE_NODISCARD result parse(
 *
 * @retval castle::status::ok
 * Serialization completed successfully.
+* @retval castle::status::invalid_config
+* The configured delimiter is invalid.
 * @retval castle::status::invalid_argument
-* The configured delimiter is invalid or a field contains an invalid
-* character.
+* A field contains an invalid character.
 * @retval castle::status::full
 * The destination buffer does not have sufficient capacity to hold
 * the serialized output.
@@ -2108,7 +2129,7 @@ CASTLE_NODISCARD result serialize(
 
     if (!detail::is_valid_delimiter(serialize_options.delimiter))
     {
-        result_value.status = castle::status::invalid_argument;
+        result_value.status = castle::status::invalid_config;
         result_value.code = error_code::invalid_delimiter;
         return result_value;
     }

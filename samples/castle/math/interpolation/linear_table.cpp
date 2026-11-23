@@ -56,7 +56,7 @@ int main()
     CASTLE_SAMPLE_CHECK(table.assign(volts, celsius, 4U) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(table.assign(nullptr, celsius, 4U) == castle::status::invalid_argument);
     CASTLE_SAMPLE_CHECK(!table.valid());
-    CASTLE_SAMPLE_CHECK(table.assign(volts, celsius, 1U) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(table.assign(volts, celsius, 1U) == castle::status::insufficient_data);
     const float flat_x[] = {0.0F, 1.0F, 1.0F};
     CASTLE_SAMPLE_CHECK(table.assign(flat_x, celsius, 3U) == castle::status::invalid_argument);
     CASTLE_SAMPLE_CHECK(table.size() == 0U);

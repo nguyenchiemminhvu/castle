@@ -112,6 +112,7 @@ int main()
     // 4. Bounded chain: up to 3 handlers registered at runtime, storage inline, no allocation.
     counters bounded_state;
     dp::bounded_chain_of_responsibility<3U, void(request const&, counters&)> bounded;
+    castle::status mutation_while_processing = castle::status::ok;
     CASTLE_SAMPLE_CHECK(bounded.add_skip_handler(
         [](request const& r, counters&) noexcept { return is_command(command::status, r); },
         [](request const&, counters& s) noexcept
@@ -120,7 +121,11 @@ int main()
             return dp::handler_flow::stop_chain;
         }) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(bounded.add_default_handler(
-        [](request const&, counters& s) noexcept { ++s.fallback; }) == castle::status::ok);
+        [&bounded, &mutation_while_processing](request const&, counters& s) noexcept
+        {
+            ++s.fallback;
+            mutation_while_processing = bounded.clear();
+        }) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(bounded.size() == 2U);
 
     req.value = command::status;
@@ -129,6 +134,8 @@ int main()
     CASTLE_SAMPLE_CHECK(bounded.process(req, bounded_state) == dp::chain_result::completed);
     CASTLE_SAMPLE_CHECK(bounded_state.status_requests == 1U);
     CASTLE_SAMPLE_CHECK(bounded_state.fallback == 1U);
+    CASTLE_SAMPLE_CHECK(mutation_while_processing == castle::status::invalid_state);
+    CASTLE_SAMPLE_CHECK(bounded.size() == 2U);
 
     return 0;
 }

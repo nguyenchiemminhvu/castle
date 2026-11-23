@@ -25,7 +25,7 @@
 |---|---|---|---|---|---|
 | Default constructor | `p2_quantile()` | Creates an unconfigured estimator. | — | O(1) | O(1) |
 | Constructor | `explicit p2_quantile(result_type probability)` | Calls `configure(probability)`. An invalid probability leaves it unconfigured. | — | O(1) | O(1) |
-| `configure` | `status configure(result_type probability)` | Selects the quantile in the open interval (0, 1) and discards all samples. | `ok`, `invalid_argument` (0, 1, NaN, negative, above 1; the estimator becomes unconfigured) | O(1) | O(1) |
+| `configure` | `status configure(result_type probability)` | Selects the quantile in the open interval (0, 1) and discards all samples. | `ok`, `invalid_config` (0, 1, NaN, negative, above 1; the estimator becomes unconfigured) | O(1) | O(1) |
 | `configured` | `bool configured() const` | Reports whether a valid probability is set. | `bool` | O(1) | O(1) |
 | `probability` | `result_type probability() const` | Configured probability; 0 when unconfigured. | value | O(1) | O(1) |
 | `count` | `size_type count() const` | Number of samples seen. Saturates at the maximum `size_type`. | value | O(1) | O(1) |

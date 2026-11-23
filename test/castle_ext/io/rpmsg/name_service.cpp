@@ -28,13 +28,13 @@ TEST(RpmsgNameService, RejectsMalformedInput)
     name_service_event out;
     uint8_t wire[name_service_message_size] = {};
     EXPECT_EQ(decode_name_service_message(nullptr, sizeof(wire), out), castle::status::invalid_argument);
-    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire) - 1U, out), castle::status::invalid_argument);
-    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::invalid_argument); // empty name
+    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire) - 1U, out), castle::status::protocol_error);
+    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::protocol_error); // empty name
     ASSERT_EQ(encode_name_service_message(name_service_event(), wire, sizeof(wire)), castle::status::invalid_argument);
     name_service_event valid;
     ASSERT_EQ(valid.name.assign("x"), castle::status::ok);
     valid.endpoint_address = 1024U;
-    EXPECT_EQ(encode_name_service_message(valid, wire, name_service_message_size - 1U), castle::status::out_of_range);
+    EXPECT_EQ(encode_name_service_message(valid, wire, name_service_message_size - 1U), castle::status::full);
     EXPECT_EQ(encode_name_service_message(valid, nullptr, sizeof(wire)), castle::status::invalid_argument);
     valid.endpoint_address = 9U;
     EXPECT_EQ(encode_name_service_message(valid, wire, sizeof(wire)), castle::status::invalid_argument);
@@ -47,9 +47,9 @@ TEST(RpmsgNameService, RejectsMalformedInput)
     valid.action = name_service_action::create;
     ASSERT_EQ(encode_name_service_message(valid, wire, sizeof(wire)), castle::status::ok);
     wire[rpmsg_name_size + 7U] = 0x7FU;
-    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::protocol_error);
     memset(wire, 'a', rpmsg_name_size);
-    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::invalid_argument); // no NUL
+    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::protocol_error); // no NUL
 }
 
 TEST(RpmsgNameService, RejectsReservedAddressAndUnknownFlags)
@@ -62,15 +62,15 @@ TEST(RpmsgNameService, RejectsReservedAddressAndUnknownFlags)
     name_service_event out;
     const uint32_t reserved_address = 35U;
     memcpy(wire + rpmsg_name_size, &reserved_address, sizeof(reserved_address));
-    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::protocol_error);
     const uint32_t any_address = rpmsg_addr_any;
     memcpy(wire + rpmsg_name_size, &any_address, sizeof(any_address));
-    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::protocol_error);
     const uint32_t valid_address = 4096U;
     memcpy(wire + rpmsg_name_size, &valid_address, sizeof(valid_address));
     const uint32_t unknown_flags = 2U;
     memcpy(wire + rpmsg_name_size + sizeof(valid_address), &unknown_flags, sizeof(unknown_flags));
-    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::invalid_argument);
+    EXPECT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::protocol_error);
     const uint32_t destroy_flags = 1U;
     memcpy(wire + rpmsg_name_size + sizeof(valid_address), &destroy_flags, sizeof(destroy_flags));
     ASSERT_EQ(decode_name_service_message(wire, sizeof(wire), out), castle::status::ok);

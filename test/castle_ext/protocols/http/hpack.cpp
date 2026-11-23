@@ -65,8 +65,8 @@ TEST(Hpack, RejectsInvalidIndexesAndTruncatedStrings)
     basic_headers<4U, 32U, 64U> headers;
     const uint8_t zero_index[] = {0x80U};
     const uint8_t truncated[] = {0x00U, 0x05U, 'a'};
-    EXPECT_EQ(decoder.decode_block(zero_index, sizeof(zero_index), headers), castle::status::invalid_argument);
-    EXPECT_EQ(decoder.decode_block(truncated, sizeof(truncated), headers), castle::status::data_loss);
+    EXPECT_EQ(decoder.decode_block(zero_index, sizeof(zero_index), headers), castle::status::protocol_error);
+    EXPECT_EQ(decoder.decode_block(truncated, sizeof(truncated), headers), castle::status::parse_error);
     EXPECT_EQ(decoder.decode_block(nullptr, 1U, headers), castle::status::invalid_argument);
 }
 
@@ -109,7 +109,7 @@ TEST(Hpack, RejectsEosSymbolInHuffmanString)
     const uint8_t block[] = {0x00U, 0x01U, 'x', 0x84U, 0xFFU, 0xFFU, 0xFFU, 0xFFU};
     basic_headers<2U, 16U, 16U> headers;
     hpack_decoder<> decoder;
-    EXPECT_EQ(decoder.decode_block(block, sizeof(block), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(block, sizeof(block), headers), castle::status::parse_error);
 }
 
 TEST(Hpack, OversizedInsertEmptiesTableButKeepsNegotiatedSize)
@@ -195,16 +195,16 @@ TEST(Hpack, HuffmanPaddingAndOutputBounds)
 
     std::string zero_padding = huffman_authority(huffman("a", "", '0'));
     basic_headers<2U, 16U, 16U> zero;
-    EXPECT_EQ(decoder.decode_block(reinterpret_cast<uint8_t const*>(zero_padding.data()), zero_padding.size(), zero), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(reinterpret_cast<uint8_t const*>(zero_padding.data()), zero_padding.size(), zero), castle::status::parse_error);
 
     std::string long_padding = huffman_authority(huffman("a", "11111111", '1')); // 11 bits of padding
     basic_headers<2U, 16U, 16U> long_tail;
-    EXPECT_EQ(decoder.decode_block(reinterpret_cast<uint8_t const*>(long_padding.data()), long_padding.size(), long_tail), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(reinterpret_cast<uint8_t const*>(long_padding.data()), long_padding.size(), long_tail), castle::status::parse_error);
 
     std::string www = huffman_authority(huffman("www.example.com", "", '1'));
     hpack_decoder<0U, 12U> small;
     basic_headers<2U, 16U, 16U> bounded;
-    EXPECT_EQ(small.decode_block(reinterpret_cast<uint8_t const*>(www.data()), www.size(), bounded), castle::status::out_of_range);
+    EXPECT_EQ(small.decode_block(reinterpret_cast<uint8_t const*>(www.data()), www.size(), bounded), castle::status::full);
 }
 
 TEST(Hpack, DecodesMalformedIndexedAndIntegerEncodings)
@@ -212,21 +212,21 @@ TEST(Hpack, DecodesMalformedIndexedAndIntegerEncodings)
     hpack_decoder<> decoder;
     basic_headers<4U, 16U, 16U> headers;
     const uint8_t truncated_index[] = {0xFFU};
-    EXPECT_EQ(decoder.decode_block(truncated_index, sizeof(truncated_index), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(truncated_index, sizeof(truncated_index), headers), castle::status::parse_error);
     const uint8_t truncated_continuation[] = {0xFFU, 0x80U};
-    EXPECT_EQ(decoder.decode_block(truncated_continuation, sizeof(truncated_continuation), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(truncated_continuation, sizeof(truncated_continuation), headers), castle::status::parse_error);
     const uint8_t unterminated[] = {0xFFU, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U};
-    EXPECT_EQ(decoder.decode_block(unterminated, sizeof(unterminated), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(unterminated, sizeof(unterminated), headers), castle::status::parse_error);
     const uint8_t shift_overflow[] = {0xFFU, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x02U};
-    EXPECT_EQ(decoder.decode_block(shift_overflow, sizeof(shift_overflow), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(shift_overflow, sizeof(shift_overflow), headers), castle::status::parse_error);
     const uint8_t value_overflow[] = {0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0x01U};
-    EXPECT_EQ(decoder.decode_block(value_overflow, sizeof(value_overflow), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(value_overflow, sizeof(value_overflow), headers), castle::status::parse_error);
     const uint8_t zero_index[] = {0x80U};
-    EXPECT_EQ(decoder.decode_block(zero_index, sizeof(zero_index), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(zero_index, sizeof(zero_index), headers), castle::status::protocol_error);
     const uint8_t beyond_static[] = {0xFFU, 0x01U};
-    EXPECT_EQ(decoder.decode_block(beyond_static, sizeof(beyond_static), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(beyond_static, sizeof(beyond_static), headers), castle::status::protocol_error);
     const uint8_t empty_dynamic[] = {0xBEU};
-    EXPECT_EQ(decoder.decode_block(empty_dynamic, sizeof(empty_dynamic), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(empty_dynamic, sizeof(empty_dynamic), headers), castle::status::protocol_error);
     EXPECT_EQ(decoder.decode_block(nullptr, 0U, headers), castle::status::ok);
     EXPECT_EQ(decoder.decode_block(nullptr, 1U, headers), castle::status::invalid_argument);
 }
@@ -236,21 +236,21 @@ TEST(Hpack, RejectsMalformedLiteralsSizeUpdatesAndFullHeaders)
     hpack_decoder<128U> decoder;
     basic_headers<4U, 16U, 16U> headers;
     const uint8_t truncated_literal[] = {0x40U};
-    EXPECT_EQ(decoder.decode_block(truncated_literal, sizeof(truncated_literal), headers), castle::status::data_loss);
+    EXPECT_EQ(decoder.decode_block(truncated_literal, sizeof(truncated_literal), headers), castle::status::parse_error);
     const uint8_t truncated_prefix[] = {0x7FU};
-    EXPECT_EQ(decoder.decode_block(truncated_prefix, sizeof(truncated_prefix), headers), castle::status::data_loss);
+    EXPECT_EQ(decoder.decode_block(truncated_prefix, sizeof(truncated_prefix), headers), castle::status::parse_error);
     const uint8_t short_string[] = {0x00U, 0x01U, 'n', 0x05U, 'h'};
-    EXPECT_EQ(decoder.decode_block(short_string, sizeof(short_string), headers), castle::status::data_loss);
+    EXPECT_EQ(decoder.decode_block(short_string, sizeof(short_string), headers), castle::status::parse_error);
     const uint8_t empty_name[] = {0x00U, 0x00U, 0x01U, 'x'};
-    EXPECT_EQ(decoder.decode_block(empty_name, sizeof(empty_name), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(empty_name, sizeof(empty_name), headers), castle::status::protocol_error);
     const uint8_t unknown_name_index[] = {0x0FU, 0x71U};
-    EXPECT_EQ(decoder.decode_block(unknown_name_index, sizeof(unknown_name_index), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(unknown_name_index, sizeof(unknown_name_index), headers), castle::status::protocol_error);
     const uint8_t size_after_field[] = {0x82U, 0x20U};
-    EXPECT_EQ(decoder.decode_block(size_after_field, sizeof(size_after_field), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(size_after_field, sizeof(size_after_field), headers), castle::status::protocol_error);
     const uint8_t truncated_size[] = {0x3FU};
-    EXPECT_EQ(decoder.decode_block(truncated_size, sizeof(truncated_size), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(truncated_size, sizeof(truncated_size), headers), castle::status::parse_error);
     const uint8_t too_large_size[] = {0x3FU, 0x62U};
-    EXPECT_EQ(decoder.decode_block(too_large_size, sizeof(too_large_size), headers), castle::status::invalid_argument);
+    EXPECT_EQ(decoder.decode_block(too_large_size, sizeof(too_large_size), headers), castle::status::protocol_error);
     const uint8_t valid_size[] = {0x3FU, 0x00U};
     EXPECT_EQ(decoder.decode_block(valid_size, sizeof(valid_size), headers), castle::status::ok);
     EXPECT_EQ(decoder.maximum_table_size(), 31U);
@@ -268,9 +268,9 @@ TEST(Hpack, EnforcesStringLimitsOfTheDecoder)
     hpack_decoder<0U, 4U> decoder;
     basic_headers<2U, 16U, 16U> headers;
     const uint8_t indexed_long_name[] = {0x0FU, 0x0DU, 0x01U, 'x'}; // content-length (14 bytes) > 4
-    EXPECT_EQ(decoder.decode_block(indexed_long_name, sizeof(indexed_long_name), headers), castle::status::out_of_range);
+    EXPECT_EQ(decoder.decode_block(indexed_long_name, sizeof(indexed_long_name), headers), castle::status::full);
     const uint8_t long_value[] = {0x00U, 0x01U, 'n', 0x05U, 'h', 'e', 'l', 'l', 'o'};
-    EXPECT_EQ(decoder.decode_block(long_value, sizeof(long_value), headers), castle::status::out_of_range);
+    EXPECT_EQ(decoder.decode_block(long_value, sizeof(long_value), headers), castle::status::full);
 }
 
 TEST(Hpack, DynamicTableEvictsByBytesEntriesAndSizeUpdates)
@@ -346,5 +346,5 @@ TEST(Hpack, HuffmanStringEndingOnSymbolBoundaryAndTruncatedLength)
 
     const uint8_t truncated[] = {0x00U, 0x01U, 'n', 0x05U, 'v'};
     basic_headers<2U, 16U, 16U> none;
-    EXPECT_EQ(decoder.decode_block(truncated, sizeof(truncated), none), castle::status::data_loss);
+    EXPECT_EQ(decoder.decode_block(truncated, sizeof(truncated), none), castle::status::parse_error);
 }

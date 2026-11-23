@@ -85,8 +85,9 @@ public:
      * @param ys Ordinates, same length as `xs`.
      * @param count Number of knots, at least 2.
      * @return `status::ok` on success; `status::invalid_argument` for null
-     *         pointers, fewer than two knots or non-increasing abscissas.
-     *         On failure the table is left unbound.
+     *         pointers or non-increasing abscissas, `status::empty` for zero
+     *         knots, and `status::insufficient_data` for one knot. On failure
+     *         the table is left unbound.
      * @note `O(count)` for validation.
      */
     CASTLE_CONSTEXPR status assign(CASTLE_CONST T* xs, CASTLE_CONST T* ys, size_type count) CASTLE_NOEXCEPT

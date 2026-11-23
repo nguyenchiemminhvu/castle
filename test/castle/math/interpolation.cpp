@@ -35,7 +35,7 @@ TEST(MathInterpolation, UmbrellaExposesCubicSpline)
     ASSERT_EQ(spline.build(xs, ys, 4U, castle::math::spline_kind::clamped, 0.0, 27.0), castle::status::ok);
     EXPECT_NEAR(spline.evaluate(1.5), 3.375, 1e-9);
     EXPECT_NEAR(spline.derivative(1.5), 6.75, 1e-9);
-    EXPECT_EQ(spline.build(xs, ys, 1U), castle::status::invalid_argument);
+    EXPECT_EQ(spline.build(xs, ys, 1U), castle::status::insufficient_data);
     EXPECT_FALSE(spline.valid());
 }
 

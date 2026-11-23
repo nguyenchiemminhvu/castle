@@ -26,8 +26,8 @@ TEST(RpmsgTypes, ConfigurationValidation)
     int memory = 0;
     EXPECT_EQ(validate_config(device_config(role::host, &memory, 0U, 4U, 512U)), castle::status::invalid_config);
     EXPECT_EQ(validate_config(device_config(role::host, nullptr, 64U, 4U, 512U)), castle::status::invalid_config);
-    EXPECT_EQ(validate_config(device_config(role::host, nullptr, 0U, 0U, 512U)), castle::status::invalid_config);
-    EXPECT_EQ(validate_config(device_config(role::host, nullptr, 0U, 4U, 8U)), castle::status::invalid_config);
+    EXPECT_EQ(validate_config(device_config(role::host, nullptr, 0U, 0U, 512U)), castle::status::out_of_range);
+    EXPECT_EQ(validate_config(device_config(role::host, nullptr, 0U, 4U, 8U)), castle::status::out_of_range);
 }
 
 TEST(RpmsgTypes, ConfigurableCapacities)

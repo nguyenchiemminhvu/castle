@@ -65,14 +65,14 @@ TEST(OnlineRegressionTest, SingleObservation)
 
     out = 11.0;
     // Sample covariance and correlation need two pairs.
-    EXPECT_EQ(model.sample_covariance(out), castle::status::empty);
-    EXPECT_EQ(model.correlation(out), castle::status::empty);
+    EXPECT_EQ(model.sample_covariance(out), castle::status::insufficient_data);
+    EXPECT_EQ(model.correlation(out), castle::status::insufficient_data);
     EXPECT_EQ(out, 11.0);
 
-    // One point: Sxx = 0, so no line can be fitted.
+    // One point: not enough data to fit a line.
     double slope = 1.5;
     double intercept = 2.5;
-    EXPECT_EQ(model.fit(slope, intercept), castle::status::invalid_argument);
+    EXPECT_EQ(model.fit(slope, intercept), castle::status::insufficient_data);
     EXPECT_EQ(slope, 1.5);
     EXPECT_EQ(intercept, 2.5);
 }

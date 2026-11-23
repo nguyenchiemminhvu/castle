@@ -50,7 +50,7 @@ See `samples/castle_ext/io/uart/uart.cpp` for a standalone sample.
 
 ## Constraints & Notes
 - `device_path` is a borrowed null-terminated string; no dynamic string ownership is introduced.
-- Baud rates are numeric bits-per-second values mapped to native `B*` termios constants. A rate not exposed by the target headers returns `invalid_config`.
+- Baud rates are numeric bits-per-second values mapped to native `B*` termios constants. A rate not exposed by the target headers returns `unsupported`; a rate that is not a standard value returns `invalid_config`.
 - `read_timeout_deciseconds` maps directly to `VTIME` (tenths of a second); `min_read_bytes` maps to `VMIN`.
 - `non_blocking` sets `O_NONBLOCK` at open. Combining non-blocking mode with non-zero `VMIN`/`VTIME` is platform-dependent; choose one receive policy deliberately.
 - `flush_*` discards data; `drain()` waits for transmission and can block.

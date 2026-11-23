@@ -37,8 +37,9 @@ int main()
     CASTLE_SAMPLE_CHECK(validate_config(can_config(bitrate_250k, can_mode::loopback)) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(validate_config(can_config(bitrate_1m, can_mode::listen_only)) == castle::status::ok);
 
-    // Rejected configurations report invalid_config without touching hardware.
-    CASTLE_SAMPLE_CHECK(validate_config(can_config(max_bitrate + 1U)) == castle::status::invalid_config);
+    // Rejected configurations never touch hardware: an unknown mode is invalid_config, a bit rate above
+    // the maximum is out_of_range.
+    CASTLE_SAMPLE_CHECK(validate_config(can_config(max_bitrate + 1U)) == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(validate_config(can_config(bitrate_500k, static_cast<can_mode>(9U)))
                         == castle::status::invalid_config);
 
