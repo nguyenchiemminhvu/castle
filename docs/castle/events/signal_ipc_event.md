@@ -3,6 +3,8 @@
 ## Overview
 `castle::events::signal_ipc_event` binds a fixed set of POSIX signals to fixed-capacity callback registries. It exists for processes that need immediate signal-context dispatch with Castle-owned inline storage and no Castle heap allocation.
 
+The dispatcher is enabled only on embedded Linux: `CASTLE_USING_POSIX_APIS` must be enabled in `castle/core/config.hpp` and `__linux__` must be defined. Other targets, such as Zephyr, get a `#error`.
+
 ## Header
 `#include "castle/events/signal_ipc_event.hpp"`
 

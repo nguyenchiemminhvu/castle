@@ -42,6 +42,7 @@
 #define CASTLE_EVENTS_SIGNAL_IPC_EVENT_HPP
 
 #include "castle/core/compiler.hpp"
+#include "castle/core/config.hpp"
 #include "castle/core/error_handler.hpp"
 #include "castle/core/traits.hpp"
 #include "castle/core/types.hpp"
@@ -53,6 +54,9 @@
 
 #include "castle/callbacks/function.hpp"
 #include "castle/callbacks/function_registry.hpp"
+
+#if CASTLE_USING_POSIX_APIS && defined(__linux__)
+
 #include "castle/events/signal_ipc_config.hpp"
 
 #include <signal.h>
@@ -526,4 +530,9 @@ CASTLE_CONSTEXPR int signal_ipc_event<SignalConfigs...>::signal_list_[];
 } // namespace events
 } // namespace castle
 
+#else
+
+#error "castle::events::signal_ipc_event requires CASTLE_USING_POSIX_APIS on Linux."
+
+#endif // CASTLE_USING_POSIX_APIS && defined(__linux__)
 #endif // CASTLE_EVENTS_SIGNAL_IPC_EVENT_HPP
