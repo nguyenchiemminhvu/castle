@@ -108,7 +108,7 @@ int main()
     CASTLE_SAMPLE_CHECK(udp.close() == castle::status::ok);
 #else
     tcp_server<2U> server;
-    CASTLE_SAMPLE_CHECK(server.open(endpoint::loopback_ipv4(0U)) == castle::status::not_configured);
+    CASTLE_SAMPLE_CHECK(server.open(endpoint::loopback_ipv4(0U)) == castle::status::unsupported);
 #endif
     return 0;
 }

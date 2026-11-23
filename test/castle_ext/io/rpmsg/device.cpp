@@ -115,12 +115,12 @@ TEST(RpmsgDevice, InitializePollAndShutdownErrors)
     EXPECT_EQ(dev.poll(), castle::status::not_configured);
     EXPECT_EQ(dev.shutdown(), castle::status::not_configured);
     EXPECT_EQ(dev.initialize(device_config(static_cast<role>(8U))), castle::status::invalid_config);
-    EXPECT_EQ(dev.initialize(device_config(role::remote, nullptr, 0U, 4U, 31U)), castle::status::invalid_config);
-    EXPECT_EQ(dev.initialize(device_config(role::remote, nullptr, 0U, 5U, 32U)), castle::status::invalid_config);
-    EXPECT_EQ(dev.initialize(device_config(role::remote, nullptr, 0U, 4U, 33U)), castle::status::invalid_config);
+    EXPECT_EQ(dev.initialize(device_config(role::remote, nullptr, 0U, 4U, 31U)), castle::status::out_of_range);
+    EXPECT_EQ(dev.initialize(device_config(role::remote, nullptr, 0U, 5U, 32U)), castle::status::out_of_range);
+    EXPECT_EQ(dev.initialize(device_config(role::remote, nullptr, 0U, 4U, 33U)), castle::status::out_of_range);
     ASSERT_EQ(dev.initialize(), castle::status::ok);
     EXPECT_TRUE(dev.is_initialized());
-    EXPECT_EQ(dev.initialize(), castle::status::invalid_config);
+    EXPECT_EQ(dev.initialize(), castle::status::invalid_state);
     EXPECT_EQ(dev.poll(), castle::status::ok);
     EXPECT_EQ(dev.shutdown(), castle::status::ok);
     EXPECT_FALSE(dev.is_initialized());
@@ -195,7 +195,7 @@ TEST(RpmsgDevice, ServiceTableBoundsAndValidation)
     EXPECT_EQ(dev.process_name_service_event(event), castle::status::invalid_argument);
     event.action = name_service_action::create;
     ASSERT_EQ(event.name.assign("this-name-is-too-long"), castle::status::ok);
-    EXPECT_EQ(dev.process_name_service_event(event), castle::status::invalid_argument);
+    EXPECT_EQ(dev.process_name_service_event(event), castle::status::out_of_range);
     dev.clear_name_service_callback();
     EXPECT_EQ(dev.set_name_service_callback(nullptr), castle::status::invalid_callback);
     EXPECT_EQ(dev.shutdown(), castle::status::ok);
@@ -278,7 +278,7 @@ TEST(RpmsgDevice, InitializeRejectsBackendAlreadyInitialized)
     small_backend backend;
     ASSERT_EQ(backend.initialize(device_config(), nullptr, nullptr), castle::status::ok);
     small_device dev(backend);
-    EXPECT_EQ(dev.initialize(), castle::status::invalid_config);
+    EXPECT_EQ(dev.initialize(), castle::status::invalid_state);
     EXPECT_FALSE(dev.is_initialized());
     EXPECT_EQ(backend.shutdown(), castle::status::ok);
 }
@@ -387,15 +387,15 @@ TEST(RpmsgDevice, BackendHandleAndSourceValidationRejectsAttach)
     scripted_endpoint ept;
     backend.null_handle = true;
     EXPECT_EQ(ept.create(dev, "nullh", rpmsg_addr_any, rpmsg_addr_any,
-                         [](message_view const&) {}), castle::status::invalid_config);
+                         [](message_view const&) {}), castle::status::unknown_error);
     backend.null_handle = false;
     backend.force_source = true;
     backend.forced_source = rpmsg_addr_any;
     EXPECT_EQ(ept.create(dev, "anysrc", rpmsg_addr_any, rpmsg_addr_any,
-                         [](message_view const&) {}), castle::status::invalid_config);
+                         [](message_view const&) {}), castle::status::unknown_error);
     backend.forced_source = 35U;
     EXPECT_EQ(ept.create(dev, "resv", rpmsg_addr_any, rpmsg_addr_any,
-                         [](message_view const&) {}), castle::status::invalid_config);
+                         [](message_view const&) {}), castle::status::unknown_error);
     EXPECT_EQ(dev.endpoint_count(), 0U);
     backend.force_source = false;
     ASSERT_EQ(ept.create(dev, "ok", rpmsg_addr_any, rpmsg_addr_any,
@@ -595,7 +595,7 @@ TEST(RpmsgDevice, ReceivePathValidatesPayloadSize)
     EXPECT_EQ(received, 8U);
     EXPECT_EQ(backend.saved_receive(backend.saved_context,
                                     message_view(ept.source_address(), 2000U, nullptr, 4U)),
-              castle::status::data_loss);
+              castle::status::unknown_error);
     EXPECT_EQ(received, 8U);
     EXPECT_EQ(ept.destroy(), castle::status::ok);
     EXPECT_EQ(dev.shutdown(), castle::status::ok);
@@ -627,10 +627,10 @@ TEST(RpmsgDevice, AcquireTxBufferHandlesEmptyBackendBuffers)
                          [](message_view const&) {}), castle::status::ok);
     tx_buffer tx;
     backend.acquire_mode = 1;
-    EXPECT_EQ(ept.acquire_tx_buffer(tx), castle::status::invalid_config);
+    EXPECT_EQ(ept.acquire_tx_buffer(tx), castle::status::unknown_error);
     EXPECT_FALSE(tx.active);
     backend.acquire_mode = 2;
-    EXPECT_EQ(ept.acquire_tx_buffer(tx), castle::status::invalid_config);
+    EXPECT_EQ(ept.acquire_tx_buffer(tx), castle::status::unknown_error);
     EXPECT_FALSE(tx.active);
     backend.acquire_mode = 0;
     ASSERT_EQ(ept.acquire_tx_buffer(tx), castle::status::ok);

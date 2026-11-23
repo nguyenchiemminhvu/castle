@@ -84,7 +84,7 @@ public:
     {
         if (initialized_ || backend_.is_initialized())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         castle::status result = validate_config(config);
         if (!castle::succeeded(result))
@@ -96,7 +96,7 @@ public:
             || config.buffer_count > Options::buffer_count
             || config.buffer_size > Options::buffer_size)
         {
-            return castle::status::invalid_config;
+            return castle::status::out_of_range;
         }
         result = backend_.initialize(config, this, &name_service_trampoline);
         if (castle::succeeded(result))
@@ -236,7 +236,7 @@ public:
         }
         castle::status result = update_channel_table(event);
         last_name_service_status_ = result;
-        if (result == castle::status::invalid_argument)
+        if (result == castle::status::invalid_argument || result == castle::status::out_of_range)
         {
             return result;
         }
@@ -348,9 +348,13 @@ private:
         {
             return castle::status::invalid_callback;
         }
-        if (message.size > Options::max_payload_size || (message.data == nullptr && message.size != 0U))
+        if (message.size > Options::max_payload_size)
         {
             return castle::status::data_loss;
+        }
+        if (message.data == nullptr && message.size != 0U)
+        {
+            return castle::status::unknown_error;
         }
         ++slot->dispatching;
         slot->on_receive(message);
@@ -522,7 +526,7 @@ private:
                 backend_.destroy_endpoint(backend_handle);
             }
             clear_slot(slot);
-            return castle::status::invalid_config;
+            return castle::status::unknown_error;
         }
         slot.backend_handle = backend_handle;
         slot.source = actual_source;
@@ -625,7 +629,7 @@ private:
         out.reset();
         if (!Options::zero_copy)
         {
-            return castle::status::not_configured;
+            return castle::status::unsupported;
         }
         if (!is_endpoint_valid(endpoint))
         {
@@ -645,7 +649,7 @@ private:
             {
                 (void)backend_.release_tx_buffer(endpoints_[endpoint.slot_].backend_handle, data);
             }
-            return castle::status::invalid_config;
+            return castle::status::unknown_error;
         }
         out.data = static_cast<uint8_t*>(data);
         out.capacity = capacity < Options::max_payload_size ? capacity : Options::max_payload_size;
@@ -661,7 +665,7 @@ private:
     {
         if (!Options::zero_copy)
         {
-            return castle::status::not_configured;
+            return castle::status::unsupported;
         }
         if (!is_endpoint_valid(endpoint))
         {
@@ -701,7 +705,7 @@ private:
     {
         if (!Options::zero_copy)
         {
-            return castle::status::not_configured;
+            return castle::status::unsupported;
         }
         if (!is_endpoint_valid(endpoint))
         {
@@ -722,11 +726,14 @@ private:
 
     castle::status update_channel_table(name_service_event CASTLE_CONST& event) CASTLE_NOEXCEPT
     {
-        if (event.name.empty() || event.name.size() > Options::max_name_length
-            || !is_valid_remote_address(event.endpoint_address)
+        if (event.name.empty() || !is_valid_remote_address(event.endpoint_address)
             || (event.action != name_service_action::create && event.action != name_service_action::destroy))
         {
             return castle::status::invalid_argument;
+        }
+        if (event.name.size() > Options::max_name_length)
+        {
+            return castle::status::out_of_range;
         }
         size_type found = Options::max_channels;
         size_type free_slot = Options::max_channels;

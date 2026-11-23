@@ -32,11 +32,11 @@ TEST(EwmaTest, ConstructorValidAndInvalidAlpha)
 TEST(EwmaTest, ConfigureRejectsInvalidAlpha)
 {
     castle::statistic::ewma<double> filter;
-    EXPECT_EQ(filter.configure(0.0), status::invalid_argument);
+    EXPECT_EQ(filter.configure(0.0), status::invalid_config);
     EXPECT_FALSE(filter.configured());
-    EXPECT_EQ(filter.configure(-0.1), status::invalid_argument);
-    EXPECT_EQ(filter.configure(1.5), status::invalid_argument);
-    EXPECT_EQ(filter.configure(std::numeric_limits<double>::quiet_NaN()), status::invalid_argument);
+    EXPECT_EQ(filter.configure(-0.1), status::invalid_config);
+    EXPECT_EQ(filter.configure(1.5), status::invalid_config);
+    EXPECT_EQ(filter.configure(std::numeric_limits<double>::quiet_NaN()), status::invalid_config);
     EXPECT_FALSE(filter.configured());
     EXPECT_EQ(filter.alpha(), 0.0);
 
@@ -46,7 +46,7 @@ TEST(EwmaTest, ConfigureRejectsInvalidAlpha)
     EXPECT_DOUBLE_EQ(filter.alpha(), 1.0);
 
     // A failed configure drops a previously valid setting.
-    EXPECT_EQ(filter.configure(2.0), status::invalid_argument);
+    EXPECT_EQ(filter.configure(2.0), status::invalid_config);
     EXPECT_FALSE(filter.configured());
 }
 

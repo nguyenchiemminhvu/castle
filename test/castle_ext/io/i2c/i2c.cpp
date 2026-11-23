@@ -11,9 +11,9 @@ TEST(I2c, ValidatesSevenAndTenBitAddressRanges)
 {
     EXPECT_EQ(validate_config(i2c_config()), castle::status::invalid_config);
     EXPECT_EQ(validate_config(i2c_config("/dev/i2c-1", 0x42U)), castle::status::ok);
-    EXPECT_EQ(validate_config(i2c_config("/dev/i2c-1", 0x80U)), castle::status::invalid_config);
+    EXPECT_EQ(validate_config(i2c_config("/dev/i2c-1", 0x80U)), castle::status::out_of_range);
     EXPECT_EQ(validate_config(i2c_config("/dev/i2c-1", 0x3FFU, true)), castle::status::ok);
-    EXPECT_EQ(validate_config(i2c_config("/dev/i2c-1", 0x400U, true)), castle::status::invalid_config);
+    EXPECT_EQ(validate_config(i2c_config("/dev/i2c-1", 0x400U, true)), castle::status::out_of_range);
 }
 
 TEST(I2c, ClosedDeviceRejectsOperations)
@@ -43,7 +43,7 @@ TEST(I2c, RejectsInvalidCombinedTransfers)
     EXPECT_EQ(bus.write_read(&buffer, 0U, &buffer, 1U), castle::status::invalid_argument);
     EXPECT_EQ(bus.write_read(&buffer, 1U, nullptr, 1U), castle::status::invalid_argument);
     EXPECT_EQ(bus.write_read(&buffer, 1U, &buffer, 0U), castle::status::invalid_argument);
-    EXPECT_EQ(bus.write_read(&buffer, 65536U, &buffer, 1U), castle::status::invalid_argument);
+    EXPECT_EQ(bus.write_read(&buffer, 65536U, &buffer, 1U), castle::status::out_of_range);
 }
 
 #if CASTLE_USING_POSIX_APIS && defined(__linux__)
@@ -66,7 +66,7 @@ TEST(I2c, LinuxSupportUnavailable)
 {
     basic_i2c bus;
     EXPECT_FALSE(i2c_available);
-    EXPECT_EQ(bus.open(i2c_config("/dev/i2c-1", 0x42U)), castle::status::not_configured);
+    EXPECT_EQ(bus.open(i2c_config("/dev/i2c-1", 0x42U)), castle::status::unsupported);
 }
 
 #endif

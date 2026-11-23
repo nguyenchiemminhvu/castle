@@ -162,14 +162,14 @@ CASTLE_NODISCARD status validate_geohash(castle::dsa::string_view encoded) CASTL
     }
     if (encoded.size() != Depth)
     {
-        return (encoded.size() > Depth) ? status::out_of_range : status::invalid_argument;
+        return (encoded.size() > Depth) ? status::out_of_range : status::parse_error;
     }
 
     for (castle::size_type i = 0U; i < Depth; ++i)
     {
         if (geohash_digit_value(encoded[i]) < 0)
         {
-            return status::invalid_argument;
+            return status::parse_error;
         }
     }
 
@@ -197,14 +197,14 @@ CASTLE_NODISCARD status validate_geohash_binary(castle::dsa::string_view encoded
     }
     if (encoded.size() != bit_count)
     {
-        return (encoded.size() > bit_count) ? status::out_of_range : status::invalid_argument;
+        return (encoded.size() > bit_count) ? status::out_of_range : status::parse_error;
     }
 
     for (castle::size_type i = 0U; i < bit_count; ++i)
     {
         if (geohash_bit_value(encoded[i]) < 0)
         {
-            return status::invalid_argument;
+            return status::parse_error;
         }
     }
 
@@ -523,10 +523,10 @@ public:
      * @brief Loads base-32 text and stores every form of its cell.
      * @param encoded Source text, which must contain exactly `Depth` characters.
      * @return `status::ok` on success, `status::empty` for empty input,
-     * `status::out_of_range` for excessive length, and
-     * `status::invalid_argument` for short input, a null non-empty view,
-     * or a character outside the Geohash alphabet. The previous value is
-     * preserved on failure.
+     * `status::out_of_range` for excessive length, `status::parse_error`
+     * for short input or a character outside the Geohash alphabet, and
+     * `status::invalid_argument` for a null non-empty view. The previous
+     * value is preserved on failure.
      * @note ASCII uppercase is accepted and stored in canonical lowercase.
      */
     CASTLE_NODISCARD status assign(view_type encoded) CASTLE_NOEXCEPT

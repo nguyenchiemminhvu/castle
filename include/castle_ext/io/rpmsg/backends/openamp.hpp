@@ -124,12 +124,17 @@ public:
      * `role::remote` device consumes buffers provided by the host through the vrings. For the remote
      * role this call blocks inside `rpmsg_init_vdev()` until the host sets driver-ready.
      * @return `ok`; `invalid_config` for null resources, role mismatch or a host without a pool;
-     *         `full` when four backends are already registered; otherwise the mapped OpenAMP error.
+     *         `invalid_state` when already initialized; `full` when four backends are already registered;
+     *         otherwise the mapped OpenAMP error.
      */
     castle::status initialize(device_config CASTLE_CONST& config, void* ns_context,
                               name_service_dispatch ns_callback) CASTLE_NOEXCEPT
     {
-        if (initialized_ || (config.node_role != role::host && config.node_role != role::remote)
+        if (initialized_)
+        {
+            return castle::status::invalid_state;
+        }
+        if ((config.node_role != role::host && config.node_role != role::remote)
             || resources_.rpmsg_virtio == nullptr || resources_.virtio == nullptr
             || resources_.shared_memory_io == nullptr
             || (config.node_role == role::host
@@ -285,7 +290,8 @@ public:
      *        bounded blocking wait (about 15 s by default).
      * @return `ok`; `full` when no TX buffer is free in `no_wait` mode; `time_out` when the wait expires;
      *         `data_loss` when the peer's buffers are smaller than `length` and OpenAMP truncated the
-     *         payload; `invalid_config` for any other timeout value.
+     *         payload; `out_of_range` when `length` exceeds `INT32_MAX`; `invalid_argument` for any other
+     *         timeout value.
      */
     castle::status send(void* handle, address src, address dst,
                         void CASTLE_CONST* data, size_type length,
@@ -296,14 +302,17 @@ public:
         {
             return castle::status::not_configured;
         }
-        if ((data == nullptr && length != 0U) || length > static_cast<size_type>(0x7FFFFFFFU)
-            || !is_valid_local_address(src) || !is_valid_remote_address(dst))
+        if ((data == nullptr && length != 0U) || !is_valid_local_address(src) || !is_valid_remote_address(dst))
         {
             return castle::status::invalid_argument;
         }
+        if (length > static_cast<size_type>(0x7FFFFFFFU))
+        {
+            return castle::status::out_of_range;
+        }
         if (timeout != no_wait && timeout != wait_forever)
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_argument;
         }
         int result = timeout == no_wait
                    ? rpmsg_trysend_offchannel(ept, src, dst, data, static_cast<int>(length))
@@ -481,9 +490,13 @@ private:
 
     static castle::status map_error(int error) CASTLE_NOEXCEPT
     {
-        if (error == RPMSG_ERR_NO_BUFF || error == RPMSG_ERR_NO_MEM)
+        if (error == RPMSG_ERR_NO_BUFF)
         {
             return castle::status::full;
+        }
+        if (error == RPMSG_ERR_NO_MEM)
+        {
+            return castle::status::resource_exhausted;
         }
         if (error == RPMSG_ERR_PARAM)
         {
@@ -502,13 +515,13 @@ private:
 #ifdef RPMSG_ERR_PERM
         if (error == RPMSG_ERR_PERM)
         {
-            return castle::status::not_configured;
+            return castle::status::permission_denied;
         }
 #endif
 #ifdef RPMSG_EOPNOTSUPP
         if (error == RPMSG_EOPNOTSUPP)
         {
-            return castle::status::not_configured;
+            return castle::status::unsupported;
         }
 #endif
         if (error == RPMSG_ERR_DEV_STATE || error == RPMSG_ERR_INIT)
@@ -518,14 +531,14 @@ private:
 #ifdef ERESTARTSYS
         if (error == -ERESTARTSYS)
         {
-            return castle::status::time_out;
+            return castle::status::interrupted;
         }
 #endif
         if (error == -ETIMEDOUT)
         {
             return castle::status::time_out;
         }
-        return castle::status::system_call_error;
+        return castle::status::unknown_error;
     }
 
     openamp_resources resources_;

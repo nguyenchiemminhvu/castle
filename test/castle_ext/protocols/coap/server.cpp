@@ -171,7 +171,7 @@ TEST(CoapServer, OpenAndRegistrationValidation)
 {
     server_t server;
     ASSERT_EQ(server.open(endpoint::loopback_ipv4(56840U)), castle::status::ok);
-    EXPECT_EQ(server.open(endpoint::loopback_ipv4(56840U)), castle::status::invalid_config);
+    EXPECT_EQ(server.open(endpoint::loopback_ipv4(56840U)), castle::status::invalid_state);
     auto noop = [](message_t const&, message_t&) {};
     EXPECT_EQ(server.register_resource("x", 0x10U, noop), castle::status::invalid_argument);
     EXPECT_EQ(server.register_resource("", allow_get, noop), castle::status::invalid_argument);

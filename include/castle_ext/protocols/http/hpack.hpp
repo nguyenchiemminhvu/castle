@@ -339,7 +339,7 @@ CASTLE_INLINE CASTLE_CONSTEXPR uint8_t hpack_huffman_lengths[257] =
 /**
  * @brief Decodes an RFC 7541 section 5.1 prefixed integer.
  *
- * @return `ok`, `data_loss` for truncated input, or `out_of_range` on overflow.
+ * @return `ok`, `parse_error` for truncated or overflowing input.
  */
 CASTLE_INLINE castle::status hpack_read_integer(uint8_t CASTLE_CONST* input, size_type size, size_type& offset,
                                                 uint8_t prefix, uint64_t& value) CASTLE_NOEXCEPT
@@ -347,7 +347,7 @@ CASTLE_INLINE castle::status hpack_read_integer(uint8_t CASTLE_CONST* input, siz
     // Callers always pass a valid offset and a constant prefix.
     if (input == nullptr || offset >= size || prefix == 0U || prefix > 8U) // LCOV_EXCL_BR_LINE
     {
-        return castle::status::data_loss;
+        return castle::status::parse_error;
     }
     uint8_t mask = static_cast<uint8_t>((1U << prefix) - 1U);
     value = input[offset] & mask;
@@ -362,18 +362,18 @@ CASTLE_INLINE castle::status hpack_read_integer(uint8_t CASTLE_CONST* input, siz
     {
         if (offset >= size)
         {
-            return castle::status::data_loss;
+            return castle::status::parse_error;
         }
         uint8_t byte = input[offset++];
         uint64_t part = static_cast<uint64_t>(byte & 0x7FU);
         if (part > (static_cast<uint64_t>(-1) >> shift))
         {
-            return castle::status::out_of_range;
+            return castle::status::parse_error;
         }
         uint64_t addend = part << shift;
         if (value > static_cast<uint64_t>(-1) - addend)
         {
-            return castle::status::out_of_range;
+            return castle::status::parse_error;
         }
         value += addend;
         if ((byte & 0x80U) == 0U)
@@ -382,7 +382,7 @@ CASTLE_INLINE castle::status hpack_read_integer(uint8_t CASTLE_CONST* input, siz
         }
         shift += 7U;
     }
-    return castle::status::out_of_range;
+    return castle::status::parse_error;
 }
 
 /**
@@ -502,7 +502,7 @@ CASTLE_INLINE size_type hpack_find_static(string_view name, string_view value, b
 /**
  * @brief Decodes a Huffman string, enforcing EOS and padding rules.
  *
- * @return `ok`, `invalid_argument` for malformed input, or `out_of_range` when the output is too small.
+ * @return `ok`, `parse_error` for malformed input, or `full` when the output is too small.
  */
 CASTLE_INLINE castle::status hpack_decode_huffman(uint8_t CASTLE_CONST* input, size_type input_size,
                                                   char* output, size_type output_capacity,
@@ -523,7 +523,7 @@ CASTLE_INLINE castle::status hpack_decode_huffman(uint8_t CASTLE_CONST* input, s
             // The RFC 7541 code is complete, so every internal node has both children.
             if (next < 0) // LCOV_EXCL_BR_LINE
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             node = static_cast<uint16_t>(next);
             int16_t symbol = hpack_huffman_tree.nodes[node].symbol;
@@ -532,11 +532,11 @@ CASTLE_INLINE castle::status hpack_decode_huffman(uint8_t CASTLE_CONST* input, s
                 // EOS inside a string is a decoding error (RFC 7541 5.2).
                 if (symbol == 256)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
                 if (output_size >= output_capacity)
                 {
-                    return castle::status::out_of_range;
+                    return castle::status::full;
                 }
                 output[output_size++] = static_cast<char>(symbol);
                 node = 0U;
@@ -548,7 +548,7 @@ CASTLE_INLINE castle::status hpack_decode_huffman(uint8_t CASTLE_CONST* input, s
     // Padding must be a strict prefix of EOS: fewer than 8 bits, all ones.
     if (node != 0U && (tail_bits > 7U || !tail_ones))
     {
-        return castle::status::invalid_argument;
+        return castle::status::parse_error;
     }
     return castle::status::ok;
 }
@@ -580,7 +580,7 @@ public:
      * @brief Decodes one complete header block into `output`.
      *
      * @tparam Headers Collection providing `add(string_view, string_view)`.
-     * @return `ok`, `invalid_argument` for malformed data, `data_loss` for truncation, or the failure reported by `output`.
+     * @return `ok`, `parse_error` for malformed or truncated data, `protocol_error` for an invalid index, table-size update or empty name, `full` when a string exceeds the decoder capacity, `invalid_argument` for a null non-empty input, or the failure reported by `output`.
      */
     template <typename Headers>
     castle::status decode_block(uint8_t CASTLE_CONST* input, size_type size, Headers& output) CASTLE_NOEXCEPT
@@ -602,12 +602,12 @@ public:
                 castle::status result = detail::hpack_read_integer(input, size, offset, 7U, index);
                 if (!castle::succeeded(result) || index == 0U)
                 {
-                    return castle::status::invalid_argument;
+                    return !castle::succeeded(result) ? castle::status::parse_error : castle::status::protocol_error;
                 }
                 string_view n, v;
                 if (!lookup(index, n, v))
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 result = output.add(n, v);
                 if (!castle::succeeded(result))
@@ -621,13 +621,13 @@ public:
             {
                 if (saw_field)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 uint64_t table_size = 0U;
                 castle::status result = detail::hpack_read_integer(input, size, offset, 5U, table_size);
                 if (!castle::succeeded(result) || table_size > MaxDynamicTableBytes)
                 {
-                    return castle::status::invalid_argument;
+                    return !castle::succeeded(result) ? castle::status::parse_error : castle::status::protocol_error;
                 }
                 allowed_table_bytes_ = static_cast<size_type>(table_size);
                 evict_to_limit();
@@ -651,11 +651,11 @@ public:
                 string_view ignored;
                 if (!lookup(name_index, n, ignored))
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 if (n.size() > MaxStringSize)
                 {
-                    return castle::status::out_of_range;
+                    return castle::status::full;
                 }
                 copy_to(name, n);
                 name_size = n.size();
@@ -676,7 +676,7 @@ public:
             }
             if (name_size == 0U)
             {
-                return castle::status::invalid_argument;
+                return castle::status::protocol_error;
             }
             result = output.add(string_view(name, name_size), string_view(value, value_size));
             if (!castle::succeeded(result))
@@ -745,14 +745,14 @@ private:
     {
         if (offset >= size)
         {
-            return castle::status::data_loss;
+            return castle::status::parse_error;
         }
         bool huffman = (input[offset] & 0x80U) != 0U;
         uint64_t encoded_size = 0U;
         castle::status result = detail::hpack_read_integer(input, size, offset, 7U, encoded_size);
         if (!castle::succeeded(result) || encoded_size > static_cast<uint64_t>(size - offset))
         {
-            return castle::status::data_loss;
+            return castle::status::parse_error;
         }
         if (huffman)
         {
@@ -763,7 +763,7 @@ private:
         {
             if (encoded_size > MaxStringSize)
             {
-                return castle::status::out_of_range;
+                return castle::status::full;
             }
             output_size = static_cast<size_type>(encoded_size);
             for (size_type i = 0U; i < output_size; ++i)

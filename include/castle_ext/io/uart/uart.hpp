@@ -268,7 +268,7 @@ CASTLE_INLINE bool valid_flow_control(flow_control value) CASTLE_NOEXCEPT
 
 } // namespace detail
 
-/** @brief Validates generic UART fields and, on POSIX, baud-rate availability. */
+/** @brief Validates generic UART fields and, on POSIX, baud-rate availability; a valid setting this build cannot apply is `unsupported`. */
 CASTLE_INLINE castle::status validate_config(uart_config const& config) CASTLE_NOEXCEPT
 {
     if (config.device_path == nullptr || config.device_path[0] == '\0' || !detail::valid_baud_value(config.baud_rate)
@@ -281,18 +281,18 @@ CASTLE_INLINE castle::status validate_config(uart_config const& config) CASTLE_N
     speed_t native_speed = 0;
     if (!detail::baud_to_native(config.baud_rate, native_speed)) // LCOV_EXCL_BR_LINE
     {
-        return castle::status::invalid_config;
+        return castle::status::unsupported;
     }
 #ifndef CRTSCTS
     if (config.flow == flow_control::hardware)
     {
-        return castle::status::invalid_config;
+        return castle::status::unsupported;
     }
 #endif
 #ifndef CMSPAR
     if (config.parity_mode == parity::mark || config.parity_mode == parity::space)
     {
-        return castle::status::invalid_config;
+        return castle::status::unsupported;
     }
 #endif
 #endif
@@ -349,7 +349,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         // LCOV_EXCL_STOP
 #if CASTLE_USING_POSIX_APIS
@@ -372,7 +372,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::not_configured;
+            return castle::status::unsupported;
         }
 #endif
         fd::basic_fd next;
@@ -403,7 +403,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -447,7 +447,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -498,7 +498,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -512,7 +512,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -526,7 +526,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -561,7 +561,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
         // LCOV_EXCL_STOP
     }
@@ -595,7 +595,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::data_loss;
+            return castle::status::out_of_range;
         }
         count = static_cast<size_type>(pending);
         if (system_error != nullptr)
@@ -608,7 +608,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
         // LCOV_EXCL_STOP
     }
@@ -638,7 +638,7 @@ private:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         // LCOV_EXCL_STOP
 
@@ -690,7 +690,7 @@ private:
                 {
                     *system_error = 0;
                 }
-                return castle::status::invalid_config;
+                return castle::status::unsupported;
 #endif
                 break;
             case parity::space:
@@ -702,7 +702,7 @@ private:
                 {
                     *system_error = 0;
                 }
-                return castle::status::invalid_config;
+                return castle::status::unsupported;
 #endif
                 break;
             // LCOV_EXCL_START
@@ -744,7 +744,7 @@ private:
                 {
                     *system_error = 0;
                 }
-                return castle::status::invalid_config;
+                return castle::status::unsupported;
 #endif
                 break;
             // LCOV_EXCL_START
@@ -816,7 +816,7 @@ private:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
         // LCOV_EXCL_STOP
     }

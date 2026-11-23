@@ -35,5 +35,5 @@ See `samples/castle_ext/io/fd/fd.cpp` for a standalone sample.
 
 ## Constraints & Notes
 - The descriptor owner is move-only and closes its descriptor on destruction; the poll manager does not own registered descriptors.
-- POSIX declarations are guarded by `CASTLE_USING_POSIX_APIS`; control/descriptor calls return `not_configured` when unavailable, while `poll()` types are omitted.
+- POSIX declarations are guarded by `CASTLE_USING_POSIX_APIS`; control/descriptor calls return `unsupported` when unavailable, while `poll()` types are omitted.
 - No dynamic allocation is used. Poll capacity and callback storage are fixed at compile time.

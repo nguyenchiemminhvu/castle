@@ -221,70 +221,70 @@ private:
                 if (stream_id_ == 0U)
                 {
                     error_ = error_code::invalid_frame;
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 break;
             case 1U: // HEADERS
                 if (stream_id_ == 0U)
                 {
                     error_ = error_code::invalid_frame;
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 break;
             case 2U: // PRIORITY
                 if (stream_id_ == 0U || payload_size_ != 5U)
                 {
                     error_ = error_code::invalid_frame;
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 break;
             case 3U: // RST_STREAM
                 if (stream_id_ == 0U || payload_size_ != 4U)
                 {
                     error_ = error_code::invalid_frame;
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 break;
             case 4U: // SETTINGS
                 if (stream_id_ != 0U || ((flags_ & 0x01U) != 0U ? payload_size_ != 0U : (payload_size_ % 6U) != 0U))
                 {
                     error_ = error_code::invalid_frame;
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 break;
             case 5U: // PUSH_PROMISE
                 if (stream_id_ == 0U || payload_size_ < 4U)
                 {
                     error_ = error_code::invalid_frame;
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 break;
             case 6U: // PING
                 if (stream_id_ != 0U || payload_size_ != 8U)
                 {
                     error_ = error_code::invalid_frame;
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 break;
             case 7U: // GOAWAY
                 if (stream_id_ != 0U || payload_size_ < 8U)
                 {
                     error_ = error_code::invalid_frame;
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 break;
             case 8U: // WINDOW_UPDATE
                 if (payload_size_ != 4U)
                 {
                     error_ = error_code::invalid_frame;
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 break;
             case 9U: // CONTINUATION
                 if (stream_id_ == 0U)
                 {
                     error_ = error_code::invalid_frame;
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 break;
             default: break; // Unknown extension frames are ignored by the connection layer.
@@ -466,7 +466,7 @@ public:
      *
      * @param body Request body; it is referenced, not copied, and must outlive the stream.
      * @param stream_id Receives the stream identifier.
-     * @return `ok`, `not_configured` before `start()`, `out_of_range` at the stream limit, `data_loss` after GOAWAY, `invalid_argument` for invalid input, or `full` when the queue is too small.
+     * @return `ok`, `not_configured` before `start()`, `invalid_state` after a connection failure, `full` at the stream limit or when the queue is too small, `unavailable` after GOAWAY, `invalid_argument` for invalid input, or `out_of_range` when a header exceeds its bound.
      */
     template <typename Headers>
     castle::status open_stream(method verb, string_view path, string_view authority,
@@ -476,7 +476,7 @@ public:
         stream_id = 0U;
         if (!started_ || failed_)
         {
-            return castle::status::not_configured;
+            return !started_ ? castle::status::not_configured : castle::status::invalid_state;
         }
         if (goaway_received_)
         {
@@ -672,7 +672,7 @@ public:
     /**
      * @brief Frees the slot of a finished stream.
      *
-     * @return `ok`, `not_found`, or `invalid_config` while the stream is still active.
+     * @return `ok`, `not_found`, or `invalid_state` while the stream is still active.
      */
     castle::status release_stream(uint32_t stream_id) CASTLE_NOEXCEPT
     {
@@ -683,7 +683,7 @@ public:
         }
         if (!stream->response_complete && !stream->reset)
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         stream->clear();
         return castle::status::ok;
@@ -1119,7 +1119,7 @@ private:
             if (stream.used && !stream.response_complete && !stream.reset && stream.id > last_stream_id_)
             {
                 stream.reset = true;
-                notify_stream(stream, castle::status::data_loss);
+                notify_stream(stream, to_status(error_code::goaway_received));
             }
         }
         return castle::status::ok;

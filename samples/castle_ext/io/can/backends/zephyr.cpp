@@ -20,8 +20,8 @@ int main()
     CASTLE_SAMPLE_CHECK(zephyr::native::to_status(-EAGAIN) == castle::status::full);
     CASTLE_SAMPLE_CHECK(zephyr::native::to_status(-ENOSPC) == castle::status::full);
     CASTLE_SAMPLE_CHECK(zephyr::native::to_status(-EINVAL) == castle::status::invalid_argument);
-    CASTLE_SAMPLE_CHECK(zephyr::native::to_status(-ENOTSUP) == castle::status::invalid_config);
-    CASTLE_SAMPLE_CHECK(zephyr::native::to_status(-ERANGE) == castle::status::invalid_config);
+    CASTLE_SAMPLE_CHECK(zephyr::native::to_status(-ENOTSUP) == castle::status::unsupported);
+    CASTLE_SAMPLE_CHECK(zephyr::native::to_status(-ERANGE) == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(zephyr::native::to_status(-ENETDOWN) == castle::status::not_configured);
     CASTLE_SAMPLE_CHECK(zephyr::native::to_status(-EIO) == castle::status::system_call_error);
     CASTLE_SAMPLE_CHECK(zephyr::native::to_status(-ENETUNREACH) == castle::status::system_call_error);
@@ -36,8 +36,8 @@ int main()
     bus_status status;
     filter_handle handle = invalid_filter;
 
-    // Every operation reports not_configured.
-    CASTLE_SAMPLE_CHECK(can.open(controller, can_config(bitrate_500k)) == castle::status::not_configured);
+    // open() reports unsupported; every other operation reports not_configured because the stub never opens.
+    CASTLE_SAMPLE_CHECK(can.open(controller, can_config(bitrate_500k)) == castle::status::unsupported);
     CASTLE_SAMPLE_CHECK(!can.is_open());
     CASTLE_SAMPLE_CHECK(can.send(value) == castle::status::not_configured);
     CASTLE_SAMPLE_CHECK(can.receive(rx, timeout_type(10)) == castle::status::not_configured);
@@ -50,7 +50,7 @@ int main()
     CASTLE_SAMPLE_CHECK(can.close() == castle::status::not_configured);
 
     // The facade still validates before the stub sees anything, and a null device is rejected.
-    CASTLE_SAMPLE_CHECK(can.open(controller, can_config(max_bitrate + 1U)) == castle::status::invalid_config);
+    CASTLE_SAMPLE_CHECK(can.open(controller, can_config(max_bitrate + 1U)) == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(can.backend().open(nullptr, can_config(), nullptr) == castle::status::invalid_argument);
 
     // Queue and filter depths are template parameters, like on the real backend.

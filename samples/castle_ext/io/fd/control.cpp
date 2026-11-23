@@ -41,7 +41,7 @@ int main()
     CASTLE_SAMPLE_CHECK(castle::io::fd::close_fd(descriptors[1]) == castle::status::ok);
 #else
     CASTLE_SAMPLE_CHECK(!castle::io::fd::posix_available);
-    CASTLE_SAMPLE_CHECK(castle::io::fd::set_nonblocking(3) == castle::status::not_configured);
+    CASTLE_SAMPLE_CHECK(castle::io::fd::set_nonblocking(3) == castle::status::unsupported);
 #endif
     return 0;
 }

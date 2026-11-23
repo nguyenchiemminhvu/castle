@@ -224,7 +224,7 @@ result decode_string(string_view source, castle::size_type& position,
     output.clear();
     if (position >= source.size() || source[position] != '"')
     {
-        r.status = castle::status::invalid_argument;
+        r.status = castle::status::parse_error;
         r.code = error_code::invalid_string;
         r.offset = position;
         return r;
@@ -240,7 +240,7 @@ result decode_string(string_view source, castle::size_type& position,
         }
         if (is_control(c))
         {
-            r.status = castle::status::invalid_argument;
+            r.status = castle::status::parse_error;
             r.code = error_code::invalid_string;
             r.offset = position - 1U;
             return r;
@@ -259,7 +259,7 @@ result decode_string(string_view source, castle::size_type& position,
 
         if (position >= source.size())
         {
-            r.status = castle::status::invalid_argument;
+            r.status = castle::status::parse_error;
             r.code = error_code::unexpected_end;
             r.offset = position;
             return r;
@@ -281,7 +281,7 @@ result decode_string(string_view source, castle::size_type& position,
             {
                 if (position + 4U > source.size())
                 {
-                    r.status = castle::status::invalid_argument;
+                    r.status = castle::status::parse_error;
                     r.code = error_code::invalid_unicode_escape;
                     r.offset = position - 2U;
                     return r;
@@ -291,7 +291,7 @@ result decode_string(string_view source, castle::size_type& position,
                 {
                     if (!is_hex(source[position + i]))
                     {
-                        r.status = castle::status::invalid_argument;
+                        r.status = castle::status::parse_error;
                         r.code = error_code::invalid_unicode_escape;
                         r.offset = position + i;
                         return r;
@@ -301,7 +301,9 @@ result decode_string(string_view source, castle::size_type& position,
                 position += 4U;
                 if (!append_utf8(code, output))
                 {
-                    r.status = castle::status::invalid_argument;
+                    CASTLE_CONST bool surrogate = code >= characters::utf16_surrogate_min &&
+                                                  code <= characters::utf16_surrogate_max;
+                    r.status = surrogate ? castle::status::parse_error : castle::status::full;
                     r.code = error_code::invalid_unicode_escape;
                     r.offset = position - 4U;
                     return r;
@@ -310,7 +312,7 @@ result decode_string(string_view source, castle::size_type& position,
             }
             default:
             {
-                r.status = castle::status::invalid_argument;
+                r.status = castle::status::parse_error;
                 r.code = error_code::invalid_escape;
                 r.offset = position - 1U;
                 return r;
@@ -326,7 +328,7 @@ result decode_string(string_view source, castle::size_type& position,
         }
     }
 
-    r.status = castle::status::invalid_argument;
+    r.status = castle::status::parse_error;
     r.code = error_code::unexpected_end;
     r.offset = position;
     return r;
@@ -816,13 +818,13 @@ public:
      * @param value Number spelling to store.
      * @param parent_id Optional parent object or array handle.
      * @param key_name Optional key name when appending to an object.
-     * @return `castle::status::ok` on success, or `invalid_argument` for unsupported number text.
+     * @return `castle::status::ok` on success, `parse_error` for malformed number text, or a node-creation failure.
      */
     castle::status set_number(node_id& out, view_type value, node_id parent_id = npos, view_type key_name = view_type()) CASTLE_NOEXCEPT
     {
         if (!detail::valid_number(value))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         return add_node(out, type::number, parent_id, key_name, value);
     }
@@ -1204,7 +1206,7 @@ private:
     result fail(error_code code) CASTLE_CONST CASTLE_NOEXCEPT
     {
         result r{};
-        r.status = castle::status::invalid_argument;
+        r.status = code == error_code::depth_exceeded ? castle::status::out_of_range : castle::status::parse_error;
         r.code = code;
         r.offset = position_;
         r.line = 1U;
@@ -1502,7 +1504,9 @@ private:
  * @tparam MaxDepth Maximum parser nesting depth.
  * @param doc Destination document.
  * @param source Source JSON text.
- * @return Detailed parse result including offset, line, and column diagnostics.
+ * @return Detailed parse result including offset, line, and column diagnostics. Malformed JSON reports
+ *         `status::parse_error`, nesting beyond `MaxDepth` reports `status::out_of_range`, and exhausted
+ *         node or string storage reports `status::full`.
  */
 template <castle::size_type MaxNodes, castle::size_type MaxStringBytes, castle::size_type MaxDepth>
 result parse(document<MaxNodes, MaxStringBytes, MaxDepth>& doc, string_view source) CASTLE_NOEXCEPT

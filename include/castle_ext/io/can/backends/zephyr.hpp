@@ -28,16 +28,16 @@
  *   accepted it instead of waiting for a bus acknowledgement. Failed completions are counted in
  *   `bus_status::tx_failures`.
  * - Driver error codes map as: `-EAGAIN`/`-ENOSPC` to `full`, `-EINVAL` to `invalid_argument`,
- *   `-ENOTSUP`/`-ERANGE` to `invalid_config`, `-ENETDOWN` to `not_configured`, anything else to
- *   `system_call_error`; the positive errno is stored in `system_error`.
+ *   `-ENOTSUP` to `unsupported`, `-ERANGE` to `out_of_range`, `-ENETDOWN` to `not_configured`,
+ *   anything else to `system_call_error`; the positive errno is stored in `system_error`.
  *
  * Threading: the receive callback is the single producer (the MCP2515 driver runs it from its
  * interrupt thread; other drivers may use interrupt context, hence no locks are taken). Use one
  * consumer thread for `receive()`. `send()` is as thread safe as the driver's `can_send()`.
  * Filters that overlap deliver a frame once per matching filter.
  *
- * Without Zephyr (`CASTLE_USING_IO_CAN_VIA_ZEPHYR == 0`) the class is a stub whose operations
- * return `status::not_configured`.
+ * Without Zephyr (`CASTLE_USING_IO_CAN_VIA_ZEPHYR == 0`) the class is a stub whose `open()` returns
+ * `status::unsupported`; every other operation reports `not_configured` because the stub is never open.
  */
 #ifndef CASTLE_EXT_IO_CAN_BACKENDS_ZEPHYR_HPP
 #define CASTLE_EXT_IO_CAN_BACKENDS_ZEPHYR_HPP
@@ -100,9 +100,13 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status to_status(int result) CASTLE_NOEXC
     {
         return castle::status::invalid_argument;
     }
-    if (result == -ENOTSUP || result == -ERANGE)
+    if (result == -ENOTSUP)
     {
-        return castle::status::invalid_config;
+        return castle::status::unsupported;
+    }
+    if (result == -ERANGE)
+    {
+        return castle::status::out_of_range;
     }
     if (result == -ENETDOWN)
     {
@@ -233,9 +237,9 @@ public:
 
     /**
      * @brief Stops the controller, applies mode and bit rate, then starts it.
-     * @return `ok`; `invalid_argument` for a null device; `invalid_config` if already open or rejected by the
-     *         driver; `not_configured` when the device is not ready or Zephyr CAN is unavailable;
-     *         otherwise the mapped driver error.
+     * @return `ok`; `invalid_argument` for a null device; `invalid_state` if already open; `unsupported`
+     *         when the driver reports a setting unsupported or Zephyr CAN is unavailable; `out_of_range`
+     *         for `-ERANGE`; `not_configured` when the device is not ready; otherwise the mapped driver error.
      */
     castle::status open(endpoint_type endpoint, can_config CASTLE_CONST& config, int* system_error) CASTLE_NOEXCEPT
     {
@@ -246,7 +250,7 @@ public:
         }
         if (device_ != nullptr)
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
 #if CASTLE_USING_IO_CAN_VIA_ZEPHYR
         if (!device_is_ready(endpoint))
@@ -285,7 +289,7 @@ public:
         return castle::status::ok;
 #else
         (void)config;
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -309,7 +313,7 @@ public:
         k_sem_reset(&rx_ready_);
         return (result == 0) ? castle::status::ok : fail(result, system_error);
 #else
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -337,7 +341,7 @@ public:
 #else
         (void)value;
         (void)timeout;
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -358,14 +362,14 @@ public:
 #else
         (void)out;
         (void)timeout;
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
     /**
      * @brief Registers a filter with `can_add_rx_filter()`.
      * @return `ok`; `full` when `MaxFilters` filters are installed or the controller has no free filter;
-     *         `invalid_config` when the controller cannot express the filter; `not_configured` when closed.
+     *         `unsupported` when the controller cannot express the filter; `not_configured` when closed.
      */
     castle::status add_filter(filter CASTLE_CONST& value, filter_handle& handle, int* system_error) CASTLE_NOEXCEPT
     {
@@ -390,7 +394,7 @@ public:
         return castle::status::ok;
 #else
         (void)value;
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -451,7 +455,7 @@ public:
         out.tx_failures = tx_failures_.load();
         return castle::status::ok;
 #else
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 

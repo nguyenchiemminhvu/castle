@@ -52,3 +52,7 @@ int main()
 
 ## Constraints & Notes
 No heap allocation, exceptions, RTTI, or virtual functions are used by the MQTT layer. Every packet, reassembly buffer, QoS table, topic, and retained payload has compile-time capacity. Client callbacks execute synchronously while `poll()` processes a network receive and must not re-enter `poll()`. A message callback may replace or clear itself; the change takes effect when it returns. Message views are valid only during the callback. `poll()` needs a monotonically increasing millisecond value from the application; no hidden clock is read. The implementation supports MQTT 3.1.0, 3.1.1, and a bounded MQTT 5.0 core (CONNECT/CONNACK, core reason/property parsing, PUBLISH acknowledgements, and DISCONNECT). MQTT 5 AUTH exchanges and the full advanced property/flow-control set are not implemented. Reconnection retains the client-side QoS table only when the broker reports Session Present; persistent broker-side pending delivery queues are not yet implemented.
+
+
+## Status mapping
+Malformed inbound wire data returns `parse_error`; packets that are well-formed but invalid for the current MQTT session or request state return `protocol_error`. MQTT 5 reason codes map to the closest CASTLE status class, including `unsupported`, `permission_denied`, `unavailable`, `already_exists`, `not_found`, and `redirected`. Connection setup failures close the transport before returning.

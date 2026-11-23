@@ -50,11 +50,11 @@ Two flavors share the same handler semantics, with no base class, no virtual fun
 | `chain_of_responsibility::capacity()` / `handler_count` | Compile-time number of handlers. |
 | `bounded_chain_of_responsibility<N, void(Args...), StorageSize, StorageAlignment>` | Runtime-registered chain with `N` slots. Each slot stores a whole `conditional_handler`, so handler semantics match the static chain. |
 | `bounded_chain_of_responsibility::index_type` | Smallest unsigned type holding `N`. Used for the internal handler count. |
-| `bounded.add_handler(predicate, action)` | Appends a handler that rejects (ends the chain) on a false predicate. Returns `status::ok`, `full`, `invalid_config` (while processing) or `invalid_callback` (null function pointer or empty `castle::callbacks::function`). |
+| `bounded.add_handler(predicate, action)` | Appends a handler that rejects (ends the chain) on a false predicate. Returns `status::ok`, `full`, `invalid_state` (while processing) or `invalid_callback` (null function pointer or empty `castle::callbacks::function`). |
 | `bounded.add_skip_handler(predicate, action)` | Appends a handler that is skipped on a false predicate. Same results as `add_handler()`. |
 | `bounded.add_default_handler(action)` | Appends a handler with the `always_true` predicate. |
 | `bounded.process(args...)` / `bounded(args...)` | Same semantics as the static chain. `Args` are the signature's parameter types. |
-| `bounded.clear()` | Removes all handlers; `invalid_config` while processing. |
+| `bounded.clear()` | Removes all handlers; `invalid_state` while processing. |
 | `bounded.size()`, `empty()`, `is_processing()`, `capacity()` | State queries. |
 
 Complexity of `process()` is O(H), at most one predicate call and one action call per handler, with H = `sizeof...(Handlers)` or `N`.
@@ -106,5 +106,5 @@ See [`samples/castle/patterns/chain_of_responsibility.cpp`](../../../samples/cas
 - A nested chain used as an action reports `stop_chain` for both `stopped` and `rejected`, so a rejection inside it also ends the outer chain.
 - `process()` passes the same lvalue arguments to every handler. Use reference parameters for shared requests and contexts. Rvalue-reference parameters are rejected by `bounded_chain_of_responsibility`.
 - The bounded chain stores each handler (predicate and action together) in one inline `function` slot (`StorageSize`, default `castle::inplace_storage_reserved`). Callables must be copy-constructible and together fit that storage. With the defaults on a 64-bit host, a 4-handler chain is 400 bytes. A bounded chain is much larger than one slot, so reference it from a lambda instead of copying it into another chain.
-- `add_handler()` and `clear()` fail with `invalid_config` while a `process()` call is active; recursive `process()` from a handler is allowed, and its depth is the caller's responsibility.
+- `add_handler()` and `clear()` fail with `invalid_state` while a `process()` call is active; recursive `process()` from a handler is allowed, and its depth is the caller's responsibility.
 - Not thread-safe; use one chain from one execution context or protect it externally.

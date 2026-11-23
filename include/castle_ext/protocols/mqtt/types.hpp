@@ -312,22 +312,44 @@ CASTLE_CONSTEXPR castle::status to_status(reason_code reason) CASTLE_NOEXCEPT
         case reason_code::no_subscription_existed:
             return castle::status::ok;
         case reason_code::unsupported_protocol_version:
-            return castle::status::invalid_config;
+        case reason_code::retain_not_supported:
+        case reason_code::qos_not_supported:
+        case reason_code::shared_subscriptions_not_supported:
+        case reason_code::subscription_identifiers_not_supported:
+        case reason_code::wildcard_subscriptions_not_supported:
+        case reason_code::bad_authentication_method:
+            return castle::status::unsupported;
         case reason_code::client_identifier_not_valid:
         case reason_code::topic_name_invalid:
-        case reason_code::malformed_packet:
-        case reason_code::protocol_error:
             return castle::status::invalid_argument;
+        case reason_code::malformed_packet:
+            return castle::status::parse_error;
+        case reason_code::protocol_error:
+            return castle::status::protocol_error;
         case reason_code::packet_too_large:
             return castle::status::out_of_range;
         case reason_code::packet_identifier_in_use:
+            return castle::status::already_exists;
         case reason_code::receive_maximum_exceeded:
             return castle::status::full;
         case reason_code::packet_identifier_not_found:
             return castle::status::not_found;
+        case reason_code::bad_user_name_or_password:
+        case reason_code::not_authorized:
+        case reason_code::banned:
+        case reason_code::administrative_action:
+            return castle::status::permission_denied;
         case reason_code::server_unavailable:
         case reason_code::server_busy:
+        case reason_code::message_rate_too_high:
+        case reason_code::quota_exceeded:
+        case reason_code::connection_rate_exceeded:
+            return castle::status::unavailable;
+        case reason_code::maximum_connect_time:
             return castle::status::time_out;
+        case reason_code::use_another_server:
+        case reason_code::server_moved:
+            return castle::status::redirected;
         default:
             return castle::status::unknown_error;
     }

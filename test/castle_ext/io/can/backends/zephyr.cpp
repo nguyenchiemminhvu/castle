@@ -92,8 +92,8 @@ TEST_F(CanZephyrBackend, ToStatusMapsEveryErrnoRow)
     EXPECT_EQ(zephyr::native::to_status(-EAGAIN), status::full);
     EXPECT_EQ(zephyr::native::to_status(-ENOSPC), status::full);
     EXPECT_EQ(zephyr::native::to_status(-EINVAL), status::invalid_argument);
-    EXPECT_EQ(zephyr::native::to_status(-ENOTSUP), status::invalid_config);
-    EXPECT_EQ(zephyr::native::to_status(-ERANGE), status::invalid_config);
+    EXPECT_EQ(zephyr::native::to_status(-ENOTSUP), status::unsupported);
+    EXPECT_EQ(zephyr::native::to_status(-ERANGE), status::out_of_range);
     EXPECT_EQ(zephyr::native::to_status(-ENETDOWN), status::not_configured);
     EXPECT_EQ(zephyr::native::to_status(-EIO), status::system_call_error);
     EXPECT_EQ(zephyr::native::to_status(-EBUSY), status::system_call_error);
@@ -350,7 +350,7 @@ TEST_F(CanZephyrBackend, DoubleOpenIsInvalidConfigAndTouchesNothing)
     const int starts = fake_can.start_calls;
 
     int err = 4;
-    EXPECT_EQ(backend.open(&dev_, can_config(bitrate_500k), &err), status::invalid_config);
+    EXPECT_EQ(backend.open(&dev_, can_config(bitrate_500k), &err), status::invalid_state);
     EXPECT_EQ(err, 0);
     EXPECT_TRUE(backend.is_open());
     EXPECT_EQ(fake_can.stop_calls, stops);
@@ -406,8 +406,8 @@ TEST_F(CanZephyrBackend, OpenFailuresAreMappedAndLeaveDeviceClosed)
     };
     const scenario scenarios[] = {
         {&fake_can.stop_result, -EIO, status::system_call_error, EIO},
-        {&fake_can.set_mode_result, -ENOTSUP, status::invalid_config, ENOTSUP},
-        {&fake_can.set_bitrate_result, -ERANGE, status::invalid_config, ERANGE},
+        {&fake_can.set_mode_result, -ENOTSUP, status::unsupported, ENOTSUP},
+        {&fake_can.set_bitrate_result, -ERANGE, status::out_of_range, ERANGE},
         {&fake_can.start_result, -ENETDOWN, status::not_configured, ENETDOWN},
         {&fake_can.start_result, -EINVAL, status::invalid_argument, EINVAL},
     };
@@ -956,7 +956,7 @@ TEST_F(CanZephyrBackend, DriverRejectedFilterIsInvalidConfigAndNotKept)
     filter_handle h = 5;
     int err = 0;
     fake_can.add_filter_result = -ENOTSUP;
-    EXPECT_EQ(backend.add_filter(filter(0x100U, 0x700U), h, &err), status::invalid_config);
+    EXPECT_EQ(backend.add_filter(filter(0x100U, 0x700U), h, &err), status::unsupported);
     EXPECT_EQ(err, ENOTSUP);
     EXPECT_EQ(h, invalid_filter);
     EXPECT_EQ(fake_can.installed_filters(), 0);
@@ -1163,7 +1163,7 @@ TEST_F(CanZephyrBackend, BusEndToEnd)
     EXPECT_TRUE(bus.is_open());
     EXPECT_EQ(fake_can.bitrate, bitrate_500k);
     EXPECT_EQ(fake_can.mode, CAN_MODE_LOOPBACK);
-    EXPECT_EQ(bus.open(&dev_), status::invalid_config); // already open
+    EXPECT_EQ(bus.open(&dev_), status::invalid_state); // already open
 
     ASSERT_EQ(bus.accept_all(), status::ok);
     EXPECT_EQ(fake_can.installed_filters(), 2);
@@ -1213,17 +1213,17 @@ TEST_F(CanZephyrBackend, BusEndToEnd)
 TEST_F(CanZephyrBackend, BusFacadeValidatesBeforeTouchingTheDriver)
 {
     default_zephyr_bus bus;
-    EXPECT_EQ(bus.open(&dev_, can_config(max_bitrate + 1U)), status::invalid_config);
+    EXPECT_EQ(bus.open(&dev_, can_config(max_bitrate + 1U)), status::out_of_range);
     EXPECT_EQ(bus.open(&dev_, can_config(0U, static_cast<can_mode>(9U))), status::invalid_config);
     EXPECT_EQ(fake_can.stop_calls, 0);
     EXPECT_EQ(bus.open(nullptr), status::invalid_argument);
     ASSERT_EQ(bus.open(&dev_), status::ok);
 
-    EXPECT_EQ(bus.send(frame(0x800U), no_wait), status::invalid_argument); // 12-bit standard id
-    EXPECT_EQ(bus.send(frame(0x1U), timeout_type(-1)), status::invalid_argument);
+    EXPECT_EQ(bus.send(frame(0x800U), no_wait), status::out_of_range); // 12-bit standard id
+    EXPECT_EQ(bus.send(frame(0x1U), timeout_type(-1)), status::out_of_range);
     frame out;
-    EXPECT_EQ(bus.receive(out, timeout_type(-1)), status::invalid_argument);
-    EXPECT_EQ(bus.add_filter(filter(0x800U, 0U)), status::invalid_argument);
+    EXPECT_EQ(bus.receive(out, timeout_type(-1)), status::out_of_range);
+    EXPECT_EQ(bus.add_filter(filter(0x800U, 0U)), status::out_of_range);
     EXPECT_EQ(fake_can.send_calls, 0);
     EXPECT_EQ(fake_can.installed_filters(), 0);
 }

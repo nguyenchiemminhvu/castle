@@ -114,10 +114,13 @@ CASTLE_INLINE castle::status validate_config(spi_config CASTLE_CONST& config) CA
      || config.device_path[0] == '\0' // LCOV_EXCL_BR_LINE
      || static_cast<unsigned char>(config.transfer_mode) > 3U
      || config.bits_per_word == 0U
-     || config.bits_per_word > 32U
      || config.max_speed_hz == 0U)
     {
         return castle::status::invalid_config;
+    }
+    if (config.bits_per_word > 32U)
+    {
+        return castle::status::out_of_range;
     }
     return castle::status::ok;
 }
@@ -172,7 +175,7 @@ public:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         // LCOV_EXCL_STOP
 #if CASTLE_USING_IO_SPI_VIA_SPIDEV
@@ -210,7 +213,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -250,7 +253,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -286,14 +289,21 @@ public:
             }
             return castle::status::ok;
         }
-        if ((transmit_buffer == nullptr && receive_buffer == nullptr) || size > static_cast<size_type>(INT_MAX)
-            || (options.bits_per_word != 0U && options.bits_per_word > 32U))
+        if (transmit_buffer == nullptr && receive_buffer == nullptr)
         {
             if (system_error != nullptr)
             {
                 *system_error = 0;
             }
             return castle::status::invalid_argument;
+        }
+        if (size > static_cast<size_type>(INT_MAX) || (options.bits_per_word != 0U && options.bits_per_word > 32U))
+        {
+            if (system_error != nullptr)
+            {
+                *system_error = 0;
+            }
+            return castle::status::out_of_range;
         }
         if (!is_configured())
         {
@@ -341,7 +351,7 @@ public:
         {
             *system_error = 0;
         }
-        return castle::status::not_configured;
+        return castle::status::unsupported;
 #endif
     }
 
@@ -377,7 +387,7 @@ private:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
 #endif
 #ifdef SPI_3WIRE
@@ -392,7 +402,7 @@ private:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
 #endif
 #ifdef SPI_LOOP
@@ -407,7 +417,7 @@ private:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
 #endif
 #ifdef SPI_NO_CS
@@ -422,7 +432,7 @@ private:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
 #endif
 #ifdef SPI_READY
@@ -437,7 +447,7 @@ private:
             {
                 *system_error = 0;
             }
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
 #endif
 

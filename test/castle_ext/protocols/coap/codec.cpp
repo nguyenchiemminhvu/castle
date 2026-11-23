@@ -58,7 +58,7 @@ TEST(CoapCodec, SkipsElectiveAndRejectsCriticalUnknownOptions)
 
     // CON GET, MID=1, unknown critical option number 99 with empty value.
     const uint8_t critical[] = {0x40U, 0x01U, 0x00U, 0x01U, 0xD0U, 0x56U};
-    EXPECT_EQ(decode_message(critical, sizeof(critical), parsed, &error), castle::status::not_configured);
+    EXPECT_EQ(decode_message(critical, sizeof(critical), parsed, &error), castle::status::unsupported);
     EXPECT_EQ(error, decode_error::unknown_critical_option);
 }
 
@@ -66,15 +66,15 @@ TEST(CoapCodec, RejectsMalformedHeadersOptionsAndPayloadMarker)
 {
     message<> parsed; decode_error error = decode_error::none;
     const uint8_t short_header[] = {0x40U, 0x01U, 0x00U};
-    EXPECT_EQ(decode_message(short_header, sizeof(short_header), parsed, &error), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(short_header, sizeof(short_header), parsed, &error), castle::status::parse_error);
     const uint8_t wrong_version[] = {0x00U, 0x01U, 0x00U, 0x01U};
-    EXPECT_EQ(decode_message(wrong_version, sizeof(wrong_version), parsed, &error), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(wrong_version, sizeof(wrong_version), parsed, &error), castle::status::unsupported);
     const uint8_t long_token[] = {0x49U, 0x01U, 0x00U, 0x01U, 1U,2U,3U,4U,5U,6U,7U,8U,9U};
-    EXPECT_EQ(decode_message(long_token, sizeof(long_token), parsed, &error), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(long_token, sizeof(long_token), parsed, &error), castle::status::protocol_error);
     const uint8_t reserved_nibble[] = {0x40U, 0x01U, 0x00U, 0x01U, 0xF0U};
-    EXPECT_EQ(decode_message(reserved_nibble, sizeof(reserved_nibble), parsed, &error), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(reserved_nibble, sizeof(reserved_nibble), parsed, &error), castle::status::parse_error);
     const uint8_t empty_payload[] = {0x40U, 0x01U, 0x00U, 0x01U, 0xFFU};
-    EXPECT_EQ(decode_message(empty_payload, sizeof(empty_payload), parsed, &error), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(empty_payload, sizeof(empty_payload), parsed, &error), castle::status::parse_error);
     EXPECT_EQ(error, decode_error::malformed_option);
 }
 
@@ -99,9 +99,9 @@ TEST(CoapCodec, CapacityAndEmptyMessageRules)
     EXPECT_EQ(encode_message(value, wire, sizeof(wire), size), castle::status::invalid_argument);
     message<> parsed; decode_error error = decode_error::none;
     const uint8_t empty_confirmable[] = {0x40U, 0x00U, 0x00U, 0x01U};
-    EXPECT_EQ(decode_message(empty_confirmable, sizeof(empty_confirmable), parsed, &error), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(empty_confirmable, sizeof(empty_confirmable), parsed, &error), castle::status::protocol_error);
     const uint8_t reset_with_code[] = {0x70U, 0x45U, 0x00U, 0x01U};
-    EXPECT_EQ(decode_message(reset_with_code, sizeof(reset_with_code), parsed, &error), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(reset_with_code, sizeof(reset_with_code), parsed, &error), castle::status::protocol_error);
     uint32_t integer = 99U;
     EXPECT_EQ(decode_uint_option(nullptr, 0U, integer), castle::status::ok);
     EXPECT_EQ(integer, 0U);
@@ -130,10 +130,10 @@ TEST(CoapCodec, DetailHelpersReportCapacityAndInvalidNibbles)
     EXPECT_EQ(detail::decode_nibble(13U, one_byte, sizeof(one_byte), used, value), castle::status::ok);
     EXPECT_EQ(value, 20U);
     used = 1U;
-    EXPECT_EQ(detail::decode_nibble(13U, one_byte, sizeof(one_byte), used, value), castle::status::invalid_argument);
+    EXPECT_EQ(detail::decode_nibble(13U, one_byte, sizeof(one_byte), used, value), castle::status::parse_error);
     used = 0U;
-    EXPECT_EQ(detail::decode_nibble(14U, one_byte, sizeof(one_byte), used, value), castle::status::invalid_argument);
-    EXPECT_EQ(detail::decode_nibble(15U, one_byte, sizeof(one_byte), used, value), castle::status::invalid_argument);
+    EXPECT_EQ(detail::decode_nibble(14U, one_byte, sizeof(one_byte), used, value), castle::status::parse_error);
+    EXPECT_EQ(detail::decode_nibble(15U, one_byte, sizeof(one_byte), used, value), castle::status::parse_error);
 }
 
 TEST(CoapCodec, OptionLengthAndRepeatRules)
@@ -358,75 +358,75 @@ TEST(CoapCodec, DecodeRejectsMalformedDatagrams)
     EXPECT_EQ(reason, decode_error::malformed_header);
 
     const uint8_t short_header[] = {0x40U, 0x01U, 0x00U};
-    EXPECT_EQ(decode_message(short_header, sizeof(short_header), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(short_header, sizeof(short_header), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(short_header, sizeof(short_header), parsed), castle::status::parse_error);
+    EXPECT_EQ(decode_message(short_header, sizeof(short_header), parsed, &reason), castle::status::parse_error);
     EXPECT_EQ(reason, decode_error::malformed_header);
 
     const uint8_t wrong_version[] = {0x00U, 0x01U, 0x00U, 0x01U};
-    EXPECT_EQ(decode_message(wrong_version, sizeof(wrong_version), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(wrong_version, sizeof(wrong_version), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(wrong_version, sizeof(wrong_version), parsed), castle::status::unsupported);
+    EXPECT_EQ(decode_message(wrong_version, sizeof(wrong_version), parsed, &reason), castle::status::unsupported);
     EXPECT_EQ(reason, decode_error::unsupported_version);
 
     const uint8_t long_token[] = {0x49U, 0x01U, 0x00U, 0x01U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U};
-    EXPECT_EQ(decode_message(long_token, sizeof(long_token), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(long_token, sizeof(long_token), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(long_token, sizeof(long_token), parsed), castle::status::protocol_error);
+    EXPECT_EQ(decode_message(long_token, sizeof(long_token), parsed, &reason), castle::status::protocol_error);
     EXPECT_EQ(reason, decode_error::invalid_token_length);
 
     const uint8_t truncated_token[] = {0x42U, 0x01U, 0x00U, 0x01U, 0xAAU};
-    EXPECT_EQ(decode_message(truncated_token, sizeof(truncated_token), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(truncated_token, sizeof(truncated_token), parsed, &reason), castle::status::parse_error);
     EXPECT_EQ(reason, decode_error::invalid_token_length);
 
     const uint8_t empty_with_token[] = {0x41U, 0x00U, 0x00U, 0x01U, 0x05U};
-    EXPECT_EQ(decode_message(empty_with_token, sizeof(empty_with_token), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(empty_with_token, sizeof(empty_with_token), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(empty_with_token, sizeof(empty_with_token), parsed), castle::status::protocol_error);
+    EXPECT_EQ(decode_message(empty_with_token, sizeof(empty_with_token), parsed, &reason), castle::status::protocol_error);
     EXPECT_EQ(reason, decode_error::malformed_header);
 
     const uint8_t empty_ack_with_option[] = {0x60U, 0x00U, 0x00U, 0x01U, 0x00U};
-    EXPECT_EQ(decode_message(empty_ack_with_option, sizeof(empty_ack_with_option), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(empty_ack_with_option, sizeof(empty_ack_with_option), parsed, &reason), castle::status::protocol_error);
     EXPECT_EQ(reason, decode_error::malformed_header);
 
     const uint8_t ack_with_request_code[] = {0x60U, 0x01U, 0x00U, 0x01U};
-    EXPECT_EQ(decode_message(ack_with_request_code, sizeof(ack_with_request_code), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(ack_with_request_code, sizeof(ack_with_request_code), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(ack_with_request_code, sizeof(ack_with_request_code), parsed), castle::status::protocol_error);
+    EXPECT_EQ(decode_message(ack_with_request_code, sizeof(ack_with_request_code), parsed, &reason), castle::status::protocol_error);
     EXPECT_EQ(reason, decode_error::malformed_header);
 
     const uint8_t truncated_delta[] = {0x40U, 0x01U, 0x00U, 0x01U, 0xD0U};
-    EXPECT_EQ(decode_message(truncated_delta, sizeof(truncated_delta), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(truncated_delta, sizeof(truncated_delta), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(truncated_delta, sizeof(truncated_delta), parsed), castle::status::parse_error);
+    EXPECT_EQ(decode_message(truncated_delta, sizeof(truncated_delta), parsed, &reason), castle::status::parse_error);
     EXPECT_EQ(reason, decode_error::malformed_option);
 
     const uint8_t truncated_wide_delta[] = {0x40U, 0x01U, 0x00U, 0x01U, 0xE0U, 0x01U};
-    EXPECT_EQ(decode_message(truncated_wide_delta, sizeof(truncated_wide_delta), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(truncated_wide_delta, sizeof(truncated_wide_delta), parsed, &reason), castle::status::parse_error);
     EXPECT_EQ(reason, decode_error::malformed_option);
 
     const uint8_t delta_overflow[] = {0x40U, 0x01U, 0x00U, 0x01U, 0xE0U, 0xFFU, 0xFFU};
-    EXPECT_EQ(decode_message(delta_overflow, sizeof(delta_overflow), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(delta_overflow, sizeof(delta_overflow), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(delta_overflow, sizeof(delta_overflow), parsed), castle::status::parse_error);
+    EXPECT_EQ(decode_message(delta_overflow, sizeof(delta_overflow), parsed, &reason), castle::status::parse_error);
     EXPECT_EQ(reason, decode_error::malformed_option);
 
     const uint8_t length_overflow[] = {0x40U, 0x01U, 0x00U, 0x01U, 0x03U, 0xAAU};
-    EXPECT_EQ(decode_message(length_overflow, sizeof(length_overflow), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(length_overflow, sizeof(length_overflow), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(length_overflow, sizeof(length_overflow), parsed), castle::status::parse_error);
+    EXPECT_EQ(decode_message(length_overflow, sizeof(length_overflow), parsed, &reason), castle::status::parse_error);
     EXPECT_EQ(reason, decode_error::malformed_option);
 
     const uint8_t zero_number[] = {0x40U, 0x01U, 0x00U, 0x01U, 0x00U};
-    EXPECT_EQ(decode_message(zero_number, sizeof(zero_number), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(zero_number, sizeof(zero_number), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(zero_number, sizeof(zero_number), parsed), castle::status::parse_error);
+    EXPECT_EQ(decode_message(zero_number, sizeof(zero_number), parsed, &reason), castle::status::parse_error);
     EXPECT_EQ(reason, decode_error::malformed_option);
 
     const uint8_t reserved_length[] = {0x40U, 0x01U, 0x00U, 0x01U, 0x0FU};
-    EXPECT_EQ(decode_message(reserved_length, sizeof(reserved_length), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(reserved_length, sizeof(reserved_length), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(reserved_length, sizeof(reserved_length), parsed), castle::status::parse_error);
+    EXPECT_EQ(decode_message(reserved_length, sizeof(reserved_length), parsed, &reason), castle::status::parse_error);
     EXPECT_EQ(reason, decode_error::malformed_option);
 
     const uint8_t payload_marker_only[] = {0x40U, 0x01U, 0x00U, 0x01U, 0xFFU};
-    EXPECT_EQ(decode_message(payload_marker_only, sizeof(payload_marker_only), parsed), castle::status::invalid_argument);
-    EXPECT_EQ(decode_message(payload_marker_only, sizeof(payload_marker_only), parsed, &reason), castle::status::invalid_argument);
+    EXPECT_EQ(decode_message(payload_marker_only, sizeof(payload_marker_only), parsed), castle::status::parse_error);
+    EXPECT_EQ(decode_message(payload_marker_only, sizeof(payload_marker_only), parsed, &reason), castle::status::parse_error);
     EXPECT_EQ(reason, decode_error::malformed_option);
 
     const uint8_t critical_unknown[] = {0x40U, 0x01U, 0x00U, 0x01U, 0xD0U, 0x56U};
-    EXPECT_EQ(decode_message(critical_unknown, sizeof(critical_unknown), parsed), castle::status::not_configured);
-    EXPECT_EQ(decode_message(critical_unknown, sizeof(critical_unknown), parsed, &reason), castle::status::not_configured);
+    EXPECT_EQ(decode_message(critical_unknown, sizeof(critical_unknown), parsed), castle::status::unsupported);
+    EXPECT_EQ(decode_message(critical_unknown, sizeof(critical_unknown), parsed, &reason), castle::status::unsupported);
     EXPECT_EQ(reason, decode_error::unknown_critical_option);
 }
 
@@ -485,7 +485,7 @@ TEST(CoapCodec, UintOptionRejectsOversizedAndNullValues)
 {
     uint32_t value = 0U;
     const uint8_t five[] = {1U, 2U, 3U, 4U, 5U};
-    EXPECT_EQ(decode_uint_option(five, sizeof(five), value), castle::status::invalid_argument);
+    EXPECT_EQ(decode_uint_option(five, sizeof(five), value), castle::status::parse_error);
     EXPECT_EQ(decode_uint_option(nullptr, 1U, value), castle::status::invalid_argument);
     const uint8_t word[] = {0x01U, 0x02U};
     EXPECT_EQ(decode_uint_option(word, sizeof(word), value), castle::status::ok);

@@ -23,7 +23,7 @@
 | `using value_type = T; using size_type = castle::size_type;` | Member type aliases. |
 | `linear_table()` | Constructs an unbound table; `valid()` is `false`. |
 | `linear_table(const T* xs, const T* ys, size_type count)` | Binds to the given knots via `assign()`. On invalid input the table stays unbound (check `valid()`, or use `assign()` to get the status). |
-| `status assign(const T* xs, const T* ys, size_type count)` | Binds the table to new knots. `xs` must be strictly increasing; `ys` has the same length; `count >= 2`. Returns `status::ok`, or `status::invalid_argument` for a null `xs`/`ys`, `count < 2`, or non-increasing/NaN abscissas. On failure the table is left unbound. `O(count)`. |
+| `status assign(const T* xs, const T* ys, size_type count)` | Binds the table to new knots. `xs` must be strictly increasing; `ys` has the same length; `count >= 2`. Returns `status::ok`; `status::invalid_argument` for null `xs`/`ys` or non-increasing/NaN abscissas; `status::empty` for `count == 0`; and `status::insufficient_data` for `count == 1`. On failure the table is left unbound. `O(count)`. |
 | `bool valid() const` | `true` when bound to valid knots. |
 | `size_type size() const` | Number of knots, or `0` when unbound. |
 | `T x_min() const` | Smallest abscissa (`xs[0]`). Table must be valid. |

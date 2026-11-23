@@ -47,8 +47,8 @@ int main()
 See `samples/castle_ext/io/i2c/i2c.cpp` for a standalone sample.
 
 ## Constraints & Notes
-- Requires Linux i2c-dev UAPI headers and an enabled `/dev/i2c-*` adapter; unsupported builds return `not_configured`.
-- 7-bit addresses are limited to `0x00..0x7F`; 10-bit addresses to `0x000..0x3FF`. Reserved-address policy is left to the application and adapter.
-- `write_read` requires non-null buffers and non-zero phase lengths; each phase is limited to 65535 bytes by `struct i2c_msg`.
+- Requires Linux i2c-dev UAPI headers and an enabled `/dev/i2c-*` adapter; unsupported builds return `unsupported`.
+- 7-bit addresses are limited to `0x00..0x7F`; 10-bit addresses to `0x000..0x3FF`; an address outside the selected range is `out_of_range`. Reserved-address policy is left to the application and adapter.
+- `write_read` requires non-null buffers and non-zero phase lengths (`invalid_argument`); each phase is limited to 65535 bytes by `struct i2c_msg` (`out_of_range`).
 - `I2C_RDWR` requires adapter support for raw I2C transactions. A driver may reject it even when ordinary SMBus operations are available.
 - The class is synchronous and not internally synchronized. Use external locking when sharing an adapter/device instance.

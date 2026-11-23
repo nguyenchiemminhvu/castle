@@ -70,7 +70,7 @@ void boot_sequencing()
     // A misconfigured dependency closes a loop: the sequencer must refuse it.
     CASTLE_SAMPLE_CHECK(boot.add_edge(4U, 1U) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(ga::has_cycle(boot));
-    CASTLE_SAMPLE_CHECK(ga::topological_sort(boot, order) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(ga::topological_sort(boot, order) == castle::status::cycle_detected);
 
     // The loop {1, 3, 4} is one strongly connected component.
     ga::component_set<boot_graph> groups = ga::strongly_connected_components(boot);

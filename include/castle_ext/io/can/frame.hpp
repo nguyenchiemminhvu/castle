@@ -205,17 +205,19 @@ CASTLE_NODISCARD CASTLE_INLINE bool operator!=(frame CASTLE_CONST& lhs, frame CA
 
 /**
  * @brief Checks that a frame is representable on a classic CAN bus.
- * @return `ok`, or `invalid_argument` for an out-of-range enumerator, a DLC above 8, or an
- *         identifier wider than its format allows.
+ * @return `ok`, `invalid_argument` for an out-of-range enumerator, or `out_of_range` for a DLC above 8
+ *         or an identifier wider than its format allows.
  */
 CASTLE_NODISCARD CASTLE_INLINE castle::status validate_frame(frame CASTLE_CONST& value) CASTLE_NOEXCEPT
 {
     if ((value.format != id_format::standard && value.format != id_format::extended)
-        || (value.type != frame_type::data && value.type != frame_type::remote)
-        || value.dlc > max_data_length
-        || value.id > max_id(value.format))
+        || (value.type != frame_type::data && value.type != frame_type::remote))
     {
         return castle::status::invalid_argument;
+    }
+    if (value.dlc > max_data_length || value.id > max_id(value.format))
+    {
+        return castle::status::out_of_range;
     }
     return castle::status::ok;
 }

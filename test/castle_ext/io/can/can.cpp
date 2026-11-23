@@ -126,7 +126,7 @@ TEST(CanDefaultBus, SocketCanRoundTripOnAnyInterface)
     ASSERT_EQ(bus.open("any", can_config(bitrate_500k), &error), status::ok);
     EXPECT_EQ(error, 0);
     EXPECT_TRUE(bus.is_open());
-    EXPECT_EQ(bus.open("any", can_config(bitrate_500k)), status::invalid_config);
+    EXPECT_EQ(bus.open("any", can_config(bitrate_500k)), status::invalid_state);
 
     EXPECT_EQ(bus.accept_all(&error), status::ok);
     EXPECT_EQ(error, 0);

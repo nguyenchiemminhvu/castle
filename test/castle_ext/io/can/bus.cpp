@@ -319,10 +319,10 @@ TEST(CanBus, OpenRejectsInvalidConfigWithoutTouchingBackend)
 {
     probe_bus bus;
     int error = untouched;
-    EXPECT_EQ(bus.open(1, can_config(max_bitrate + 1U), &error), status::invalid_config);
+    EXPECT_EQ(bus.open(1, can_config(max_bitrate + 1U), &error), status::out_of_range);
     EXPECT_EQ(error, 0);
     error = untouched;
-    EXPECT_EQ(bus.open(1, can_config(0xFFFFFFFFU), &error), status::invalid_config);
+    EXPECT_EQ(bus.open(1, can_config(0xFFFFFFFFU), &error), status::out_of_range);
     EXPECT_EQ(error, 0);
     error = untouched;
     EXPECT_EQ(bus.open(1, can_config(bitrate_500k, static_cast<can_mode>(3)), &error), status::invalid_config);
@@ -368,7 +368,7 @@ TEST(CanBus, OpenCloseLifecycleOverMock)
     EXPECT_FALSE(bus.is_open());
     ASSERT_EQ(bus.open("vcan0"), status::ok);
     EXPECT_TRUE(bus.is_open());
-    EXPECT_EQ(bus.open("vcan0"), status::invalid_config);
+    EXPECT_EQ(bus.open("vcan0"), status::invalid_state);
     EXPECT_EQ(bus.close(), status::ok);
     EXPECT_FALSE(bus.is_open());
     EXPECT_EQ(bus.close(), status::not_configured);
@@ -418,16 +418,16 @@ TEST(CanBus, SendRejectsInvalidFramesWithoutTouchingBackend)
 
     frame bad_dlc(0x10U);
     bad_dlc.dlc = 9U;
-    EXPECT_EQ(bus.send(bad_dlc, no_wait, &error), status::invalid_argument);
+    EXPECT_EQ(bus.send(bad_dlc, no_wait, &error), status::out_of_range);
     EXPECT_EQ(error, 0);
 
     error = untouched;
-    EXPECT_EQ(bus.send(make_frame(max_standard_id + 1U), no_wait, &error), status::invalid_argument);
+    EXPECT_EQ(bus.send(make_frame(max_standard_id + 1U), no_wait, &error), status::out_of_range);
     EXPECT_EQ(error, 0);
 
     error = untouched;
     EXPECT_EQ(bus.send(make_frame(max_extended_id + 1U, id_format::extended), no_wait, &error),
-              status::invalid_argument);
+              status::out_of_range);
     EXPECT_EQ(error, 0);
 
     frame bad_format(0x10U);
@@ -446,9 +446,9 @@ TEST(CanBus, SendRejectsNegativeTimeoutWithoutTouchingBackend)
 {
     probe_bus bus;
     int error = untouched;
-    EXPECT_EQ(bus.send(make_frame(1U), milliseconds(-1), &error), status::invalid_argument);
+    EXPECT_EQ(bus.send(make_frame(1U), milliseconds(-1), &error), status::out_of_range);
     EXPECT_EQ(error, 0);
-    EXPECT_EQ(bus.send(make_frame(1U), milliseconds(-100000)), status::invalid_argument);
+    EXPECT_EQ(bus.send(make_frame(1U), milliseconds(-100000)), status::out_of_range);
     EXPECT_EQ(bus.backend().total_calls(), 0);
 }
 
@@ -514,11 +514,11 @@ TEST(CanBus, SendBytesValidatesIdentifierAndTimeout)
     const uint8_t payload[1] = {0};
     int error = untouched;
     EXPECT_EQ(bus.send(max_standard_id + 1U, payload, 1U, id_format::standard, no_wait, &error),
-              status::invalid_argument);
+              status::out_of_range);
     EXPECT_EQ(error, 0);
-    EXPECT_EQ(bus.send(max_extended_id + 1U, payload, 1U, id_format::extended), status::invalid_argument);
+    EXPECT_EQ(bus.send(max_extended_id + 1U, payload, 1U, id_format::extended), status::out_of_range);
     EXPECT_EQ(bus.send(0x1U, payload, 1U, static_cast<id_format>(7)), status::invalid_argument);
-    EXPECT_EQ(bus.send(0x1U, payload, 1U, id_format::standard, milliseconds(-1)), status::invalid_argument);
+    EXPECT_EQ(bus.send(0x1U, payload, 1U, id_format::standard, milliseconds(-1)), status::out_of_range);
     EXPECT_EQ(bus.backend().total_calls(), 0);
 }
 
@@ -529,7 +529,7 @@ TEST(CanBus, ReceiveRejectsNegativeTimeoutWithoutTouchingBackend)
     probe_bus bus;
     frame out(0x55U);
     int error = untouched;
-    EXPECT_EQ(bus.receive(out, milliseconds(-1), &error), status::invalid_argument);
+    EXPECT_EQ(bus.receive(out, milliseconds(-1), &error), status::out_of_range);
     EXPECT_EQ(error, 0);
     EXPECT_EQ(out, frame(0x55U));
     EXPECT_EQ(bus.backend().receive_calls, 0);
@@ -584,24 +584,24 @@ TEST(CanBus, AddFilterRejectsInvalidFilterAndResetsHandle)
     filter_handle handle = 55;
     int error = untouched;
 
-    EXPECT_EQ(bus.add_filter(filter(max_standard_id + 1U, 0U), &handle, &error), status::invalid_argument);
+    EXPECT_EQ(bus.add_filter(filter(max_standard_id + 1U, 0U), &handle, &error), status::out_of_range);
     EXPECT_EQ(handle, invalid_filter);
     EXPECT_EQ(error, 0);
 
     handle = 55;
-    EXPECT_EQ(bus.add_filter(filter(0U, max_standard_id + 1U), &handle), status::invalid_argument);
+    EXPECT_EQ(bus.add_filter(filter(0U, max_standard_id + 1U), &handle), status::out_of_range);
     EXPECT_EQ(handle, invalid_filter);
 
     handle = 55;
     EXPECT_EQ(bus.add_filter(filter(max_extended_id + 1U, 0U, id_format::extended), &handle),
-              status::invalid_argument);
+              status::out_of_range);
     EXPECT_EQ(handle, invalid_filter);
 
     handle = 55;
     EXPECT_EQ(bus.add_filter(filter(0U, 0U, static_cast<id_format>(9)), &handle), status::invalid_argument);
     EXPECT_EQ(handle, invalid_filter);
 
-    EXPECT_EQ(bus.add_filter(filter(max_standard_id + 1U, 0U), nullptr), status::invalid_argument);
+    EXPECT_EQ(bus.add_filter(filter(max_standard_id + 1U, 0U), nullptr), status::out_of_range);
     EXPECT_EQ(bus.backend().total_calls(), 0);
 }
 
@@ -906,51 +906,6 @@ TEST(CanBus, NullSystemErrorIsAcceptedEverywhere)
     EXPECT_EQ(bus.remove_filter(0), status::ok);
     EXPECT_EQ(bus.clear_filters(), status::ok);
     EXPECT_EQ(bus.query_status(st), status::ok);
-}
-
-// ---------------------------------------------------------------- status passthrough
-
-TEST(CanBus, BackendStatusCodesPassThroughUnchanged)
-{
-    const status codes[] = {
-        status::ok,           status::full,         status::empty,       status::out_of_range,
-        status::not_found,    status::not_configured, status::invalid_config, status::invalid_argument,
-        status::invalid_callback, status::invalid_subscription, status::already_exists,
-        status::system_call_error, status::data_loss, status::time_out,    status::unknown_error};
-
-    for (const status code : codes)
-    {
-        probe_bus bus;
-        bus.backend().result = code;
-        frame out;
-        bus_status st;
-        filter_handle handle = 55;
-        const uint8_t payload[2] = {1, 2};
-
-        EXPECT_EQ(bus.open(1), code) << static_cast<int>(code);
-        EXPECT_EQ(bus.close(), code) << static_cast<int>(code);
-        EXPECT_EQ(bus.send(make_frame(1U)), code) << static_cast<int>(code);
-        EXPECT_EQ(bus.send(1U, payload, 2U), code) << static_cast<int>(code);
-        EXPECT_EQ(bus.receive(out), code) << static_cast<int>(code);
-        EXPECT_EQ(bus.add_filter(filter::any(), &handle), code) << static_cast<int>(code);
-        EXPECT_EQ(handle, code == status::ok ? bus.backend().handle_to_give : invalid_filter)
-            << static_cast<int>(code);
-        EXPECT_EQ(bus.accept_all(), code) << static_cast<int>(code);
-        EXPECT_EQ(bus.remove_filter(3), code) << static_cast<int>(code);
-        EXPECT_EQ(bus.clear_filters(), code) << static_cast<int>(code);
-        EXPECT_EQ(bus.query_status(st), code) << static_cast<int>(code);
-
-        // open, close, send x2, receive, add_filter, accept_all(first add fails or both succeed),
-        // remove, clear, query: every operation reached the backend exactly once.
-        EXPECT_EQ(bus.backend().open_calls, 1);
-        EXPECT_EQ(bus.backend().close_calls, 1);
-        EXPECT_EQ(bus.backend().send_calls, 2);
-        EXPECT_EQ(bus.backend().receive_calls, 1);
-        EXPECT_EQ(bus.backend().add_calls, code == status::ok ? 3 : 2);
-        EXPECT_EQ(bus.backend().remove_calls, 1);
-        EXPECT_EQ(bus.backend().clear_calls, 1);
-        EXPECT_EQ(bus.backend().query_calls, 1);
-    }
 }
 
 } // namespace

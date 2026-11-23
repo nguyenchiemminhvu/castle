@@ -118,15 +118,21 @@ struct device_config
     }
 };
 
-/** @brief Validates role and shared-memory pointer/size consistency. */
+/**
+ * @brief Validates role and shared-memory pointer/size consistency and the buffer dimensions.
+ * @return `ok`; `invalid_config` for an unknown role or inconsistent shared-memory pointer/size;
+ *         `out_of_range` for a zero buffer count or a buffer size below the RPMsg header size.
+ */
 CASTLE_NODISCARD CASTLE_INLINE castle::status validate_config(device_config CASTLE_CONST& config) CASTLE_NOEXCEPT
 {
     if ((config.node_role != role::host && config.node_role != role::remote)
-        || ((config.shared_memory == nullptr) != (config.shared_memory_size == 0U))
-        || config.buffer_count == 0U
-        || config.buffer_size < rpmsg_header_size)
+        || ((config.shared_memory == nullptr) != (config.shared_memory_size == 0U)))
     {
         return castle::status::invalid_config;
+    }
+    if (config.buffer_count == 0U || config.buffer_size < rpmsg_header_size)
+    {
+        return castle::status::out_of_range;
     }
     return castle::status::ok;
 }

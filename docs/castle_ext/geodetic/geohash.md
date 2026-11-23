@@ -110,11 +110,12 @@ Binary text must have exactly `bit_count` characters. This differs from the Pyth
 | Encode | Raw destination smaller than `Depth + 1` bytes | `status::full` |
 | Decode / assign | Empty base-32 or binary text | `status::empty` |
 | Decode / assign | Hash text longer than `Depth` | `status::out_of_range` |
-| Decode / assign | Short text, null non-empty view, or invalid alphabet character | `status::invalid_argument` |
+| Decode / assign | Short text or invalid alphabet character | `status::parse_error` |
+| Decode / assign | Null non-empty view | `status::invalid_argument` |
 | Assign from C string | Null pointer | `status::invalid_argument` |
 | Binary decode / assign / convert | Empty binary text | `status::empty` |
 | Binary decode / assign / convert | Binary text longer than `bit_count` | `status::out_of_range` |
-| Binary decode / assign / convert | Binary text shorter than `bit_count`, or a character other than '0' or '1' | `status::invalid_argument` |
+| Binary decode / assign / convert | Binary text shorter than `bit_count`, or a character other than '0' or '1' | `status::parse_error` |
 | Decode / assign bits | Bits set at or above position `bit_count` | `status::out_of_range` |
 
 The valid alphabet is `0123456789bcdefghjkmnpqrstuvwxyz`. ASCII uppercase is accepted on input and normalized to lowercase in every stored text form.

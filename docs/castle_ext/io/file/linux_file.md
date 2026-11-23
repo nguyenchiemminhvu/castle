@@ -51,6 +51,6 @@ See `samples/castle_ext/io/file/linux_file.cpp` for a standalone sample.
 - The path is a borrowed null-terminated string and must outlive any use that reads `configuration()`; the kernel resolves it during `open()`.
 - No heap allocation, exceptions, RTTI, virtual functions, STL types or internal locking.
 - `read_some` and `write_some` are partial-transfer APIs. Prefer `read_exact`/`write_all` only where blocking behavior is acceptable.
-- `append`, `truncate` and `exclusive` require write access; `exclusive` also requires create.
-- `seek`, `fstat`, `ftruncate` and `fsync` are POSIX operations and return `not_configured` when POSIX support is disabled.
+- `append`, `truncate` and `exclusive` require write access; `exclusive` also requires create. Read/write operations and `truncate` return `invalid_state` when the open access mode does not permit the requested operation.
+- `seek`, `fstat`, `ftruncate` and `fsync` are POSIX operations and return `unsupported` when POSIX support is disabled.
 - File offsets are shared kernel state. Synchronize externally when multiple execution contexts use one file object or descriptor.

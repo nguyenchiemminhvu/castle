@@ -473,7 +473,7 @@ TEST(GraphAlgorithmsTest, TopologicalSortKahn)
 
     // 1 -> 2 -> 3 -> 1 is a cycle; only 0, 4 and 5 can be ordered.
     graph_type cyclic(6U, {{0U, 1U}, {1U, 2U}, {2U, 3U}, {3U, 1U}, {4U, 5U}});
-    EXPECT_EQ(ga::topological_sort(cyclic, order), status::invalid_argument);
+    EXPECT_EQ(ga::topological_sort(cyclic, order), status::cycle_detected);
     ASSERT_EQ(order.size(), 3U);
     EXPECT_EQ(order[0], 0U);
     EXPECT_EQ(order[1], 4U);
@@ -649,7 +649,7 @@ TEST(GraphAlgorithmsTest, BellmanFordHandlesNegativeWeights)
     EXPECT_TRUE(tree.empty());
 
     EXPECT_EQ(graph.add_edge(4U, 3U, 1), status::ok); // 3 -> 1 -> 4 -> 3 weighs -5
-    EXPECT_EQ(ga::bellman_ford(graph, 0U, tree), status::invalid_argument);
+    EXPECT_EQ(ga::bellman_ford(graph, 0U, tree), status::cycle_detected);
     EXPECT_TRUE(tree.empty());
     EXPECT_EQ(tree.path_to(0U, path), status::out_of_range);
 
@@ -657,12 +657,12 @@ TEST(GraphAlgorithmsTest, BellmanFordHandlesNegativeWeights)
     using negative_type = undirected_weighted_graph<2U, 1U>;
     const negative_type negative_edge(2U, {{0U, 1U, -1}});
     ga::shortest_path_tree<negative_type> negative_tree;
-    EXPECT_EQ(ga::bellman_ford(negative_edge, 0U, negative_tree), status::invalid_argument);
+    EXPECT_EQ(ga::bellman_ford(negative_edge, 0U, negative_tree), status::cycle_detected);
 
     // A single node with a negative self-loop is detected in the only round.
     directed_weighted_graph<1U, 1U> self_loop(1U, {{0U, 0U, -1}});
     ga::shortest_path_tree<directed_weighted_graph<1U, 1U>> self_tree;
-    EXPECT_EQ(ga::bellman_ford(self_loop, 0U, self_tree), status::invalid_argument);
+    EXPECT_EQ(ga::bellman_ford(self_loop, 0U, self_tree), status::cycle_detected);
 
     // Unweighted graphs relax with unit weights.
     using hops_type = directed_graph<3U, 2U>;
@@ -690,10 +690,10 @@ TEST(GraphAlgorithmsTest, FloydWarshallAllPairs)
     EXPECT_EQ(matrix(0U, 3U), 77);
 
     const graph_type negative_loop(2U, {{0U, 1U, 1}, {1U, 1U, -1}});
-    EXPECT_EQ(ga::floyd_warshall(negative_loop, matrix), status::invalid_argument);
+    EXPECT_EQ(ga::floyd_warshall(negative_loop, matrix), status::cycle_detected);
 
     const graph_type negative_cycle(3U, {{0U, 1U, 1}, {1U, 2U, -3}, {2U, 0U, 1}});
-    EXPECT_EQ(ga::floyd_warshall(negative_cycle, matrix), status::invalid_argument);
+    EXPECT_EQ(ga::floyd_warshall(negative_cycle, matrix), status::cycle_detected);
 
     using hops_type = undirected_graph<4U, 3U>;
     const hops_type hops(4U, {{0U, 1U}, {1U, 2U}});

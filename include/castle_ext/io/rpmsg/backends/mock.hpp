@@ -90,7 +90,7 @@ public:
     {
         if (initialized_)
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         initialized_ = true;
         ns_context_ = context;
@@ -287,9 +287,13 @@ public:
         {
             return castle::status::not_configured;
         }
-        if ((data == nullptr && length != 0U) || length > MaxPayload)
+        if (data == nullptr && length != 0U)
         {
             return castle::status::invalid_argument;
+        }
+        if (length > MaxPayload)
+        {
+            return castle::status::out_of_range;
         }
         for (size_type i = 0U; i < MaxEndpoints; ++i)
         {

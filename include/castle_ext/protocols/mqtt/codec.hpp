@@ -66,7 +66,7 @@ CASTLE_INLINE castle::status encode_remaining_length(uint32_t value, uint8_t out
 }
 
 /**
- * @brief Decodes MQTT Remaining Length; `empty` means more stream bytes are needed.
+ * @brief Decodes MQTT Remaining Length; `empty` means more stream bytes are needed, `parse_error` a malformed length.
  * @param consumed Number of encoded length bytes on success.
  */
 CASTLE_INLINE castle::status decode_remaining_length(uint8_t CASTLE_CONST* input, size_type size,
@@ -103,14 +103,14 @@ CASTLE_INLINE castle::status decode_remaining_length(uint8_t CASTLE_CONST* input
                 }
                 if (value < minimum)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
             }
             return castle::status::ok;
         }
         multiplier *= 128U;
     }
-    return castle::status::invalid_argument; // continuation bit on the fourth byte
+    return castle::status::parse_error; // continuation bit on the fourth byte
 }
 
 /** @brief Checks that fixed-header flags are valid for a packet type. */
@@ -130,7 +130,7 @@ CASTLE_INLINE bool valid_fixed_header(packet_type type, uint8_t flags) CASTLE_NO
 
 /**
  * @brief Inspects a TCP stream and returns a packet view when a complete MQTT packet is available.
- * @return `empty` for an incomplete frame, `invalid_argument` for malformed headers, `out_of_range`
+ * @return `empty` for an incomplete frame, `parse_error` for malformed headers, `out_of_range`
  *         for a frame beyond `maximum_packet_size`, otherwise `ok`.
  */
 CASTLE_INLINE castle::status inspect_packet(uint8_t CASTLE_CONST* input, size_type size,
@@ -149,7 +149,7 @@ CASTLE_INLINE castle::status inspect_packet(uint8_t CASTLE_CONST* input, size_ty
     uint8_t flags = static_cast<uint8_t>(input[0U] & 0x0FU);
     if (type_value == 0U || !valid_fixed_header(static_cast<packet_type>(type_value), flags))
     {
-        return castle::status::invalid_argument;
+        return castle::status::parse_error;
     }
     uint32_t remaining = 0U;
     size_type length_bytes = 0U;
@@ -289,7 +289,7 @@ public:
     {
         if (remaining() < 1U)
         {
-            return result_ = castle::status::invalid_argument;
+            return result_ = castle::status::parse_error;
         }
         value = input_[position_++]; return result_;
     }
@@ -297,7 +297,7 @@ public:
     {
         if (remaining() < 2U)
         {
-            return result_ = castle::status::invalid_argument;
+            return result_ = castle::status::parse_error;
         }
         value = read_be16(input_ + position_); position_ += 2U; return result_;
     }
@@ -305,7 +305,7 @@ public:
     {
         if (remaining() < 4U)
         {
-            return result_ = castle::status::invalid_argument;
+            return result_ = castle::status::parse_error;
         }
         value = read_be32(input_ + position_); position_ += 4U; return result_;
     }
@@ -319,7 +319,8 @@ public:
         }
         if (count >= capacity || remaining() < count || (output == nullptr && capacity != 0U)) // LCOV_EXCL_BR_LINE
         {
-            return result_ = count >= capacity ? castle::status::out_of_range : castle::status::invalid_argument;
+            return result_ = count >= capacity ? castle::status::out_of_range
+                           : (output == nullptr ? castle::status::invalid_argument : castle::status::parse_error);
         }
         for (size_type i = 0U; i < count; ++i)
         {
@@ -337,7 +338,8 @@ public:
         }
         if (count > capacity || remaining() < count || (output == nullptr && count != 0U))
         {
-            return result_ = count > capacity ? castle::status::out_of_range : castle::status::invalid_argument;
+            return result_ = count > capacity ? castle::status::out_of_range
+                           : (output == nullptr ? castle::status::invalid_argument : castle::status::parse_error);
         }
         for (size_type i = 0U; i < count; ++i)
         {
@@ -360,7 +362,7 @@ public:
     {
         if (count > remaining())
         {
-            return result_ = castle::status::invalid_argument;
+            return result_ = castle::status::parse_error;
         }
         position_ += count; return result_;
     }
@@ -520,7 +522,7 @@ CASTLE_INLINE castle::status decode_properties(packet_reader& reader,
     }
     if (property_length > reader.remaining())
     {
-        return castle::status::invalid_argument;
+        return castle::status::parse_error;
     }
     uint8_t CASTLE_CONST* start = reader.current();
     packet_reader properties(start, property_length);
@@ -530,7 +532,7 @@ CASTLE_INLINE castle::status decode_properties(packet_reader& reader,
         result = properties.get_varint(raw_id);
         if (!castle::succeeded(result) || !detail::property_known(raw_id))
         {
-            return ignore_unknown ? reader.skip(property_length) : castle::status::invalid_argument;
+            return ignore_unknown ? reader.skip(property_length) : castle::status::parse_error;
         }
         property_id id = static_cast<property_id>(raw_id);
         if (output.full())
@@ -549,7 +551,7 @@ CASTLE_INLINE castle::status decode_properties(packet_reader& reader,
                  (id != property_id::payload_format_indicator && id != property_id::maximum_qos && value > 1U) ||
                  (id == property_id::maximum_qos && value > 1U)))
             {
-                return castle::status::invalid_argument;
+                return castle::status::protocol_error;
             }
         }
         else if (detail::property_is_u16(id))
@@ -559,7 +561,7 @@ CASTLE_INLINE castle::status decode_properties(packet_reader& reader,
             item.integer = value;
             if (castle::succeeded(result) && value == 0U && (id == property_id::receive_maximum || id == property_id::topic_alias))
             {
-                return castle::status::invalid_argument;
+                return castle::status::protocol_error;
             }
         }
         else if (detail::property_is_u32(id))
@@ -571,7 +573,7 @@ CASTLE_INLINE castle::status decode_properties(packet_reader& reader,
             result = properties.get_varint(item.integer);
             if (castle::succeeded(result) && item.integer == 0U)
             {
-                return castle::status::invalid_argument;
+                return castle::status::protocol_error;
             }
         }
         else if (detail::property_is_binary(id))
@@ -591,7 +593,7 @@ CASTLE_INLINE castle::status decode_properties(packet_reader& reader,
         // can not cover branches code: every identifier in property_known() is classified above.
         else
         {
-            result = castle::status::invalid_argument;
+            result = castle::status::parse_error;
         }
         // LCOV_EXCL_STOP
         if (!castle::succeeded(result))

@@ -36,9 +36,9 @@ TEST(MqttTypes, UserPropertiesAndReasonMapping)
     EXPECT_EQ(properties.add_user_property("k", "v"), castle::status::ok);
     EXPECT_STREQ(properties.entries[0U].string_value, "k");
     EXPECT_STREQ(properties.entries[0U].user_value, "v");
-    EXPECT_EQ(to_status(reason_code::unsupported_protocol_version), castle::status::invalid_config);
+    EXPECT_EQ(to_status(reason_code::unsupported_protocol_version), castle::status::unsupported);
     EXPECT_EQ(to_status(reason_code::packet_identifier_not_found), castle::status::not_found);
-    EXPECT_EQ(to_status(reason_code::server_busy), castle::status::time_out);
+    EXPECT_EQ(to_status(reason_code::server_busy), castle::status::unavailable);
     EXPECT_EQ(to_status(static_cast<reason_code>(0xEEU)), castle::status::unknown_error);
 }
 
@@ -105,12 +105,12 @@ TEST(MqttTypes, ReasonCodesMapToEveryStatusClass)
     EXPECT_EQ(to_status(reason_code::no_subscription_existed), castle::status::ok);
     EXPECT_EQ(to_status(reason_code::client_identifier_not_valid), castle::status::invalid_argument);
     EXPECT_EQ(to_status(reason_code::topic_name_invalid), castle::status::invalid_argument);
-    EXPECT_EQ(to_status(reason_code::malformed_packet), castle::status::invalid_argument);
-    EXPECT_EQ(to_status(reason_code::protocol_error), castle::status::invalid_argument);
+    EXPECT_EQ(to_status(reason_code::malformed_packet), castle::status::parse_error);
+    EXPECT_EQ(to_status(reason_code::protocol_error), castle::status::protocol_error);
     EXPECT_EQ(to_status(reason_code::packet_too_large), castle::status::out_of_range);
-    EXPECT_EQ(to_status(reason_code::packet_identifier_in_use), castle::status::full);
+    EXPECT_EQ(to_status(reason_code::packet_identifier_in_use), castle::status::already_exists);
     EXPECT_EQ(to_status(reason_code::receive_maximum_exceeded), castle::status::full);
-    EXPECT_EQ(to_status(reason_code::server_unavailable), castle::status::time_out);
+    EXPECT_EQ(to_status(reason_code::server_unavailable), castle::status::unavailable);
     EXPECT_EQ(to_status(reason_code::unspecified_error), castle::status::unknown_error);
 }
 

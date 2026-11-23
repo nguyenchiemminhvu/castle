@@ -105,7 +105,7 @@ public:
     {
         if (transport_.is_open())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         castle::status result = validate_connect_options(options);
         if (!castle::succeeded(result))
@@ -887,14 +887,14 @@ private:
             case packet_type::pingresp:
                 if (packet.remaining_length != 0U || !ping_outstanding_)
                 {
-                    return castle::status::invalid_argument;
+                    return packet.remaining_length != 0U ? castle::status::parse_error : castle::status::protocol_error;
                 }
                 ping_outstanding_ = false;
                 return castle::status::ok;
             case packet_type::disconnect:
                 if (!connected_)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 if (options_.protocol_version == version::v5_0 && reader.remaining() != 0U)
                 {
@@ -912,8 +912,8 @@ private:
                 connected_ = false;
                 (void)transport_.close(nullptr);
                 return castle::status::not_configured;
-            case packet_type::auth: return castle::status::invalid_config;
-            default: return castle::status::invalid_argument;
+            case packet_type::auth: return castle::status::unsupported;
+            default: return castle::status::protocol_error;
         }
     }
 
@@ -921,20 +921,20 @@ private:
     {
         if (!connecting_ || reader.remaining() < 2U)
         {
-            return castle::status::invalid_argument;
+            return connecting_ ? castle::status::parse_error : castle::status::protocol_error;
         }
         uint8_t flags = 0U; uint8_t code = 0U;
         (void)reader.get_u8(flags); (void)reader.get_u8(code);
         if ((flags & 0xFEU) != 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         session_present_ = (flags & 0x01U) != 0U;
         if (options_.protocol_version == version::v5_0)
         {
             if (reader.remaining() == 0U)
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             properties_type properties;
             castle::status status = decode_properties(reader, properties, true);
@@ -945,7 +945,7 @@ private:
         }
         else if (reader.remaining() != 0U || code > 5U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         connecting_ = false;
         if (code != 0U)
@@ -956,13 +956,13 @@ private:
             }
             switch (code) // LCOV_EXCL_BR_LINE
             {
-                case 1U: return castle::status::invalid_config;
+                case 1U: return castle::status::unsupported;
                 case 2U: return castle::status::invalid_argument;
-                case 3U: return castle::status::time_out;
-                case 4U: case 5U: return castle::status::not_configured;
+                case 3U: return castle::status::unavailable;
+                case 4U: case 5U: return castle::status::permission_denied;
                 // LCOV_EXCL_START
                 // can not cover branches code
-                default: return castle::status::invalid_argument;
+                default: return castle::status::parse_error;
                 // LCOV_EXCL_STOP
             }
         }
@@ -977,20 +977,20 @@ private:
         qos quality = static_cast<qos>((flags >> 1U) & 0x03U);
         if (static_cast<uint8_t>(quality) > 2U) // LCOV_EXCL_BR_LINE
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         char topic[MaxTopicLength]{}; size_type topic_size = 0U;
         castle::status status = reader.get_utf8(topic, sizeof(topic), topic_size);
         if (!castle::succeeded(status) || !castle::succeeded(validate_topic_name(castle::dsa::string_view(topic, topic_size))))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         uint16_t identifier = 0U;
         if (quality != qos::at_most_once)
         {
             if (!castle::succeeded(reader.get_u16(identifier)) || identifier == 0U)
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
         }
         if (options_.protocol_version == version::v5_0)
@@ -1053,7 +1053,7 @@ private:
         uint16_t identifier = 0U;
         if (!castle::succeeded(reader.get_u16(identifier)) || identifier == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if (options_.protocol_version == version::v5_0 && reader.remaining() != 0U)
         {
@@ -1067,7 +1067,7 @@ private:
         }
         else if (options_.protocol_version != version::v5_0 && reader.remaining() != 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         incoming_entry* entry = find_incoming(identifier);
         if (entry != nullptr)
@@ -1093,7 +1093,7 @@ private:
         uint16_t identifier = 0U;
         if (!castle::succeeded(reader.get_u16(identifier)) || identifier == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         uint8_t reason = 0U;
         if (options_.protocol_version == version::v5_0 && reader.remaining() != 0U)
@@ -1107,12 +1107,12 @@ private:
         }
         else if (options_.protocol_version != version::v5_0 && reader.remaining() != 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         outgoing_entry* entry = find_outgoing(identifier);
         if (entry == nullptr || entry->state != expected)
         {
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
         }
         last_acknowledged_id_ = identifier;
         if (type == packet_type::pubrec)
@@ -1139,7 +1139,7 @@ private:
         uint16_t identifier = 0U;
         if (!castle::succeeded(reader.get_u16(identifier)) || identifier == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if (options_.protocol_version == version::v5_0)
         {
@@ -1152,7 +1152,7 @@ private:
         }
         if (reader.remaining() == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         while (reader.remaining() != 0U)
         {
@@ -1160,13 +1160,13 @@ private:
             (void)reader.get_u8(code);
             if (code > 2U && code < 0x80U)
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
         }
         pending_request* request = find_request(identifier, packet_type::subscribe);
         if (request == nullptr)
         {
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
         }
         request->used = false;
         last_acknowledged_id_ = identifier;
@@ -1178,7 +1178,7 @@ private:
         uint16_t identifier = 0U;
         if (!castle::succeeded(reader.get_u16(identifier)) || identifier == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if (options_.protocol_version == version::v5_0)
         {
@@ -1196,12 +1196,12 @@ private:
         }
         else if (reader.remaining() != 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         pending_request* request = find_request(identifier, packet_type::unsubscribe);
         if (request == nullptr)
         {
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
         }
         request->used = false;
         last_acknowledged_id_ = identifier;

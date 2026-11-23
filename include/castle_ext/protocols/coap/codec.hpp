@@ -84,7 +84,7 @@ CASTLE_INLINE castle::status decode_nibble(uint8_t nibble, uint8_t CASTLE_CONST*
     {
         if (used >= size)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         value = 13U + input[used++];
         return castle::status::ok;
@@ -93,13 +93,13 @@ CASTLE_INLINE castle::status decode_nibble(uint8_t nibble, uint8_t CASTLE_CONST*
     {
         if (size - used < 2U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         value = 269U + read_be16(input + used);
         used += 2U;
         return castle::status::ok;
     }
-    return castle::status::invalid_argument;
+    return castle::status::parse_error;
 }
 
 CASTLE_INLINE uint8_t encode_nibble(uint32_t value) CASTLE_NOEXCEPT
@@ -242,7 +242,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
         {
             *error = decode_error::malformed_header;
         }
-        return castle::status::invalid_argument;
+        return input == nullptr ? castle::status::invalid_argument : castle::status::parse_error;
     }
     CASTLE_CONST uint8_t first = input[0U];
     CASTLE_CONST uint8_t version = static_cast<uint8_t>(first >> 6U);
@@ -253,7 +253,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
         {
             *error = decode_error::unsupported_version;
         }
-        return castle::status::invalid_argument;
+        return castle::status::unsupported;
     }
     if (token_length > maximum_token_length || size < 4U + token_length)
     {
@@ -261,7 +261,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
         {
             *error = decode_error::invalid_token_length;
         }
-        return castle::status::invalid_argument;
+        return token_length > maximum_token_length ? castle::status::protocol_error : castle::status::parse_error;
     }
     output.version = version;
     output.type = static_cast<message_type>((first >> 4U) & 0x03U);
@@ -281,7 +281,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
             {
                 *error = decode_error::malformed_header;
             }
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
         }
         return castle::status::ok;
     }
@@ -292,7 +292,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
         {
             *error = decode_error::malformed_header;
         }
-        return castle::status::invalid_argument;
+        return castle::status::protocol_error;
     }
 
     size_type position = 4U + token_length;
@@ -308,7 +308,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
                 {
                     *error = decode_error::malformed_option;
                 }
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             CASTLE_CONST size_type payload_size = size - position;
             CASTLE_CONST castle::status copied = output.set_payload(input + position, payload_size);
@@ -332,7 +332,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
             {
                 *error = decode_error::malformed_option;
             }
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         uint32_t delta = 0U, length = 0U;
         castle::status result = detail::decode_nibble(delta_nibble, input, size, position, delta);
@@ -346,7 +346,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
             {
                 *error = decode_error::malformed_option;
             }
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         option_number_value += delta;
         if (option_number_value == 0U)
@@ -355,7 +355,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
             {
                 *error = decode_error::malformed_option;
             }
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         CASTLE_CONST uint16_t current_option = static_cast<uint16_t>(option_number_value);
         bool recognized = is_supported_option(current_option) && valid_option_length(current_option, length);
@@ -371,7 +371,7 @@ castle::status decode_message(uint8_t CASTLE_CONST* input, size_type size, Messa
                 {
                     *error = decode_error::unknown_critical_option;
                 }
-                return castle::status::not_configured;
+                return castle::status::unsupported;
             }
             position += length; // unknown/elective or invalid-length elective option: safely skip it
             continue;
@@ -395,9 +395,13 @@ CASTLE_INLINE castle::status decode_uint_option(uint8_t CASTLE_CONST* value, siz
                                                uint32_t& output) CASTLE_NOEXCEPT
 {
     output = 0U;
-    if (length > 4U || (value == nullptr && length != 0U))
+    if (value == nullptr && length != 0U)
     {
         return castle::status::invalid_argument;
+    }
+    if (length > 4U)
+    {
+        return castle::status::parse_error;
     }
     for (size_type i = 0U; i < length; ++i)
     {

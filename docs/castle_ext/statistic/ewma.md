@@ -23,7 +23,7 @@
 |---|---|---|---|---|---|
 | Default constructor | `ewma()` | Creates an unconfigured filter. | — | O(1) | O(1) |
 | Constructor | `explicit ewma(result_type alpha)` | Creates a filter and calls `configure(alpha)`. An invalid `alpha` leaves it unconfigured. | — | O(1) | O(1) |
-| `configure` | `status configure(result_type alpha)` | Sets the smoothing factor and discards the state. `alpha` must be in (0, 1]. | `ok`, `invalid_argument` (the filter becomes unconfigured and `alpha()` is 0) | O(1) | O(1) |
+| `configure` | `status configure(result_type alpha)` | Sets the smoothing factor and discards the state. `alpha` must be in (0, 1]. | `ok`, `invalid_config` (the filter becomes unconfigured and `alpha()` is 0) | O(1) | O(1) |
 | `configured` | `bool configured() const` | Reports whether a valid `alpha` is set. | `bool` | O(1) | O(1) |
 | `alpha` | `result_type alpha() const` | Current smoothing factor. 0 when unconfigured. | value | O(1) | O(1) |
 | `empty` | `bool empty() const` | `true` until the first sample after configuration or `clear()`. | `bool` | O(1) | O(1) |

@@ -132,7 +132,7 @@ public:
             }
         }
         castle::status result = socket_.connect(remote, system_error);
-        if (result == castle::status::time_out) // LCOV_EXCL_BR_LINE
+        if (result == castle::status::in_progress) // LCOV_EXCL_BR_LINE
         {
             result = socket_.finish_connect(timeout_ms, system_error);
         }
@@ -230,7 +230,7 @@ public:
      * @return `ok` after a packet/stream chunk is received, `time_out` for no readiness,
      *         `empty` for a non-blocking receive with no data, `not_configured` when closed or after
      *         TCP peer EOF (which closes the socket), `data_loss` for a UDP datagram larger than the
-     *         buffer (dropped without a callback), `invalid_config` when called from the callback, or
+     *         buffer (dropped without a callback), `invalid_state` when called from the callback, or
      *         the underlying socket error status.
      */
     castle::status process_once(int timeout_ms = 0, int* system_error = nullptr) CASTLE_NOEXCEPT
@@ -238,7 +238,7 @@ public:
         detail::clear_system_error(system_error);
         if (dispatcher_.is_dispatching())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         if (!socket_.is_open())
         {

@@ -192,7 +192,7 @@ struct vincenty_result
  * @param to Destination point.
  * @param result Receives the distance and bearings on success.
  * @param max_iterations Iteration budget for the Lambda fixed-point loop.
- * @return `castle::status::ok` on convergence; `castle::status::unknown_error`
+ * @return `castle::status::ok` on convergence; `castle::status::not_converged`
  * when the iteration does not converge within `max_iterations` (this is a
  * known limitation of Vincenty's formula for nearly-antipodal points).
  * @note `result` is left unmodified when this function returns anything
@@ -273,7 +273,7 @@ CASTLE_NODISCARD castle::status vincenty_inverse(CASTLE_CONST geo_point<T>& from
     // LCOV_EXCL_START
     if (!converged)
     {
-        return castle::status::unknown_error;
+        return castle::status::not_converged;
     }
     // LCOV_EXCL_STOP
 
@@ -317,7 +317,7 @@ CASTLE_NODISCARD castle::status vincenty_inverse(CASTLE_CONST geo_point<T>& from
  * @param final_bearing_deg Receives the arrival bearing, in decimal degrees,
  * on success.
  * @param max_iterations Iteration budget for the sigma fixed-point loop.
- * @return `castle::status::ok` on convergence; `castle::status::unknown_error`
+ * @return `castle::status::ok` on convergence; `castle::status::not_converged`
  * when the iteration does not converge within `max_iterations`.
  * @note The computed destination longitude is normalized into `[-180, 180)`
  * and the destination latitude is clamped into `[-90, 90]` to absorb
@@ -378,7 +378,7 @@ CASTLE_NODISCARD castle::status vincenty_direct(CASTLE_CONST geo_point<T>& start
     // LCOV_EXCL_START
     if (!converged)
     {
-        return castle::status::unknown_error;
+        return castle::status::not_converged;
     }
     // LCOV_EXCL_STOP
 

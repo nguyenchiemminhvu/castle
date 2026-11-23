@@ -76,7 +76,7 @@ TEST(SlidingHistogramTest, ConstructorWithBoundsAndConfigure)
     EXPECT_EQ(bad.push(1.0), status::not_configured);
 
     S s;
-    EXPECT_EQ(s.configure(kNaN, 1.0), status::invalid_argument);
+    EXPECT_EQ(s.configure(kNaN, 1.0), status::invalid_config);
     EXPECT_FALSE(s.configured());
     EXPECT_EQ(s.configure(0.0, 4.0), status::ok);
     EXPECT_TRUE(s.configured());
@@ -93,7 +93,7 @@ TEST(SlidingHistogramTest, ConstructorWithBoundsAndConfigure)
 
     // An invalid range also clears the window and unconfigures.
     EXPECT_EQ(s.push(1.0), status::ok);
-    EXPECT_EQ(s.configure(1.0, 0.0), status::invalid_argument);
+    EXPECT_EQ(s.configure(1.0, 0.0), status::invalid_config);
     EXPECT_TRUE(s.empty());
     EXPECT_FALSE(s.configured());
 }

@@ -66,7 +66,7 @@ int main()
     // Invalid ranges leave the histogram unconfigured.
     castle::statistic::histogram<double, 4U> unconfigured;
     CASTLE_SAMPLE_CHECK(unconfigured.push(1.0) == castle::status::not_configured);
-    CASTLE_SAMPLE_CHECK(unconfigured.configure(1.0, 1.0) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(unconfigured.configure(1.0, 1.0) == castle::status::invalid_config);
     CASTLE_SAMPLE_CHECK(!unconfigured.configured());
 
     // Expanding histogram: the range doubles until the value fits; eight bins stay eight bins.

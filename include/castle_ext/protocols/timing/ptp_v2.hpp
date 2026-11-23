@@ -586,13 +586,13 @@ public:
         action = slave_action{};
         if (!valid_timestamp(receive_timestamp))
         {
-            return castle::status::invalid_argument;
+            return castle::status::out_of_range;
         }
 
         message_view message{};
         if (!decode_message(packet, message))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if ((message.header.domain_number != config_.domain_number)
          || ((config_.transport_specific != PTP_ANY_TRANSPORT_SPECIFIC) // LCOV_EXCL_BR_LINE
@@ -617,7 +617,7 @@ public:
             }
             default:
             {
-                return castle::status::not_found;
+                return castle::status::unsupported;
             }
         }
     }
@@ -643,11 +643,11 @@ public:
         action = slave_action{};
         if (!pending_)
         {
-            return castle::status::not_configured;
+            return castle::status::invalid_state;
         }
         if (!valid_timestamp(transmit_timestamp)) // LCOV_EXCL_BR_LINE
         {
-            return castle::status::invalid_argument;
+            return castle::status::out_of_range;
         }
 
         t3_ = transmit_timestamp;
@@ -704,7 +704,7 @@ private:
             {
                 pending_ = false;
                 awaiting_follow_up_ = false;
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             t1_valid_ = true;
         }
@@ -743,7 +743,7 @@ private:
         }
         if (!read_message_timestamp(message, t1_))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
 
         t1_valid_ = true;
@@ -763,7 +763,7 @@ private:
         }
         if (message.payload.size() < (PTP_TIMESTAMP_SIZE + PTP_TIMESTAMP_SIZE))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
 
         port_identity requesting_port{};
@@ -778,7 +778,7 @@ private:
         }
         if (!detail::read_timestamp(message.payload.data(), t4_)) // LCOV_EXCL_BR_LINE
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
 
         t4_valid_ = true;
@@ -817,7 +817,7 @@ private:
         {
             pending_ = false;
             awaiting_follow_up_ = false;
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
         }
         CASTLE_CONST int64_t path_delay = total_path / 2LL;
         CASTLE_CONST int64_t offset = sync_interval - path_delay;

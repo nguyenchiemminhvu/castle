@@ -91,7 +91,7 @@ TEST(RpmsgMockBackend, InitializeAndShutdownAreNotRepeatable)
     device_config config;
     ASSERT_EQ(backend.initialize(config, nullptr, nullptr), castle::status::ok);
     EXPECT_TRUE(backend.is_initialized());
-    EXPECT_EQ(backend.initialize(config, nullptr, nullptr), castle::status::invalid_config);
+    EXPECT_EQ(backend.initialize(config, nullptr, nullptr), castle::status::invalid_state);
     EXPECT_EQ(backend.shutdown(), castle::status::ok);
     EXPECT_FALSE(backend.is_initialized());
     EXPECT_EQ(backend.shutdown(), castle::status::not_configured);
@@ -243,7 +243,7 @@ TEST(RpmsgMockBackend, PollRemoteAddressAndInjectValidation)
     EXPECT_EQ(backend.remote_address(handle), rpmsg_addr_any);
     const uint8_t byte = 1U;
     EXPECT_EQ(backend.inject(actual, 2000U, nullptr, 1U), castle::status::invalid_argument);
-    EXPECT_EQ(backend.inject(actual, 2000U, &byte, 17U), castle::status::invalid_argument);
+    EXPECT_EQ(backend.inject(actual, 2000U, &byte, 17U), castle::status::out_of_range);
     EXPECT_EQ(backend.inject(999U, 2000U, &byte, 1U), castle::status::not_found);
     EXPECT_EQ(backend.inject(actual, 2000U, &byte, 1U), castle::status::ok);
     EXPECT_EQ(backend.shutdown(), castle::status::ok);

@@ -130,7 +130,7 @@ TEST(IniParseTest, InvalidLinesReportSpecificErrors)
     {
         document<4U, 16U, 16U, 32U> doc;
         auto result = parse(doc, string_view("[broken\n"));
-        EXPECT_EQ(result.status, castle::status::invalid_argument);
+        EXPECT_EQ(result.status, castle::status::parse_error);
         EXPECT_EQ(result.code, error_code::invalid_section);
         EXPECT_EQ(result.line, 1U);
         EXPECT_TRUE(doc.empty());
@@ -139,36 +139,42 @@ TEST(IniParseTest, InvalidLinesReportSpecificErrors)
     {
         document<4U, 16U, 16U, 32U> doc;
         auto result = parse(doc, string_view("[ok] trailing-garbage\n"));
+        EXPECT_EQ(result.status, castle::status::parse_error);
         EXPECT_EQ(result.code, error_code::invalid_section);
     }
 
     {
         document<4U, 16U, 16U, 32U> doc;
         auto result = parse(doc, string_view("= value\n"));
+        EXPECT_EQ(result.status, castle::status::parse_error);
         EXPECT_EQ(result.code, error_code::invalid_key);
     }
 
     {
         document<4U, 16U, 16U, 32U> doc;
         auto result = parse(doc, string_view("key\n"));
+        EXPECT_EQ(result.status, castle::status::parse_error);
         EXPECT_EQ(result.code, error_code::invalid_assignment);
     }
 
     {
         document<4U, 16U, 16U, 32U> doc;
         auto result = parse(doc, string_view("x = \"bad\"tail\n"));
+        EXPECT_EQ(result.status, castle::status::parse_error);
         EXPECT_EQ(result.code, error_code::invalid_quote);
     }
 
     {
         document<4U, 16U, 16U, 32U> doc;
         auto result = parse(doc, string_view("x = \"bad\\q\"\n"));
+        EXPECT_EQ(result.status, castle::status::parse_error);
         EXPECT_EQ(result.code, error_code::invalid_escape);
     }
 
     {
         document<4U, 16U, 16U, 32U> doc;
         auto result = parse(doc, string_view("[ ]\n"));
+        EXPECT_EQ(result.status, castle::status::parse_error);
         EXPECT_EQ(result.code, error_code::invalid_section);
     }
 }
@@ -233,7 +239,7 @@ TEST(IniConversionTest, BooleanReadWrite)
     EXPECT_TRUE(value);
     EXPECT_EQ(doc.get_bool("zero", value), castle::status::ok);
     EXPECT_FALSE(value);
-    EXPECT_EQ(doc.get_bool("bad", value), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_bool("bad", value), castle::status::parse_error);
 }
 
 TEST(IniConversionTest, IntegerReadWriteAndRangeChecks)
@@ -263,7 +269,7 @@ TEST(IniConversionTest, IntegerReadWriteAndRangeChecks)
     EXPECT_EQ(doc.set("neg_unsigned", "-1"), castle::status::ok);
     EXPECT_EQ(doc.get_integer("neg_unsigned", unsigned_value), castle::status::invalid_argument);
     EXPECT_EQ(doc.set("bad", "12x"), castle::status::ok);
-    EXPECT_EQ(doc.get_integer("bad", signed_value), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_integer("bad", signed_value), castle::status::parse_error);
 }
 
 enum class mode : uint8_t
@@ -300,11 +306,11 @@ TEST(IniConversionTest, FloatingPointRead)
     EXPECT_DOUBLE_EQ(double_value, 0.04);
 
     EXPECT_EQ(doc.set("bad1", "."), castle::status::ok);
-    EXPECT_EQ(doc.get_floating("bad1", double_value), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_floating("bad1", double_value), castle::status::parse_error);
     EXPECT_EQ(doc.set("bad2", "1e"), castle::status::ok);
-    EXPECT_EQ(doc.get_floating("bad2", double_value), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_floating("bad2", double_value), castle::status::parse_error);
     EXPECT_EQ(doc.set("bad3", "1.2x"), castle::status::ok);
-    EXPECT_EQ(doc.get_floating("bad3", double_value), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_floating("bad3", double_value), castle::status::parse_error);
     EXPECT_EQ(doc.set("huge", "1e1025"), castle::status::ok);
     EXPECT_EQ(doc.get_floating("huge", double_value), castle::status::out_of_range);
 }
@@ -382,10 +388,14 @@ TEST(IniDocumentTest, DetailValueDecodeAndEscapingBranches)
     EXPECT_EQ(decoded.view(), string_view("plain"));
     EXPECT_EQ(detail::decode_value(string_view("\"a\\\"b\\\\c\\n\\r\\t\""), decoded, 1U, 1U).status, castle::status::ok);
     EXPECT_EQ(decoded.view(), string_view("a\"b\\c\n\r\t"));
+    EXPECT_EQ(detail::decode_value(string_view("\"bad"), decoded, 1U, 1U).status, castle::status::parse_error);
     EXPECT_EQ(detail::decode_value(string_view("\"bad"), decoded, 1U, 1U).code, error_code::invalid_quote);
     const char trailing_escape[] = {'\"', 'a', '\\', '\"'};
+    EXPECT_EQ(detail::decode_value(string_view(trailing_escape, 4U), decoded, 1U, 1U).status, castle::status::parse_error);
     EXPECT_EQ(detail::decode_value(string_view(trailing_escape, 4U), decoded, 1U, 1U).code, error_code::invalid_escape);
+    EXPECT_EQ(detail::decode_value(string_view("\"a\\q\""), decoded, 1U, 1U).status, castle::status::parse_error);
     EXPECT_EQ(detail::decode_value(string_view("\"a\\q\""), decoded, 1U, 1U).code, error_code::invalid_escape);
+    EXPECT_EQ(detail::decode_value(string_view("\"a\"b\""), decoded, 1U, 1U).status, castle::status::parse_error);
     EXPECT_EQ(detail::decode_value(string_view("\"a\"b\""), decoded, 1U, 1U).code, error_code::invalid_quote);
 
     string<1U> tight;
@@ -422,8 +432,8 @@ TEST(IniDocumentTest, NumericBoundaryAndDocumentGroupingPaths)
     EXPECT_EQ(detail::parse_floating_value(string_view("3e-2"), floating_value), castle::status::ok);
     EXPECT_DOUBLE_EQ(floating_value, 0.03);
     EXPECT_EQ(detail::parse_floating_value(string_view("1e1025"), floating_value), castle::status::out_of_range);
-    EXPECT_EQ(detail::parse_floating_value(string_view("1e+"), floating_value), castle::status::invalid_argument);
-    EXPECT_EQ(detail::parse_floating_value(string_view("1.2x"), floating_value), castle::status::invalid_argument);
+    EXPECT_EQ(detail::parse_floating_value(string_view("1e+"), floating_value), castle::status::parse_error);
+    EXPECT_EQ(detail::parse_floating_value(string_view("1.2x"), floating_value), castle::status::parse_error);
 
     document<8U, 8U, 16U, 64U> doc;
     EXPECT_EQ(doc.set("global", "value"), castle::status::ok);
@@ -459,18 +469,18 @@ TEST(IniDocumentTest, TypedSectionConversionsAndOutputEdges)
     EXPECT_EQ(selected, mode::on);
     EXPECT_EQ(doc.get_integer("network", "missing", count), castle::status::not_found);
     bool boolean = false;
-    EXPECT_EQ(doc.get_bool("network", "count", boolean), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_bool("network", "count", boolean), castle::status::parse_error);
 
     document_type invalid;
     EXPECT_EQ(invalid.set("network", "bad-int", "12x"), castle::status::ok);
-    EXPECT_EQ(invalid.get_integer("network", "bad-int", count), castle::status::invalid_argument);
+    EXPECT_EQ(invalid.get_integer("network", "bad-int", count), castle::status::parse_error);
     EXPECT_EQ(invalid.set("network", "bad-float", "1e1025"), castle::status::ok);
     EXPECT_EQ(invalid.get_floating("network", "bad-float", gain), castle::status::out_of_range);
 
     string<2U> quoted_close_tight;
     EXPECT_EQ(detail::append_escaped_value(string_view(" "), quoted_close_tight), castle::status::full);
     EXPECT_EQ(detail::parse_integer_value(string_view("2147483648"), count), castle::status::out_of_range);
-    EXPECT_EQ(detail::parse_integer_value(string_view("12x"), count), castle::status::invalid_argument);
+    EXPECT_EQ(detail::parse_integer_value(string_view("12x"), count), castle::status::parse_error);
 }
 
 } // namespace

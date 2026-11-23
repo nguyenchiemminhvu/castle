@@ -107,7 +107,8 @@ public:
      * @param start_slope Slope at the first knot; used by `spline_kind::clamped` only.
      * @param end_slope Slope at the last knot; used by `spline_kind::clamped` only.
      * @return `status::ok` on success; `status::invalid_argument` for null
-     *         pointers, fewer than two knots or non-increasing abscissas;
+     *         pointers or non-increasing abscissas, `status::empty` for zero
+     *         knots, `status::insufficient_data` for one knot, and
      *         `status::full` when `count` exceeds `Capacity`. On failure the
      *         spline is left empty.
      * @note `O(count)`.

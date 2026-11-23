@@ -169,7 +169,7 @@ TEST(MathRootFinding, BisectionIterationBudgetExhausted)
     const auto r = castle::math::find_root_bisection(f, 0.0, 2.0, 1.0e-12, 3U);
 
     EXPECT_FALSE(r.ok());
-    EXPECT_EQ(r.code, castle::status::out_of_range);
+    EXPECT_EQ(r.code, castle::status::not_converged);
     EXPECT_EQ(r.iterations, 3U);
     // After three halvings the bracket is [1.25, 1.5] with half width 0.125.
     EXPECT_NEAR(r.value, 1.375, 1.0e-12);
@@ -181,7 +181,7 @@ TEST(MathRootFinding, BisectionZeroIterationBudget)
     const auto f = [](double x) { return (x * x) - 2.0; };
     const auto r = castle::math::find_root_bisection(f, 0.0, 2.0, 1.0e-12, 0U);
 
-    EXPECT_EQ(r.code, castle::status::out_of_range);
+    EXPECT_EQ(r.code, castle::status::not_converged);
     EXPECT_EQ(r.iterations, 0U);
     EXPECT_EQ(r.value, 0.0);
     EXPECT_EQ(r.error, 2.0);
@@ -295,7 +295,7 @@ TEST(MathRootFinding, NewtonZeroDerivativeAtStart)
     const auto r = castle::math::find_root_newton(f, df, 0.0, 1.0e-12);
 
     EXPECT_FALSE(r.ok());
-    EXPECT_EQ(r.code, castle::status::invalid_argument);
+    EXPECT_EQ(r.code, castle::status::not_converged);
     EXPECT_EQ(r.value, 0.0);
     EXPECT_EQ(r.iterations, 0U);
 }
@@ -307,7 +307,7 @@ TEST(MathRootFinding, NewtonZeroDerivativeAtLaterIterate)
     const auto df = [](double x) { return 2.0 * x; };
     const auto r = castle::math::find_root_newton(f, df, 1.0, 1.0e-12);
 
-    EXPECT_EQ(r.code, castle::status::invalid_argument);
+    EXPECT_EQ(r.code, castle::status::not_converged);
     EXPECT_EQ(r.value, 0.0);
     EXPECT_EQ(r.iterations, 1U);
 }
@@ -319,13 +319,13 @@ TEST(MathRootFinding, NewtonIterationBudgetExhausted)
     const auto r = castle::math::find_root_newton(f, df, 100.0, 1.0e-12, 2U);
 
     EXPECT_FALSE(r.ok());
-    EXPECT_EQ(r.code, castle::status::out_of_range);
+    EXPECT_EQ(r.code, castle::status::not_converged);
     EXPECT_EQ(r.iterations, 2U);
     EXPECT_GT(r.error, 1.0e-12);
 
     // Zero budget returns the initial guess untouched.
     const auto none = castle::math::find_root_newton(f, df, 100.0, 1.0e-12, 0U);
-    EXPECT_EQ(none.code, castle::status::out_of_range);
+    EXPECT_EQ(none.code, castle::status::not_converged);
     EXPECT_EQ(none.iterations, 0U);
     EXPECT_EQ(none.value, 100.0);
     EXPECT_EQ(none.error, 0.0);
@@ -423,7 +423,7 @@ TEST(MathRootFinding, SecantFlatAtStart)
     const auto r = castle::math::find_root_secant(f, -1.0, 1.0, 1.0e-12);
 
     EXPECT_FALSE(r.ok());
-    EXPECT_EQ(r.code, castle::status::invalid_argument);
+    EXPECT_EQ(r.code, castle::status::not_converged);
     EXPECT_EQ(r.value, 1.0);
     EXPECT_EQ(r.error, 2.0);
     EXPECT_EQ(r.iterations, 0U);
@@ -435,7 +435,7 @@ TEST(MathRootFinding, SecantFlatAtLaterIterate)
     const auto f = [](double x) { return (x * x) + 1.0; };
     const auto r = castle::math::find_root_secant(f, 0.0, 1.0, 1.0e-12);
 
-    EXPECT_EQ(r.code, castle::status::invalid_argument);
+    EXPECT_EQ(r.code, castle::status::not_converged);
     EXPECT_EQ(r.value, -1.0);
     EXPECT_EQ(r.iterations, 1U);
 }
@@ -446,13 +446,13 @@ TEST(MathRootFinding, SecantIterationBudgetExhausted)
     const auto r = castle::math::find_root_secant(f, 100.0, 200.0, 1.0e-12, 2U);
 
     EXPECT_FALSE(r.ok());
-    EXPECT_EQ(r.code, castle::status::out_of_range);
+    EXPECT_EQ(r.code, castle::status::not_converged);
     EXPECT_EQ(r.iterations, 2U);
     EXPECT_GT(r.error, 1.0e-12);
 
     // Zero budget returns the second starting point.
     const auto none = castle::math::find_root_secant(f, 100.0, 200.0, 1.0e-12, 0U);
-    EXPECT_EQ(none.code, castle::status::out_of_range);
+    EXPECT_EQ(none.code, castle::status::not_converged);
     EXPECT_EQ(none.iterations, 0U);
     EXPECT_EQ(none.value, 200.0);
     EXPECT_EQ(none.error, 100.0);

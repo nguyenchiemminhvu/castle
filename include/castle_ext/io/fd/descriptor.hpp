@@ -44,7 +44,7 @@ static CASTLE_CONSTEXPR bool descriptor_available = (CASTLE_USING_POSIX_APIS != 
  * @param out_fd Receives the new descriptor, or -1 on failure.
  * @param permissions Creation permissions, used when `O_CREAT` is present.
  * @param system_error Optional output receiving `errno` for system-call failures.
- * @return `ok`, `invalid_argument`, `system_call_error`, or `not_configured`.
+ * @return `ok`, `invalid_argument`, `system_call_error`, or `unsupported`.
  */
 CASTLE_INLINE castle::status open_fd(CASTLE_CONST char* path,
                               int flags,
@@ -70,7 +70,7 @@ CASTLE_INLINE castle::status open_fd(CASTLE_CONST char* path,
 #else
     (void)flags;
     (void)permissions;
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 #endif
 }
 
@@ -82,7 +82,7 @@ CASTLE_INLINE castle::status open_fd(CASTLE_CONST char* path,
  * @param bytes_read Receives the byte count (zero on error or end-of-file).
  * @param system_error Optional output receiving `errno` on a system-call failure.
  * @return `ok` when bytes were read, `empty` on EOF/non-blocking no-data,
- *         `invalid_argument`, `system_call_error`, or `not_configured`.
+ *         `invalid_argument`, `system_call_error`, or `unsupported`.
  */
 CASTLE_INLINE castle::status read_fd(int descriptor,
                               void* buffer,
@@ -120,7 +120,7 @@ CASTLE_INLINE castle::status read_fd(int descriptor,
 #else
     (void)buffer;
     (void)capacity;
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 #endif
 }
 
@@ -133,7 +133,7 @@ CASTLE_INLINE castle::status read_fd(int descriptor,
  * @param system_error Optional output receiving `errno` on a system-call failure.
  * @return `ok` when bytes were written, `full` when a non-blocking descriptor
  *         cannot currently accept data, `invalid_argument`, `system_call_error`,
- *         or `not_configured`.
+ *         or `unsupported`.
  */
 CASTLE_INLINE castle::status write_fd(int descriptor,
                                CASTLE_CONST void* buffer,
@@ -171,7 +171,7 @@ CASTLE_INLINE castle::status write_fd(int descriptor,
 #else
     (void)buffer;
     (void)size;
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 #endif
 }
 
@@ -308,7 +308,7 @@ public:
         if (is_open())
         {
             detail::clear_system_error(system_error);
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         return open_fd(path, flags, descriptor_, permissions, system_error);
     }
@@ -362,7 +362,8 @@ public:
         
         // LCOV_EXCL_START
         castle::status result = close(system_error);
-        if (result != castle::status::ok && result != castle::status::not_configured)
+        if (result != castle::status::ok && result != castle::status::not_configured
+            && result != castle::status::unsupported)
         {
             return result;
         }

@@ -41,5 +41,5 @@ int main()
 
 ## Constraints & Notes
 - The umbrella header inherits the constraints of its component headers: fixed-size storage, no heap allocation, no exceptions, no RTTI, no virtual dispatch, and no internal worker threads.
-- BSD socket operations require `CASTLE_USING_POSIX_APIS`; declarations remain available on unsupported builds and return `not_configured` for system operations.
+- BSD socket operations require `CASTLE_USING_POSIX_APIS`; declarations remain available on unsupported builds and return `unsupported` for system operations.
 - Prefer individual component headers when compile-time inclusion cost matters.

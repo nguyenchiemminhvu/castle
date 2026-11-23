@@ -56,7 +56,7 @@ namespace math
  *         bracket width in `error`. `code` is `status::ok` on convergence
  *         (including an exact zero at an end point or midpoint),
  *         `status::invalid_argument` when `f(lo)` and `f(hi)` have the same
- *         strict sign, and `status::out_of_range` when the budget was exhausted.
+ *         strict sign, and `status::not_converged` when the budget was exhausted.
  *         One evaluation of `f` per iteration plus two for the bracket.
  */
 template <typename F, typename T>
@@ -85,7 +85,7 @@ find_root_bisection(F&& f,
         return numeric_result<T>{lo, castle::math::abs(hi - lo), 0U, status::invalid_argument};
     }
 
-    numeric_result<T> result = {lo, castle::math::abs(hi - lo), 0U, status::out_of_range};
+    numeric_result<T> result = {lo, castle::math::abs(hi - lo), 0U, status::not_converged};
     for (unsigned i = 1U; i <= max_iterations; ++i)
     {
         CASTLE_CONST T mid = lo + static_cast<T>(0.5) * (hi - lo);
@@ -129,8 +129,8 @@ find_root_bisection(F&& f,
  * @param max_iterations Iteration budget.
  * @return `numeric_result` with the root estimate in `value` and the last step
  *         length in `error`. `code` is `status::ok` on convergence,
- *         `status::invalid_argument` when the derivative vanishes at an
- *         iterate, and `status::out_of_range` when the budget was exhausted.
+ *         `status::not_converged` when the derivative vanishes at an
+ *         iterate or the budget was exhausted.
  *         One evaluation of `f` and `df` per iteration.
  * @note Convergence is only guaranteed for starting points close enough to a
  *       simple root; prefer `find_root_bisection` when a bracket is known.
@@ -147,13 +147,13 @@ find_root_newton(F&& f,
     static_assert(meta::is_invocable<F&, T>::value, "find_root_newton requires a callable T f(T)");
     static_assert(meta::is_invocable<DF&, T>::value, "find_root_newton requires a callable T df(T)");
 
-    numeric_result<T> result = {x0, static_cast<T>(0), 0U, status::out_of_range};
+    numeric_result<T> result = {x0, static_cast<T>(0), 0U, status::not_converged};
     for (unsigned i = 1U; i <= max_iterations; ++i)
     {
         CASTLE_CONST T slope = df(result.value);
         if (slope == static_cast<T>(0))
         {
-            result.code = status::invalid_argument;
+            result.code = status::not_converged;
             return result;
         }
 
@@ -181,10 +181,10 @@ find_root_newton(F&& f,
  * @param max_iterations Iteration budget.
  * @return `numeric_result` with the root estimate in `value` and the last step
  *         length in `error`. `code` is `status::ok` on convergence (including
- *         an exact zero), `status::invalid_argument` when two successive
- *         iterates give equal non-zero function values (flat secant), and
- *         `status::out_of_range` when the budget was exhausted. One evaluation
- *         of `f` per iteration plus two to start.
+ *         an exact zero), `status::not_converged` when two successive
+ *         iterates give equal non-zero function values (flat secant) or the
+ *         budget was exhausted. One evaluation of `f` per iteration plus two
+ *         to start.
  */
 template <typename F, typename T>
 CASTLE_NODISCARD
@@ -199,7 +199,7 @@ find_root_secant(F&& f,
 
     T f0 = f(x0);
     T f1 = f(x1);
-    numeric_result<T> result = {x1, castle::math::abs(x1 - x0), 0U, status::out_of_range};
+    numeric_result<T> result = {x1, castle::math::abs(x1 - x0), 0U, status::not_converged};
     for (unsigned i = 1U; i <= max_iterations; ++i)
     {
         if (f1 == static_cast<T>(0))
@@ -210,7 +210,7 @@ find_root_secant(F&& f,
         }
         if (f1 == f0)
         {
-            result.code = status::invalid_argument;
+            result.code = status::not_converged;
             return result;
         }
 

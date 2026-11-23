@@ -66,7 +66,7 @@ public:
 
     /**
      * @brief Opens the virtual controller.
-     * @return `ok`, `invalid_argument` for a null/empty name, or `invalid_config` when already open.
+     * @return `ok`, `invalid_argument` for a null/empty name, or `invalid_state` when already open.
      */
     castle::status open(endpoint_type endpoint, can_config CASTLE_CONST& config, int* system_error) CASTLE_NOEXCEPT
     {
@@ -77,7 +77,7 @@ public:
         }
         if (open_)
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
 
         config_ = config;
@@ -116,7 +116,7 @@ public:
     /**
      * @brief Queues a frame for transmission (or loops it back in `can_mode::loopback`).
      * @return `ok`; `full` when the transmit queue holds `TxQueueDepth` unread frames;
-     *         `invalid_config` in `listen_only` mode; `system_call_error` while bus-off (errno `ENETUNREACH`);
+     *         `invalid_state` in `listen_only` mode; `system_call_error` while bus-off (errno `ENETUNREACH`);
      *         the status armed by `fail_next_send()`; `not_configured` when closed.
      */
     castle::status send(frame CASTLE_CONST& value, timeout_type, int* system_error) CASTLE_NOEXCEPT
@@ -128,7 +128,7 @@ public:
         }
         if (config_.mode == can_mode::listen_only)
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         if (forced_send_status_ != castle::status::ok)
         {

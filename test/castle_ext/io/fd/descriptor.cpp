@@ -74,7 +74,7 @@ TEST(FdDescriptor, BasicFdOwnsAndTransfersDescriptor)
     ASSERT_EQ(original.open("/dev/null", O_RDWR), castle::status::ok);
     EXPECT_TRUE(original.is_open());
     EXPECT_TRUE(castle::io::fd::is_valid_fd(original.native_handle()));
-    EXPECT_EQ(original.open("/dev/null", O_RDWR), castle::status::invalid_config);
+    EXPECT_EQ(original.open("/dev/null", O_RDWR), castle::status::invalid_state);
     EXPECT_EQ(original.set_nonblocking(true), castle::status::ok);
     EXPECT_EQ(original.set_nonblocking(false), castle::status::ok);
     EXPECT_EQ(original.set_close_on_exec(true), castle::status::ok);
@@ -184,7 +184,7 @@ TEST(FdDescriptor, ReadAndWriteErrorsCaptureErrno)
 TEST(FdDescriptor, PosixStubsRemainCallable)
 {
     castle::io::fd::basic_fd descriptor;
-    EXPECT_EQ(descriptor.open("/dev/null", 0), castle::status::not_configured);
+    EXPECT_EQ(descriptor.open("/dev/null", 0), castle::status::unsupported);
     castle::size_type count = 0U;
     EXPECT_EQ(descriptor.read_some(nullptr, 0U, count), castle::status::not_configured);
     EXPECT_EQ(count, 0U);

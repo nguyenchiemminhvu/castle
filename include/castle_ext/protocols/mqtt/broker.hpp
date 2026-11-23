@@ -358,7 +358,7 @@ private:
         packet_reader reader(packet.body, packet.remaining_length);
         if (state.protocol_level == 0U && packet.type != packet_type::connect)
         {
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
         }
         switch (packet.type)
         {
@@ -373,13 +373,13 @@ private:
             case packet_type::pingreq:
                 if (packet.remaining_length != 0U || state.protocol_level == 0U) // LCOV_EXCL_BR_LINE
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
                 return send_packet(state.handle, packet_type::pingresp, 0U, nullptr, 0U);
             case packet_type::disconnect:
                 if (state.protocol_level == 0U) // LCOV_EXCL_BR_LINE
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::protocol_error;
                 }
                 if (state.protocol_level == 5U && reader.remaining() != 0U)
                 {
@@ -393,13 +393,13 @@ private:
                 }
                 else if (state.protocol_level != 5U && reader.remaining() != 0U)
                 {
-                    return castle::status::invalid_argument;
+                    return castle::status::parse_error;
                 }
                 state.will_pending = false;
                 state.close_pending = true;
                 return castle::status::ok;
-            case packet_type::auth: return castle::status::invalid_config;
-            default: return castle::status::invalid_argument;
+            case packet_type::auth: return castle::status::unsupported;
+            default: return castle::status::protocol_error;
         }
     }
 
@@ -407,7 +407,7 @@ private:
     {
         if (state.protocol_level != 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
         }
         char protocol_name[8U]{}; size_type name_size = 0U;
         uint8_t level = 0U; uint8_t flags = 0U; uint16_t keep_alive = 0U;
@@ -415,7 +415,7 @@ private:
             !castle::succeeded(reader.get_u8(level)) || !castle::succeeded(reader.get_u8(flags)) ||
             !castle::succeeded(reader.get_u16(keep_alive)))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         state.protocol_level = level;
         bool name_ok = (level == 3U && text_equal(protocol_name, "MQIsdp")) ||
@@ -425,7 +425,7 @@ private:
             ((flags & 0x40U) != 0U && (flags & 0x80U) == 0U))
         {
             (void)send_connack(state, false, level > 5U ? reason_code::unsupported_protocol_version : reason_code::malformed_packet);
-            return castle::status::invalid_argument;
+            return level > 5U ? castle::status::unsupported : castle::status::parse_error;
         }
         properties_type connect_properties;
         if (level == 5U)
@@ -445,7 +445,7 @@ private:
         if (!castle::succeeded(reader.get_utf8(id, sizeof(id), id_size)))
         {
             (void)send_connack(state, false, reason_code::client_identifier_not_valid);
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         // A zero-length ClientId is only allowed with a clean session; the server assigns a unique one.
         bool assigned = id_size == 0U;
@@ -472,7 +472,7 @@ private:
                 !castle::succeeded(validate_topic_name(castle::dsa::string_view(will_topic, will_topic_size))) ||
                 !castle::succeeded(reader.get_binary(will_payload, sizeof(will_payload), will_payload_size)))
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
         }
         char username[MaxTopicLength]{}; size_type username_size = 0U;
@@ -481,22 +481,22 @@ private:
         bool has_password = (flags & 0x40U) != 0U;
         if (has_username && !castle::succeeded(reader.get_utf8(username, sizeof(username), username_size)))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if (has_password && !castle::succeeded(reader.get_binary(password, sizeof(password), password_size)))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if (reader.remaining() != 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if (authentication_enabled_ && (!has_username || !has_password ||
             !text_equal(expected_username_, castle::dsa::string_view(username, username_size)) ||
             !binary_equal(expected_password_, password, password_size)))
         {
             (void)send_connack(state, false, reason_code::bad_user_name_or_password);
-            return castle::status::not_configured;
+            return castle::status::permission_denied;
         }
 
         bool session_present = !clean && session_exists(id);
@@ -683,19 +683,19 @@ private:
         uint8_t quality_value = static_cast<uint8_t>((flags >> 1U) & 0x03U);
         if (quality_value > 2U) // LCOV_EXCL_BR_LINE
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         qos quality = static_cast<qos>(quality_value);
         char topic[MaxTopicLength]{}; size_type topic_size = 0U;
         if (!castle::succeeded(reader.get_utf8(topic, sizeof(topic), topic_size)) ||
             !castle::succeeded(validate_topic_name(castle::dsa::string_view(topic, topic_size))))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         uint16_t identifier = 0U;
         if (quality != qos::at_most_once && (!castle::succeeded(reader.get_u16(identifier)) || identifier == 0U))
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if (state.protocol_level == 5U)
         {
@@ -744,7 +744,7 @@ private:
         uint16_t identifier = 0U;
         if (!castle::succeeded(reader.get_u16(identifier)) || identifier == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if (state.protocol_level == 5U && reader.remaining() != 0U)
         {
@@ -758,7 +758,7 @@ private:
         }
         else if (state.protocol_level != 5U && reader.remaining() != 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         qos_entry* entry = find_qos(state.incoming_qos2, identifier);
         if (entry != nullptr)
@@ -776,7 +776,7 @@ private:
         uint16_t identifier = 0U;
         if (!castle::succeeded(reader.get_u16(identifier)) || identifier == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         uint8_t reason = 0U;
         if (state.protocol_level == 5U && reader.remaining() != 0U)
@@ -790,12 +790,12 @@ private:
         }
         else if (state.protocol_level != 5U && reader.remaining() != 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         qos_entry* entry = find_qos(state.outgoing, identifier);
         if (entry == nullptr || entry->state != expected)
         {
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
         }
         if (reason >= 0x80U)
         {
@@ -816,7 +816,7 @@ private:
         uint16_t identifier = 0U;
         if (!castle::succeeded(reader.get_u16(identifier)) || identifier == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if (state.protocol_level == 5U)
         {
@@ -842,7 +842,7 @@ private:
                 !castle::succeeded(validate_topic_filter(castle::dsa::string_view(filters[reason_count], filter_size))) ||
                 !castle::succeeded(reader.get_u8(options)))
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             uint8_t requested_qos = options & 0x03U;
             bool invalid_options = requested_qos > 2U;
@@ -856,7 +856,7 @@ private:
             }
             if (invalid_options)
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             requested[reason_count] = static_cast<qos>(requested_qos);
             if (add_subscription(state.client_id, castle::dsa::string_view(filters[reason_count]), requested[reason_count]))
@@ -871,7 +871,7 @@ private:
         }
         if (reason_count == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         packet_writer body(tx_, MaxPacketSize);
         (void)body.put_u16(identifier);
@@ -911,7 +911,7 @@ private:
         uint16_t identifier = 0U;
         if (!castle::succeeded(reader.get_u16(identifier)) || identifier == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         if (state.protocol_level == 5U)
         {
@@ -934,14 +934,14 @@ private:
             if (!castle::succeeded(reader.get_utf8(filter, sizeof(filter), filter_size)) ||
                 !castle::succeeded(validate_topic_filter(castle::dsa::string_view(filter, filter_size))))
             {
-                return castle::status::invalid_argument;
+                return castle::status::parse_error;
             }
             bool removed = remove_subscription(state.client_id, filter);
             results[count++] = state.protocol_level == 5U ? static_cast<uint8_t>(removed ? 0U : 0x11U) : 0U;
         }
         if (count == 0U)
         {
-            return castle::status::invalid_argument;
+            return castle::status::parse_error;
         }
         packet_writer body(tx_, MaxPacketSize);
         (void)body.put_u16(identifier);

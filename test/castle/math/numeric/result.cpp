@@ -18,9 +18,9 @@ TEST(MathNumericResult, FieldsAndOkForConvergedDouble)
 
 TEST(MathNumericResult, OkIsFalseForEveryNonOkStatus)
 {
-    const castle::math::numeric_result<double> out_of_range = {2.0, 0.5, 12U, castle::status::out_of_range};
-    EXPECT_FALSE(out_of_range.ok());
-    EXPECT_DOUBLE_EQ(out_of_range.value, 2.0);
+    const castle::math::numeric_result<double> not_converged = {2.0, 0.5, 12U, castle::status::not_converged};
+    EXPECT_FALSE(not_converged.ok());
+    EXPECT_DOUBLE_EQ(not_converged.value, 2.0);
 
     const castle::math::numeric_result<double> invalid = {0.0, 0.0, 0U, castle::status::invalid_argument};
     EXPECT_FALSE(invalid.ok());
@@ -38,14 +38,14 @@ TEST(MathNumericResult, FloatInstantiation)
     EXPECT_EQ(r.iterations, 3U);
     EXPECT_TRUE(r.ok());
 
-    const castle::math::numeric_result<float> failed = {0.25F, 1e-2F, 3U, castle::status::out_of_range};
+    const castle::math::numeric_result<float> failed = {0.25F, 1e-2F, 3U, castle::status::not_converged};
     EXPECT_FALSE(failed.ok());
 }
 
 TEST(MathNumericResult, OkIsConstexpr)
 {
     constexpr castle::math::numeric_result<double> good = {1.0, 0.0, 1U, castle::status::ok};
-    constexpr castle::math::numeric_result<double> bad = {1.0, 0.0, 1U, castle::status::out_of_range};
+    constexpr castle::math::numeric_result<double> bad = {1.0, 0.0, 1U, castle::status::not_converged};
     static_assert(good.ok(), "ok");
     static_assert(!bad.ok(), "not ok");
     EXPECT_TRUE(good.ok());

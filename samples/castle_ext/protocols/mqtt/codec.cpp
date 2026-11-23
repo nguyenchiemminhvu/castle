@@ -16,7 +16,7 @@ int main()
     uint8_t partial[] = {0x80U}; uint32_t decoded = 0U; castle::size_type consumed = 0U;
     CASTLE_SAMPLE_CHECK(decode_remaining_length(partial, sizeof(partial), decoded, consumed) == castle::status::empty);
     uint8_t malformed[] = {0x80U, 0x80U, 0x80U, 0x80U};
-    CASTLE_SAMPLE_CHECK(decode_remaining_length(malformed, sizeof(malformed), decoded, consumed) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(decode_remaining_length(malformed, sizeof(malformed), decoded, consumed) == castle::status::parse_error);
     CASTLE_SAMPLE_CHECK(!valid_fixed_header(packet_type::pubrel, 0U));
     CASTLE_SAMPLE_CHECK(valid_fixed_header(packet_type::pubrel, 0x02U));
     CASTLE_SAMPLE_CHECK(!valid_fixed_header(packet_type::publish, 0x06U));

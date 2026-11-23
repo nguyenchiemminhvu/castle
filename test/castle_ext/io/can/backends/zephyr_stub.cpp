@@ -41,8 +41,8 @@ TEST(CanZephyrStub, ToStatusIsUnconditional)
     EXPECT_EQ(zephyr::native::to_status(-EAGAIN), status::full);
     EXPECT_EQ(zephyr::native::to_status(-ENOSPC), status::full);
     EXPECT_EQ(zephyr::native::to_status(-EINVAL), status::invalid_argument);
-    EXPECT_EQ(zephyr::native::to_status(-ENOTSUP), status::invalid_config);
-    EXPECT_EQ(zephyr::native::to_status(-ERANGE), status::invalid_config);
+    EXPECT_EQ(zephyr::native::to_status(-ENOTSUP), status::unsupported);
+    EXPECT_EQ(zephyr::native::to_status(-ERANGE), status::out_of_range);
     EXPECT_EQ(zephyr::native::to_status(-ENETDOWN), status::not_configured);
     EXPECT_EQ(zephyr::native::to_status(-EIO), status::system_call_error);
 }
@@ -56,22 +56,22 @@ TEST(CanZephyrStub, OpenWithNullDeviceIsInvalidArgument)
     EXPECT_FALSE(backend.is_open());
 }
 
-TEST(CanZephyrStub, OpenWithDeviceIsNotConfiguredAndStaysClosed)
+TEST(CanZephyrStub, OpenWithDeviceIsUnsupportedAndStaysClosed)
 {
     stub_backend backend;
     int err = 9;
     EXPECT_EQ(backend.open(dummy_device(), can_config(bitrate_500k, can_mode::loopback), &err),
-              status::not_configured);
+              status::unsupported);
     EXPECT_EQ(err, 0);
     EXPECT_FALSE(backend.is_open());
-    EXPECT_EQ(backend.open(dummy_device(), can_config(), nullptr), status::not_configured); // never "already open"
+    EXPECT_EQ(backend.open(dummy_device(), can_config(), nullptr), status::unsupported); // never "already open"
     EXPECT_FALSE(backend.is_open());
 }
 
 TEST(CanZephyrStub, EveryOperationIsNotConfigured)
 {
     stub_backend backend;
-    ASSERT_EQ(backend.open(dummy_device(), can_config(), nullptr), status::not_configured);
+    ASSERT_EQ(backend.open(dummy_device(), can_config(), nullptr), status::unsupported);
 
     int err = 5;
     EXPECT_EQ(backend.close(&err), status::not_configured);
@@ -125,24 +125,24 @@ TEST(CanZephyrStub, QueryStatusLeavesDefaultInitialisedOut)
     EXPECT_EQ(st.tx_failures, 0U);
 }
 
-TEST(CanZephyrStub, BusFacadeReportsNotConfiguredEverywhere)
+TEST(CanZephyrStub, BusFacadeReportsStubStatusesEverywhere)
 {
     stub_bus bus;
     EXPECT_FALSE(bus.is_open());
 
     EXPECT_EQ(bus.open(nullptr), status::invalid_argument); // checked before availability
-    EXPECT_EQ(bus.open(dummy_device(), can_config(bitrate_125k)), status::not_configured);
-    EXPECT_EQ(bus.open(dummy_device(), can_config(max_bitrate + 1U)), status::invalid_config); // facade validation first
+    EXPECT_EQ(bus.open(dummy_device(), can_config(bitrate_125k)), status::unsupported);
+    EXPECT_EQ(bus.open(dummy_device(), can_config(max_bitrate + 1U)), status::out_of_range); // facade validation first
     EXPECT_FALSE(bus.is_open());
 
     EXPECT_EQ(bus.send(frame(0x1U)), status::not_configured);
     const uint8_t payload[] = {1U, 2U};
     EXPECT_EQ(bus.send(0x2U, payload, sizeof(payload)), status::not_configured);
-    EXPECT_EQ(bus.send(frame(0x1U), timeout_type(-1)), status::invalid_argument);
+    EXPECT_EQ(bus.send(frame(0x1U), timeout_type(-1)), status::out_of_range);
 
     frame out;
     EXPECT_EQ(bus.receive(out), status::not_configured);
-    EXPECT_EQ(bus.receive(out, timeout_type(-1)), status::invalid_argument);
+    EXPECT_EQ(bus.receive(out, timeout_type(-1)), status::out_of_range);
 
     filter_handle handle = 7;
     EXPECT_EQ(bus.add_filter(filter::exact(0x10U), &handle), status::not_configured);
@@ -166,11 +166,11 @@ TEST(CanZephyrStub, DestructorOfStubIsHarmless)
 {
     {
         stub_backend backend;
-        EXPECT_EQ(backend.open(dummy_device(), can_config(), nullptr), status::not_configured);
+        EXPECT_EQ(backend.open(dummy_device(), can_config(), nullptr), status::unsupported);
     }
     {
         stub_bus bus;
-        EXPECT_EQ(bus.open(dummy_device()), status::not_configured);
+        EXPECT_EQ(bus.open(dummy_device()), status::unsupported);
     }
     SUCCEED();
 }

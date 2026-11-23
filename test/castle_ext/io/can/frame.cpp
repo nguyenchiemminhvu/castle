@@ -453,27 +453,27 @@ TEST(CanFrame, ValidateAcceptsRepresentableFrames)
 
 TEST(CanFrame, ValidateRejectsIdentifierWiderThanFormat)
 {
-    EXPECT_EQ(validate_frame(make(0x800U)), castle::status::invalid_argument);
-    EXPECT_EQ(validate_frame(make(0xFFFFFFFFU)), castle::status::invalid_argument);
+    EXPECT_EQ(validate_frame(make(0x800U)), castle::status::out_of_range);
+    EXPECT_EQ(validate_frame(make(0xFFFFFFFFU)), castle::status::out_of_range);
     EXPECT_EQ(validate_frame(make(0x800U, id_format::extended)), castle::status::ok);
     EXPECT_EQ(validate_frame(make(0x1FFFFFFFU, id_format::extended)), castle::status::ok);
-    EXPECT_EQ(validate_frame(make(0x20000000U, id_format::extended)), castle::status::invalid_argument);
-    EXPECT_EQ(validate_frame(make(0xFFFFFFFFU, id_format::extended)), castle::status::invalid_argument);
+    EXPECT_EQ(validate_frame(make(0x20000000U, id_format::extended)), castle::status::out_of_range);
+    EXPECT_EQ(validate_frame(make(0xFFFFFFFFU, id_format::extended)), castle::status::out_of_range);
 }
 
 TEST(CanFrame, ValidateRejectsDlcAboveEight)
 {
     frame f(0x1U);
     f.dlc = 9U;
-    EXPECT_EQ(validate_frame(f), castle::status::invalid_argument);
+    EXPECT_EQ(validate_frame(f), castle::status::out_of_range);
     f.dlc = 255U;
-    EXPECT_EQ(validate_frame(f), castle::status::invalid_argument);
+    EXPECT_EQ(validate_frame(f), castle::status::out_of_range);
     f.dlc = 8U;
     EXPECT_EQ(validate_frame(f), castle::status::ok);
 
     f.type = frame_type::remote;
     f.dlc = 9U;
-    EXPECT_EQ(validate_frame(f), castle::status::invalid_argument);
+    EXPECT_EQ(validate_frame(f), castle::status::out_of_range);
 }
 
 TEST(CanFrame, ValidateRejectsOutOfRangeEnumerators)
@@ -499,11 +499,11 @@ TEST(CanFrame, ValidateReportsInvalidArgumentForEachIndependentFault)
 
     frame bad_id = f;
     bad_id.id = 0x800U;
-    EXPECT_EQ(validate_frame(bad_id), castle::status::invalid_argument);
+    EXPECT_EQ(validate_frame(bad_id), castle::status::out_of_range);
 
     frame bad_dlc = f;
     bad_dlc.dlc = 9U;
-    EXPECT_EQ(validate_frame(bad_dlc), castle::status::invalid_argument);
+    EXPECT_EQ(validate_frame(bad_dlc), castle::status::out_of_range);
 
     frame bad_type = f;
     bad_type.type = static_cast<frame_type>(7U);

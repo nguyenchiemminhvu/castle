@@ -92,12 +92,12 @@ int main()
     CASTLE_SAMPLE_CHECK(validate_frame(frame(max_extended_id, id_format::extended)) == castle::status::ok);
 
     // ...and rejects fields that were assigned directly to inconsistent values.
-    CASTLE_SAMPLE_CHECK(validate_frame(frame(max_standard_id + 1U)) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(validate_frame(frame(max_standard_id + 1U)) == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(validate_frame(frame(max_extended_id + 1U, id_format::extended))
-                        == castle::status::invalid_argument);
+                        == castle::status::out_of_range);
     frame oversized(0x10U);
     oversized.dlc = static_cast<uint8_t>(max_data_length + 1U);
-    CASTLE_SAMPLE_CHECK(validate_frame(oversized) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(validate_frame(oversized) == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(oversized.data_length() == max_data_length); // data_length() clamps for safe reads
     frame bad_format(0x10U);
     bad_format.format = static_cast<id_format>(7U);

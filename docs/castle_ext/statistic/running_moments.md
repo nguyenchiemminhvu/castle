@@ -31,7 +31,7 @@ Numerically stable one-pass mean, variance, standard deviation, RMS, skewness, a
 | `sum()`, `sum_squares()` | Return `mean * n` and `M2 + n * mean^2`; zero when empty. |
 | `rms(out)` | `sqrt(sum_squares / n)`. `ok` or `empty`. |
 | `population_variance(out)`, `population_stddev(out)` | `M2 / n` and its square root. `ok` or `empty`. |
-| `sample_variance(out)`, `sample_stddev(out)` | `M2 / (n - 1)` and its square root. `ok`, or `empty` with fewer than two samples. |
+| `sample_variance(out)`, `sample_stddev(out)` | `M2 / (n - 1)` and its square root. `ok`, `empty` without samples, or `insufficient_data` with one sample. |
 | `skewness(out)` (`Order >= 3`) | `g1 = sqrt(n) * M3 / M2^1.5`. `ok`, `empty`, or `invalid_argument` when the variance is zero. |
 | `excess_kurtosis(out)` (`Order >= 4`) | `g2 = n * M4 / M2^2 - 3`. `ok`, `empty`, or `invalid_argument` when the variance is zero. |
 | `order` | Static constant: `Order`. |

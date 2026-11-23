@@ -92,7 +92,7 @@ TEST(CsvParseTest, StrictColumnMode)
     EXPECT_EQ(doc.rows(), 3U);
 
     const auto result = parse(doc, string_view("a,b\n1\n"), parse_options);
-    EXPECT_EQ(result.status, castle::status::invalid_argument);
+    EXPECT_EQ(result.status, castle::status::parse_error);
     EXPECT_EQ(result.code, error_code::inconsistent_columns);
     EXPECT_TRUE(doc.empty());
 }
@@ -119,7 +119,7 @@ TEST(CsvParseTest, InvalidSyntaxReportsLocationAndClearsDocument)
     {
         document<8U, 8U, 32U> doc;
         const auto result = parse(doc, test_case.input);
-        EXPECT_TRUE(result.status == castle::status::invalid_argument);
+        EXPECT_TRUE(result.status == castle::status::parse_error);
         EXPECT_TRUE(result.code == test_case.code);
         EXPECT_TRUE(result.line == test_case.line);
         EXPECT_TRUE(result.column == test_case.column);
@@ -134,7 +134,7 @@ TEST(CsvParseTest, InvalidDelimiterIsRejected)
     options invalid;
     invalid.delimiter = '"';
     auto result = parse(doc, string_view("a,b\n"), invalid);
-    EXPECT_EQ(result.status, castle::status::invalid_argument);
+    EXPECT_EQ(result.status, castle::status::invalid_config);
     EXPECT_EQ(result.code, error_code::invalid_delimiter);
     EXPECT_TRUE(doc.empty());
 
@@ -326,23 +326,23 @@ TEST(CsvConversionTest, BooleanIntegerEnumAndFloatingPoint)
     EXPECT_EQ(doc.get_bool(row, 7U, bool_value), castle::status::ok);
     EXPECT_TRUE(bool_value);
     EXPECT_EQ(doc.set(row, 0U, string_view("maybe")), castle::status::ok);
-    EXPECT_EQ(doc.get_bool(row, 0U, bool_value), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_bool(row, 0U, bool_value), castle::status::parse_error);
 
     EXPECT_EQ(doc.set(row, 0U, string_view("999999999999999999999999")), castle::status::ok);
     EXPECT_EQ(doc.get_integer(row, 0U, signed_value), castle::status::out_of_range);
     EXPECT_EQ(doc.set(row, 1U, string_view("-1")), castle::status::ok);
     EXPECT_EQ(doc.get_integer(row, 1U, unsigned_value), castle::status::invalid_argument);
     EXPECT_EQ(doc.set(row, 2U, string_view("12x")), castle::status::ok);
-    EXPECT_EQ(doc.get_integer(row, 2U, signed_value), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_integer(row, 2U, signed_value), castle::status::parse_error);
 
     EXPECT_EQ(doc.set(row, 3U, string_view("1e")), castle::status::ok);
-    EXPECT_EQ(doc.get_floating(row, 3U, double_value), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_floating(row, 3U, double_value), castle::status::parse_error);
     EXPECT_EQ(doc.set(row, 3U, string_view("1e1025")), castle::status::ok);
     EXPECT_EQ(doc.get_floating(row, 3U, double_value), castle::status::out_of_range);
     EXPECT_EQ(doc.set(row, 3U, string_view(".")), castle::status::ok);
-    EXPECT_EQ(doc.get_floating(row, 3U, double_value), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_floating(row, 3U, double_value), castle::status::parse_error);
     EXPECT_EQ(doc.set(row, 3U, string_view("1.2x")), castle::status::ok);
-    EXPECT_EQ(doc.get_floating(row, 3U, double_value), castle::status::invalid_argument);
+    EXPECT_EQ(doc.get_floating(row, 3U, double_value), castle::status::parse_error);
     EXPECT_EQ(doc.set(row, 3U, string_view("3.125e+1")), castle::status::ok);
     EXPECT_EQ(doc.get_floating(row, 3U, double_value), castle::status::ok);
     EXPECT_DOUBLE_EQ(double_value, 31.25);
@@ -366,9 +366,9 @@ TEST(CsvDetailTest, NumericAndFieldFormattingFailureBranches)
     double floating_value = 0.0;
 
     EXPECT_EQ(parse_integer(string_view(), signed_value), castle::status::invalid_argument);
-    EXPECT_EQ(parse_integer(string_view("-"), signed_value), castle::status::invalid_argument);
+    EXPECT_EQ(parse_integer(string_view("-"), signed_value), castle::status::parse_error);
     EXPECT_EQ(parse_integer(string_view("-1"), unsigned_value), castle::status::invalid_argument);
-    EXPECT_EQ(parse_integer(string_view("12x"), signed_value), castle::status::invalid_argument);
+    EXPECT_EQ(parse_integer(string_view("12x"), signed_value), castle::status::parse_error);
     EXPECT_EQ(parse_integer(string_view("999999999999999999999999999999999999999999"), unsigned_value),
               castle::status::out_of_range);
     EXPECT_EQ(parse_integer(string_view("2147483648"), signed_value), castle::status::out_of_range);
@@ -381,15 +381,15 @@ TEST(CsvDetailTest, NumericAndFieldFormattingFailureBranches)
     EXPECT_EQ(parse_floating(string_view(), floating_value), castle::status::invalid_argument);
     EXPECT_EQ(parse_floating(string_view("+3.5"), floating_value), castle::status::ok);
     EXPECT_DOUBLE_EQ(floating_value, 3.5);
-    EXPECT_EQ(parse_floating(string_view("."), floating_value), castle::status::invalid_argument);
-    EXPECT_EQ(parse_floating(string_view("1e"), floating_value), castle::status::invalid_argument);
+    EXPECT_EQ(parse_floating(string_view("."), floating_value), castle::status::parse_error);
+    EXPECT_EQ(parse_floating(string_view("1e"), floating_value), castle::status::parse_error);
     EXPECT_EQ(parse_floating(string_view("1e+3"), floating_value), castle::status::ok);
     EXPECT_DOUBLE_EQ(floating_value, 1000.0);
     EXPECT_EQ(parse_floating(string_view("1e-3"), floating_value), castle::status::ok);
     EXPECT_DOUBLE_EQ(floating_value, 0.001);
     EXPECT_EQ(parse_floating(string_view("1e1025"), floating_value), castle::status::out_of_range);
     EXPECT_EQ(parse_floating(string_view("1e100000"), floating_value), castle::status::out_of_range);
-    EXPECT_EQ(parse_floating(string_view("1.2x"), floating_value), castle::status::invalid_argument);
+    EXPECT_EQ(parse_floating(string_view("1.2x"), floating_value), castle::status::parse_error);
 
     castle::dsa::string<1U> tiny_integer;
     EXPECT_EQ(format_integer(static_cast<int32_t>(-12), tiny_integer), castle::status::full);
@@ -479,7 +479,7 @@ TEST(CsvSerializeTest, InvalidDelimiterAndOutputCapacity)
     invalid.delimiter = '\n';
     castle::dsa::string<64U> output;
     auto result = serialize(doc, output, invalid);
-    EXPECT_EQ(result.status, castle::status::invalid_argument);
+    EXPECT_EQ(result.status, castle::status::invalid_config);
     EXPECT_EQ(result.code, error_code::invalid_delimiter);
     EXPECT_TRUE(output.empty());
 
@@ -579,7 +579,7 @@ TEST(CsvParseTest, QuotedParserLineEndingAndQuoteClosedPaths)
 
     document malformed;
     const auto result = castle::serialization::csv::parse(malformed, string_view("\"a\"x\n"));
-    EXPECT_EQ(result.status, castle::status::invalid_argument);
+    EXPECT_EQ(result.status, castle::status::parse_error);
     EXPECT_EQ(result.code, castle::serialization::csv::error_code::invalid_quote);
 
     using tight_document = castle::serialization::csv::document<2U, 2U, 1U>;
@@ -651,8 +651,8 @@ TEST(CsvParseTest, ConversionParserAndFieldCapacityEdges)
 
     EXPECT_EQ(detail::parse_floating(string_view("1e309"), floating), castle::status::out_of_range);
     int32_t integer = 0;
-    EXPECT_EQ(detail::parse_floating(string_view("12.3x"), floating), castle::status::invalid_argument);
-    EXPECT_EQ(detail::parse_integer(string_view("12x"), integer), castle::status::invalid_argument);
+    EXPECT_EQ(detail::parse_floating(string_view("12.3x"), floating), castle::status::parse_error);
+    EXPECT_EQ(detail::parse_integer(string_view("12x"), integer), castle::status::parse_error);
 
     string<2U> decimal_tight;
     EXPECT_EQ(detail::format_floating(12.3, decimal_tight, 1U), castle::status::full);
@@ -671,7 +671,7 @@ TEST(CsvParseTest, ConversionParserAndFieldCapacityEdges)
     document malformed;
     const char embedded_nul[] = {'a', '\0', 'b'};
     const auto parsed = parse(malformed, string_view(embedded_nul, 3U));
-    EXPECT_EQ(parsed.status, castle::status::invalid_argument);
+    EXPECT_EQ(parsed.status, castle::status::parse_error);
     EXPECT_EQ(parsed.code, error_code::invalid_character);
 }
 

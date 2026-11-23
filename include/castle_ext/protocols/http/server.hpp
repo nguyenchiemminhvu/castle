@@ -856,7 +856,7 @@ public:
     {
         if (started_)
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         castle::status result = transport_.set_default_callback(
             [this](client_handle handle, castle::net::endpoint CASTLE_CONST&, uint8_t CASTLE_CONST* data, size_type size)
@@ -1693,7 +1693,7 @@ private:
             !append_text(response_output_, max_response_size_, used, detail::reason_phrase(response.status_)) ||
             !append_text(response_output_, max_response_size_, used, string_view("\r\n")))
         {
-            return castle::status::out_of_range;
+            return castle::status::full;
         }
         bool no_body = request.method_ == method::head || response.status_ == 204U || response.status_ == 304U ||
                        (response.status_ >= 100U && response.status_ < 200U);
@@ -1728,18 +1728,18 @@ private:
                 !append_text(response_output_, max_response_size_, used, header.value) ||
                 !append_text(response_output_, max_response_size_, used, string_view("\r\n")))
             {
-                return castle::status::out_of_range;
+                return castle::status::full;
             }
         }
         if (!append_text(response_output_, max_response_size_, used, string_view("\r\n")))
         {
-            return castle::status::out_of_range;
+            return castle::status::full;
         }
         if (!no_body)
         {
             if (response.body_size_ > max_response_size_ - used)
             {
-                return castle::status::out_of_range;
+                return castle::status::full;
             }
             for (size_type i = 0U; i < response.body_size_; ++i)
             {

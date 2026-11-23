@@ -19,9 +19,9 @@ Provides checked MQTT fixed-header handling, canonical Remaining Length encoding
 |---|---|
 | `packet_view` | View of a complete packet in an input TCP stream. |
 | `encode_remaining_length(value, out, written)` | Encodes MQTT Remaining Length in its minimal one-to-four-byte representation. |
-| `decode_remaining_length(input, size, value, consumed)` | Decodes Remaining Length; returns `empty` for incomplete input and rejects malformed/noncanonical encodings. |
+| `decode_remaining_length(input, size, value, consumed)` | Decodes Remaining Length; returns `empty` for incomplete input, `parse_error` for malformed/noncanonical encodings, and `out_of_range` above the MQTT limit. |
 | `valid_fixed_header(type, flags)` | Checks packet-type-specific fixed flags, including PUBLISH QoS and DUP restrictions. |
-| `inspect_packet(input, size, max_size, view)` | Inspects one complete frame without copying; returns `empty` for an incomplete stream frame. |
+| `inspect_packet(input, size, max_size, view)` | Inspects one complete frame without copying; returns `empty` for an incomplete stream frame, `parse_error` for malformed fixed headers, and `out_of_range` when the packet exceeds the configured maximum. |
 | `packet_writer` | Bounded cursor with `put_u8/u16/u32`, `put_bytes`, `put_utf8`, `put_binary`, and `put_varint`. |
 | `packet_reader` | Bounds-checked cursor with matching read operations and `skip`. |
 | `encode_properties` / `decode_properties` | Encode/decode a bounded MQTT 5 property section. Unknown IDs can optionally be skipped. |
@@ -44,4 +44,4 @@ int main()
 ```
 
 ## Constraints & Notes
-The codec never allocates. The caller owns input/output buffers and chooses maximum packet size. Remaining Length is limited to 268,435,455 bytes by MQTT, while practical users should configure a much smaller packet maximum. `inspect_packet` never consumes bytes; callers advance by `packet_size` after handling. Property list entries are bounded by compile-time capacities and only known property wire types are encoded.
+Malformed wire encodings return `parse_error`; structurally valid values that violate MQTT protocol constraints return `protocol_error`; incomplete stream input returns `empty`; invalid caller buffers/arguments return `invalid_argument`. The codec never allocates. The caller owns input/output buffers and chooses maximum packet size. Remaining Length is limited to 268,435,455 bytes by MQTT, while practical users should configure a much smaller packet maximum. `inspect_packet` never consumes bytes; callers advance by `packet_size` after handling. Property list entries are bounded by compile-time capacities and only known property wire types are encoded.

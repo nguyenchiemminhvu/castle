@@ -50,15 +50,19 @@ struct name_service_event
  * @param data Message payload; must point to at least 40 readable bytes.
  * @param length Payload size, which must equal 40 bytes.
  * @param out Decoded event, unchanged on failure.
- * @return `ok`; `invalid_argument` for null, wrong length, missing NUL or unknown flags.
+ * @return `ok`; `invalid_argument` for null; `protocol_error` for wrong length, missing NUL, bad address or unknown flags.
  */
 CASTLE_NODISCARD CASTLE_INLINE castle::status decode_name_service_message(void CASTLE_CONST* data,
                                                                     size_type length,
                                                                     name_service_event& out) CASTLE_NOEXCEPT
 {
-    if (data == nullptr || length != name_service_message_size)
+    if (data == nullptr)
     {
         return castle::status::invalid_argument;
+    }
+    if (length != name_service_message_size)
+    {
+        return castle::status::protocol_error;
     }
 
     uint8_t CASTLE_CONST* bytes = static_cast<uint8_t CASTLE_CONST*>(data);
@@ -69,7 +73,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status decode_name_service_message(void C
     }
     if (name_length == 0U || name_length == rpmsg_name_size || name_length > max_name_length)
     {
-        return castle::status::invalid_argument;
+        return castle::status::protocol_error;
     }
 
     uint32_t raw_address = 0U;
@@ -81,13 +85,13 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status decode_name_service_message(void C
         || (raw_flags != static_cast<uint32_t>(name_service_action::create)
             && raw_flags != static_cast<uint32_t>(name_service_action::destroy)))
     {
-        return castle::status::invalid_argument;
+        return castle::status::protocol_error;
     }
 
     name_service_event candidate;
     if (candidate.name.assign(reinterpret_cast<char CASTLE_CONST*>(bytes)) != castle::status::ok)
     {
-        return castle::status::invalid_argument;
+        return castle::status::protocol_error;
     }
     candidate.endpoint_address = raw_address;
     candidate.action = static_cast<name_service_action>(raw_flags);
@@ -100,7 +104,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status decode_name_service_message(void C
  * @param event Source event.
  * @param output Output buffer, at least `name_service_message_size` bytes.
  * @param capacity Output buffer capacity.
- * @return `ok`; `invalid_argument` for invalid event; `out_of_range` when output is short.
+ * @return `ok`; `invalid_argument` for invalid event; `full` when output is short.
  */
 CASTLE_NODISCARD CASTLE_INLINE castle::status encode_name_service_message(name_service_event CASTLE_CONST& event,
                                                                     void* output,
@@ -113,7 +117,7 @@ CASTLE_NODISCARD CASTLE_INLINE castle::status encode_name_service_message(name_s
     }
     if (capacity < name_service_message_size)
     {
-        return castle::status::out_of_range;
+        return castle::status::full;
     }
 
     uint8_t* bytes = static_cast<uint8_t*>(output);

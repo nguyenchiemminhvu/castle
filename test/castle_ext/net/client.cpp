@@ -134,9 +134,9 @@ TEST(NetClient, OpenAndOperationStatusAreForwarded)
     EXPECT_FALSE(client.is_open());
     EXPECT_EQ(client.process_once(), castle::status::not_configured);
     EXPECT_EQ(client.open(address_family::ipv4), castle::status::ok);
-    EXPECT_EQ(client.open(address_family::ipv4), castle::status::invalid_config);
+    EXPECT_EQ(client.open(address_family::ipv4), castle::status::invalid_state);
     size_type bytes = 99U;
-    EXPECT_EQ(client.send_to("x", 1U, endpoint::loopback_ipv4(1U), bytes), castle::status::invalid_config);
+    EXPECT_EQ(client.send_to("x", 1U, endpoint::loopback_ipv4(1U), bytes), castle::status::unsupported);
     EXPECT_EQ(client.close(), castle::status::ok);
 
     udp_client<> datagram_client;
@@ -260,7 +260,7 @@ TEST(NetClient, CallbackCannotReenterProcessOnceButMayClose)
     size_type bytes = 0U;
     ASSERT_EQ(server.send_to("c", 1U, client_address, bytes), castle::status::ok);
     EXPECT_EQ(client.process_once(1000), castle::status::ok);
-    EXPECT_EQ(nested, castle::status::invalid_config);
+    EXPECT_EQ(nested, castle::status::invalid_state);
     EXPECT_FALSE(client.is_open());
 }
 
@@ -392,7 +392,7 @@ TEST(NetClient, MoveTransfersSocketPeerAndCallback)
 TEST(NetClient, UnsupportedTargetKeepsApiAvailable)
 {
     tcp_client<> client;
-    EXPECT_EQ(client.open(), castle::status::not_configured);
+    EXPECT_EQ(client.open(), castle::status::unsupported);
     EXPECT_EQ(client.process_once(), castle::status::not_configured);
 }
 

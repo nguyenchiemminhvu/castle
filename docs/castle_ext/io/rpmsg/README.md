@@ -255,8 +255,7 @@ RB --> ROA
 @startuml
 skinparam shadowing false
 [*] --> Constructed : basic_device(backend)
-Constructed --> Initialized : initialize() == ok\n(backend.initialize OK)
-Constructed --> Constructed : initialize() fails\n(invalid_config, full, ...)
+Constructed --> Constructed : initialize() fails\n(invalid_config, out_of_range, full, unsupported, ...)
 Initialized --> Initialized : endpoint.create() / destroy()\nNS events / poll()
 Initialized --> Constructed : shutdown()\n(all endpoints destroyed,\nservice table cleared)
 Constructed --> [*] : ~basic_device()
@@ -601,9 +600,9 @@ castle::status st = host_dev.initialize(cfg);
 | `rvdev`, `vdev`, `shm_io` non-null | `openamp_backend::initialize` | `invalid_config` |
 | `shared_memory != nullptr`, `shared_memory_size > 0` (host role only) | `openamp_backend::initialize` | `invalid_config` |
 | `node_role` equals the virtio device role | `openamp_backend::initialize` | `invalid_config` |
-| `buffer_size >= max_payload_size + 16`, `1 <= buffer_count <= Options::buffer_count`, `buffer_size <= Options::buffer_size` | `basic_device::initialize` | `invalid_config` |
+| `buffer_size >= max_payload_size + 16`, `1 <= buffer_count <= Options::buffer_count`, `buffer_size <= Options::buffer_size` | `basic_device::initialize` | `out_of_range` |
 | Free slot in the global NS router (max 4 backends) | `openamp_backend::initialize` | `full` |
-| Not already initialized | device and backend | `invalid_config` |
+| Not already initialized | device and backend | `invalid_state` |
 
 Shut down in reverse order: destroy endpoints (or let handles go out of scope), `dev.shutdown()`, then release platform resources. `~basic_device()` and `~basic_endpoint()` clean up automatically.
 
@@ -634,7 +633,7 @@ Rules enforced by the facade:
 * Destination must be bound (`not_configured` otherwise) and not in the reserved range (`invalid_argument`).
 * Explicit local addresses must be `ANY` or `>= 1024`; duplicates return `already_exists`.
 * Service names are 1..31 characters (`out_of_range` if longer).
-* **OpenAMP backend timeouts:** only `no_wait` (0) and `wait_forever` (-1). Positive millisecond timeouts return `invalid_config`.
+* **OpenAMP backend timeouts:** only `no_wait` (0) and `wait_forever` (-1). Other timeout values return `invalid_argument`.
 * Endpoint handles are move-only; assigning over a live endpoint destroys the old one first.
 
 ## 8. Name Service
@@ -680,7 +679,7 @@ if (castle::succeeded(st))
 ```
 
 * An active `tx_buffer` is move-only. Never copy or reuse it; after a successful send or release `tx.active == false`.
-* Requires `Options::zero_copy == true`, otherwise `not_configured`.
+* Requires `Options::zero_copy == true`, otherwise `unsupported`.
 * A buffer belongs to the endpoint that acquired it (`invalid_argument` otherwise).
 
 ## 10. Configuration (`options<>`)
@@ -712,17 +711,22 @@ Violations are compile-time `static_assert` failures. `Options::buffer_*` are co
 | Status | Typical cause here |
 |---|---|
 | `ok` | Success |
-| `not_configured` | Device/endpoint not initialized, destination unbound, zero-copy disabled, stale handle |
-| `invalid_config` | Role/pointer/geometry mismatch, double init, unsupported timeout |
-| `invalid_argument` | Null name/data, reserved or invalid address, foreign tx buffer |
+| `not_configured` | Device/endpoint not initialized, destination unbound, stale handle |
+| `invalid_config` | Role/pointer/shared-memory configuration mismatch |
+| `invalid_state` | Device or backend already initialized; operation conflicts with lifecycle state |
+| `invalid_argument` | Null name/data, reserved or invalid address, foreign TX buffer, unsupported timeout value |
 | `invalid_callback` | Empty RX callback |
 | `already_exists` | Local address already used |
 | `full` | No endpoint/channel slot, no TX buffer, NS router full |
-| `out_of_range` | Payload or name too long |
+| `out_of_range` | Payload/name limit or configured buffer geometry exceeded |
+| `unsupported` | Zero-copy disabled or requested backend capability unavailable |
+| `resource_exhausted` | OpenAMP could not acquire a required memory resource |
+| `permission_denied` | OpenAMP explicitly refused permission |
+| `interrupted` | OpenAMP operation interrupted by a signal |
 | `time_out` | Blocking acquire/send expired (OpenAMP waits about 15 s) |
 | `data_loss` | RX frame larger than `max_payload_size`; or a TX payload that OpenAMP truncated because the peer's buffers are smaller than `length` |
 | `not_found` | Unknown service/channel |
-| `system_call_error` | Unmapped OpenAMP error code |
+| `unknown_error` | Unmapped OpenAMP error code or invalid backend result |
 
 ## 12. Threading and context rules
 
@@ -777,11 +781,11 @@ Troubleshooting:
 
 | Symptom | Likely cause |
 |---|---|
-| `initialize()` returns `invalid_config` | Role mismatch between `device_config` and the `virtio_device`, null resource pointer, null shared memory, or buffer geometry outside `options<>` |
+| `initialize()` returns `invalid_config` | Role mismatch, null resource pointer, or invalid shared-memory configuration |
 | `initialize()` never returns on remote role | Host has not set driver-ready; check remoteproc start and resource table |
 | No NS callback | Peer did not enable `VIRTIO_RPMSG_F_NS`, or a local endpoint with the same name already consumed the announcement |
 | `send` returns `not_configured` | Destination still `rpmsg_addr_any`; wait for the peer message/NS, or use `send_to()` |
-| `send` returns `invalid_config` | Positive finite timeout passed to the OpenAMP backend |
+| `send` returns `invalid_argument` | Positive finite timeout passed to the OpenAMP backend |
 | `acquire_tx_buffer` returns `full` / `time_out` | TX pool exhausted; peer not consuming or kicks are not reaching the remote |
 | Nothing received | `rproc_virtio_notified()` never called (mailbox ISR not wired) or wrong notify id |
 | Payload rejected on RX | Peer sent a frame larger than `max_payload_size`; it is dropped (`data_loss` from the device, never propagated as an OpenAMP error) |
@@ -1605,7 +1609,8 @@ Only the platform glue and devicetrees change between SoCs: the CASTLE service c
 | Kernel reports the ELF segment cannot be loaded / bad `da` | Firmware linked outside `mcuram2`; fix Zephyr SRAM node and Linux `memory-region` |
 | No `rpmsg host is online`, or kernel complains about missing vring/carveout | Reserved-memory node names are not `vdev0vring0`, `vdev0vring1`, `vdev0buffer`, or the resource table vring `da` is outside them |
 | Zephyr never prints `castle.ctl ready` | Stuck in `rproc_virtio_wait_remote_ready()` (host never set driver-ready: check mailbox `vq0`/`vq1` DT, IPM node) or `initialize()` returned an error (log shows the `castle::status` value) |
-| `initialize()` returns `invalid_config` | `device_config::node_role` differs from `VIRTIO_DEV_DEVICE`, null `rvdev`/`vdev`/`shm_io`, or `buffer_count`/`buffer_size` outside `options<>` |
+| `initialize()` returns `invalid_config` | `device_config::node_role` differs from `VIRTIO_DEV_DEVICE`, or resource pointers/shared-memory configuration are invalid |
+| `initialize()` returns `out_of_range` | `buffer_count` or `buffer_size` exceeds the configured `options<>` bounds |
 | `rpmsg host is online` but no `creating channel castle.ctl` | NS feature bit missing in the resource table, `CONFIG_RPMSG_NS` off in Linux, or the endpoint was created with a fixed destination |
 | `/dev/rpmsg0` absent | `rpmsg_chrdev` not built or not bound (see 16.4.4), channel name mismatch in the `grep` |
 | Linux write succeeds, Zephyr sees nothing | Kick lost: IPM channel id does not match `notifyid`, IPM callback not enabled, or `rproc_virtio_notified()` never runs |

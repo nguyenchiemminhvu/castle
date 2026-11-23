@@ -410,7 +410,7 @@ public:
      * @param predicate Callable invocable as `bool(Args&...)`.
      * @param action Callable invocable as `void(Args&...)` (implies `continue_chain`) or
      *        `handler_flow(Args&...)`.
-     * @return `status::ok`; `status::full` when all slots are used; `status::invalid_config` while
+     * @return `status::ok`; `status::full` when all slots are used; `status::invalid_state` while
      *         the chain is processing; `status::invalid_callback` when the predicate or action is a
      *         null function pointer or an empty `castle::callbacks::function`.
      * @warning Both callables must be copy-constructible and together fit `StorageSize`.
@@ -479,13 +479,13 @@ public:
 
     /**
      * @brief Removes every handler.
-     * @return `status::ok`, or `status::invalid_config` while the chain is processing.
+     * @return `status::ok`, or `status::invalid_state` while the chain is processing.
      */
     status clear() CASTLE_NOEXCEPT
     {
         if (depth_ != 0U)
         {
-            return status::invalid_config;
+            return status::invalid_state;
         }
 
         for (size_type i = 0U; i < size_; ++i)
@@ -543,7 +543,7 @@ private:
 
         if (depth_ != 0U)
         {
-            return status::invalid_config;
+            return status::invalid_state;
         }
 
         if (size_ >= MaxHandlers)

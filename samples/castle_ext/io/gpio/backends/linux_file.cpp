@@ -22,7 +22,7 @@ int main()
 
     const linux_file::pin_handle handle(path, true);
     level value = level::low;
-    assert(linux_file::backend::configure(handle, pin_config()) == castle::status::not_configured);
+    assert(linux_file::backend::configure(handle, pin_config()) == castle::status::unsupported);
     assert(linux_file::backend::read(handle, value) == castle::status::ok);
     assert(value == level::high);
     assert(linux_file::backend::write(handle, level::low) == castle::status::ok);

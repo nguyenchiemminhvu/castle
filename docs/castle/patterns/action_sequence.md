@@ -20,7 +20,7 @@ A fixed-capacity, self-contained sequence of one-shot calls and delays, modeled 
 | `action_sequence_state` | `idle`, `running`, `completed`. |
 | `action_sequence<MaxActions, Duration, CallbackStorageSize, CallbackStorageAlignment>` | Owns up to `MaxActions` steps. `Duration` is a `castle::chrono::duration` with an integral rep (default `castle::chrono::milliseconds`); its period is the time resolution. |
 | `action_sequence::index_type` | Smallest unsigned type holding `MaxActions`. Used for the internal step count and next-step cursor. |
-| `add_call(callable)` | Appends a `void()` call step (`CallFunc`). Returns `status::ok`, `full`, `invalid_config`, or `invalid_callback` (null function pointer or empty `castle::callbacks::function`). |
+| `add_call(callable)` | Appends a `void()` call step (`CallFunc`). Returns `status::ok`, `full`, `invalid_state`, or `invalid_callback` (null function pointer or empty `castle::callbacks::function`). |
 | `add_delay(duration)` | Appends a delay step (`DelayTime`). Accepts any duration whose unit is a whole multiple of the resolution. Zero is allowed. Returns `invalid_argument` for negative and `out_of_range` for unrepresentable delays. |
 | `append(other)` | Copies every step of another sequence with the same `Duration` and storage configuration (composition by flattening). `full` leaves this sequence unchanged. |
 | `start()` | Starts or restarts from the first step without executing anything. An empty sequence becomes `completed`. |
@@ -67,7 +67,7 @@ See [`samples/castle/patterns/action_sequence.cpp`](../../../samples/castle/patt
 - Time units finer than the resolution (for example `microseconds` into a millisecond sequence) do not compile: truncating them would make delays end early or make small `update()` steps vanish. Convert explicitly with `castle::chrono::ceil<duration_type>()` for delays, or pick a finer `Duration`.
 - On small 32-bit targets, `castle::chrono::duration<uint32_t, castle::units::milli>` avoids 64-bit arithmetic.
 - Callables must be copy-constructible and fit `CallbackStorageSize`; they are stored in `castle::callbacks::function`.
-- Steps can be added only when the sequence is not running. Calling `start()`, `reset()`, `clear()`, `add_*()`, or `append()` from inside a step returns `status::invalid_config`. A step must not destroy the sequence that runs it.
+- Steps can be added only when the sequence is not running. Calling `start()`, `reset()`, `clear()`, `add_*()`, or `append()` from inside a step returns `status::invalid_state`. A step must not destroy the sequence that runs it.
 - Editing a completed sequence returns it to `idle`.
 - Copying a sequence copies its callables, so each copy runs independently.
 - Only one delay is in progress at a time, so the sequence keeps one remaining-time counter; `start()`/`reset()` are O(1).

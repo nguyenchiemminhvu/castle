@@ -22,7 +22,7 @@ All names live in `castle::io::can`.
 | `wait_forever` | `timeout_type::max()`. Block until the operation can proceed. |
 | `is_forever(timeout_type)` | `constexpr bool`. True when `timeout.count() == wait_forever.count()`. |
 
-A negative timeout is rejected by `basic_bus` with `invalid_argument`.
+A negative timeout is rejected by `basic_bus` with `out_of_range`.
 
 ### Bit rates
 | API | Description |
@@ -36,7 +36,7 @@ A negative timeout is rejected by `basic_bus` with `invalid_argument`.
 | `can_mode` | `uint8_t` enum: `normal` (transmit and receive), `loopback` (transmitted frames are looped back to this node and not driven onto the bus), `listen_only` (receive only, never drives the bus). |
 | `can_config` | Fields `uint32_t bitrate`, `can_mode mode`. |
 | `explicit can_config(uint32_t bit_rate = 0U, can_mode operating_mode = can_mode::normal)` | `constexpr`. Bit rate `0` keeps the driver/devicetree default. |
-| `validate_config(can_config const&)` | Pure check, never touches hardware. Returns `ok`, or `invalid_config` when `bitrate > max_bitrate` or `mode` is not one of the three enumerators. `basic_bus::open()` calls it first. |
+| `validate_config(can_config const&)` | Pure check, never touches hardware. Returns `ok`, `invalid_config` when `mode` is not one of the three enumerators, or `out_of_range` when `bitrate > max_bitrate`. `basic_bus::open()` calls it first. |
 
 ### Bus state
 | API | Description |
@@ -62,7 +62,7 @@ int main()
     const can_config self_test(bitrate_125k, can_mode::loopback);
     assert(validate_config(bus_speed) == castle::status::ok);
     assert(validate_config(self_test) == castle::status::ok);
-    assert(validate_config(can_config(max_bitrate + 1U)) == castle::status::invalid_config);
+    assert(validate_config(can_config(max_bitrate + 1U)) == castle::status::out_of_range);
 
     assert(!is_forever(no_wait));
     assert(is_forever(wait_forever));
@@ -81,7 +81,7 @@ int main()
 ## Constraints & Notes
 - Everything here is a `constexpr`-friendly value type or constant: no heap, exceptions, RTTI or virtual functions.
 - `bitrate` is applied only by backends that own bit timing: Zephyr calls `can_set_bitrate()` when it is non-zero. On Linux the interface owns bit timing (`ip link set can0 type can bitrate 500000`), so the SocketCAN backend validates but does not apply it; the mock backend just records it.
-- Supported modes differ per platform: the SocketCAN backend implements `loopback` with `CAN_RAW_RECV_OWN_MSGS` and rejects `listen_only` with `invalid_config` (set `listen-only on` on the interface instead). The mock backend refuses `send()` in `listen_only` with `invalid_config`. Zephyr passes the mode to the driver, which may reject it.
+- Supported modes differ per platform: the SocketCAN backend implements `loopback` with `CAN_RAW_RECV_OWN_MSGS` and rejects `listen_only` with `unsupported` (set `listen-only on` on the interface instead). The mock backend refuses `send()` in `listen_only` with `invalid_state`. Zephyr passes the mode to the driver, which may reject it.
 - `bus_status` counters: `rx_overruns` and `tx_failures` count dropped receive frames and failed transmissions. The error counters are filled where the platform reports them (always on Zephyr; on SocketCAN only when the kernel sends them in an error frame, and then only as of the last `receive()`).
 - `is_operational()` is a state predicate, not a health check: `error_passive` can still transmit but signals errors passively, and is treated as not operational here.
 - `timeout_type` is millisecond-granular. Backends clamp very large values to their platform's limit (`INT_MAX` ms for `poll()`, `INT32_MAX` ms on Zephyr); use `wait_forever` for "no limit".

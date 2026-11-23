@@ -113,8 +113,8 @@ TEST(CentralMomentsTest, SampleVarianceNeedsTwoSamples)
     castle::statistic::central_moments<double, 2U> moments;
     EXPECT_EQ(moments.push(5.0), status::ok);
     double out = 77.0;
-    EXPECT_EQ(moments.sample_variance(out), status::empty);
-    EXPECT_EQ(moments.sample_stddev(out), status::empty);
+    EXPECT_EQ(moments.sample_variance(out), status::insufficient_data);
+    EXPECT_EQ(moments.sample_stddev(out), status::insufficient_data);
     EXPECT_EQ(out, 77.0);
     EXPECT_EQ(moments.population_variance(out), status::ok);
     EXPECT_EQ(out, 0.0);

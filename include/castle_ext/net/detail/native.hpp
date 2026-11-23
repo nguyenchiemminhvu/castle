@@ -46,7 +46,7 @@ using castle::io::fd::detail::clear_system_error;
 CASTLE_INLINE castle::status unsupported(int* system_error) CASTLE_NOEXCEPT
 {
     clear_system_error(system_error);
-    return castle::status::not_configured;
+    return castle::status::unsupported;
 }
 
 #if CASTLE_USING_LINUX_BSD_SOCKET
@@ -124,7 +124,7 @@ CASTLE_INLINE castle::status from_native_endpoint(struct sockaddr_storage CASTLE
                                ntohs(native_address.sin6_port), native_address.sin6_scope_id);
         return castle::status::ok;
     }
-    return castle::status::invalid_argument;
+    return castle::status::parse_error;
 }
 
 /**
@@ -140,8 +140,8 @@ CASTLE_INLINE castle::status finish_new_socket(castle::io::fd::basic_fd& descrip
     if (!flags_applied)
     {
         castle::status result = descriptor.set_close_on_exec(true, system_error);
-        // Targets without descriptor flags report not_configured and have no exec() to leak into.
-        if (!castle::succeeded(result) && result != castle::status::not_configured)
+        // Targets without descriptor flags report unsupported and have no exec() to leak into.
+        if (!castle::succeeded(result) && result != castle::status::unsupported)
         {
             return result;
         }
@@ -222,7 +222,7 @@ CASTLE_INLINE castle::status bind_socket(int fd, endpoint CASTLE_CONST& local, i
     return castle::status::ok;
 }
 
-/** @brief Starts a connect; a connection still in progress is `time_out` with `EINPROGRESS`/`EALREADY`. */
+/** @brief Starts a connect; a connection still in progress is `in_progress` with `EINPROGRESS`/`EALREADY`. */
 CASTLE_INLINE castle::status connect_socket(int fd, endpoint CASTLE_CONST& remote, int* system_error) CASTLE_NOEXCEPT
 {
     struct sockaddr_storage address;
@@ -243,7 +243,7 @@ CASTLE_INLINE castle::status connect_socket(int fd, endpoint CASTLE_CONST& remot
     if (errno == EINPROGRESS || errno == EALREADY) // LCOV_EXCL_BR_LINE
     {
         capture_system_error(system_error);
-        return castle::status::time_out;
+        return castle::status::in_progress;
     }
     return system_failure(system_error);
 }

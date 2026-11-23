@@ -116,7 +116,7 @@ public:
 
     /**
      * @brief Sets the range `[lower, upper)` and discards all weight.
-     * @return `status::ok`, or `status::invalid_argument` when a bound is not finite,
+     * @return `status::ok`, or `status::invalid_config` when a bound is not finite,
      *         `lower >= upper`, or the width overflows (the histogram becomes unconfigured).
      * @note Complexity: O(BinCount).
      */
@@ -128,7 +128,7 @@ public:
             lower_ = static_cast<result_type>(0);
             upper_ = static_cast<result_type>(0);
             configured_ = false;
-            return castle::status::invalid_argument;
+            return castle::status::invalid_config;
         }
         lower_ = lower;
         upper_ = upper;

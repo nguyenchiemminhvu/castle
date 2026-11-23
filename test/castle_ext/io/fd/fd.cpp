@@ -12,6 +12,6 @@ TEST(FdUmbrella, ExposesOnePosixAvailabilityDecision)
     EXPECT_EQ(manager.get_enabled_fd_count(), 0U);
 #else
     EXPECT_FALSE(castle::io::fd::posix_available);
-    EXPECT_EQ(castle::io::fd::set_nonblocking(7), castle::status::not_configured);
+    EXPECT_EQ(castle::io::fd::set_nonblocking(7), castle::status::unsupported);
 #endif
 }

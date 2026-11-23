@@ -83,7 +83,7 @@ public:
     /**
      * @brief Selects the estimated quantile and discards every sample.
      * @param probability Quantile in the open interval (0, 1).
-     * @return `status::ok`, or `status::invalid_argument` (the estimator becomes unconfigured).
+     * @return `status::ok`, or `status::invalid_config` (the estimator becomes unconfigured).
      */
     castle::status configure(result_type probability) CASTLE_NOEXCEPT
     {
@@ -92,7 +92,7 @@ public:
         {
             configured_ = false;
             probability_ = static_cast<result_type>(0);
-            return castle::status::invalid_argument;
+            return castle::status::invalid_config;
         }
         probability_ = probability;
         configured_ = true;

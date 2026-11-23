@@ -102,8 +102,9 @@ TEST(RpmsgEndpoint, MoveAndUnsupportedZeroCopy)
     no_copy_endpoint endpoint2;
     ASSERT_EQ(endpoint2.create(dev2, "no.copy", rpmsg_addr_any, 8000U, [](message_view const&) {}), castle::status::ok);
     tx_buffer buffer;
-    EXPECT_EQ(endpoint2.acquire_tx_buffer(buffer), castle::status::not_configured);
-    EXPECT_EQ(endpoint2.release_tx_buffer(buffer), castle::status::not_configured);
+    EXPECT_EQ(endpoint2.acquire_tx_buffer(buffer), castle::status::unsupported);
+    EXPECT_EQ(endpoint2.release_tx_buffer(buffer), castle::status::unsupported);
+    EXPECT_EQ(endpoint2.send_nocopy(buffer, 0U), castle::status::unsupported);
     EXPECT_EQ(endpoint2.destroy(), castle::status::ok);
     EXPECT_EQ(dev2.shutdown(), castle::status::ok);
 }

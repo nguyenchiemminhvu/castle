@@ -35,7 +35,7 @@ Castle's CAN extension is one classic-CAN (CAN 2.0A/2.0B) API over three interch
 | `CASTLE_USING_IO_CAN_VIA_SOCKET_CAN` | `socket_can::backend` | `true` |
 | neither | `mock::backend` | `false` |
 
-`CASTLE_USING_IO_CAN_VIA_ZEPHYR` is `1` when `__ZEPHYR__` is defined and `<zephyr/drivers/can.h>` exists. `CASTLE_USING_IO_CAN_VIA_SOCKET_CAN` is `1` for Linux POSIX builds (not Zephyr) where `<linux/can.h>` and `<linux/can/raw.h>` exist. Both can be overridden on the command line (`-DCASTLE_USING_IO_CAN_VIA_SOCKET_CAN=0`). Zephyr takes precedence over SocketCAN. Where a hardware backend is not available its class still compiles but every operation returns `not_configured`.
+`CASTLE_USING_IO_CAN_VIA_ZEPHYR` is `1` when `__ZEPHYR__` is defined and `<zephyr/drivers/can.h>` exists. `CASTLE_USING_IO_CAN_VIA_SOCKET_CAN` is `1` for Linux POSIX builds (not Zephyr) where `<linux/can.h>` and `<linux/can/raw.h>` exist. Both can be overridden on the command line (`-DCASTLE_USING_IO_CAN_VIA_SOCKET_CAN=0`). Zephyr takes precedence over SocketCAN. Where a hardware backend is not available its class still compiles: `open()` returns `unsupported` and every other call on the never-opened backend returns `not_configured`.
 
 ### Endpoint differences
 Only the endpoint passed to `open()` differs between platforms (`default_bus::endpoint_type`); everything else is source compatible.
@@ -52,7 +52,7 @@ Other platform differences:
 |---|---|---|---|
 | Bit rate (`can_config::bitrate`) | Not applied; `ip link ... bitrate` owns it | Applied with `can_set_bitrate()` when non-zero; `0` keeps the devicetree `bus-speed` | Recorded only |
 | `can_mode::loopback` | `CAN_RAW_RECV_OWN_MSGS` | Driver loopback mode | Sent frames are delivered to the node's own receive path |
-| `can_mode::listen_only` | `invalid_config` (set `listen-only on` on the interface) | Driver listen-only mode | `send()` returns `invalid_config` |
+| `can_mode::listen_only` | `unsupported` (set `listen-only on` on the interface) | Driver listen-only mode | `send()` returns `invalid_state` |
 | Filter slots | `MaxFilters` (default 8), up to `CAN_RAW_FILTER_MAX` | `MaxFilters` (default 8), limited by the controller (5 on the stock MCP2515 driver) | `MaxFilters` (default 8) |
 | Receive buffering | Kernel socket buffer | Fixed queue of `RxQueueDepth` frames (default 16); overflow counted in `rx_overruns` | Fixed queue of `RxQueueDepth` (default 16) |
 | Bus state / counters | From kernel error frames, current as of the last `receive()` | Read from the driver on every `query_status()` | Scripted with `set_bus_state()` |
@@ -137,7 +137,7 @@ int main()
 ## Constraints & Notes
 - No heap allocation, exceptions, RTTI, virtual functions or STL anywhere in the component; all queues and filter tables have compile-time capacity.
 - Thread safety belongs to the backend (see "Endpoint differences"); the facade adds no locks.
-- Hardware backends need their platform: SocketCAN needs a Linux POSIX build with the CAN UAPI headers, Zephyr needs Zephyr 3.2+ with `CONFIG_CAN=y`. Otherwise their operations return `not_configured`.
+- Hardware backends need their platform: SocketCAN needs a Linux POSIX build with the CAN UAPI headers, Zephyr needs Zephyr 3.2+ with `CONFIG_CAN=y`. Otherwise `open()` returns `unsupported`.
 - Bit timing on Linux is an interface property set with `ip link`; on Zephyr it comes from `can_config::bitrate` or the devicetree `bus-speed`.
 - Related: [`frame.md`](frame.md), [`filter.md`](filter.md), [`types.md`](types.md), [`bus.md`](bus.md), [`../../io/io.md`](../../io/io.md).
 
@@ -216,15 +216,15 @@ These hold on every backend, so code and tests written against the mock behave t
 - A frame passes a filter when `frame.format == filter.format && ((frame.id ^ filter.id) & filter.mask) == 0`. Data and remote frames are not distinguished.
 - `send()` returns once the frame is **queued**, not acknowledged. `full` means the queue stayed full for the whole timeout.
 - `receive()` returns `empty` when no frame arrived in time. The output frame is only written on `ok`.
-- Timeouts are non-negative (negative gives `invalid_argument`); `no_wait` never blocks; `wait_forever` blocks indefinitely.
-- Calls on a closed bus return `not_configured`; opening twice returns `invalid_config`.
+- Timeouts are non-negative (negative gives `out_of_range`); `no_wait` never blocks; `wait_forever` blocks indefinitely.
+- Calls on a closed bus return `not_configured`; opening twice returns `invalid_state`.
 - Every call takes an optional `int* system_error`, cleared on entry.
-- The facade validates configuration (`invalid_config`) and frame, filter and timeout arguments (`invalid_argument`) before the backend runs.
+- The facade validates configuration (`invalid_config` for an unknown mode, `out_of_range` for a bit rate above the maximum) and frame, filter and timeout arguments (`invalid_argument` for an unknown enumerator, `out_of_range` for an identifier, mask, DLC or timeout outside its range) before the backend runs.
 
 ### Error handling
 - Every operation returns `castle::status` (see [`core/status.md`](../../../castle/core/status.md)); there are no exceptions. Test results with `castle::succeeded(...)`.
-- Statuses the CAN API uses: `ok`, `full` (queue or filter table full), `empty` (nothing received in time), `out_of_range` (payload or DLC above 8), `not_found` (unknown filter handle), `not_configured` (closed, or backend unavailable on this build), `invalid_config` (bad configuration, already open, unsupported mode or filter), `invalid_argument` (bad frame, filter, timeout, endpoint), `system_call_error` (platform call failed), `data_loss` (truncated or unrepresentable frame). A poll timeout is never returned as `time_out`; it is mapped to `empty` or `full`.
-- `system_call_error` carries the platform error in the optional `system_error` argument: `errno` on Linux (for example `ENODEV` for an unknown interface, `ENETDOWN` for an interface that went down) and the positive Zephyr driver errno (for example `ENETUNREACH` while bus-off). SocketCAN `send()` also reports `EAGAIN`/`ENOBUFS` there when it returns `full`; an `empty` `receive()` leaves it `0`. It is `0` for the other statuses. Zephyr driver codes `-EAGAIN`/`-ENOSPC` map to `full`, `-EINVAL` to `invalid_argument`, `-ENOTSUP`/`-ERANGE` to `invalid_config`, `-ENETDOWN` to `not_configured`.
+- Statuses the CAN API uses: `ok`, `full` (queue or filter table full), `empty` (nothing received in time), `out_of_range` (payload, DLC, identifier, mask, bit rate, interface name or timeout outside its range), `not_found` (unknown filter handle), `not_configured` (closed, or the Zephyr device is not ready), `invalid_config` (unknown mode), `invalid_state` (already open, or a send refused in the current mode), `unsupported` (unsupported mode or filter, or backend unavailable on this build), `invalid_argument` (unknown frame or filter enumerator, null or empty endpoint, null payload), `system_call_error` (platform call failed), `data_loss` (truncated or unrepresentable frame). A poll timeout is never returned as `time_out`; it is mapped to `empty` or `full`.
+- `system_call_error` carries the platform error in the optional `system_error` argument: `errno` on Linux (for example `ENODEV` for an unknown interface, `ENETDOWN` for an interface that went down) and the positive Zephyr driver errno (for example `ENETUNREACH` while bus-off). SocketCAN `send()` also reports `EAGAIN`/`ENOBUFS` there when it returns `full`; an `empty` `receive()` leaves it `0`. It is `0` for the other statuses. Zephyr driver codes `-EAGAIN`/`-ENOSPC` map to `full`, `-EINVAL` to `invalid_argument`, `-ENOTSUP` to `unsupported`, `-ERANGE` to `out_of_range`, `-ENETDOWN` to `not_configured`.
 - Fault confinement is observable through `query_status()` (`bus_state`, error counters, `rx_overruns`, `tx_failures`); see [`types.md`](types.md).
 
 ### CAN FD

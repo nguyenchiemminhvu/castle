@@ -27,7 +27,7 @@ Compared with the exact [`sorted_window`](sorted_window.md), it stores the windo
 |---|---|---|---|---|
 | `sliding_histogram()` | Unconfigured instance; `push()` reports `not_configured`. | | O(BinCount) | O(1) |
 | `sliding_histogram(lower, upper)` | Configures the histogram range `[lower, upper)`. Invalid bounds leave it unconfigured; check `configured()`. | | O(BinCount) | O(1) |
-| `configure(lower, upper)` | Sets the range and discards every sample. | `ok`, `invalid_argument` | O(BinCount) | O(1) |
+| `configure(lower, upper)` | Sets the range and discards every sample. | `ok`, `invalid_config` | O(BinCount) | O(1) |
 | `configured()` | Whether a valid range is set. | `bool` | O(1) | O(1) |
 | `static capacity()`, `count()`, `empty()`, `full()` | Window length; samples held; no samples; `Capacity` samples. | | O(1) | O(1) |
 | `push(T sample)` | Adds a sample. When the window is full, the oldest sample is evicted and retracted from the histogram. Floating-point `T` rejects NaN and infinity. | `ok`, `not_configured`, `invalid_argument` | O(1) | O(1) |

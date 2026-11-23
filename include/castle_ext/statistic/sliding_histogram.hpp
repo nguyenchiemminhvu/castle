@@ -76,7 +76,7 @@ public:
 
     /**
      * @brief Sets the histogram range and discards every sample.
-     * @return `status::ok`, or `status::invalid_argument` for invalid bounds.
+     * @return `status::ok`, or `status::invalid_config` for invalid bounds.
      * @note Complexity: O(BinCount).
      */
     castle::status configure(result_type lower, result_type upper) CASTLE_NOEXCEPT

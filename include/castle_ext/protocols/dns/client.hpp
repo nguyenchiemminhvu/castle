@@ -116,7 +116,9 @@ public:
      * @param type Requested resource-record type.
      * @param output Caller-owned fixed-capacity response destination.
      * @param system_error Optional native errno output.
-     * @return `ok`, `not_found` for NXDOMAIN, `time_out`, `full`, or the underlying socket/codec status.
+     * @return `ok`; `not_found` for NXDOMAIN; `protocol_error` for a format error or mismatched question;
+     *         `unavailable` for server failure; `unsupported` for NOTIMP; `permission_denied` for REFUSED;
+     *         or the underlying socket/codec status.
      */
     castle::status resolve(net::endpoint CASTLE_CONST& nameserver,
                            castle::dsa::string_view name,
@@ -126,7 +128,7 @@ public:
     {
         if (busy())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         output.clear();
         net::endpoint peer = dns_peer(nameserver);
@@ -205,7 +207,7 @@ public:
      * @param name Domain name copied into the encoded request before returning.
      * @param type Query type.
      * @param now_ms Monotonic millisecond tick supplied by the application.
-     * @return `ok` when started; otherwise a validation or socket error.
+     * @return `ok` when started; `invalid_state` when another operation is active; otherwise a validation or socket error.
      */
     castle::status start_resolve(net::endpoint CASTLE_CONST& nameserver,
                                  castle::dsa::string_view name,
@@ -215,7 +217,7 @@ public:
     {
         if (busy())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         response_.clear();
         server_ = dns_peer(nameserver);
@@ -259,13 +261,14 @@ public:
     /**
      * @brief Advances one step of the asynchronous state machine without blocking.
      * @param now_ms Monotonic millisecond tick from the same clock used by `start_resolve()`.
-     * @return `empty` while waiting, `ok` after progress/success, or the completed/error status.
+     * @return `empty` while waiting, `ok` after progress/success, `invalid_state` during callback dispatch,
+     *         or the completed/error status.
      */
     castle::status poll(uint32_t now_ms, int* system_error = nullptr) CASTLE_NOEXCEPT
     {
         if (dispatcher_.is_dispatching())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         if (state_ == async_state::idle)
         {
@@ -402,7 +405,7 @@ public:
         }
         // LCOV_EXCL_START
         // Every async_state is handled above, so the state machine cannot reach this fallback.
-        return complete(castle::status::invalid_config);
+        return complete(castle::status::invalid_state);
         // LCOV_EXCL_STOP
     }
 
@@ -484,7 +487,7 @@ private:
         if (!same_name(expected_name, output.question_name) ||
             output.question_type != expected_type || output.question_class != record_class::internet)
         {
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
         }
         if (output.truncated)
         {
@@ -496,7 +499,19 @@ private:
         }
         if (output.rcode == response_code::format_error)
         {
-            return castle::status::invalid_argument;
+            return castle::status::protocol_error;
+        }
+        if (output.rcode == response_code::server_failure)
+        {
+            return castle::status::unavailable;
+        }
+        if (output.rcode == response_code::not_implemented)
+        {
+            return castle::status::unsupported;
+        }
+        if (output.rcode == response_code::refused)
+        {
+            return castle::status::permission_denied;
         }
         if (output.rcode != response_code::no_error)
         {

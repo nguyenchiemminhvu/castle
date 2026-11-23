@@ -368,7 +368,7 @@ TEST(DiagnosticManager, OneShotRecoveryRequiresManualRearm)
     manager.report<shot_fault_tag>(true);
     manager.update(test_epoch);
     EXPECT_EQ(recoveries, 1U);
-    EXPECT_EQ(manager.rearm<shot_fault_tag>(), castle::status::invalid_argument);
+    EXPECT_EQ(manager.rearm<shot_fault_tag>(), castle::status::invalid_state);
 
     manager.report<shot_fault_tag>(false);
     manager.update(test_epoch + test_duration(1));
@@ -380,7 +380,7 @@ TEST(DiagnosticManager, OneShotRecoveryRequiresManualRearm)
     manager.update(test_epoch + test_duration(2));
     EXPECT_TRUE(manager.is_active<shot_fault_tag>());
     EXPECT_EQ(recoveries, 1U);
-    EXPECT_EQ(manager.rearm<shot_fault_tag>(), castle::status::invalid_argument);
+    EXPECT_EQ(manager.rearm<shot_fault_tag>(), castle::status::invalid_state);
 
     manager.report<shot_fault_tag>(false);
     manager.update(test_epoch + test_duration(3));

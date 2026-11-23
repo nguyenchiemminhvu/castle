@@ -10,7 +10,7 @@
  * in `<string>`, streams, or filesystem classes.
  *
  * Direction/pull/drive configuration is treated as BSP-owned configuration;
- * `configure()` therefore returns `status::not_configured` rather than
+ * `configure()` therefore returns `status::unsupported` rather than
  * pretending a generic value file can change electrical configuration.
  */
 #ifndef CASTLE_EXT_IO_GPIO_BACKENDS_LINUX_VALUE_FILE_HPP
@@ -53,7 +53,7 @@ struct backend
 
     static castle::status configure(native_handle_type CASTLE_CONST&, pin_config CASTLE_CONST&) CASTLE_NOEXCEPT
     {
-        return castle::status::not_configured;
+        return castle::status::unsupported;
     }
 
     static castle::status write(native_handle_type CASTLE_CONST& handle, level value) CASTLE_NOEXCEPT
@@ -157,7 +157,7 @@ private:
             }
         }
 
-        return castle::status::invalid_argument; // LCOV_EXCL_LINE
+        return castle::status::parse_error; // LCOV_EXCL_LINE
     }
 };
 

@@ -62,8 +62,8 @@ void check_build_failures()
         EXPECT_FALSE(spline.valid());
 
         // Too few knots.
-        EXPECT_EQ(spline.build(xs, ys, 0U, kind), status::invalid_argument);
-        EXPECT_EQ(spline.build(xs, ys, 1U, kind), status::invalid_argument);
+        EXPECT_EQ(spline.build(xs, ys, 0U, kind), status::empty);
+        EXPECT_EQ(spline.build(xs, ys, 1U, kind), status::insufficient_data);
         EXPECT_FALSE(spline.valid());
         EXPECT_EQ(spline.size(), 0U);
 

@@ -48,7 +48,7 @@ int main()
     CASTLE_SAMPLE_CHECK(can.close() == castle::status::not_configured);
 
     // The facade validates the configuration before the backend is touched.
-    CASTLE_SAMPLE_CHECK(can.open("can0", can_config(max_bitrate + 1U)) == castle::status::invalid_config);
+    CASTLE_SAMPLE_CHECK(can.open("can0", can_config(max_bitrate + 1U)) == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(!can.is_open());
 
     // Open with a real configuration; the optional system_error output is cleared on entry.
@@ -56,7 +56,7 @@ int main()
     CASTLE_SAMPLE_CHECK(can.open("can0", can_config(bitrate_500k), &error) == castle::status::ok);
     CASTLE_SAMPLE_CHECK(error == 0);
     CASTLE_SAMPLE_CHECK(can.is_open());
-    CASTLE_SAMPLE_CHECK(can.open("can0") == castle::status::invalid_config); // already open
+    CASTLE_SAMPLE_CHECK(can.open("can0") == castle::status::invalid_state); // already open
     CASTLE_SAMPLE_CHECK(can.backend().configuration().bitrate == bitrate_500k);
 
     // No filter is installed after open(), so nothing is received yet.
@@ -74,7 +74,7 @@ int main()
 
     // Invalid filters are rejected by the facade, and the handle output is reset.
     filter_handle rejected = 7;
-    CASTLE_SAMPLE_CHECK(can.add_filter(filter(max_standard_id + 1U, 0U), &rejected) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(can.add_filter(filter(max_standard_id + 1U, 0U), &rejected) == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(rejected == invalid_filter);
 
     // Frame in -> frame out through the receive path.
@@ -87,7 +87,7 @@ int main()
     CASTLE_SAMPLE_CHECK(rx == wire);
     CASTLE_SAMPLE_CHECK(drain(can) == 1U);
     CASTLE_SAMPLE_CHECK(can.receive(rx, timeout_type(10)) == castle::status::empty);
-    CASTLE_SAMPLE_CHECK(can.receive(rx, timeout_type(-1)) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(can.receive(rx, timeout_type(-1)) == castle::status::out_of_range);
 
     // send(): frame overload...
     frame command(0x321U);
@@ -111,8 +111,8 @@ int main()
     CASTLE_SAMPLE_CHECK(sent.payload()[2] == 9U);
 
     // Bad arguments are caught before the backend sees them.
-    CASTLE_SAMPLE_CHECK(can.send(frame(max_standard_id + 1U)) == castle::status::invalid_argument);
-    CASTLE_SAMPLE_CHECK(can.send(command, timeout_type(-5)) == castle::status::invalid_argument);
+    CASTLE_SAMPLE_CHECK(can.send(frame(max_standard_id + 1U)) == castle::status::out_of_range);
+    CASTLE_SAMPLE_CHECK(can.send(command, timeout_type(-5)) == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(can.send(0x1U, bytes, max_data_length + 1U) == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(can.send(0x1U, nullptr, 2U) == castle::status::invalid_argument);
 

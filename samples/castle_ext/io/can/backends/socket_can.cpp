@@ -107,10 +107,10 @@ int main()
     CASTLE_SAMPLE_CHECK(status.state == bus_state::error_active);
 
     // Already open: open() and a second adopt() are refused. adopt() consumes its descriptor even then.
-    CASTLE_SAMPLE_CHECK(can.open("can0") == castle::status::invalid_config);
+    CASTLE_SAMPLE_CHECK(can.open("can0") == castle::status::invalid_state);
     int spare[2] = {-1, -1};
     CASTLE_SAMPLE_CHECK(::socketpair(AF_UNIX, SOCK_DGRAM, 0, spare) == 0);
-    CASTLE_SAMPLE_CHECK(can.backend().adopt(spare[0]) == castle::status::invalid_config);
+    CASTLE_SAMPLE_CHECK(can.backend().adopt(spare[0]) == castle::status::invalid_state);
     CASTLE_SAMPLE_CHECK(::close(spare[1]) == 0);
 
     // send(): the peer end reads the exact struct can_frame the backend wrote.
@@ -197,9 +197,9 @@ int main()
     CASTLE_SAMPLE_CHECK(direct.open(nullptr, can_config(), &open_error) == castle::status::invalid_argument);
     CASTLE_SAMPLE_CHECK(direct.open("", can_config(), &open_error) == castle::status::invalid_argument);
     CASTLE_SAMPLE_CHECK(direct.open("interface-name-too-long", can_config(), &open_error)
-                        == castle::status::invalid_argument);
+                        == castle::status::out_of_range);
     CASTLE_SAMPLE_CHECK(direct.open("can0", can_config(bitrate_500k, can_mode::listen_only), &open_error)
-                        == castle::status::invalid_config); // an interface property on Linux
+                        == castle::status::unsupported); // an interface property on Linux
     // Unknown interface (or no PF_CAN support at all): the errno explains why.
     CASTLE_SAMPLE_CHECK(direct.open("nonexistent0", can_config(), &open_error) == castle::status::system_call_error);
     CASTLE_SAMPLE_CHECK(open_error != 0);
@@ -209,7 +209,7 @@ int main()
     socket_can::basic_backend<2U> small;
     CASTLE_SAMPLE_CHECK(!small.is_open());
 #else
-    // Without SocketCAN the backend keeps the API but every operation is not_configured.
+    // Without SocketCAN open() is unsupported; operations on the never-opened backend are not_configured.
     static_assert(!socket_can::socket_can_available, "stub build");
 
     socket_can::backend backend;
@@ -219,8 +219,8 @@ int main()
     bus_status status;
     filter_handle handle = invalid_filter;
 
-    CASTLE_SAMPLE_CHECK(can.open("can0") == castle::status::not_configured);
-    CASTLE_SAMPLE_CHECK(backend.open("can0", can_config(), nullptr) == castle::status::not_configured);
+    CASTLE_SAMPLE_CHECK(can.open("can0") == castle::status::unsupported);
+    CASTLE_SAMPLE_CHECK(backend.open("can0", can_config(), nullptr) == castle::status::unsupported);
     CASTLE_SAMPLE_CHECK(!backend.is_open());
     CASTLE_SAMPLE_CHECK(can.send(value) == castle::status::not_configured);
     CASTLE_SAMPLE_CHECK(can.receive(rx) == castle::status::not_configured);

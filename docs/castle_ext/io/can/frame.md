@@ -52,7 +52,7 @@ All names live in `castle::io::can`.
 |---|---|
 | `operator==(frame const&, frame const&)` | True when identifier, format, type and DLC are equal and the first `data_length()` payload bytes are equal. Bytes beyond the valid length are ignored. `noexcept`, O(8). |
 | `operator!=(frame const&, frame const&)` | Negation of `operator==`. |
-| `validate_frame(frame const&)` | Returns `ok`, or `invalid_argument` for an out-of-range `format` or `type` enumerator, `dlc > 8`, or `id > max_id(format)`. `basic_bus::send()` calls it before touching the backend. |
+| `validate_frame(frame const&)` | Returns `ok`, `invalid_argument` for an out-of-range `format` or `type` enumerator, or `out_of_range` for `dlc > 8` or `id > max_id(format)`. `basic_bus::send()` calls it before touching the backend. |
 
 ## Usage Example
 See `samples/castle_ext/io/can/frame.cpp`.
@@ -80,7 +80,7 @@ int main()
     assert(request.data_length() == 3U);       // unchanged on failure
 
     frame wide(0x800U);                        // 12 bits do not fit a standard identifier
-    assert(validate_frame(wide) == castle::status::invalid_argument);
+    assert(validate_frame(wide) == castle::status::out_of_range);
     wide.format = id_format::extended;
     assert(validate_frame(wide) == castle::status::ok);
     return 0;

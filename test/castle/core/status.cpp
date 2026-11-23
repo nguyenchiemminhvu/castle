@@ -7,6 +7,9 @@ TEST(StatusTest, ValuesAndSucceeded)
 
     EXPECT_TRUE(castle::succeeded(castle::status::ok));
     EXPECT_FALSE(castle::succeeded(castle::status::full));
-    EXPECT_NE(castle::status::invalid_argument,castle::status::invalid_callback);
+    EXPECT_FALSE(castle::succeeded(castle::status::in_progress));
+    EXPECT_NE(castle::status::invalid_argument,castle::status::parse_error);
+    EXPECT_NE(castle::status::not_converged,castle::status::insufficient_data);
+    EXPECT_NE(castle::status::invalid_state,castle::status::unsupported);
     EXPECT_NE(castle::status::already_exists,castle::status::unknown_error);
 }

@@ -177,7 +177,7 @@ TEST(HttpClient, Http2SendsPrefaceAndOpensMultiplexedStream)
     EXPECT_EQ(client.open_stream(method::get, "/two", headers, string_view(), second), castle::status::ok);
     EXPECT_EQ(first, 1U);
     EXPECT_EQ(second, 3U);
-    EXPECT_EQ(client.open_stream(method::get, "/three", headers, string_view(), second), castle::status::out_of_range);
+    EXPECT_EQ(client.open_stream(method::get, "/three", headers, string_view(), second), castle::status::full);
     EXPECT_EQ(client.poll(0), castle::status::time_out); // writes are drained; no server frame is ready
     EXPECT_TRUE(transport.contains("PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"));
     EXPECT_TRUE(transport.output_size > 24U);
@@ -262,9 +262,9 @@ TEST(HttpClient, Http1ConnectRejectsSecondConnectAndBusyRequest)
     http1_client<fake_transport>::headers_type headers;
     EXPECT_EQ(client.request(method::get, "/", headers), castle::status::not_configured);
     ASSERT_EQ(client.connect(endpoint::ipv4(192U, 0U, 2U, 1U, 80U)), castle::status::ok);
-    EXPECT_EQ(client.connect(endpoint::loopback_ipv4(80U)), castle::status::invalid_config);
+    EXPECT_EQ(client.connect(endpoint::loopback_ipv4(80U)), castle::status::invalid_state);
     ASSERT_EQ(client.request(method::get, "/", headers), castle::status::ok);
-    EXPECT_EQ(client.request(method::get, "/", headers), castle::status::not_configured);
+    EXPECT_EQ(client.request(method::get, "/", headers), castle::status::invalid_state);
     EXPECT_EQ(client.close(), castle::status::ok);
 }
 
@@ -478,7 +478,7 @@ TEST(HttpClient, Http2FlushReceiveAndFeedErrorPaths)
 
     const uint8_t bad_frame[9] = {0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U}; // DATA on stream 0
     transport.set_input(reinterpret_cast<char const*>(bad_frame), sizeof(bad_frame));
-    EXPECT_EQ(client.poll(0), castle::status::invalid_argument);
+    EXPECT_EQ(client.poll(0), castle::status::protocol_error);
     EXPECT_FALSE(client.connected());
 }
 
@@ -490,7 +490,7 @@ TEST(HttpClient, Http1ReportsStateAndSendBackpressure)
     http1_client<fake_transport>::headers_type headers;
     ASSERT_EQ(client.connect(endpoint::loopback_ipv4(80U)), castle::status::ok);
     EXPECT_EQ(client.poll(0), castle::status::ok);
-    EXPECT_EQ(client.connect(endpoint::loopback_ipv4(80U), "local.test:80"), castle::status::invalid_config);
+    EXPECT_EQ(client.connect(endpoint::loopback_ipv4(80U), "local.test:80"), castle::status::invalid_state);
     transport.send_result = castle::status::full;
     ASSERT_EQ(client.request(method::get, "/", headers), castle::status::ok);
     EXPECT_EQ(client.poll(0), castle::status::full);

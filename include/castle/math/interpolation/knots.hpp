@@ -48,16 +48,26 @@ namespace detail
  * @tparam T Floating-point type.
  * @param xs Abscissa values.
  * @param count Number of knots.
- * @return `status::ok` when `xs` is non-null, holds at least two knots and is
- *         strictly increasing; otherwise `status::invalid_argument`.
+ * @return `status::ok` when `xs` holds at least two strictly increasing knots;
+ *         `status::invalid_argument` for a null pointer or non-increasing/NaN
+ *         knots, `status::empty` for zero knots, and
+ *         `status::insufficient_data` for one knot.
  * @note NaN entries fail the strict-increase test and are rejected.
  */
 template <typename T>
 CASTLE_NODISCARD CASTLE_CONSTEXPR status validate_knots(CASTLE_CONST T* xs, size_type count) CASTLE_NOEXCEPT
 {
-    if ((xs == nullptr) || (count < 2U))
+    if (xs == nullptr)
     {
         return status::invalid_argument;
+    }
+    if (count == 0U)
+    {
+        return status::empty;
+    }
+    if (count < 2U)
+    {
+        return status::insufficient_data;
     }
 
     for (size_type i = 1U; i < count; ++i)

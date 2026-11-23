@@ -96,8 +96,8 @@ public:
      * @brief Creates an IPv4 or IPv6 socket with close-on-exec set.
      * @param family Address family used by later bind/connect operations.
      * @param nonblocking True to enable `O_NONBLOCK` immediately (the default).
-     * @return `ok`, `invalid_config` if already open, `invalid_argument`, `system_call_error`,
-     *         or `not_configured`.
+     * @return `ok`, `invalid_state` if already open, `invalid_argument`, `system_call_error`,
+     *         or `unsupported`.
      */
     castle::status open(address_family family = address_family::ipv4,
                         bool nonblocking = true,
@@ -106,7 +106,7 @@ public:
         detail::clear_system_error(system_error);
         if (is_open())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         if (family != address_family::ipv4 && family != address_family::ipv6)
         {
@@ -167,7 +167,7 @@ public:
         detail::clear_system_error(system_error);
         if (Protocol != socket_protocol::tcp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         if (!is_open()) // LCOV_EXCL_BR_LINE
         {
@@ -182,7 +182,7 @@ public:
         detail::clear_system_error(system_error);
         if (Protocol != socket_protocol::tcp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         if (!is_open()) // LCOV_EXCL_BR_LINE
         {
@@ -208,7 +208,7 @@ public:
 
     /**
      * @brief Connects to a numeric peer without waiting for a non-blocking connect to finish.
-     * @return `ok` when connected, `time_out` with `system_error` set to `EINPROGRESS`/`EALREADY`
+     * @return `ok` when connected, `in_progress` with `system_error` set to `EINPROGRESS`/`EALREADY`
      *         while establishment is pending, or `system_call_error` on failure.
      */
     castle::status connect(endpoint CASTLE_CONST& remote, int* system_error = nullptr) CASTLE_NOEXCEPT
@@ -228,7 +228,7 @@ public:
     /**
      * @brief Completes a pending TCP connect, optionally waiting for writability first.
      * @param timeout_ms Milliseconds to wait; zero only checks readiness, negative waits forever.
-     * @return `ok` once connected, `time_out` while still pending, `invalid_config` for UDP, or
+     * @return `ok` once connected, `time_out` while still pending, `unsupported` for UDP, or
      *         `system_call_error` (with the connect error in `system_error`).
      */
     castle::status finish_connect(int timeout_ms = 0, int* system_error = nullptr) CASTLE_NOEXCEPT
@@ -236,7 +236,7 @@ public:
         detail::clear_system_error(system_error);
         if (Protocol != socket_protocol::tcp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         if (!is_open()) // LCOV_EXCL_BR_LINE
         {
@@ -255,19 +255,19 @@ public:
         }
         if (Protocol != socket_protocol::tcp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         if (backlog < 0) // LCOV_EXCL_BR_LINE
         {
-            return castle::status::invalid_argument;
+            return castle::status::out_of_range;
         }
         return detail::listen_socket(native_handle(), backlog, system_error);
     }
 
     /**
      * @brief Accepts one TCP peer into an empty output socket that inherits this socket's blocking mode.
-     * @return `ok`, `empty` when a non-blocking listener has no pending peer, `invalid_config` for a UDP
-     *         listener or an already-open `out`, `not_configured`, or `system_call_error`.
+     * @return `ok`, `empty` when a non-blocking listener has no pending peer, `unsupported` for a UDP
+     *         listener, `invalid_state` for an already-open `out`, `not_configured`, or `system_call_error`.
      */
     castle::status accept(basic_socket<socket_protocol::tcp>& out, endpoint& remote,
                           int* system_error = nullptr) CASTLE_NOEXCEPT
@@ -275,7 +275,7 @@ public:
         detail::clear_system_error(system_error);
         if (Protocol != socket_protocol::tcp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         if (!is_open()) // LCOV_EXCL_BR_LINE
         {
@@ -283,7 +283,7 @@ public:
         }
         if (out.is_open())
         {
-            return castle::status::invalid_config;
+            return castle::status::invalid_state;
         }
         CASTLE_CONST castle::status result = detail::accept_socket(native_handle(), nonblocking_,
                                                                     out.descriptor_, remote, system_error);
@@ -330,7 +330,7 @@ public:
         detail::clear_system_error(system_error);
         if (Protocol != socket_protocol::tcp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         if (!is_open()) // LCOV_EXCL_BR_LINE
         {
@@ -412,7 +412,7 @@ public:
         detail::clear_system_error(system_error);
         if (Protocol != socket_protocol::udp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         if (!is_open()) // LCOV_EXCL_BR_LINE
         {
@@ -438,7 +438,7 @@ public:
         detail::clear_system_error(system_error);
         if (Protocol != socket_protocol::udp)
         {
-            return castle::status::invalid_config;
+            return castle::status::unsupported;
         }
         if (!is_open()) // LCOV_EXCL_BR_LINE
         {

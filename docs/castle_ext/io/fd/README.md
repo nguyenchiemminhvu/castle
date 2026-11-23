@@ -183,7 +183,7 @@ The default alias `fd_event_manager` is `basic_fd_event_manager<16U>`. Applicati
 
 The manager deliberately separates readiness detection from callback execution. This keeps application code out of the manager's critical sections and permits callbacks to call manager methods such as `add_fd()`, `remove_fd()`, `enable_fd()`, or `disable_fd()`.
 
-1. `wait()` acquires `wait_mutex_` with `try_lock()`. If another wait is active, it returns `castle::status::invalid_config` rather than blocking behind that waiter.
+1. `wait()` acquires `wait_mutex_` with `try_lock()`. If another wait is active, it returns `castle::status::invalid_state` rather than blocking behind that waiter.
 2. Under `state_mutex_`, it rejects a new wait if a previous pending batch has not been processed. It then snapshots every occupied, enabled registration into the fixed `pollfd` arrays, recording the slot index and generation.
 3. It releases `state_mutex_` before calling `poll()`. Registration changes can therefore proceed while the calling thread is blocked in the operating system.
 4. After `poll()` returns, it reacquires `state_mutex_`. A readiness result is accepted only if the registration is still occupied and enabled and its descriptor and generation still match the snapshot. Stale readiness from a registration changed during the wait is discarded.
@@ -204,7 +204,7 @@ The manager deliberately separates readiness detection from callback execution. 
  activate Manager
  Manager -> Manager : try_lock(wait_mutex_)
  alt another wait is active
-   Manager --> Application : invalid_config
+   Manager --> Application : invalid_state
  else this thread owns the wait phase
    Manager -> StateLock : lock
    activate StateLock
@@ -372,7 +372,7 @@ int main()
 
 ## Constraints & Notes
 
-- **POSIX gating:** `control.hpp` and `poll.hpp` include POSIX headers and call POSIX APIs only inside `#if CASTLE_USING_POSIX_APIS`. `posix_available` and `poll_available` report availability. When POSIX APIs are disabled, control functions remain available as stubs and return `castle::status::not_configured` (after rejecting negative descriptors). The poll manager and poll-mask constants are not declared in that configuration; `poll_requires_posix` is declared instead.
+- **POSIX gating:** `control.hpp` and `poll.hpp` include POSIX headers and call POSIX APIs only inside `#if CASTLE_USING_POSIX_APIS`. `posix_available` and `poll_available` report availability. When POSIX APIs are disabled, control functions remain available as stubs and return `castle::status::unsupported` (after rejecting negative descriptors). The poll manager and poll-mask constants are not declared in that configuration; `poll_requires_posix` is declared instead.
 - **No ownership of registered descriptors:** `add_fd()` borrows the descriptor. `remove_fd()`, `clear()`, and manager destruction do not close it. The application owns descriptor lifetime and must avoid closing/reusing a descriptor while a queued callback can still refer to it.
 - **Non-owning metadata:** `user_data` and `name` are stored as pointers. Their targets must remain valid for as long as the manager or a queued callback may use them.
 - **Bounded storage:** registration, poll-snapshot, and pending-event capacities are fixed at compile time. Registration lookup and mutation are linear in `Capacity`; poll preparation and validation are also linear in the number of enabled registrations. Callback dispatch is linear in the number of queued events.
